@@ -11,7 +11,7 @@ usage ()
         echo "      Note: the option \"-d directory\" can be replaced by \"-f filename\" in case of a single root file to be analyzed"
         echo "            Example: $0 -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker"
         echo "            Example: $0 -f LQ_ue_600_10TeV_enuejj__ferencek-LQ_ue_600_10TeV_enuejj-6e2b1038c288aef5f9e332910cc64b07__USER_8.root -t treeCreator/RootTupleMakerPAT"
-        echo "            Example for CASTOR: $0  -f rfio:/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-03-DATA-GR_R_35X_V7A_SD_EG-v2-132440-133511_20100505_233733/ -t rootTupleTree/tree"
+        echo "            Example for CASTOR: $0  -f rfio:/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-03-DATA-GR_R_35X_V7A_SD_EG-v2-132440-133511_20100505_233733/MinimumBias__Commissioning10-GR_R_35X_V7A_SD_EG-v2__RECO_1_1.root -t rootTupleTree/tree"
         echo ""
         exit 1;
 }
