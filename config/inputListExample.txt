@@ -1,0 +1,5 @@
+#### list of root files, including path, to be analyzed in chain
+data/input/LQ_ue_600_10TeV_enuejj__ferencek-LQ_ue_600_10TeV_enuejj-6e2b1038c288aef5f9e332910cc64b07__USER_8.root
+#data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root
+#data/input/LQ1stgenM400_full167_100pbScenario.root
+#data/input/LQ1stgenM1000_full167_100pbScenario.root

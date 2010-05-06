@@ -1,0 +1,188 @@
+
+Introduction:
+-------------
+
+This package provides a small facility to analyze one or a chain of root ntuples.
+
+A script (./scripts/make_rootNtupleClass.sh) is used to generate automatically
+(using the root command RootNtupleMaker->MakeClass) a class (include/rootNtupleClass.h 
+and src/rootNtupleClass.C) with the variable definitions of a given root ntuple
+(to be provided by the user).
+
+The class baseClass (include/baseClass.h and src/baseClass.C) inherits from the
+automatically generated rootNtupleClass. 
+baseClass provides the methods that are common to all analysis, such as the method
+to read a list of root files and form a chain. It will, asap, also provide a method 
+to read a list of selection cuts.
+
+The class analysisClass (include/analysisClass.h and src/analysisClass.C) inherits
+from baseClass.
+The user's code should be placed in the method Loop() of analysisClass, which reimplements
+the method Loop() of rootNtupleClass. 
+
+The main program (src/main.C) receives the configuration parameters (such a the input 
+chain of root files and a file to provide a cut list) and executes the analysisClass code.
+
+Instructions:
+-------------
+
+1) Checkout the code:
+   export CVSROOT=:gserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
+   cvs checkout -d rootNtupleAnalyzerV2 UserCode/Leptoquarks/rootNtupleAnalyzerV2
+
+2) Generate the rootNtupleClass:
+   cd rootNtupleAnalyzerV2/
+   ./scripts/make_rootNtupleClass.sh   
+      (you will be asked for input arguments)
+
+   IMPORTANT NOTE:	
+   you need to add 
+
+   #include <vector>
+   using namespace std;
+
+   to the file 
+
+   include/rootNtupleClass.h
+
+   I will modify in future the .sh script to do it automatically.
+
+
+3) Copy the analysis template file into your own file:
+     cp -i src/analysisClass_template.C src/analysisClass_myCode.C
+   and make a symbolic link analysisClass.C by:
+     ln -s analysisClass_myCode.C src/analysisClass.C
+
+   NOTE: the macro analysisClass_template.C might not be compatible with the dataformat of your ntuples
+         you have to write a consistent macro.
+   
+4) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
+   make clean
+   make
+
+5) Add your analysis code to the method Loop() of analysisClass_myCode.C
+
+6) Compile as in 4.
+
+7) Run:
+   ./main 
+      (you will be asked for input arguments)
+
+Note1: 
+  one can have several analyses in a directory, such as
+    src/analysisClass_myCode1.C
+    src/analysisClass_myCode2.C
+    src/analysisClass_myCode3.C
+  and move the symbolic link to the one to be used:
+    ln -sf analysisClass_myCode2.C src/analysisClass.C 
+  and compile/run as above.
+
+Note2: 
+  a CVS area to commit all the analysis macros such as analysisClass_XXX.C
+  has been prepared in 
+  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleMacrosV2/src/
+  This will allow to separate the developments of the rootNtupleAnalyzerV2 package
+  and the developments of the analysis macros.
+  In order to compile and run an analysis macro
+    /...fullPath.../rootNtupleMacros/src/analysisClass_XXX.C
+  do:
+    ln -sf /...fullPath.../rootNtupleMacrosV2/src/analysisClass_XXX.C src/analysisClass.C
+  and compile/run as above.
+
+More details:
+-------------
+
+- Example code:
+The src/analysisClass_template.C comes with simple example code. The example code in enclosed by
+  #ifdef USE_EXAMPLE
+    ... code ...
+  #endif //end of USE_EXAMPLE
+The code is NOT compiled by default. In order to compile it, uncomment the line 
+  #FLAGS += -DUSE_EXAMPLE
+in the Makefile. 
+
+- Providing cuts via file:
+A list of cut variable names and cut limits can be provided through a file (see config/cutFileExample.txt).
+The variable names in such a file have to be filled with a value calculated by the user analysisClass code,
+a function "fillVariableWithValue" is provided - see example code.
+Once all the cut variables have been filled, the cuts can be evaluated by calling "evaluateCuts" - see 
+example code. Do not forget to reset the cuts by calling "resetCuts" at each event before filling the 
+variables - see example code.
+The function "evaluateCuts" determines whether the cuts are satisfied or not, stores the pass/failed result
+of each cut, calculates cut efficiencies and fills histograms for each cut variable (binning provided by the
+cut file, see config/cutFileExample.txt).
+The user has access to the cut results via a set of functions (see include/baseClass.h)
+  bool baseClass::passedCut(const string& s);
+  bool baseClass::passedAllPreviousCuts(const string& s);
+  bool baseClass::passedAllOtherCuts(const string& s);
+where the string to be passed is the cut variable name.
+The cuts are evaluated following the order of their apperance in the cut file (config/cutFileExample.txt).
+One can simply change the sequnce of line in the cut file to have the cuts applied in a different order
+and do cut efficiency studies.
+Also, the user can assign to each cut a level (0,1,2,3,4 ... n) and use a function
+  bool baseClass::passedAllOtherSameLevelCuts(const string& s);
+to have the pass/failed info on all other cuts with the same level.
+There is actually also cuts with level=-1. These cuts are not actually evaluated, the corresponding lines 
+in the cut file (config/cutFileExample.txt) are used to pass values to the user code (such as fiducial 
+region limits). The user can access these values (and also those of the cuts with level >= 0) by
+  double baseClass::getCutMinValue1(const string& s);
+  double baseClass::getCutMaxValue1(const string& s);
+  double baseClass::getCutMinValue2(const string& s);
+  double baseClass::getCutMaxValue2(const string& s);
+
+- Automatic histograms for cuts
+In the output root file the following histograms are generated for each cut variable with level >= 0:
+  no cuts applied
+  passedAllPreviousCuts 
+  passedAllOtherSameLevelCuts
+  passedAllOtherCuts
+  passedAllCut
+
+- Automatic cut efficiency:
+the absolute and relative efficiency is calculated for each cut and stored in an output file
+(named data/output/cutEfficiencyFile.dat if the code is executed following the examples)
+
+
+
+
+Additional scripts for running on several datasets:
+---------------------------------------------------
+
+See ./doc/howToMakeAnalysisWithRootTuples.txt 
+
+
+
+Using the Optimizer (Jeff Temple):
+----------------------------------
+
+The input cut file can also specify variables to be used in optimization studies.  
+To do so, add a line in the file for each variable to optimize. The first field of a line
+must be the name of the variable, second field must be "OPT", third field either ">" or "<".
+(The ">" sign will pass values greater than the applied threshold, and "<" will pass 
+those less than the threshold.) 4th and 5th fields should be the minimum 
+and maximum thresholds you wish to apply when scanning for optimal cuts.  
+An example of the optimization syntax is:
+
+#VariableName     must be OPT   > or <    RangeMin        RangeMax        unused
+#------------     -----------   ------    ------------    -------------   ------
+muonPt               OPT          >          10              55              5
+
+This optimizer will scan 10 different values, evenly distributed over 
+the inclusive range [RangeMin, RangeMax]. At the moment, the 6th value is not used and 
+does not need to be specified.
+The optimization cuts are always run after all the other cuts in the file, and are only run 
+when all other cuts are passed.  
+The above line will make 10 different cuts on muonPt, at [10, 15, 20, 25, ..., 55].  
+('5' in the 6th field is meaningless here.)
+The output of the optimization will be a 10-bin histogram, showing the number of 
+events passing each of the 10 thresholds. 
+
+Multiple optimization cuts may be applied in the same file.  In the case where N optimization cuts 
+are applied, a histogram of 10^N bins will be produced, with each bin corresponding to a unique cut combination.  
+No more than 6 variables may be optimized at one time (limitation in the number of bins for a TH1F ~ 10^6).
+Since such file can become quite large, the default is to not create
+
+A file (optimizationCuts.txt in the working directory) that lists the cut values applied for 
+each bin can be produced by uncommenting the line
+#FLAGS += -DCREATE_OPT_CUT_FILE
+in the Makefile. Since this file can be quite large (10^N lines), by default it is not created.

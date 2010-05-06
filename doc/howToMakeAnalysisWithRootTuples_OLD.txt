@@ -1,0 +1,293 @@
+#################################################################################
+#   All the steps to perform an analysis with RootTuples                        #
+#   starting from the production of the .root files (using CMSSW and CRAB)      #
+#   to the creation of the final plots and efficiency tables                    #
+#   (both rescaled for a given integrated luminosity)                           #
+#################################################################################
+
+
+#######################
+1) RootTuple production
+#######################
+
+In this example the rootTuples (.root files) have already been created and 
+they are stored for several datasets on pcuscms45.cern.ch at:
+
+  /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output
+  where V00-00-06 = RootTupleMaker version
+  and 2008121_163513 = date_time of creation of the jobs (CMSSW,CRAB)
+
+  NOTE: .root files should be readable by everybody ( -rw-r--r-- )
+  
+Details on the creation of the rootTuples are in: 
+
+  https://twiki.cern.ch/twiki/bin/view/CMS/ExoticaLeptoquarkSubmitJobsWithCrab 
+  (then go to the CVS location -> README)
+
+
+#################
+pre 2) Setup ROOT
+#################
+
+if not already done set the ROOT environment variables:
+
+  setenv ROOTSYS /afs/cern.ch/sw/lcg/external/root/5.20.00/slc4_ia32_gcc34/root/
+  setenv PATH ${ROOTSYS}/bin:${PATH}
+  setenv LD_LIBRARY_PATH ${ROOTSYS}/lib:
+
+
+################################################################
+2) Setting up the code to analyze RootTuples (rootNtupleAnalyzer)
+#################################################################
+
+Create a working area:
+
+  NOTE: substitute "santanas" with you "USERNAME"
+
+  mkdir -p /home/santanas/Workspace/Leptoquarks/test
+  cd /home/santanas/Workspace/Leptoquarks/test
+
+Checkout the code to analyze rootTuples from CVS:
+
+  cvs checkout -d rootNtupleAnalyzer_15Jan2008 UserCode/Leptoquarks/rootNtupleAnalyzer
+  cd  rootNtupleAnalyzer_15Jan2008/
+
+Setup and compile the code:
+
+  ./scripts/make_rootNtupleClass.sh -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker
+
+
+  ln -sf analysisClass_template.C src/analysisClass.C								 
+  make clean
+  make
+
+
+  NOTE: in this tutorial an example of a simple analysis is already implemented in: 
+    analysisClass_template.C 
+  If you want you can modify it, or create a new file (even with a different filename), 
+  and then procede in the same way (as described above).
+  The best place where to put your new analysis is 
+    http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleMacros/src/analysisClass_YourAnalysis.C
+  and then you create the symbolic link to analysisClass.C (as described above)
+
+Details on the structure and use of the code can be found in:
+
+  https://twiki.cern.ch/twiki/bin/view/CMS/ExoticaLeptoquarkRootNtupleAnalyzer 
+  (then go to README)
+
+
+#######################
+3) Create dataset lists
+#######################
+
+Create a global list containing the lists (one for each dataset) of root files with:
+
+  ./scripts/createList.pl -d /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output -m root -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config
+
+the global list is: 
+
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt 
+
+and it contains the lists (one for each dataset) with the .root files:
+
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.txt
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/Exotica_LQtoCMu_M400__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.txt
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.txt
+  ...
+  ...
+
+  NOTE: for example the list 
+    /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.txt 
+  is:
+    /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output/Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root
+    /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output/Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_2.root
+    ..
+    ..
+
+
+################################################################
+4) Run the rootNtupleAnalyzer over all the datasets (i.e. lists)
+################################################################
+
+Launch the analysis over all the datasets with:
+
+./scripts/launchAnalysis.pl -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c config/cutFileExample.txt -n RootTupleMaker -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output | tee temp.log
+
+  NOTE: temp.log wil contain the stdout and stderr of the program
+
+The output is stored in:
+
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output
+
+which contains these files:
+
+  analysisClass_template___Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.dat
+  analysisClass_template___Exotica_LQtoCMu_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.root
+  analysisClass_template___Exotica_LQtoCMu_M400__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.dat
+  analysisClass_template___Exotica_LQtoCMu_M400__Summer08_IDEAL_V9_v1__GEN-SIM-RECO.root
+  ...
+  ...
+
+  .root files: contain all the histograms
+  .dat files: contain the tables with number of events and relative efficiencies after each cut 
+             (cuts are specified in  
+             /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/cutFileExample.txt, 
+             and have been passed before as argument to the rootNtupleAnalyzer)
+
+  NOTE: "analysisClass_template": is the name of the actual code used for the analysis 
+
+
+###############################
+pre 5) unset the ROOT variables 
+###############################
+
+This is needed to use correctly (later) the python libraries for PYROOT
+without conflicts. The python environment infact will be set using 
+the CMSSW scripts ("cmsenv" as described below)
+It's just a temporary solution but seems to work.
+
+ in tcsh: 
+  unsetenv ROOTSYS
+  unsetenv LD_LIBRARY_PATH
+
+ in bash: 
+  unset ROOTSYS
+  unset LD_LIBRARY_PATH
+
+Somewhere create a CMSSW release or use an existing one:
+
+ scramv1 project CMSSW CMSSW_2_1_8
+ cd CMSSW_2_1_8/src    
+ cmsenv (now the CMSSW ROOT and PYTHON environment variables are set)
+ cd - (to came back in the workdir)
+
+
+#####################################################################################
+5) Combine histograms and tables for different datasets (rescaling for cross section) 
+#####################################################################################
+
+Create a file with the cross section (in pb) for each dataset. An example is already available at 
+  config/xsection_pb_default.txt 
+
+In this example we'll use the file:
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt
+  /Exotica_LQtoCMu_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+  /Exotica_LQtoCMu_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+  /Exotica_LQtoUE_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+  /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+  ..
+  ..
+
+Create a file with the name of the SAMPLE for which you want the final plots and efficiency tables
+In this example the file used is:
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
+
+  LQtoUE_M250 Exotica_LQtoUE_M250
+  LQtoUE_M400 Exotica_LQtoUE_M400
+  Z           Zee  ZJets-madgraph
+  QCD         HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt
+  TTBAR       TTJets-madgraph
+  QCDTTBAR    HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
+  ALLBKG      Zee  ZJets-madgraph HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
+
+The first name of each row is the name of the SAMPLE (you decide it). 
+The other elements of the row are strings that will be used to find the datasets 
+from the list which must be included in that SAMPLE.
+If at least one of the strings matches with the name of a dataset 
+(i.e. Exotica_LQtoUE_M400 matches with /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO)
+, that dataset will be assumed as part of the SAMPLE. Plots and tables from datasets
+associated to the same SAMPLE will be merged (rescaling for cross section).
+
+Two different python scripts are used:
+ - combineTablesTemplate.py (for tables)
+ - combinePlotsTemplate.py (for histograms)
+
+#############################################
+5a) Combine Tables (combineTablesTemplate.py)
+#############################################
+
+Produce the tables with:
+
+./scripts/combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -s /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
+
+The output tables with number of selected events and efficiencies for each cut and for each sample are in:
+  
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/output/analysisClass_template_tables.dat	
+
+###########################################
+5b) Combine Plots (combinePlotsTemplate.py)
+###########################################
+
+Produce the plots with:
+
+./scripts/combinePlotsTemplate.py -i /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/inputListAllCurrent.txt -c analysisClass_template -d /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -l 100 -x /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/data/output -s /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/config/sampleListForMerging.txt
+
+The output plots (rescaled for the cross section) are in:
+  
+  /home/santanas/Workspace/Leptoquarks/test/rootNtupleAnalyzer_15Jan2008/output/analysisClass_template_plots.root	
+
+
+#################################################################
+6) Example of a root macro to produce final plots with nice style
+#################################################################
+
+An example of macro to produce a final plot with overlaid histograms 
+(one for each sample), legend and x/y axis titles can be found at:
+
+test/makeStackHistoTemplate.py
+
+To run it:
+  cd test	
+  ./makeStackHistoTemplate.py -i ../data/output/analysisClass_template_plots.root -n cutHisto_allPreviousCuts__pT1stEle -x pT_1st_ele_\(GeV\) -y number_of_entries
+
+NOTE: in ../data/output/analysisClass_template_plots.root you will find these files:
+
+  ...
+  KEY: TH1F     histo1D__TTBAR__cutHisto_noCuts___________nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allPreviousCuts__nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allOthrSmLvlCuts_nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allOtherCuts_____nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allCuts__________nEleFinal;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_noCuts___________pT1stEle;1
+  KEY: TH1F     histo1D__TTBAR__cutHisto_allPreviousCuts__pT1stEle;1
+  ...
+
+As you can see the format is histo1D__SAMPLE__OriginalHistoname (;1 is just a print out from ROOT)
+
+OriginalHistoname is the argument to be passed with "-n" to the script, 
+i.e. in this example: cutHisto_allPreviousCuts__pT1stEle
+
+Outputs are in the current directory:
+  
+  - makeStackHistoTemplate_cutHisto_allPreviousCuts__pT1stEle.root 
+  - stack_cutHisto_allPreviousCuts__pT1stEle.gif 
+  - stack_cutHisto_allPreviousCuts__pT1stEle.eps
+
+NOTE: this is just an example and can be improved or modified for 
+different purpose. This macro is not completely automatized 
+like the rest of the scripts in this tutorial. The code needs to 
+be edited by the user depending on the different cases.
+
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+
+Backup
+
+#################################################################
+b1) TO DO list to improve the code
+#################################################################
+
+- For Francesco
+  * .pl and .py scripts: fix the path (modify code so that the full path is not required)
+  * .py scripts: fix the help message (problem when calling PYROOT using the CMSSW python environment variables)
+  * redirect output of "launchAnalysis.pl" on a .log file
+  * combineTablesTemplate.py: use the values of min1,max1,min2,max2 provided by Paolo's code
+  * combinePlotsTemplate.py: add check for 2d histograms
+
+- For Paolo
+  * update instructions for rootNtupleAnalyzer
+  * add 5th decimal to effic.
+  * change instructions, always make a symbolic link 
+    (i.e. analysisClass.C -> src/analysisClass_XXX.C or in the directory rootNtupleMacros/src)
+    NOTE: specify dir from where to make the symb link
