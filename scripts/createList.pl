@@ -143,7 +143,7 @@ print "List created: $AllListsFilename\n";
 sub help(){
     print "Usage: ./createList.pl -d <inputDir> -m <match> -o <outputDir> -c yes [optional]  [-h <help?>] \n";
     print "Example: ./createList.pl -d /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/output -m root -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config \n";
-    print "Example for a CASTOR directory: ./createList.pl -d  -m root -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config -c yes \n";
+    print "Example for a CASTOR directory: ./createList.pl -d /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-03-DATA-GR_R_35X_V7A_SD_EG-v2-132440-133511_20100505_233733 -m root -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config -c yes \n";
     print "Options:\n";
     print "-d <inputDir>:       choose the input directory containing the files (FULL PATH REQUIRED + NO SLASH AT THE END)\n";
     print "-m <match>:          choose the parameter MATCH, will be used to select only the files whose filename matches with the string MATCH\n";
