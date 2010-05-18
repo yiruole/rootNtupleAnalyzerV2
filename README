@@ -35,19 +35,6 @@ Instructions:
    ./scripts/make_rootNtupleClass.sh   
       (you will be asked for input arguments)
 
-   IMPORTANT NOTE:	
-   you need to add 
-
-   #include <vector>
-   using namespace std;
-
-   to the file 
-
-   include/rootNtupleClass.h
-
-   I will modify in future the .sh script to do it automatically.
-
-
 3) Copy the analysis template file into your own file:
      cp -i src/analysisClass_template.C src/analysisClass_myCode.C
    and make a symbolic link analysisClass.C by:

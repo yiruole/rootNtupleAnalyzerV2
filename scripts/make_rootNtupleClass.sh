@@ -3,15 +3,15 @@
 usage ()
 {
         echo ""
-        echo "Usage:   $0 -d directory -t TTreeName "
-        echo "where:   directory is the location of the *.root files to be analyzed"
-        echo "Example: $0 -d /home/data/RootTuples/Leptoquarks/V00-00-09_2009310_142420/output -t RootTupleMaker"
-        echo "Example: $0 -d /home/data/RootTuples/Leptoquarks/LQenujj-10TeV-CMSSW2-PAT-V00-00-07_091016_212933/output -t treeCreator/RootTupleMakerPAT"
-        echo ""
-        echo "      Note: the option \"-d directory\" can be replaced by \"-f filename\" in case of a single root file to be analyzed"
-        echo "            Example: $0 -f data/input/Exotica_LQtoUE_M250__Summer08_IDEAL_V9_v1__GEN-SIM-RECO_1.root -t RootTupleMaker"
-        echo "            Example: $0 -f LQ_ue_600_10TeV_enuejj__ferencek-LQ_ue_600_10TeV_enuejj-6e2b1038c288aef5f9e332910cc64b07__USER_8.root -t treeCreator/RootTupleMakerPAT"
-        echo "            Example for CASTOR: $0  -f rfio:/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-03-DATA-GR_R_35X_V7A_SD_EG-v2-132440-133511_20100505_233733/MinimumBias__Commissioning10-GR_R_35X_V7A_SD_EG-v2__RECO_1_1.root -t rootTupleTree/tree"
+        echo "Usage:   $0 -f FILENAME -t TTREENAME "
+        echo "where:   FILENAME is the *.root file to be analyzed and TTREENAME the name of the TTree"
+        echo "Example: $0 -f /afs/cern.ch/user/p/prumerio/scratch0/lq/mc/data/RootTupleMakerV2_output_MC.root -t rootTupleTree/tree"
+        echo "Example for CASTOR: $0  -f rfio:/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-03-DATA-GR_R_35X_V7A_SD_EG-v2-132440-133511_20100505_233733/MinimumBias__Commissioning10-GR_R_35X_V7A_SD_EG-v2__RECO_1_1.root -t rootTupleTree/tree"
+#### Note: the option "-d DIRECTORY" to run this script on the full chain of root files is left in the code but no longer needed (since arrays have been replaced by vectors) 
+#         echo "Usage:   $0 -d directory -t TTreeName "
+#         echo "where:   directory is the location of the *.root files to be analyzed"
+#         echo "Example: $0 -d /home/data/RootTuples/Leptoquarks/V00-00-09_2009310_142420/output -t RootTupleMaker"
+#         echo "Example: $0 -d /home/data/RootTuples/Leptoquarks/LQenujj-10TeV-CMSSW2-PAT-V00-00-07_091016_212933/output -t treeCreator/RootTupleMakerPAT"
         echo ""
         exit 1;
 }
@@ -59,6 +59,14 @@ EOF
 root -l -q temporaryMacro.C
 
 rm temporaryMacro.C
+
+# insert additional lines needed by rootNtupleClass.h
+sed '
+/\<TROOT\.h\>/ i\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \n\#include \<vector\> \nusing namespace std\; \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+' < rootNtupleClass.h > tmp.h
+mv tmp.h rootNtupleClass.h
+
 if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
     mv -i rootNtupleClass.h include/
