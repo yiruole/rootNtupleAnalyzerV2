@@ -3,19 +3,19 @@
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile)
 {
-  std::cout << "baseClass::baseClass(): begins " << std::endl;
+  //STDOUT("begins");
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
   outputFileName_ = outputFileName;
   cutEfficFile_ = cutEfficFile;
   init();
-  std::cout << "baseClass::baseClass(): ends " << std::endl;
+  //STDOUT("ends");
 }
 
 baseClass::~baseClass()
 {
-  std::cout << "baseClass::~baseClass(): begin " << std::endl;
+  //STDOUT("begins");
   if( !writeCutHistos() )
     {
       STDOUT("ERROR: writeCutHistos did not complete successfully.");
@@ -25,19 +25,17 @@ baseClass::~baseClass()
       STDOUT("ERROR: writeStatFile did not complete successfully.");
     }
   output_root_->Close();
-  std::cout << "baseClass::~baseClass(): end " << std::endl;
+  //STDOUT("ends");
 }
 
 void baseClass::init()
 {
-  STDOUT("begin");
-    //std::cout << "baseClass::init(): begin " << std::endl;
-
+  //STDOUT("begins");
   tree_ = NULL;
   readInputList();
   readCutFile();
   if(tree_ == NULL){
-    std::cout << "baseClass::init(): ERROR: tree_ = NULL " << std::endl;
+    STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
     return;
   }
   Init(tree_);
@@ -53,7 +51,7 @@ void baseClass::init()
   //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "<<it->first)
   //  for (vector<string>::iterator it = orderedCutNames_.begin(); 
   //       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
-  STDOUT("end");
+  //STDOUT("ends");
 }
 
 void baseClass::readInputList()
@@ -65,12 +63,12 @@ void baseClass::readInputList()
   NBeforeSkim_ = 0;
   int NBeforeSkim;
 
-  std::cout << "baseClass::readinputList(): inputList_ =  "<< *inputList_ << std::endl;
+  STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
 
   ifstream is(inputList_->c_str());
   if(is.good())
     {
-      cout << "baseClass::readInputList: Reading list: " << *inputList_ << " ......." << endl;
+      STDOUT("baseClass::readInputList: Starting reading list: " << *inputList_ );
       while( is.getline(pName, 500, '\n') )
         {
           if (pName[0] == '#') continue;
@@ -83,11 +81,11 @@ void baseClass::readInputList()
 	  STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
         }
       tree_ = chain;
-      cout << "baseClass::readInputList: Finished reading list: " << *inputList_ << endl;
+      STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
     }
   else
     {
-      cout << "baseClass::readInputList: ERROR opening inputList:" << *inputList_ << endl;
+      STDOUT("baseClass::readInputList: ERROR opening inputList:" << *inputList_ );
       exit (1);
     }
   is.close();
