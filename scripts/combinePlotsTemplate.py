@@ -140,7 +140,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     
     for j,line in enumerate( open( inputDataFile ) ):
 
-        if( re.search("###", line) ):
+        if( re.search("^###", line) ):
             continue
 
         line = string.strip(line,"\n")

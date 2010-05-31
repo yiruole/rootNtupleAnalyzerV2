@@ -318,7 +318,7 @@ for n, lin in enumerate( open( options.inputList ) ):
         
         #print datfile
         datfileFullPath = outputBatchDir + "/" + datfile
-        if( re.search(".dat", datfileFullPath) and not re.search(".resubmit", datfileFullPath) ):
+        if( re.search("\.dat", datfileFullPath) and not re.search("\.resubmit", datfileFullPath) ):
 
             countdat = countdat + 1
 
@@ -331,7 +331,7 @@ for n, lin in enumerate( open( options.inputList ) ):
                 line = string.strip(line,"\n")
 
                 #skip precuts 
-                if( re.search("###", line) ):
+                if( re.search("^###", line) ):
                     ############################
                     ##only once for each dataset
                     if(countdat==0):
