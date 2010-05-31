@@ -69,17 +69,23 @@ tmp.close()
 os.system("\\rm tmp.log")
 #################################################
 numfiles = reduce(lambda x,y: x+1, file(options.inputlist).xreadlines(), 0)
-filesperjob = numfiles/int(options.ijobmax)
+ijobmax=int(options.ijobmax)
+if int(options.ijobmax) > numfiles:
+    ijobmax=numfiles
+filesperjob = numfiles/int(ijobmax)
 filesperjob = filesperjob
-extrafiles  = numfiles%int(options.ijobmax)
+extrafiles  = numfiles%int(ijobmax)
 input = open(options.inputlist)
+print "numfiles",numfiles
+print "options.ijobmax",options.ijobmax
+print "ijobmax",ijobmax
 ######################################
-for ijob in range(int(options.ijobmax)):
+for ijob in range(int(ijobmax)):
     # prepare the list file
     inputfilename = options.output+"/input/input_"+str(ijob)+".list"
     inputfile = open(inputfilename,'w')
     # if it is a normal job get filesperjob lines
-    if ijob != (int(options.ijobmax)-1):
+    if ijob != (int(ijobmax)-1):
         for line in range(filesperjob):
             ntpfile = input.readline()
             if ntpfile != '':
