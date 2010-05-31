@@ -26,7 +26,7 @@ parser.add_option("-t", "--treeName", dest="treeName",
                   metavar="TREENAME")
 
 parser.add_option("-n", "--ijobmax", dest="ijobmax",
-                  help="max number of jobs",
+                  help="max number of jobs, limited automatically to the number of files in inputlist",
                   metavar="IJOBMAX")
 
 parser.add_option("-q", "--queue", dest="queue",
