@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 ###########################################
 ## Code to launch the analysis in batch  ##
@@ -91,7 +91,7 @@ sub help(){
     print "-n <treename>:       choose the name of the TTree of the .root files you want to analyze\n";
     print "-c <cutfile>:        choose the name of the file with the analysis cuts\n";
     print "-o <outputDir>:      choose the output directory where the .root files will be stored\n";
-    print "-j <njobs>:          choose number of jobs for batch submission\n";
+    print "-j <njobs>:          choose number of jobs for batch submission, limited automatically to number of files in input list\n";
     print "-q <queue>:          choose queue for batch submission (choose among cmst3 8nm 1nh 8nh 1nd 1nw)\n";
     print "-h <yes> :           to print the help \n";
     die "please, try again...\n";
