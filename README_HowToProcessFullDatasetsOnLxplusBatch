@@ -1,0 +1,242 @@
+
+
+This file describes how to process a full dataset (and/or several datasets) 
+of already-created roottuples (generally stored on CASTOR) using rootNtupleAnalyzerV2 
+and running PARALLEL jobs on LXPLUS BATCH.
+
+The final output will be a root file (with plots rescaled by a given integrated luminosity) 
+and a .dat file (with the selection efficiencies) for each processed dataset.
+To do so, the scripts in the directory rootNtupleAnalyzerV2/scripts/ are used.
+Output files are created on a local directory.
+
+NOTE: the description/location of already-created roottuples is at
+      https://twiki.cern.ch/twiki/bin/view/CMS/ExoticaLeptoquarkRootTuplesV2Location2010
+      while the instructions to create the roottuples are at 
+      https://twiki.cern.ch/twiki/bin/view/CMS/ExoticaLeptoquarkShiftMakeRootTuplesV2
+
+#############
+INSTRUCTIONS:
+#############
+
+#################################################################################
+1) Download, compile and test locally the rootNtupleAnalyzerV2 code following the 
+   instructions at rootNtupleAnalyzerV2/README
+
+#################################################################################
+pre-2) This is needed to use correctly the python libraries for PYROOT
+       without conflicts. The python environment infact will be set using 
+       the CMSSW scripts ("cmsenv" as described below)
+       It's just a temporary solution but seems to work.
+       In tcsh: 
+         unsetenv ROOTSYS
+  	 unsetenv LD_LIBRARY_PATH
+       In bash: 
+  	 unset ROOTSYS
+	 unset LD_LIBRARY_PATH
+       Somewhere create a CMSSW release or use an existing one:
+	 scramv1 project CMSSW CMSSW_3_5_7
+	 cd CMSSW_3_5_7/src    
+	 cmsenv (now the CMSSW ROOT and PYTHON environment variables are set)
+	 cd - (to came back in the workdir)
+
+#################################################################################
+2) Create a global list containing the lists (one list for each dataset) of root 
+   files with:
+
+   ./scripts/createList.py
+
+   You'll be asked for arguments. 
+   An example is:
+
+   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o config
+
+   which creates a global list config/inputListAllCurrent.txt containing one list for each dataset
+	config/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-280_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-300_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-320_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-340_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-370_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-400_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-450_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-500_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+	config/LQToUE_M-600_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
+
+   Each single-dataset list contains the pointers to the CASTOR location of the roottuple files to be processed,
+   e.g. config/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt contains:
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_1_1.root
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_2_1.root
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_3_1.root
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_4_1.root
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_5_1.root
+	rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_6_1.root
+
+#################################################################################
+3) Run the rootNtupleAnalyzer over all the datasets (i.e. lists) 
+   running multiple parallel jobs on the LXPLUS BATCH system:
+
+   ./scripts/launchAnalysis_batch.pl
+
+   You'll be asked for arguments. 
+   An example is:
+
+   ./scripts/launchAnalysis_batch.pl -i config/inputListAllCurrent.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh | tee temp.log
+
+   NOTE: the argument "-j 30" means that 30 jobs will be submitted for each dataset. 
+   However, if the number of roottuple files, N, for a dataset is less than 30, then 30 will be 
+   automatically replaced by N, so that no more than one job per roottuple file will be submitted.
+   If you want to look quickly how many files you have for each dataset you can run
+     for file in `cat config/inputListAllCurrent.txt`; do wc $file; done
+   and look at the first number on each output line.   
+
+   The command above creates a directory for each dataset in data/output/, e.g.
+   data/output/analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO/
+   Each of such directories will contain the subdirs:
+   input/  log/  output/  src/
+
+   One output .root and .dat files for each submitted job will be created (gererally within minutes if you
+   have submitted a sufficient number of jobs) in the output/ subdirectory. 
+
+   NOTE: in order to check the status of the jobs, run the command
+         bjobs
+         Other useful commands (see their man page) are 
+         bpeek
+         bkill
+
+   An example of the content pof the output/ subdirectory is:
+     [lxplus218] ls data/output/analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO/output/
+        analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_0.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_0.root
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_1.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_1.root
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_2.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_2.root
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_3.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_3.root
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_4.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_4.root
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_5.dat
+	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_5.root
+
+   where "analysisClass_eejjSample" is the name of the actual code used for the analysis.
+
+#####################################################################################
+4) Combine .root and .dat files of each jobs into a single .root and .dat file 
+   for each dataset using
+
+   ./scripts/check_combine_output_batch.py
+
+   You'll be asked for arguments. 
+   An example is:
+
+   ./scripts/check_combine_output_batch.py -i `pwd`/config/inputListAllCurrent.txt -c analysisClass_eejjSample -d `pwd`/data/output -o `pwd`/data/output -q 1nh
+
+   If all jobs were OK, message "=== All jobs successfull!!! ===" will appear.
+
+   If any job failed, a file ToBeResubmitted.list will be created.
+   To resubmit the failed jobs do:
+     source ToBeResubmitted.list
+   then try again ./scripts/check_combine_output_batch.py
+
+   With the above example command, the output .root and .dat file of each dataset will be
+   in the directory:
+     data/output/
+   for example:
+     analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.root
+     analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.dat
+
+#####################################################################################
+5) Combine histograms and tables for different datasets (rescaling for cross section) 
+
+   Create a file with the cross section (in pb) for each dataset. An example is already available at 
+     config/xsection_pb_default.txt :
+
+	/Exotica_LQtoCMu_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+	/Exotica_LQtoCMu_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+	/Exotica_LQtoUE_M250/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 5.82
+	/Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 0.432
+	/TTJets-madgraph/Summer08_IDEAL_V9_v2/GEN-SIM-RECO 317
+	/ZJets-madgraph/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 3700
+	/WJets-madgraph/Summer08_IDEAL_V9_v1/GEN-SIM-RECO 40000
+
+   Create a file with the name of the SAMPLE for which you want the final plots and efficiency tables.
+   An example is 
+     config/sampleListForMerging.txt :
+
+  	LQtoUE_M250 Exotica_LQtoUE_M250
+  	LQtoUE_M400 Exotica_LQtoUE_M400
+  	Z           Zee  ZJets-madgraph
+  	QCD         HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt
+  	TTBAR       TTJets-madgraph
+  	QCDTTBAR    HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
+  	ALLBKG      Zee  ZJets-madgraph HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
+
+   The first name of each row is the name of the SAMPLE (you decide it). 
+   The other elements of the row are strings that will be used to find the datasets 
+   from the list which must be included in that SAMPLE.
+   If at least one of the strings matches with the name of a dataset 
+   (i.e. Exotica_LQtoUE_M400 matches with /Exotica_LQtoUE_M400/Summer08_IDEAL_V9_v1/GEN-SIM-RECO),
+   that dataset will be assumed as part of the SAMPLE. Plots and tables from datasets
+   associated to the same SAMPLE will be merged (rescaling for cross section).
+
+   Two different python scripts are used:
+
+     ./scripts/combineTablesTemplate.py (for tables)
+     ./scripts/combinePlotsTemplate.py (for histograms)
+
+   You'll be asked for arguments, and be prompted with an example usage.
+
+
+
+###################################################################################
+
+NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTER LOCATIONS
+      one could do:
+
+Create lists:
+
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o config
+  and save in a total list:
+   cat config/inputListAllCurrent.txt > config/inputListReallyAll.txt
+
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910 -o config
+  and append to total list
+  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 -o config
+  and append to total list
+  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604  -o config
+  and append to total list
+  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022  -o config
+  and append to total list
+  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+
+
+Check how many batch jobs you may want by running
+
+  for file in `cat config/inputListReallyAll.txt`; do wc $file; done                               
+
+
+Launch the batch jobs on the total list:
+
+  ./scripts/launchAnalysis_batch.pl -i config/inputListReallyAll.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh
+
+
+Check and combine the jobs of the total list
+
+ ./scripts/check_combine_output_batch.py -i `pwd`/config/inputListReallyAll.txt -c analysisClass_eejjSample -d `pwd`/data/output -o `pwd`/data/output -q 1nh
+
+
+Go to step 5) above.
+
+
+###################################################################################
+
+NOTE: old instructions for running the analyzer in local (no multiple batch jobs)
+      are still at doc/howToMakeAnalysisWithRootTuples_OLD.txt
+
+
