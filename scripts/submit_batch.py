@@ -76,9 +76,6 @@ filesperjob = numfiles/int(ijobmax)
 filesperjob = filesperjob
 extrafiles  = numfiles%int(ijobmax)
 input = open(options.inputlist)
-print "numfiles",numfiles
-print "options.ijobmax",options.ijobmax
-print "ijobmax",ijobmax
 ######################################
 for ijob in range(int(ijobmax)):
     # prepare the list file
