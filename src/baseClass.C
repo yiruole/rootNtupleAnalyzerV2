@@ -1040,7 +1040,7 @@ int baseClass::getGlobalInfoNstart(char *pName)
 {
   int NBeforeSkim = 0;
   STDOUT(pName<<"  "<< NBeforeSkim)
-  TFile *f = new TFile(pName);
+  TFile *f = TFile::Open(pName);
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
