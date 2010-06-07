@@ -219,6 +219,10 @@ Create lists:
   and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
+  ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 -o config
+  and append to total list
+  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+
 
 Check how many batch jobs you may want by running
 
