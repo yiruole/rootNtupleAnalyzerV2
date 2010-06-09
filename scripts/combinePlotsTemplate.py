@@ -32,7 +32,7 @@ parser.add_option("-l", "--intLumi", dest="intLumi",
                   metavar="INTLUMI")
 
 parser.add_option("-x", "--xsection", dest="xsection",
-                  help="the file XSEC contains the cross sections (in pb) for all the datasets (full path required)",
+                  help="the file XSEC contains the cross sections (in pb) for all the datasets (full path required). Use -1 as cross section value for no-rescaling",
                   metavar="XSEC")
 
 parser.add_option("-o", "--outputDir", dest="outputDir",
@@ -167,10 +167,15 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #---Calculate weight
     Ntot = int(data[0]['N'])
-    if( Ntot == 0 ):
-        weight = float(0)
+    if( xsection_val == "-1" ):
+        weight = 1.0
+        xsection_X_intLumi = Ntot
     else:
-        weight = float(xsection_val) * float(options.intLumi) / Ntot  
+        xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
+        if( Ntot == 0 ):
+            weight = float(0)
+        else:
+            weight = xsection_X_intLumi / Ntot 
     print "weight: " + str(weight)
     
     #---Combine histograms using PYROOT
