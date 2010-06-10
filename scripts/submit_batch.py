@@ -71,8 +71,7 @@ ijobmax=int(options.ijobmax)
 if ijobmax > numfiles:
     ijobmax=numfiles
 filesperjob = int(numfiles/ijobmax)
-delta = (float(numfiles)/float(ijobmax))-float(int(numfiles/ijobmax))
-if not delta==0:
+if numfiles%ijobmax!=0:
     filesperjob = filesperjob+1
     ijobmax = int(numfiles/filesperjob)+1
 #################################################
@@ -84,7 +83,7 @@ for ijob in range(ijobmax):
     inputfile = open(inputfilename,"w")
     for i in range(filesperjob):
         line = input.readline()
-        if line != '':
+        if line != "":
             inputfile.write(line)
         continue
     inputfile.close()
