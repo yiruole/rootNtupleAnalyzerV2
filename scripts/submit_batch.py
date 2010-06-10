@@ -2,8 +2,8 @@
 import os
 import sys
 import string
+import re
 from optparse import OptionParser
-import os.path
 
 usage = "usage: %prog [options] \nExample: ./scripts/submit_batch.py -i HeepStudies_v1/MinimumBias__Commissioning10-SD_EG-v9__RECO_short.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -o TestFrancesco/Mydataset -t rootTupleTree/tree -n 2 -q 1nh"
 
@@ -40,71 +40,61 @@ if len(sys.argv)<12:
     print usage
     sys.exit()
 
-
 ################################################
-# to write on local disks
-################################################
-outputmain = options.output
+pwd = os.getcwd()
 
-os.system("mkdir -p "+options.output)
-os.system("mkdir -p "+options.output+"/log/")
-os.system("mkdir -p "+options.output+"/input/")
-os.system("mkdir -p "+options.output+"/src/")
-outputroot = outputmain+"/output/"
-os.system("mkdir -p "+outputroot)
+outputmain = options.output.rstrip("/")
+if not re.search("^/", outputmain):
+    outputmain = pwd + "/" + outputmain
 
-## output Prefix
-outputPrefix = string.split(options.output,"/")[-1]
-#print outputPrefix
-#sys.exit()
+inputlist = options.inputlist
+if not re.search("^/", inputlist):
+    cutfile = pwd + "/" + inputlist
 
+cutfile = options.cutfile
+if not re.search("^/", cutfile):
+    cutfile = pwd + "/" + cutfile
 ################################################
-#look for the current directory
+# write on local disk
 ################################################
-os.system("\\rm tmp.log")
-os.system("echo $PWD > tmp.log")
-tmp = open("tmp.log")
-pwd = tmp.readline()
-tmp.close()
-os.system("\\rm tmp.log")
+os.system("mkdir -p "+outputmain)
+os.system("mkdir -p "+outputmain+"/log/")
+os.system("mkdir -p "+outputmain+"/input/")
+os.system("mkdir -p "+outputmain+"/src/")
+os.system("mkdir -p "+outputmain+"/output/")
 #################################################
-numfiles = reduce(lambda x,y: x+1, file(options.inputlist).xreadlines(), 0)
+# output Prefix
+outputPrefix = string.split(outputmain,"/")[-1]
+#################################################
+numfiles = len(file(inputlist).readlines())
 ijobmax=int(options.ijobmax)
-if int(options.ijobmax) > numfiles:
+if ijobmax > numfiles:
     ijobmax=numfiles
-filesperjob = numfiles/int(ijobmax)
-filesperjob = filesperjob
-extrafiles  = numfiles%int(ijobmax)
-input = open(options.inputlist)
-######################################
-for ijob in range(int(ijobmax)):
+filesperjob = int(numfiles/ijobmax)
+delta = (float(numfiles)/float(ijobmax))-float(int(numfiles/ijobmax))
+if not delta==0:
+    filesperjob = filesperjob+1
+    ijobmax = int(numfiles/filesperjob)+1
+#################################################
+input = open(inputlist)
+#################################################
+for ijob in range(ijobmax):
     # prepare the list file
-    inputfilename = options.output+"/input/input_"+str(ijob)+".list"
-    inputfile = open(inputfilename,'w')
-    # if it is a normal job get filesperjob lines
-    if ijob != (int(ijobmax)-1):
-        for line in range(filesperjob):
-            ntpfile = input.readline()
-            if ntpfile != '':
-                inputfile.write(ntpfile)
-            continue
-    else:
-        # if it is the last job get ALL remaining lines
-        ntpfile = input.readline()
-        while ntpfile != '':
-            inputfile.write(ntpfile)
-            ntpfile = input.readline()
-            continue
+    inputfilename = outputmain+"/input/input_"+str(ijob)+".list"
+    inputfile = open(inputfilename,"w")
+    for i in range(filesperjob):
+        line = input.readline()
+        if line != '':
+            inputfile.write(line)
+        continue
     inputfile.close()
 
     # prepare the script to run
-    outputname = options.output+"/src/submit_"+str(ijob)+".src"
-    outputfile = open(outputname,'w')
-    outputfile.write('#!/bin/bash\n')
-    outputfile.write('cd '+pwd)
-    outputfile.write('./main '+inputfilename+" "+options.cutfile+" "+ options.treeName + " "+ outputroot+outputPrefix+"_"+str(ijob)+" "+outputroot+outputPrefix+"_"+str(ijob)+"\n") 
+    outputname = outputmain+"/src/submit_"+str(ijob)+".src"
+    outputfile = open(outputname,"w")
+    outputfile.write("#!/bin/bash\n")
+    outputfile.write("cd "+pwd+"\n")
+    outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"\n")
     outputfile.close
-    os.system("echo bsub -q "+options.queue+" -o "+options.output+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+pwd[:-1]+"/"+outputname)
-    os.system("bsub -q "+options.queue+" -o "+options.output+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+pwd[:-1]+"/"+outputname)
-    ijob = ijob+1
-    continue
+    print    ("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
+    os.system("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
