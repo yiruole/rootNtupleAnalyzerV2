@@ -232,6 +232,11 @@ def WriteTable(table, precutlist, file):
 ToBeResubmitted_name = "ToBeResubmitted.list"
 ToBeResubmitted = open(ToBeResubmitted_name,'w')
 
+#error counters
+nLogFileErrors = 0
+nRootFileSizeErrors = 0
+nDatFileSizeErrors = 0
+
 
 #---Loop over datasets
 print "\n"
@@ -273,8 +278,28 @@ for n, lin in enumerate( open( options.inputList ) ):
         rootFile = outputBatchDir + "/" + options.analysisCode + "___" + dataset_mod + "_" + number + ".root"
         datFile = outputBatchDir + "/" + options.analysisCode + "___" + dataset_mod + "_" + number + ".dat"
 
+        resubmitThisJob = False
+
         # Check that for each .src you have the 3 correspondent .log, .root and .dat files
         if(os.path.isfile(logFile) == False or os.path.isfile(rootFile) == False or os.path.isfile(datFile) == False):
+            resubmitThisJob = True
+        else:
+            for line in open(logFile):
+                if "error" in line.lower():
+                       resubmitThisJob = True
+                       nLogFileErrors = nLogFileErrors+1
+                       print logFile + "has at least one instance of the word 'error' (case insensitive)" 
+                       break
+            if (os.path.getsize(rootFile) == 0 ):
+                resubmitThisJob = True
+                nRootFileSizeErrors = nRootFileSizeErrors+1
+                print rootFile, " has size equal to zero"
+            if (os.path.getsize(datFile) == 0 ):
+                resubmitThisJob = True
+                nDatFileSizeErrors = nDatFileSizeErrors+1
+                print datFile, "has size equal to zero"
+
+        if ( resubmitThisJob == True):
             print "--------------------------------------------------"
             print "WARNING: the output of job N. " + number + " is not complete." 
             if(os.path.isfile(logFile) == False):
@@ -293,7 +318,7 @@ for n, lin in enumerate( open( options.inputList ) ):
                 
             #print >> ToBeResubmitted, "rm -f " + logFile + " " + rootFile + " " + datFile 
             print >> ToBeResubmitted, "bsub -q " + options.queue + " -o " + logFile + " source " + scriptFile
-
+            
 
     ##--Combine .root files
     print "merging .root files ... "
@@ -439,7 +464,12 @@ for n, lin in enumerate( open( options.inputList ) ):
 if (os.path.getsize(ToBeResubmitted_name) == 0 ):
     print ""
     print "=== All jobs successfull!!! ==="
-if (os.path.getsize(ToBeResubmitted_name) > 0 ):
+else:
+    print "================================================="
+    print "Number of log files found with at least one instance of the word 'error' (case insensitive) in it = ",nLogFileErrors
+    print "Number of .root files found with zero size = ", nRootFileSizeErrors
+    print "Number of .dat files found with zero size = ", nDatFileSizeErrors
+    print "================================================="
     print "=== WARNING: Some jobs need to be resubmitted ==="
     print "=== Check the file: " + ToBeResubmitted_name   
 ToBeResubmitted.close
