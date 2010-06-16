@@ -196,31 +196,24 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 Create lists:
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o config
-  and save in a total list:
   cat config/inputListAllCurrent.txt > config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910 -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604  -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022  -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
   ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 -o config
-  and append to total list
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
 
@@ -247,4 +240,12 @@ Go to step 5) above.
 NOTE: old instructions for running the analyzer in local (no multiple batch jobs)
       are still at doc/howToMakeAnalysisWithRootTuples_OLD.txt
 
+###################################################################################
 
+Various stuff:
+
+To kill all submitted batch jobs:
+  for file in `bjobs | awk '{if($1 != "JOBID") print $1}'`; do bkill $file; done
+
+To see a JSON decently:
+  sed 's/"1/\n"1/g' Cert_132440-136297_7TeV_StreamExpress_Collisions10_JSON.txt |sort
