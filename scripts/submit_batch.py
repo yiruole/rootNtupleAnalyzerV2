@@ -49,7 +49,7 @@ if not re.search("^/", outputmain):
 
 inputlist = options.inputlist
 if not re.search("^/", inputlist):
-    cutfile = pwd + "/" + inputlist
+    inputlist = pwd + "/" + inputlist
 
 cutfile = options.cutfile
 if not re.search("^/", cutfile):
