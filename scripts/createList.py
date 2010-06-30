@@ -22,7 +22,7 @@ def filelist_castor(inputDir, match):
         m2 = re.search('_\d+_\d+.root', filename)
         if( m1 ):
             dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
-            job = filename[m1.start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[m1.start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
@@ -38,7 +38,7 @@ def filelist_castor(inputDir, match):
                     filelist[dataset][int(job[0])][1].append(job[2])
         elif( m2 ):
             dataset = re.split('_\d+_\d+.root', filename)[0]
-            job = filename[m2.start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[m2.start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
@@ -52,7 +52,7 @@ def filelist_castor(inputDir, match):
                     filelist[dataset][int(job[0])][0].append(int(job[1]))
         else:
             dataset = re.split('_\d+.root', filename)[0]
-            job = filename[re.search('_\d+.root', filename).start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[re.search('_\d+.root', filename).start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
@@ -83,7 +83,7 @@ def filelist_default(inputDir, match):
         m2 = re.search('_\d+_\d+.root', filename)
         if( m1 ):
             dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
-            job = filename[m1.start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[m1.start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
@@ -99,7 +99,7 @@ def filelist_default(inputDir, match):
                     filelist[dataset][int(job[0])][1].append(job[2])
         elif( m2 ):
             dataset = re.split('_\d+_\d+.root', filename)[0]
-            job = filename[m2.start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[m2.start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
@@ -113,7 +113,7 @@ def filelist_default(inputDir, match):
                     filelist[dataset][int(job[0])][0].append(int(job[1]))
         else:
             dataset = re.split('_\d+.root', filename)[0]
-            job = filename[re.search('_\d+.root', filename).start():].lstrip('_').rstrip('.root').split('_')
+            job = filename[re.search('_\d+.root', filename).start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
