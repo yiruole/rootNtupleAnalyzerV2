@@ -18,31 +18,48 @@ def filelist_castor(inputDir, match):
             continue
         if ( match!=None and not re.search(match, filename) ):
             continue
-        m = re.search('_\d+_\d+.root', filename)
-        if( m ):
-            dataset = re.split('_\d+_\d+.root', filename)[0]
-            job = filename[m.start():].lstrip('_').rstrip('.root').split('_')
+        m1 = re.search('_\d+_\d+_\w+.root', filename)
+        m2 = re.search('_\d+_\d+.root', filename)
+        if( m1 ):
+            dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
+            job = filename[m1.start():].lstrip('_').rstrip('.root').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = [int(job[1])]
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[job[2]]]
                 else:
-                    filelist[dataset][int(job[0])].append(int(job[1]))
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+                    filelist[dataset][int(job[0])][1].append(job[2])
             else:
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = [int(job[1])]
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[job[2]]]
                 else:
-                    filelist[dataset][int(job[0])].append(int(job[1]))
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+                    filelist[dataset][int(job[0])][1].append(job[2])
+        elif( m2 ):
+            dataset = re.split('_\d+_\d+.root', filename)[0]
+            job = filename[m2.start():].lstrip('_').rstrip('.root').split('_')
+            if dataset not in filelist.keys():
+                filelist[dataset] = {}
+                if int(job[0]) not in filelist[dataset].keys():
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[]]
+                else:
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+            else:
+                if int(job[0]) not in filelist[dataset].keys():
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[]]
+                else:
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
         else:
             dataset = re.split('_\d+.root', filename)[0]
             job = filename[re.search('_\d+.root', filename).start():].lstrip('_').rstrip('.root').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = []
+                    filelist[dataset][int(job[0])] = [[],[]]
             else:
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = []
+                    filelist[dataset][int(job[0])] = [[],[]]
 
     return filelist
 
@@ -62,31 +79,48 @@ def filelist_default(inputDir, match):
             continue
         if ( match!=None and not re.search(match, filename) ):
             continue
-        m = re.search('_\d+_\d+.root', filename)
-        if( m ):
-            dataset = re.split('_\d+_\d+.root', filename)[0]
-            job = filename[m.start():].lstrip('_').rstrip('.root').split('_')
+        m1 = re.search('_\d+_\d+_\w+.root', filename)
+        m2 = re.search('_\d+_\d+.root', filename)
+        if( m1 ):
+            dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
+            job = filename[m1.start():].lstrip('_').rstrip('.root').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = [int(job[1])]
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[job[2]]]
                 else:
-                    filelist[dataset][int(job[0])].append(int(job[1]))
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+                    filelist[dataset][int(job[0])][1].append(job[2])
             else:
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = [int(job[1])]
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[job[2]]]
                 else:
-                    filelist[dataset][int(job[0])].append(int(job[1]))
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+                    filelist[dataset][int(job[0])][1].append(job[2])
+        elif( m2 ):
+            dataset = re.split('_\d+_\d+.root', filename)[0]
+            job = filename[m2.start():].lstrip('_').rstrip('.root').split('_')
+            if dataset not in filelist.keys():
+                filelist[dataset] = {}
+                if int(job[0]) not in filelist[dataset].keys():
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[]]
+                else:
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
+            else:
+                if int(job[0]) not in filelist[dataset].keys():
+                    filelist[dataset][int(job[0])] = [[int(job[1])],[]]
+                else:
+                    filelist[dataset][int(job[0])][0].append(int(job[1]))
         else:
             dataset = re.split('_\d+.root', filename)[0]
             job = filename[re.search('_\d+.root', filename).start():].lstrip('_').rstrip('.root').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = []
+                    filelist[dataset][int(job[0])] = [[],[]]
             else:
                 if int(job[0]) not in filelist[dataset].keys():
-                    filelist[dataset][int(job[0])] = []
+                    filelist[dataset][int(job[0])] = [[],[]]
 
     return filelist
 
@@ -109,8 +143,11 @@ def write_inputlists(filelist, prefix, inputDir, outputDir):
         mainInputList.write(inputListName+'\n')
         inputList = open(inputListName,'w')
         for job in filelist[dataset].keys():
-            if( len(filelist[dataset][job])>0 ):
-                filename = (prefix+inputDir+dataset+'_%i_%i.root')%(job,max(filelist[dataset][job]))
+            if( len(filelist[dataset][job][0])>0 ):
+                if( len(filelist[dataset][job][1])>0 ):
+                    filename = (prefix+inputDir+dataset+'_%i_%i_%s.root')%(job,max(filelist[dataset][job][0]),filelist[dataset][job][1][filelist[dataset][job][0].index(max(filelist[dataset][job][0]))])
+                else:
+                    filename = (prefix+inputDir+dataset+'_%i_%i.root')%(job,max(filelist[dataset][job][0]))
             else:
                 filename = (prefix+inputDir+dataset+'_%i.root')%(job)
             inputList.write(filename+'\n')
