@@ -217,11 +217,6 @@ Create lists:
   cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
 
 
-Check how many batch jobs you may want by running
-
-  for file in `cat config/inputListReallyAll.txt`; do wc $file; done                               
-
-
 Launch the batch jobs on the total list:
 
   ./scripts/launchAnalysis_batch.pl -i config/inputListReallyAll.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh
@@ -242,7 +237,25 @@ NOTE: old instructions for running the analyzer in local (no multiple batch jobs
 
 ###################################################################################
 
+RUNNING ON SEVERAL CUT FILES:
+
+To generate several cut files (e.g. with several Mee,St cuts), the script 
+  ../rootNtupleMacrosV2/config/eejj/make_eejj_cutFiles.py
+is available.
+
+Also, to facilitate creating all sets of commands needed to run the analysis 
+on several cut files, a script 
+  ./scripts/writeCommandsToRunOnMoreCutFiles.sh
+is available.
+
+###################################################################################
+
+
+
 Various stuff:
+
+To check how many batch jobs you may want to give to the '-j' option of ./scripts/launchAnalysis_batch.pl
+  for file in `cat config/inputListReallyAll.txt`; do wc $file; done                               
 
 To kill all submitted batch jobs:
   for file in `bjobs | awk '{if($1 != "JOBID") print $1}'`; do bkill $file; done
