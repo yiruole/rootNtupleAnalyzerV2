@@ -236,7 +236,7 @@ ToBeResubmitted = open(ToBeResubmitted_name,'w')
 nLogFileErrors = 0
 nRootFileSizeErrors = 0
 nDatFileSizeErrors = 0
-
+nJobsToBeResubmitted = 0
 
 #---Loop over datasets
 print "\n"
@@ -300,6 +300,7 @@ for n, lin in enumerate( open( options.inputList ) ):
                 print datFile, "has size equal to zero"
 
         if ( resubmitThisJob == True):
+            nJobsToBeResubmitted = nJobsToBeResubmitted+1
             print "--------------------------------------------------"
             print "WARNING: the output of job N. " + number + " is not complete." 
             if(os.path.isfile(logFile) == False):
@@ -461,7 +462,10 @@ for n, lin in enumerate( open( options.inputList ) ):
 
 
 ##--Close file containing the jobs to be resubmitted (one for all datasets)
-if (os.path.getsize(ToBeResubmitted_name) == 0 ):
+ToBeResubmitted.close
+
+#if (os.path.getsize(ToBeResubmitted_name) == 0 ): ## the size check was failing somehow... replaced with nJobsToBeResubmitted counter
+if (nJobsToBeResubmitted == 0):
     print ""
     print "=== All jobs successfull!!! ==="
 else:
@@ -470,7 +474,6 @@ else:
     print "Number of .root files found with zero size = ", nRootFileSizeErrors
     print "Number of .dat files found with zero size = ", nDatFileSizeErrors
     print "================================================="
-    print "=== WARNING: Some jobs need to be resubmitted ==="
+    print "=== WARNING: "+str(nJobsToBeResubmitted)+" jobs need to be resubmitted ==="
     print "=== Check the file: " + ToBeResubmitted_name   
-ToBeResubmitted.close
             
