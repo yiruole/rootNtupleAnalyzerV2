@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Please run this script from the rootNtupleAnalyzerV2 directory by:  
+# ./scripts/writeCommandsToRunOnMoreCutFiles.sh
+
 # This scripts creates the whole sets of commands needed to run the analysis on multiple cut files.
 # The commands will be written in a text file commandsToRunOnMoreCutFiles.txt in the current directory, 
 # to be used by doing cut&paste to a terminal.
@@ -22,6 +25,7 @@ suffix=${suffix%\.*}
 OUTDIR=$OUTDIRPATH/output_$suffix
 cat >> commandsToRunOnMoreCutFiles.txt <<EOF
 
+####################################################
 #### launch, check and combine cmds for $suffix ####
 
   ./scripts/launchAnalysis_batch.pl \
@@ -65,3 +69,9 @@ cat >> commandsToRunOnMoreCutFiles.txt <<EOF
 EOF
 done
 
+echo "The set of commands to run on the cut files:" 
+for file in $files
+do
+echo "  " $file
+done 
+echo "has been written to commandsToRunOnMoreCutFiles.txt"
