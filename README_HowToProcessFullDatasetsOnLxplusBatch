@@ -195,36 +195,39 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o config
-  cat config/inputListAllCurrent.txt > config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910 -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604  -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022  -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
-
-  ./scripts/createList.py -m root -i /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 -o config
-  cat config/inputListAllCurrent.txt >> config/inputListReallyAll.txt
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_low_mass_20100604_213652 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_low_mass_20100608_175052 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v2_136087-136297_20100607_203722 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-EG-Run2010A-PromptReco-v1_135821-136086_20100607_195728 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-MinimumBias-Commissioning10-SD_EG-v9_135004-135802_20100607_211739 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-MinimumBias-Commissioning10-May6thPDSkim2_SD_EG-v1_132440-134987_20100607_205548 \
+/castor/cern.ch/user/l/lockner/RootTuples_DATA/RootTuple-V00-00-10-DATA-137437-138751_20100628_224034 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v4-138919-139239_20100704_175507 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v4-139347-139375-NoJSON_20100705_221022 \
+    -o config
 
 
 Launch the batch jobs on the total list:
 
-  ./scripts/launchAnalysis_batch.pl -i config/inputListReallyAll.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh
+  ./scripts/launchAnalysis_batch.pl -i config/inputListAllCurrent.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh
 
 
 Check and combine the jobs of the total list
 
- ./scripts/check_combine_output_batch.py -i `pwd`/config/inputListReallyAll.txt -c analysisClass_eejjSample -d `pwd`/data/output -o `pwd`/data/output -q 1nh
+ ./scripts/check_combine_output_batch.py -i config/inputListAllCurrent.txt -c analysisClass_eejjSample -d data/output -o data/output -q 1nh
 
 
 Go to step 5) above.
@@ -255,7 +258,7 @@ is available.
 Various stuff:
 
 To check how many batch jobs you may want to give to the '-j' option of ./scripts/launchAnalysis_batch.pl
-  for file in `cat config/inputListReallyAll.txt`; do wc $file; done                               
+  for file in `cat config/inputListAllCurrent.txt`; do wc $file; done                               
 
 To kill all submitted batch jobs:
   for file in `bjobs | awk '{if($1 != "JOBID") print $1}'`; do bkill $file; done
