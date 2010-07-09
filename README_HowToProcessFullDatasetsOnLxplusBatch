@@ -24,15 +24,9 @@ INSTRUCTIONS:
 
 #################################################################################
 pre-2) This is needed to use correctly the python libraries for PYROOT
-       without conflicts. The python environment infact will be set using 
+       without conflicts. The python environment will be set using 
        the CMSSW scripts ("cmsenv" as described below)
-       It's just a temporary solution but seems to work.
-       In tcsh: 
-         unsetenv ROOTSYS
-  	 unsetenv LD_LIBRARY_PATH
-       In bash: 
-  	 unset ROOTSYS
-	 unset LD_LIBRARY_PATH
+
        Somewhere create a CMSSW release or use an existing one:
 	 scramv1 project CMSSW CMSSW_3_5_7
 	 cd CMSSW_3_5_7/src    
@@ -103,7 +97,7 @@ pre-2) This is needed to use correctly the python libraries for PYROOT
          bpeek
          bkill
 
-   An example of the content pof the output/ subdirectory is:
+   An example of the content of the output/ subdirectory is:
      [lxplus218] ls data/output/analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO/output/
         analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_0.dat
 	analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_0.root
