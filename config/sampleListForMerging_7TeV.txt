@@ -15,7 +15,8 @@ LQenujj_M600		   LQToUE_ENuJJFilter_M-600
 QCD_Madgraph	           QCD_Pt1000toInf QCD_Pt100to250 QCD_Pt250to500 QCD_Pt500to1000
 QCDPt15                    QCD_Pt15
 SingleTop		   SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel
-TTbar			   TTbarJets-madgraph
+TTbar_Madgraph		   TTbarJets-madgraph
+TTbar_Pythia		   TTbar__Spring10
 VVjets			   VVJets-madgraph
 WW			   WW__Spring10-START3X_V26_S09
 WZ			   WZ__Spring10-START3X_V26_S09
