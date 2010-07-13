@@ -208,9 +208,7 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-EG-Run2010A-PromptReco-v1_135821-136086_20100607_195728 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-MinimumBias-Commissioning10-SD_EG-v9_135004-135802_20100607_211739 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-DATA-MinimumBias-Commissioning10-May6thPDSkim2_SD_EG-v1_132440-134987_20100607_205548 \
-/castor/cern.ch/user/l/lockner/RootTuples_DATA/RootTuple-V00-00-10-DATA-137437-138751_20100628_224034 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v4-138919-139239_20100704_175507 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v4-139347-139375-NoJSON_20100705_221022 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-09-DATA-EG-Run2010A-PromptReco-v4_137437-139790_20100713_140331 \
     -o config
 
 
