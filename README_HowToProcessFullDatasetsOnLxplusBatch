@@ -259,3 +259,7 @@ To kill all submitted batch jobs:
 
 To see a JSON decently:
   sed 's/"1/\n"1/g' Cert_132440-136297_7TeV_StreamExpress_Collisions10_JSON.txt |sort
+
+To see entries and abs efficiency for only a selected cut, eg sT, for every sample in the merged/rescaled efficiency file:  
+  awk '{if( NF==1 ) name=$1; if( $1=="sT" ) printf("%20s %20s     %8s %8s        %8s %8s \n",name,$1,$6,$7,$10,$11) }' ./data/output/analysisClass_eejjSample_tables.dat
+
