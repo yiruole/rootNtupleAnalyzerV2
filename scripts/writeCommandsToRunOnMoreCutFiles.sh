@@ -12,59 +12,53 @@
 
 #### INPUTS HERE ####
 files=`ls ../rootNtupleMacrosV2/config/eejj/cutTable_eejjSample_*.txt` # list of cut files that will be used
-OUTDIRPATH=/afs/cern.ch/user/p/prumerio/scratch0/lq/collisions/data  # a subdir will be created for each cut file 
-ILUM=100 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
+if [ `hostname -s` == 'pcuscms46' ]; then
+    SUBDIR=254nb-1 
+fi
+ILUM=0.25385 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 #### END OF INPUTS ####
 
-echo "" > commandsToRunOnMoreCutFiles.txt
+COMMANDFILE=commandsToRunOnMoreCutFiles_`hostname -s |perl -pi -e 's|lxplus[0-9]*|lxplus|'`.txt
+echo "" > $COMMANDFILE
 
 for file in $files
 do
 suffix=`basename $file`
 suffix=${suffix%\.*}
-OUTDIR=$OUTDIRPATH/output_$suffix
-cat >> commandsToRunOnMoreCutFiles.txt <<EOF
+cat >> $COMMANDFILE <<EOF
 
 ####################################################
 #### launch, check and combine cmds for $suffix ####
 
   ./scripts/launchAnalysis_batch.pl \
-    -i config/inputListReallyAll.txt \
+    -i config/inputListAllCurrent.txt \
     -n rootTupleTree/tree \
     -c $file \
-    -o $OUTDIR  \
-    -j 30 \
+    -o $OUTDIRPATH/output_$suffix  \
+    -j 50 \
     -q 1nh \
     | tee launch_${suffix}.log
 
   ./scripts/check_combine_output_batch.py \
-    -i config/inputListReallyAll.txt \
+    -i config/inputListAllCurrent.txt \
     -c analysisClass_eejjSample \
-    -d $OUTDIR \
-    -o $OUTDIR \
+    -d $OUTDIRPATH/output_$suffix \
+    -o $OUTDIRPATH/output_$suffix \
     -q 1nh \
-    | tee checkcombine_${suffix}.log
+    | tee $OUTDIRPATH/output_$suffix/checkcombine_${suffix}.log
 
 
   ./scripts/combineTablesTemplate.py \
-    -i config/inputListReallyAll.txt \
+    -i config/inputListAllCurrent.txt \
     -c analysisClass_eejjSample \
-    -d $OUTDIR \
+    -d $OUTDIRPATH/$SUBDIR/output_$suffix \
     -l ${ILUM} \
     -x config/xsection_7TeV.txt \
-    -o $OUTDIR \
+    -o $OUTDIRPATH/$SUBDIR \
     -s config/sampleListForMerging_7TeV.txt \
-    | tee combineTables_${suffix}.log
+    | tee $OUTDIRPATH/$SUBDIR/combineTables_${suffix}.log
 
-  ./scripts/combinePlotsTemplate.py \
-    -i config/inputListReallyAll.txt \
-    -c analysisClass_eejjSample \
-    -d $OUTDIR \
-    -l ${ILUM} \
-    -x config/xsection_7TeV.txt \
-    -o $OUTDIR \
-    -s config/sampleListForMerging_7TeV.txt \
-    | tee combinePlots_${suffix}.log
 
 EOF
 done
@@ -74,4 +68,4 @@ for file in $files
 do
 echo "  " $file
 done 
-echo "has been written to commandsToRunOnMoreCutFiles.txt"
+echo "has been written to $COMMANDFILE"
