@@ -88,8 +88,7 @@
 /ZeeJet_Pt170to230/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO		0.7241
 /ZeeJet_Pt230to300/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO		0.1946
 /ZeeJet_Pt300toInf/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO		0.07627
-/EG/Run2010A-PromptReco-v1/RECO                                         -1
-/EG/Run2010A-PromptReco-v2/RECO                                         -1
+/MinimumBias/Commissioning10-SD_EG-Jun14thSkim_v1/RECO			-1
+/EG/Run2010A-Jun14thReReco_v1/RECO					-1
+/EG/Run2010A-Jul16thReReco-v2/RECO					-1
 /EG/Run2010A-PromptReco-v4/RECO						-1
-/MinimumBias/Commissioning10-SD_EG-v9/RECO                              -1
-/MinimumBias/Commissioning10-May6thPDSkim2_SD_EG-v1/RECO                -1
