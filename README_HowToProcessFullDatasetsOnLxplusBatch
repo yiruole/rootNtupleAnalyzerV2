@@ -258,7 +258,7 @@ To see a JSON decently:
 
 To see entries and abs efficiency for only a selected cut, eg sT, for every sample in the merged/rescaled efficiency file
 and adding a rescaling factor:  
-  awk -v factor=0.000584 '{if( NF==1 ) name=$1; if( $1=="sT" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' ./data/output/analysisClass_eejjSample_tables.dat
+  awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' ./data/output/analysisClass_eejjSample_tables.dat
 
 and pipe it into the following to select specific samples:
-  |egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | ZJetAlpgen | ALLBKG | DATA' | sort
+  |egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | ZJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
