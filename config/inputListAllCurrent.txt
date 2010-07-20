@@ -1,5 +1,5 @@
-config/EG__Run2010A-PromptReco-v1__RECO.txt
-config/EG__Run2010A-PromptReco-v2__RECO.txt
+config/EG__Run2010A-Jul16thReReco-v2__RECO.txt
+config/EG__Run2010A-Jun14thReReco_v1__RECO.txt
 config/EG__Run2010A-PromptReco-v4__RECO.txt
 config/LQToUE_ENuJJFilter_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
 config/LQToUE_ENuJJFilter_M-280_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO.txt
@@ -25,8 +25,7 @@ config/LQ_ue_150_7TeV_eejj_RAW__ferencek-LQ_ue_150_7TeV_eejj_RECO-d0c450599c7f49
 config/LQ_ue_150_7TeV_enujj_RAW__ferencek-LQ_ue_150_7TeV_enujj_RECO-d0c450599c7f4954244d4e7cbeababc4__USER.txt
 config/LQ_ue_200_7TeV_eejj_RAW__ferencek-LQ_ue_200_7TeV_eejj_RECO-d0c450599c7f4954244d4e7cbeababc4__USER.txt
 config/LQ_ue_200_7TeV_enujj_RAW__ferencek-LQ_ue_200_7TeV_enujj_RECO-d0c450599c7f4954244d4e7cbeababc4__USER.txt
-config/MinimumBias__Commissioning10-May6thPDSkim2_SD_EG-v1__RECO.txt
-config/MinimumBias__Commissioning10-SD_EG-v9__RECO.txt
+config/MinimumBias__Commissioning10-SD_EG-Jun14thSkim_v1__RECO.txt
 config/QCD_Pt1000toInf-madgraph__Spring10-START3X_V26_S09-v1__GEN-SIM-RECO.txt
 config/QCD_Pt100to250-madgraph__Spring10-START3X_V26_S09-v2__GEN-SIM-RECO.txt
 config/QCD_Pt15__Spring10-START3X_V26_S09-v1__GEN-SIM-RECO.txt
