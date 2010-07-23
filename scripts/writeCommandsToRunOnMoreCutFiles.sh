@@ -11,12 +11,14 @@
 # This script will then use those cut files to create the commands needed to run on them.
 
 #### INPUTS HERE ####
+
 files=`ls ../rootNtupleMacrosV2/config/eejj/cutTable_eejjSample_*.txt` # list of cut files that will be used
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-if [ `hostname -s` == 'pcuscms46' ]; then
-    SUBDIR=254nb-1 
-fi
+SUBDIR=254nb-1 #output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 ILUM=0.25385 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
+CODENAME=analysisClass_eejjSample #the actual name of the code used to process the ntuples (without the suffix ".C") 
+
 #### END OF INPUTS ####
 
 COMMANDFILE=commandsToRunOnMoreCutFiles_`hostname -s |perl -pi -e 's|lxplus[0-9]*|lxplus|'`.txt
@@ -35,33 +37,42 @@ cat >> $COMMANDFILE <<EOF
     -i config/inputListAllCurrent.txt \
     -n rootTupleTree/tree \
     -c $file \
-    -o $OUTDIRPATH/output_$suffix  \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix  \
     -j 50 \
     -q 1nh \
-    | tee launch_${suffix}.log
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/launch_${suffix}.log
 
   ./scripts/check_combine_output_batch.py \
     -i config/inputListAllCurrent.txt \
-    -c analysisClass_eejjSample \
-    -d $OUTDIRPATH/output_$suffix \
-    -o $OUTDIRPATH/output_$suffix \
+    -c $CODENAME \
+    -d $OUTDIRPATH/$SUBDIR/output_$suffix \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -q 1nh \
-    | tee $OUTDIRPATH/output_$suffix/checkcombine_${suffix}.log
-
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/checkcombine_${suffix}.log
 
   ./scripts/combineTablesTemplate.py \
     -i config/inputListAllCurrent.txt \
-    -c analysisClass_eejjSample \
+    -c $CODENAME \
+    -d $OUTDIRPATH/$SUBDIR/output_$suffix \
+    -l  `echo "$ILUM*$FACTOR" | bc` \
+    -x config/xsection_7TeV.txt \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
+    -s config/sampleListForMerging_7TeV.txt \
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTables_${suffix}.log
+
+  ./scripts/combinePlotsTemplate.py \
+    -i config/inputListAllCurrent.txt \
+    -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/output_$suffix \
     -l ${ILUM} \
     -x config/xsection_7TeV.txt \
-    -o $OUTDIRPATH/$SUBDIR \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s config/sampleListForMerging_7TeV.txt \
-    | tee $OUTDIRPATH/$SUBDIR/combineTables_${suffix}.log
-
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combinePlots_${suffix}.log
 
 EOF
 done
+
 
 echo "The set of commands to run on the cut files:" 
 for file in $files
