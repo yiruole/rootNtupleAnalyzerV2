@@ -266,7 +266,7 @@ void baseClass::resetCuts()
   return;
 }
 
-void baseClass::fillVariableWithValue(const string& s, const double& d)
+void baseClass::fillVariableWithValue(const string& s, const double& d, const double& w)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -279,6 +279,7 @@ void baseClass::fillVariableWithValue(const string& s, const double& d)
       cut * c = & (cc->second);
       c->filled = true;
       c->value = d;
+      c->weight = w;
     }
   fillOptimizerWithValue(s, d);
   return;
@@ -746,11 +747,11 @@ bool baseClass::fillCutHistos()
       cut * c = & (cutName_cut_.find(*it)->second);
       if( c->filled )
 	{
-	  c->histo1.Fill( c->value );
-	  if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value );
-	  if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value );
-	  if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value );
-	  if( passedCut("all") )                                      c->histo5.Fill( c->value );
+	  c->histo1.Fill( c->value, c->weight );
+	  if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
+	  if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value, c->weight );
+	  if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
+	  if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
 	}
     }
   return ret;

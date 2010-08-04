@@ -41,6 +41,7 @@ struct cut {
   // Filled event by event
   bool filled;
   double value;
+  double weight;
   bool passed;
   int nEvtInput;
   int nEvtPassed;
@@ -115,7 +116,7 @@ class baseClass : public rootNtupleClass {
   map<string, bool> combCutName_passed_;
 
   void resetCuts();
-  void fillVariableWithValue(const std::string&, const double&);
+  void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
   void evaluateCuts();
   bool passedCut(const string& s);
   bool passedAllPreviousCuts(const string& s);
