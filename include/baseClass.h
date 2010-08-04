@@ -43,8 +43,8 @@ struct cut {
   double value;
   double weight;
   bool passed;
-  int nEvtInput;
-  int nEvtPassed;
+  double nEvtInput;
+  double nEvtPassed;
 };
 
 struct preCut {

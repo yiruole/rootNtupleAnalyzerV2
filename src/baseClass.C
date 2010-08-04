@@ -784,8 +784,8 @@ bool baseClass::updateCutEffic()
       cut * c = & (cutName_cut_.find(*it)->second);
       if( passedAllPreviousCuts(c->variableName) )  
 	{
-	  c->nEvtInput++;
-	  if( passedCut(c->variableName) )              c->nEvtPassed++;
+	  c->nEvtInput+=c->weight;
+	  if( passedCut(c->variableName) )              c->nEvtPassed+=c->weight;
 	}
     }
   return ret;
