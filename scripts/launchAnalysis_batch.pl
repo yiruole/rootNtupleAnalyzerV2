@@ -20,7 +20,7 @@ my $outputDir;
 my $treename;
 my $cutfile;
 
-getopts('h:i:o:n:c:j:q:');
+getopts('h:i:o:n:c:j:q:w:');
 
 if(!$opt_i) {help();}
 if(!$opt_o) {help();}
@@ -28,6 +28,7 @@ if(!$opt_n) {help();}
 if(!$opt_c) {help();}
 if(!$opt_j) {help();}
 if(!$opt_q) {help();}
+#if(!$opt_w) {help();}
 
 if($opt_h) {help();}
 if($opt_i) {$inputList = $opt_i;}
@@ -36,6 +37,7 @@ if($opt_n) {$treename = $opt_n;}
 if($opt_c) {$cutfile = $opt_c;}
 if($opt_j) {$njobs = $opt_j;}
 if($opt_q) {$queue = $opt_q;}
+if($opt_w) {$wait = $opt_w;} else {$wait=0;}
 
 system "mkdir -p $outputDir";
 
@@ -78,14 +80,16 @@ for $line(@inputList)
     
     print "./scripts/submit_batch.py -i $line -c $cutfile -t $treename -o $outputDir/$codename\_\_\_$dataset -n $njobs -q $queue \n";
     system "./scripts/submit_batch.py -i $line -c $cutfile -t $treename -o $outputDir/$codename\_\_\_$dataset -n $njobs -q $queue";    
+
+    time.sleep($wait);
     
 }
 
 #---------------------------------------------------------#
 
 sub help(){
-    print "Usage: perl ./script/launchAnalysis.pl -i <inputList> -c <cutfile> -n <treename> -o <outputDir> -j <njobs> -q <queue>[-h <help?>] \n";
-    print "Example: perl scripts/launchAnalysis_batch.pl -i HeepStudies_v1/inputListAllCurrent.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -n rootTupleTree/tree -o TestFrancesco -j 2 -q 1nh \n";
+    print "Usage: perl ./script/launchAnalysis.pl -i <inputList> -c <cutfile> -n <treename> -o <outputDir> -j <njobs> -q <queue> [-w <wait> -h <help?>] \n";
+    print "Example: perl scripts/launchAnalysis_batch.pl -i HeepStudies_v1/inputListAllCurrent.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -n rootTupleTree/tree -o TestFrancesco -j 2 -q 1nh -w 5 \n";
     print "Options:\n";
     print "-i <inputList>:      choose the file containing all the input lists for the analysis\n";
     print "-n <treename>:       choose the name of the TTree of the .root files you want to analyze\n";
@@ -93,6 +97,7 @@ sub help(){
     print "-o <outputDir>:      choose the output directory where the .root files will be stored\n";
     print "-j <njobs>:          choose number of jobs for batch submission, limited automatically to number of files in input list\n";
     print "-q <queue>:          choose queue for batch submission (choose among cmst3 8nm 1nh 8nh 1nd 1nw)\n";
+    print "-w <wait>:           set a wait time in sec between submission of different datasets\n";
     print "-h <yes> :           to print the help \n";
     die "please, try again...\n";
 }
