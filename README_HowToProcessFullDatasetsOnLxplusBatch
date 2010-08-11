@@ -258,6 +258,10 @@ To check how many batch jobs you may want to give to the '-j' option of ./script
 To kill all submitted batch jobs:
   for file in `bjobs | awk '{if($1 != "JOBID") print $1}'`; do bkill $file; done
 
+  or 
+
+  bkill -q QUEUE -u USERNAME 0 (put your lxplus username, i.e. santanas, and name of the queue, i.e. 1nh)
+
 To see a JSON decently:
   sed 's/"1/\n"1/g' Cert_132440-136297_7TeV_StreamExpress_Collisions10_JSON.txt |sort
 
