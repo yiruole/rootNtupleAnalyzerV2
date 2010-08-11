@@ -24,6 +24,6 @@ ZZ			   ZZ__Spring10-START3X_V26_S09
 ZeeJetPythia		   ZeeJet_Pt0to15 ZeeJet_Pt15to20 ZeeJet_Pt20to30 ZeeJet_Pt30to50 ZeeJet_Pt50to80 ZeeJet_Pt80to120 ZeeJet_Pt120to170 ZeeJet_Pt170to230 ZeeJet_Pt230to300 ZeeJet_Pt300toInf
 ZJetAlpgen		   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt
 WJetAlpgen		   W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
-ALLBKG			   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt TTbarJets-madgraph WW WZ ZZ QCD_Pt15 SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
-OTHERBKG		   WW WZ ZZ QCD_Pt15 SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
+ALLBKG			   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt TTbarJets-madgraph WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
+OTHERBKG		   WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
 DATA			   MinimumBias__Commissioning10-SD_EG-Jun14thSkim_v1__RECO EG__Run2010A-Jun14thReReco_v1__RECO EG__Run2010A-Jul16thReReco-v2__RECO EG__Run2010A-PromptReco-v4__RECO 
