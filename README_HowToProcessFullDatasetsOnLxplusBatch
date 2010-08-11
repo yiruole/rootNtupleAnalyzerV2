@@ -74,7 +74,7 @@ pre-2) This is needed to use correctly the python libraries for PYROOT
    You'll be asked for arguments.
    An example is:
 
-   ./scripts/launchAnalysis_batch.pl -i config/inputListAllCurrent.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh | tee temp.log
+   ./scripts/launchAnalysis_batch.pl -i config/inputListAllCurrent.txt -n rootTupleTree/tree -c config/cutTable.txt -o data/output -j 30 -q 1nh -w 5 | tee temp.log
 
    NOTE: the argument "-j 30" means that 30 jobs will be submitted for each dataset.
    However, if the number of roottuple files, N, for a dataset is less than 30, then 30 will be
@@ -82,6 +82,10 @@ pre-2) This is needed to use correctly the python libraries for PYROOT
    If you want to look quickly how many files you have for each dataset you can run
      for file in `cat config/inputListAllCurrent.txt`; do wc $file; done
    and look at the first number on each output line.
+
+   The option "-w 5" (not mandatory) put a <sleep> command of 5 seconds after the submission of each dataset. This is needed recently since the rate 
+   of lxbatch submissions cannot exceed some limit. This value might need to be tuned depending on the size of the dataset.
+   5 seconds is found to be a good cut for the moment.
 
    The command above creates a directory for each dataset in data/output/, e.g.
    data/output/analysisClass_eejjSample___LQToUE_M-250_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO/
