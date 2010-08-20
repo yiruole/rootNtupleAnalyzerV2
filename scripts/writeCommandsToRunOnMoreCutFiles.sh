@@ -11,14 +11,16 @@
 # This script will then use those cut files to create the commands needed to run on them.
 
 #### INPUTS HERE ####
-#files=`ls ../rootNtupleMacrosV2/config/eejj/cutTable_eejjSample_*.txt` # list of cut files that will be used
+files=`ls $LQMACRO/config/eejj/cutTable_eejjSample_*.txt $LQMACRO/config/cutTable_eejjSample.txt` # list of cut files that will be used
 #files=`ls ../rootNtupleMacrosV2/config/cutTable_eejjSample.txt` # list of cut files that will be used
-files=`ls ./config/cutTable_eejjSample_eejj_825nb-1_preSelJet30GeV_noDeltaEta.txt` # list of cut files that will be used
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=eejj_825nb-1_preSelJet30GeV_noDeltaEta #output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
-ILUM=0.82785 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
-FACTOR=1 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
+SUBDIR=eejj_analysis/830nb-1 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
+                             # it is suggested to specify the luminosity in the name of the directory
+ILUM=0.830 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 CODENAME=analysisClass_eejjSample #the actual name of the code used to process the ntuples (without the suffix ".C") 
+XSECTION=config/xsection_7TeV.txt #specify cross section file
+#XSECTION=config/xsection_7TeV_Zrescale.txt #specify cross section file
 
 #### END OF INPUTS ####
 
@@ -57,7 +59,7 @@ cat >> $COMMANDFILE <<EOF
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/output_$suffix \
     -l  `echo "$ILUM*$FACTOR" | bc` \
-    -x config/xsection_7TeV.txt \
+    -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s config/sampleListForMerging_7TeV.txt \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTables_${suffix}.log
@@ -67,7 +69,7 @@ cat >> $COMMANDFILE <<EOF
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/output_$suffix \
     -l ${ILUM} \
-    -x config/xsection_7TeV.txt \
+    -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s config/sampleListForMerging_7TeV.txt \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combinePlots_${suffix}.log
