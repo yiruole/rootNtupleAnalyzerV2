@@ -24,7 +24,7 @@
    - follow example in the file  README_HowToProcessFullDatasetsOnLxplusBatch 
      at "NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCATIONS"
 
-4) launch  writeCommandsToRunOnMoreCutFiles.sh
+4) edit and launch  writeCommandsToRunOnMoreCutFiles.sh
    - will create commandsToRunOnMoreCutFiles_lxplus.txt
 
 5) launch  launchAnalysis_batch.pl   (shown in commandsToRunOnMoreCutFiles_lxplus.txt)
@@ -35,10 +35,10 @@
 
 	 EDIT here:
 
-         preselection = lxplusXXX
-         MLQ100       = lxplusXXX
-	 MLQ200       = lxplus216
-	 MLQ300       = lxplus237
+         preselection = lxplus251
+         MLQ100       = lxplus258
+	 MLQ200       = lxplusXXX
+	 MLQ300       = lxplusXXX
 
 
 6) launch  check_combine_output_batch.py   (shown in commandsToRunOnMoreCutFiles_lxplus.txt)
