@@ -16,9 +16,13 @@
    
 1) check analysis code: ls -lrth src/analysisClass.C --> analysisClass_eejjSample.C
 
-2) check cut files in $LQMACRO/config and $LQMACRO/config/eejj/
+2) launch  make_eejj_cutFiles.py 
+   - check first cut files in $LQMACRO/config and $LQMACRO/config/eejj/
 
-3) launch  make_eejj_cutFiles.py
+3) launch createList.py
+   - update the README_HowToProcessFullDatasetsOnLxplusBatch file if input list changed
+   - follow example in the file  README_HowToProcessFullDatasetsOnLxplusBatch 
+     at "NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCATIONS"
 
 4) launch  writeCommandsToRunOnMoreCutFiles.sh
    - will create commandsToRunOnMoreCutFiles_lxplus.txt
