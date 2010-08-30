@@ -127,7 +127,7 @@ File_selection    = GetFile("$LQDATA/eejj_analysis/830nb-1/output_cutTable_eejjS
 pre-selection:
 
 ## 2 electrons
->  awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="Mee_PAS" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/eejj_analysis/1.1pb-1/output_cutTable_eejjSample/analysisClass_eejjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | ZJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+>  awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="Mee_TwoEleOnly" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/eejj_analysis/1.1pb-1/output_cutTable_eejjSample/analysisClass_eejjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | ZJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
 
 ## 2 electrons + 2 jets
 >  awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="maxMEtaJets_noOvrlp_ID" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/eejj_analysis/1.1pb-1/output_cutTable_eejjSample/analysisClass_eejjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | ZJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
