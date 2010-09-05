@@ -24,12 +24,14 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 #------------
 CODENAME=analysisClass_eejjSample #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
-INPUTLIST=config/inputListAllCurrent.txt #specify input list
+#INPUTLIST=config/inputListAllCurrent.txt #specify input list
+INPUTLIST=config/inputListAllCurrent_metStudy.txt
 #------------
 #XSECTION=config/xsection_7TeV.txt #specify cross section file
 XSECTION=config/xsection_7TeV_Zrescale.txt #specify cross section file
 #------------
-SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV.txt #specify list for sample merging
+#SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV.txt #specify list for sample merging
+SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_metStudy.txt
 #------------
 NJOBS=50 #number of jobs for each dataset
 WAIT=8 #seconds of delay between submission of different datasets
