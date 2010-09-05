@@ -11,20 +11,29 @@
 # This script will then use those cut files to create the commands needed to run on them.
 
 #### INPUTS HERE ####
+#------------
 files=`ls $LQMACRO/config/eejj/cutTable_eejjSample_*.txt $LQMACRO/config/cutTable_eejjSample.txt` # list of cut files that will be used
 #files=`ls ../rootNtupleMacrosV2/config/cutTable_eejjSample.txt` # list of cut files that will be used
+#------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 SUBDIR=eejj_analysis/1.1pb-1_v5_metStudy # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
-                             # it is suggested to specify the luminosity in the name of the directory
+                                         # it is suggested to specify the luminosity in the name of the directory
+#------------
 ILUM=1.1 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
+#------------
 CODENAME=analysisClass_eejjSample #the actual name of the code used to process the ntuples (without the suffix ".C") 
+#------------
 INPUTLIST=config/inputListAllCurrent.txt #specify input list
+#------------
 #XSECTION=config/xsection_7TeV.txt #specify cross section file
 XSECTION=config/xsection_7TeV_Zrescale.txt #specify cross section file
+#------------
 SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV.txt #specify list for sample merging
+#------------
 NJOBS=50 #number of jobs for each dataset
 WAIT=8 #seconds of delay between submission of different datasets
+#------------
 
 #### END OF INPUTS ####
 
