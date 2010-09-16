@@ -221,6 +221,7 @@ void baseClass::readCutFile()
 	  // Filled event by event
 	  thisCut.filled = false;
 	  thisCut.value = 0;
+	  thisCut.weight = 1;
 	  thisCut.passed = false;
 	  thisCut.nEvtInput=0;
 	  thisCut.nEvtPassed=0;
