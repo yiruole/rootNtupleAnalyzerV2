@@ -779,14 +779,16 @@ bool baseClass::writeCutHistos()
 bool baseClass::updateCutEffic()
 {
   bool ret = true;
+  double weight_previousCut = 1;
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
        it != orderedCutNames_.end(); it++) 
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       if( passedAllPreviousCuts(c->variableName) )  
 	{
-	  c->nEvtInput+=c->weight;
+	  c->nEvtInput+=weight_previousCut;
 	  if( passedCut(c->variableName) )              c->nEvtPassed+=c->weight;
+	  weight_previousCut = c->weight;
 	}
     }
   return ret;
