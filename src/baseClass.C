@@ -261,6 +261,7 @@ void baseClass::resetCuts()
       cut * c = & (cc->second);
       c->filled = false;
       c->value = 0;
+      c->weight = 1;
       c->passed = false;
     }
   combCutName_passed_.clear();
