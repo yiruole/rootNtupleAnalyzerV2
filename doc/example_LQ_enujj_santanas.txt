@@ -1,0 +1,94 @@
+## Main sequence for LQ eejj analysis (Francesco) ##
+
+0) define your environment variables in both lxplus and pcuscms46
+
+   ## lxplus ## 
+   setenv LQDATA /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/data/output_fromAFS
+   setenv LQANA /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/rootNtupleAnalyzerV2 
+   setenv LQMACRO /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/rootNtupleMacrosV2 
+   setenv LQPLOT /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/plotting_tmp
+
+   ## pcuscms46 ##  
+   setenv LQDATA /home/santanas/Leptoquarks/data/output_fromAFS
+   setenv LQANA /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/rootNtupleAnalyzerV2 
+   setenv LQMACRO /afs/cern.ch/user/s/santanas/scratch0/Leptoquarks/rootNtupleMacrosV2 
+   setenv LQPLOT /home/santanas/Leptoquarks/plotting_tmp
+   
+1) check analysis code: ls -lrth src/analysisClass.C --> analysisClass_enujjSample.C
+
+2) check cut files 
+   - check first cut files in $LQMACRO/config and $LQMACRO/config/enujj/
+
+3) launch createList.py
+   - update the README_HowToProcessFullDatasetsOnLxplusBatch file if input list changed
+   - follow example in the file  README_HowToProcessFullDatasetsOnLxplusBatch 
+     at "NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCATIONS"
+
+4) edit and launch  writeCommandsToRunOnMoreCutFiles.sh
+   - will create commandsToRunOnMoreCutFiles_lxplus.txt
+
+5) launch  launchAnalysis_batch.pl   (shown in commandsToRunOnMoreCutFiles_lxplus.txt)
+
+6) launch  check_combine_output_batch.py   (shown in commandsToRunOnMoreCutFiles_lxplus.txt)
+   - do it once jobs are finished 
+   - do this for pre-selection and final selection files
+
+7) launch  ToBeResubmitted.list
+   - do this for pre-selection and final selection files
+   
+
+repeat 6) and 7) until the jobs are done
+If the disk space in afs start to increase move to point 8) 
+and then redo steps 5), 6), 7) until all the files are processed
+
+
+------- login on pcuscms46 ---------
+
+
+> cd $LQANA --> it will point to the AFS working area 
+
+
+8) mv directories from afs to pcuscms46
+   - connect on pcuscms46 and do something like:
+     mv $LQDATAAFS/enujj_analysis/830nb-1/output_cutTable_enujjSample $LQDATA/enujj_analysis/830nb-1
+     (verify that $LQDATA/enujj_analysis/830nb-1 exists)
+
+9) launch writeCommandsToRunOnMoreCutFiles.sh in $LQANA from pcuscms46
+   - will create commandsToRunOnMoreCutFiles_pcuscms46.txt
+
+10)  launch  combineTablesTemplate.py        (shown in commandsToRunOnMoreCutFiles_pcuscms46.txt)
+
+11)  launch  combinePlotsTemplate.py        (shown in commandsToRunOnMoreCutFiles_pcuscms46.txt)
+
+
+> cd $LQPLOT  --> it will point to the pcuscms46 plotting area
+- verify that $LQMACRO is up to date 
+> cp $LQMACRO/plotting/makeStackHistoTemplateV2_enujj.py $LQPLOT/ 
+
+12) launch  makeStackHistoTemplateV2.py
+
+> cd $LQPLOT
+
+edit .py file:
+
+File_preselection = GetFile("$LQDATA/enujj_analysis/830nb-1/output_cutTable_enujjSample/analysisClass_enujjSample_plots.root")
+File_selection    = GetFile("$LQDATA/enujj_analysis/830nb-1/output_cutTable_enujjSample_Mee100_St280/analysisClass_enujjSample_plots.root")
+
+13) prepare table with number of events passing the different cuts
+
+- pre-selection:
+
+## 1 ele + large MET + 2 jets  
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="Pt1stEle_PAS" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+
+
+- full selection (after ST cut):
+
+## M200
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ200" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+
+## M300
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ300" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+
+etc... for the other masses
+
