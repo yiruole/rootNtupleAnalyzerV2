@@ -223,7 +223,6 @@ void baseClass::readCutFile()
 	  thisCut.value = 0;
 	  thisCut.weight = 1;
 	  thisCut.passed = false;
-	  thisCut.nEvtInput=0;
 	  thisCut.nEvtPassed=0;
 
 	  orderedCutNames_.push_back(thisCut.variableName);
@@ -787,7 +786,6 @@ bool baseClass::updateCutEffic()
       cut * c = & (cutName_cut_.find(*it)->second);
       if( passedAllPreviousCuts(c->variableName) )  
 	{
-	  c->nEvtInput+=weight_previousCut;
 	  if( passedCut(c->variableName) )              c->nEvtPassed+=c->weight;
 	  weight_previousCut = c->weight;
 	}
@@ -858,6 +856,8 @@ bool baseClass::writeCutEfficFile()
   if (optimizeName_cut_.size())
     h_optimizer_->SetBinContent(0, nEntTot);
 
+  double nEvtPassed_previousCut = nEntTot;
+
   if(skimWasMade_)
     {
       ++bincounter;
@@ -883,6 +883,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << effAbs
 	 << setw(15) << effAbsErr
 	 << endl;
+      nEvtPassed_previousCut = nEntRoottuple;
     }
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
        it != orderedCutNames_.end(); it++) 
@@ -890,8 +891,8 @@ bool baseClass::writeCutEfficFile()
       cut * c = & (cutName_cut_.find(*it)->second);
       ++bincounter;
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
-      effRel = (double) c->nEvtPassed / (double) c->nEvtInput;
-      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) c->nEvtInput );
+      effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
+      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / nEvtPassed_previousCut );
       effAbs = (double) c->nEvtPassed / (double) nEntTot;
       effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEntTot );
 
@@ -923,7 +924,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->level_int
-	 << setw(15) << c->nEvtInput
+	 << setw(15) << nEvtPassed_previousCut
 	 << setw(15) << c->nEvtPassed
 	 << setprecision(11) 
 	 << setw(15) << effRel
@@ -931,6 +932,7 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << effAbs
 	 << setw(15) << effAbsErr
 	 << endl;
+      nEvtPassed_previousCut = c->nEvtPassed;
     }
 
   // Write optimization histograms
