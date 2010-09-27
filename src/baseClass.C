@@ -826,7 +826,9 @@ bool baseClass::writeCutEfficFile()
      << preCutInfo_.str();
 
   int cutIdPed=0;
-  os.precision(4); 
+  double minForFixed = 0.1;
+  int precision = 4;
+  os.precision(precision); 
   os << "################################## Cuts #####################################################################################\n" 
      <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
@@ -840,11 +842,11 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "-"
      << setw(15) << nEntTot
      << setw(15) << nEntTot
-     << setprecision(11) 
-     << setw(15) << "1.00000000000"
-     << setw(15) << "0.00000000000"
-     << setw(15) << "1.00000000000"
-     << setw(15) << "0.00000000000"
+    //     << setprecision(11) 
+     << setw(15) << 1.
+     << setw(15) << 0.
+     << setw(15) << 1.
+     << setw(15) << 0.
      << endl;
 
   double effRel;
@@ -877,12 +879,11 @@ bool baseClass::writeCutEfficFile()
 	 << setw(15) << "-"
 	 << setw(15) << NBeforeSkim_
 	 << setw(15) << nEntRoottuple
-	 << setprecision(11) 
-	 << setw(15) << effRel
-	 << setw(15) << effRelErr
-	 << setw(15) << effAbs
-	 << setw(15) << effAbsErr
-	 << endl;
+	 << setw(15) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
+	 << setw(15) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
+	 << setw(15) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
+	 << setw(15) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
+	 << fixed << endl;
       nEvtPassed_previousCut = nEntRoottuple;
     }
   for (vector<string>::iterator it = orderedCutNames_.begin(); 
@@ -917,21 +918,20 @@ bool baseClass::writeCutEfficFile()
 	}
       os << setw(3) << cutIdPed+c->id 
 	 << setw(25) << c->variableName 
-	 << setprecision(4)
+	 << setprecision(precision)
 	 << fixed 
 	 << setw(15) << ( ( c->minValue1 == -9999999.0 ) ? "-inf" : ssm1.str() )
 	 << setw(15) << ( ( c->maxValue1 ==  9999999.0 ) ? "+inf" : ssM1.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->level_int
-	 << setw(15) << nEvtPassed_previousCut
-	 << setw(15) << c->nEvtPassed
-	 << setprecision(11) 
-	 << setw(15) << effRel
-	 << setw(15) << effRelErr
-	 << setw(15) << effAbs
-	 << setw(15) << effAbsErr
-	 << endl;
+	 << setw(15) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut 
+	 << setw(15) << ( (c->nEvtPassed          < minForFixed) ? (scientific) : (fixed) ) << c->nEvtPassed 
+	 << setw(15) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
+	 << setw(15) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
+	 << setw(15) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
+	 << setw(15) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
+	 << fixed << endl;
       nEvtPassed_previousCut = c->nEvtPassed;
     }
 
