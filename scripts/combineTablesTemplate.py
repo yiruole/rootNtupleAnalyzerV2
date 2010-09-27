@@ -183,7 +183,7 @@ def CalculateEfficiency(table):
 
 def WriteTable(table, name, file):
     print >>file, name
-    print >>file, "variableName".rjust(15),
+    print >>file, "variableName".rjust(25),
     print >>file, "min1".rjust(15),
     print >>file, "max1".rjust(15),
     print >>file, "min2".rjust(15),
@@ -196,25 +196,50 @@ def WriteTable(table, name, file):
     print >>file, "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print >>file, table[j]['variableName'].rjust(15),
+        print >>file, table[j]['variableName'].rjust(25),
         print >>file, table[j]['min1'].rjust(15),
         print >>file, table[j]['max1'].rjust(15),
         print >>file, table[j]['min2'].rjust(15),
         print >>file, table[j]['max2'].rjust(15),
-        print >>file, ("%.02f" % table[j]['Npass']).rjust(17),
-        print >>file, ("%.02f" % table[j]['errNpass']).rjust(17),
-        print >>file, ("%.01e" % table[j]['EffRel']).rjust(15),
-        print >>file, ("%.01e" % table[j]['errEffRel']).rjust(15),
-        print >>file, ("%.01e" % table[j]['EffAbs']).rjust(15),
-        print >>file, ("%.01e" % table[j]['errEffAbs']).rjust(15)
-
+        ###
+        if( table[j]['Npass'] >= 0.1 ):
+            print >>file, ("%.04f" % table[j]['Npass']).rjust(17),
+        else:
+            print >>file, ("%.04e" % table[j]['Npass']).rjust(17),
+        ### 
+        if( table[j]['errNpass'] >= 0.1):    
+            print >>file, ("%.04f" % table[j]['errNpass']).rjust(17),
+        else:
+            print >>file, ("%.04e" % table[j]['errNpass']).rjust(17),
+        ### 
+        if( table[j]['EffRel'] >= 0.1 ):
+            print >>file, ("%.04f" % table[j]['EffRel']).rjust(15),
+        else:
+            print >>file, ("%.04e" % table[j]['EffRel']).rjust(15),
+        ### 
+        if( table[j]['errEffRel'] >= 0.1 ):
+            print >>file, ("%.04f" % table[j]['errEffRel']).rjust(15),    
+        else:
+            print >>file, ("%.04e" % table[j]['errEffRel']).rjust(15),
+        ### 
+        if( table[j]['EffAbs'] >= 0.1 ):
+            print >>file, ("%.04f" % table[j]['EffAbs']).rjust(15),
+        else:
+            print >>file, ("%.04e" % table[j]['EffAbs']).rjust(15),
+        ### 
+        if( table[j]['errEffAbs'] >= 0.1 ):
+            print >>file, ("%.04f" % table[j]['errEffAbs']).rjust(15)
+        else:
+            print >>file, ("%.04e" % table[j]['errEffAbs']).rjust(15)         
+        ###
+            
     print >>file, "\n"
 
     #--- print to screen
     
     print "\n"
     print name
-    print "variableName".rjust(15),
+    print "variableName".rjust(25),
     print "min1".rjust(15),
     print "max1".rjust(15),
     print "min2".rjust(15),
@@ -227,17 +252,42 @@ def WriteTable(table, name, file):
     print "errEffAbs".rjust(15)
 
     for j, line in enumerate(table):
-        print table[j]['variableName'].rjust(15),
+        print table[j]['variableName'].rjust(25),
         print table[j]['min1'].rjust(15),
         print table[j]['max1'].rjust(15),
         print table[j]['min2'].rjust(15),
         print table[j]['max2'].rjust(15),
-        print ("%.02f" % table[j]['Npass']).rjust(17),
-        print ("%.02f" % table[j]['errNpass']).rjust(17),
-        print ("%.01e" % table[j]['EffRel']).rjust(15),
-        print ("%.01e" % table[j]['errEffRel']).rjust(15),
-        print ("%.01e" % table[j]['EffAbs']).rjust(15),
-        print ("%.01e" % table[j]['errEffAbs']).rjust(15)
+        ###
+        if( table[j]['Npass'] >= 0.1 ):
+            print ("%.04f" % table[j]['Npass']).rjust(17),
+        else:
+            print ("%.04e" % table[j]['Npass']).rjust(17),
+        ### 
+        if( table[j]['errNpass'] >= 0.1):    
+            print ("%.04f" % table[j]['errNpass']).rjust(17),
+        else:
+            print ("%.04e" % table[j]['errNpass']).rjust(17),
+        ### 
+        if( table[j]['EffRel'] >= 0.1 ):
+            print ("%.04f" % table[j]['EffRel']).rjust(15),
+        else:
+            print ("%.04e" % table[j]['EffRel']).rjust(15),
+        ### 
+        if( table[j]['errEffRel'] >= 0.1 ):
+            print ("%.04f" % table[j]['errEffRel']).rjust(15),    
+        else:
+            print ("%.04e" % table[j]['errEffRel']).rjust(15),
+        ### 
+        if( table[j]['EffAbs'] >= 0.1 ):
+            print ("%.04f" % table[j]['EffAbs']).rjust(15),
+        else:
+            print ("%.04e" % table[j]['EffAbs']).rjust(15),
+        ### 
+        if( table[j]['errEffAbs'] >= 0.1 ):
+            print ("%.04f" % table[j]['errEffAbs']).rjust(15)
+        else:
+            print ("%.04e" % table[j]['errEffAbs']).rjust(15)         
+        ###
 
     return
 
@@ -329,7 +379,8 @@ for n, lin in enumerate( open( options.inputList ) ):
     #print Ntot
 
     #---Calculate weight
-    Ntot = int(data[0]['N'])
+    #Ntot = int(data[0]['N'])
+    Ntot = float(data[0]['N'])
     if( xsection_val == "-1" ):
         weight = 1.0
         xsection_X_intLumi = Ntot
@@ -351,9 +402,9 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'max1': "-",
                               'min2': "-",
                               'max2': "-",
-                              'N': "%.03f" % ( Ntot * weight ),
+                              'N': ( Ntot * weight ),
                               'errN': int(0),
-                              'Npass': "%.03f" % ( Ntot * weight ),
+                              'Npass': ( Ntot * weight ),
                               'errNpass': int(0),
                               }
 
@@ -387,10 +438,10 @@ for n, lin in enumerate( open( options.inputList ) ):
                               'max1': data[j]['max1'],
                               'min2': data[j]['min2'],
                               'max2': data[j]['max2'],
-                              'N':           "%.03f" % N,
-                              'errN':        "%.03f" % errN,
-                              'Npass':       "%.03f" % Npass,
-                              'errNpass':    "%.03f" % errNpass,
+                              'N':         N,
+                              'errN':      errN,
+                              'Npass':     Npass,
+                              'errNpass':  errNpass,
                               }
 
             #print newtable

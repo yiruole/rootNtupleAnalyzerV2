@@ -166,7 +166,8 @@ for n, lin in enumerate( open( options.inputList ) ):
     #print Ntot
 
     #---Calculate weight
-    Ntot = int(data[0]['N'])
+    #Ntot = int(data[0]['N'])
+    Ntot = float(data[0]['N'])
     if( xsection_val == "-1" ):
         weight = 1.0
         xsection_X_intLumi = Ntot
