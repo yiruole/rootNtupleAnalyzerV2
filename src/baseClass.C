@@ -787,14 +787,9 @@ bool baseClass::updateCutEffic()
       cut * c = & (cutName_cut_.find(*it)->second);
       if( passedAllPreviousCuts(c->variableName) )  
 	{
-	  bool nEvtPassedBeforeWeight_alreadyIncremented = false;
 	  if( passedCut(c->variableName) ) 
 	    {
-	      if ( !nEvtPassedBeforeWeight_alreadyIncremented ) 
-		{
-		  c->nEvtPassedBeforeWeight += 1;
-		  nEvtPassedBeforeWeight_alreadyIncremented = true;
-		}
+	      c->nEvtPassedBeforeWeight += 1;
 	      c->nEvtPassed+=c->weight;
 	      c->nEvtPassedErr2 += (c->weight)*(c->weight);
 	    }
@@ -904,12 +899,18 @@ bool baseClass::writeCutEfficFile()
       cut * c = & (cutName_cut_.find(*it)->second);
       ++bincounter;
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
-      effRel = (double) c->nEvtPassed / nEvtPassedBeforeWeight_previousCut;
-      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / nEvtPassedBeforeWeight_previousCut );
-      //effRelErr = sqrt((double) c->nEvtPassedErr2) / nEvtPassedBeforeWeight_previousCut;
+      effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
+      double N = nEvtPassedBeforeWeight_previousCut;
+      double Np = c->nEvtPassedBeforeWeight;
+      double p = Np / N;
+      double q = 1-p;
+      double w = c->nEvtPassed / c->nEvtPassedBeforeWeight;
+      effRelErr = sqrt(p*q/N)*w;
       effAbs = (double) c->nEvtPassed / (double) nEntTot;
-      effAbsErr = sqrt( (double) effAbs * (1.0 - (double) effAbs) / (double) nEntTot );
-      //effAbsErr = sqrt((double) c->nEvtPassedErr2) / nEntTot;
+      N = nEntTot;
+      p = Np / N;
+      q = 1-p;
+      effAbsErr = sqrt(p*q/N)*w;
 
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
