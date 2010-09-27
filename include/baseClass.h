@@ -44,6 +44,7 @@ struct cut {
   double weight;
   bool passed;
   double nEvtInput;
+  double nEvtPassedBeforeWeight;
   double nEvtPassed;
   double nEvtPassedErr2;
 };
