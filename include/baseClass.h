@@ -45,6 +45,7 @@ struct cut {
   bool passed;
   double nEvtInput;
   double nEvtPassed;
+  double nEvtPassedErr2;
 };
 
 struct preCut {
