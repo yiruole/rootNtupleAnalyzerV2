@@ -1,0 +1,21 @@
+
+
+TODO list for the rootNtupleAnalyzerV2 package:
+
+Priorities:
+----------
+
+
+Lower priorities:
+----------------
+
+- use correct weights when filling all types of automatic histograms.
+  Currently, only XXX_allPreviousCuts are filled with the correct weight.
+
+
+Wishes:
+------
+
+- make a function to create and fill new histograms using a simple call from the 
+  user .C code. The histogram would be created at the first call.
+
