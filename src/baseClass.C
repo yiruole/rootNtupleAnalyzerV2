@@ -226,6 +226,7 @@ void baseClass::readCutFile()
 	  thisCut.nEvtPassedBeforeWeight=0;
 	  thisCut.nEvtPassed=0;
 	  thisCut.nEvtPassedErr2=0;
+	  thisCut.nEvtPassedBeforeWeight_alreadyFilled = false;
 
 	  orderedCutNames_.push_back(thisCut.variableName);
 	  cutName_cut_[thisCut.variableName]=thisCut;
@@ -255,7 +256,7 @@ void baseClass::readCutFile()
 
 }
 
-void baseClass::resetCuts()
+void baseClass::resetCuts(const string& s)
 {
   for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) 
     {
@@ -264,6 +265,14 @@ void baseClass::resetCuts()
       c->value = 0;
       c->weight = 1;
       c->passed = false;
+      if(s == "newEvent") 
+	{
+	  c->nEvtPassedBeforeWeight_alreadyFilled = false;
+	}
+      else if(s != "sameEvent")
+	{
+	  STDOUT("ERROR: unrecognized option. Only allowed options are 'sameEvent' and 'newEvent'; no option = 'newEvent'.");
+	}
     }
   combCutName_passed_.clear();
   return;
@@ -789,7 +798,11 @@ bool baseClass::updateCutEffic()
 	{
 	  if( passedCut(c->variableName) ) 
 	    {
-	      c->nEvtPassedBeforeWeight += 1;
+	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false) 
+		{
+		  c->nEvtPassedBeforeWeight += 1;
+		  c->nEvtPassedBeforeWeight_alreadyFilled = true;
+		}
 	      c->nEvtPassed+=c->weight;
 	      c->nEvtPassedErr2 += (c->weight)*(c->weight);
 	    }

@@ -47,6 +47,7 @@ struct cut {
   double nEvtPassedBeforeWeight;
   double nEvtPassed;
   double nEvtPassedErr2;
+  bool nEvtPassedBeforeWeight_alreadyFilled;
 };
 
 struct preCut {
@@ -117,7 +118,7 @@ class baseClass : public rootNtupleClass {
   public :
   map<string, bool> combCutName_passed_;
 
-  void resetCuts();
+  void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
   void evaluateCuts();
   bool passedCut(const string& s);
