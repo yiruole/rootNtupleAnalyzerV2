@@ -79,16 +79,20 @@ File_selection    = GetFile("$LQDATA/enujj_analysis/830nb-1/output_cutTable_enuj
 - pre-selection:
 
 ## 1 ele + large MET + 2 jets  
-> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="Pt1stEle_PAS" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="Pt1stEle_PAS" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v9_nod1d2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQenujj_M200 | LQenujj_M200 | LQenujj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
 
+--> same for QCD part
 
 - full selection (after ST cut):
 
 ## M200
-> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ200" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ200" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v9_nod1d2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQenujj_M200 | LQenujj_M200 | LQenujj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
 
 ## M300
-> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ300" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQeejj_M100 | LQeejj_M200 | LQeejj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+> awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT_MLQ300" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' $LQDATA/enujj_analysis/2.9pb-1_v9_nod1d2/output_cutTable_enujjSample/analysisClass_enujjSample_tables.dat | egrep 'LQenujj_M200 | LQenujj_M200 | LQenujj_M300 | TTbar_Madgraph | WJetAlpgen | OTHERBKG | ALLBKG | DATA' | sort
+
+--> same for QCD part
+
 
 etc... for the other masses
 
