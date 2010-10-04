@@ -30,3 +30,22 @@ Predicting number of events at pre-cuts levels:
    Histograms are filled with weights assuming exactly 2 superclusters in the event
    and that both convert to HEEP electrons.
 
+Adjusting fake rate and closure test due to SM contamination:
+1) Run the analysisClass_SCFakeRate code over MC samples from SM processes
+   in order to estimate the total contribution to the numerator of the fake rate 
+   for the integrated luminosity of data considered.
+   Calculate contribution in barrel and endcap separately.
+   PhotonJet is the only processes seen so far to contribute significantly.
+   The contributions to the denominator have been negligible.
+
+2) Calculate what percentage of the DATA numerator the SM MC
+   predictions account for.  ( # PhotonJet MC numerator / # Data numerator)
+
+3) Reduce the fake rates calculated in the barrel and endcap from data by the
+   percentage calculated in step 2.  This is the new, "adjusted" fake rate.
+
+4) To adjust the closure, run analysisClass_SCPredictions.C over SM MC samples.
+   In this version of the analysis have used W+Jet, Z+Jet, TTbar, PhotonJet, and VV.
+   Calculate number of electron-supercluster-jet events pass all cuts in SM MC.
+   Subtract this number from the "actual" number of e-s-j events in data before
+   comparing to the "predicted" number in data (the reweighted s-s-j events).
