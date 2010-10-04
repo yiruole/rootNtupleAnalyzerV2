@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <iomanip>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -154,6 +155,9 @@ class baseClass : public rootNtupleClass {
   void fillOptimizerWithValue(const string& s, const double& d);
   void runOptimizer();
 
+  void CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
+  void CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
+
   private :
   string * configFile_;
   string * outputFileName_; 
@@ -168,11 +172,14 @@ class baseClass : public rootNtupleClass {
   map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_; 
+  map<const char* , TH1D> userTH1Ds_;
+  map<const char* , TH2D> userTH2Ds_;
   void init();
   void readInputList();
   void readCutFile();
   bool fillCutHistos();
   bool writeCutHistos();
+  bool writeUserHistos();
   bool updateCutEffic();
   bool writeCutEfficFile();
   bool sortCuts(const cut&, const cut&);
