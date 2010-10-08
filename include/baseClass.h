@@ -172,8 +172,8 @@ class baseClass : public rootNtupleClass {
   map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_; 
-  map<const char* , TH1D> userTH1Ds_;
-  map<const char* , TH2D> userTH2Ds_;
+  map<const char* , TH1D*> userTH1Ds_;
+  map<const char* , TH2D*> userTH2Ds_;
   void init();
   void readInputList();
   void readCutFile();

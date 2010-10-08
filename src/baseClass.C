@@ -15,7 +15,6 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
 
 baseClass::~baseClass()
 {
-  //STDOUT("begins");
   if( !writeCutHistos() )
     {
       STDOUT("ERROR: writeCutHistos did not complete successfully.");
@@ -29,7 +28,6 @@ baseClass::~baseClass()
       STDOUT("ERROR: writeUserHistos did not complete successfully.");
     }
   output_root_->Close();
-  //STDOUT("ends");
 }
 
 void baseClass::init()
@@ -1103,46 +1101,49 @@ int baseClass::getGlobalInfoNstart(char *pName)
 
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
-  map<const char* , TH1D>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  map<const char* , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
-      TH1D h = TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup); 
-      h.Sumw2();
+      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup); 
+      h->Sumw2();
       userTH1Ds_[nameAndTitle] = h;
-      h.Fill(value);
+      h->Fill(value);
     }
   else
     {
-      nh_h->second.Fill(value, weight);      
+      nh_h->second->Fill(value, weight);      
     }
 }
 
 void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<const char* , TH2D>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+  map<const char* , TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+  TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
-      TH2D h = TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup); 
-      h.Sumw2();
+      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup); 
+      h->Sumw2();
       userTH2Ds_[nameAndTitle] = h;
-      h.Fill(value_x, value_y, weight);
+      h->Fill(value_x, value_y, weight);
     }
   else
     {
-      nh_h->second.Fill(value_x, value_y, weight);      
+      nh_h->second->Fill(value_x, value_y, weight);      
     }
 }
 
 bool baseClass::writeUserHistos()
 { 
   bool ret = true;
-  for (map<const char*, TH1D>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++) 
+  for (map<const char*, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++) 
     {
-      uh_h->second.Write();
+      uh_h->second->Write();
     }
-  for (map<const char*, TH2D>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++) 
+  for (map<const char*, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++) 
     {
-      uh_h->second.Write();
+      //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
+      uh_h->second->Write();
     }
   // Any failure mode to implement?
   return ret;
