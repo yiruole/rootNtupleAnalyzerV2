@@ -93,3 +93,6 @@
 /EG/Run2010A-Jun14thReReco_v1/RECO					-1
 /EG/Run2010A-Jul16thReReco-v2/RECO					-1
 /EG/Run2010A-PromptReco-v4/RECO						-1
+/EG/Run2010A-Sep17ReReco_v2/RECO					-1
+/Electron/Run2010B-PromptReco-v2/RECO					-1
+/Photon/Run2010B-PromptReco-v2/RECO					-1
