@@ -1,0 +1,1 @@
+DATA			   EG__Run2010A-Sep17ReReco_v2 Photon__Run2010B-PromptReco-v2
