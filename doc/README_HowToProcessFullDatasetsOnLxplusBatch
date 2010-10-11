@@ -194,6 +194,8 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
+## Electron/EG + Electron skim
+
   ./scripts/createList.py \
     -m root \
     -i \
@@ -209,13 +211,31 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-ZJet-madgraph_20100828_021017 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101006_194357 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146428-146644_20101006_162408 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146804-147114_20101009_001302 \
+-o config/ElectronSkim
+
+
+## Photon/EG + Supercluster skim
+
+ ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101007_124915 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-Photon-Run2010B-PromptReco-v2-146428-146644_20101007_144045 \
+-o config/PhotonSkim
+
+
+//---------------------------
+OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Jun14thReReco_v1_132440-137028_20100719_165009 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-Jul16thReReco_v2_139779-140160_20100719_181525 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_138564-139459_140180-140387_20100719_183025 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_140401-141961_20100805_023138 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_142035-143179_20100821_013157 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_143181-144114_20100907_232524 \
-    -o config
+//---------------------------
 
 
 Launch the batch jobs on the total list:
