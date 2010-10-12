@@ -1,14 +1,131 @@
-Predicting N_eejj from QCD and the closure test:
-1) Run analysisClass_SCFakeRate.C with similarly labeled cut table on data.  
-   This will produce histograms with distributions of HEEP electrons and isolated
-   superculsters passing the di-jet like cuts.
-   More specific instructions and explanations are in the code itself.
 
-2) Edit the pyroot macro QCD_FakeRate_fitting.py to take use the output of 
+This file describes the procedure to determine the QCD multi-jet contribution
+to the final N_eejj or N_enujj samples, and to perform the closure test.
+
+The DATA sample needed is always the SuperCluster Skim.
+For the MC samples, an Electron Skim is sufficient (since MC is used to 
+determine contamination from real electrons or converted photons, and this
+contamination is negligible for sample where only superclusters are requested
+while it may be not negligible for samples where an electron is requested).
+
+
+1) Determine the Fake Rates:
+   -------------------------
+   Fake rates have to be determined using data and MC (for estimating real 
+   electron/photon contamination) with 2 different selections:
+
+   a) requesting 1 isoSC + 2 jets (needed for closure test and enujj analysis) 
+   b) requesting 1 isoSC + 3 jets (needed eejj analysis)
+
+   Run twice (for a and for b) the rootNtupleAnalyzerV2 with the macro
+     analysisClass_SCFakeRate.C 
+   and cut file
+     cutTable_SCFakeRate.txt
+   where you set the cut on nJet_PtCut as:
+
+   a) nJet_PtCut                      1          +inf                 -               -               0       16 -0.5 15.5 
+   b) nJet_PtCut                      2          +inf                 -               -               0       16 -0.5 15.5 
+
+   This will produce histograms with distributions of HEEP electrons and isolated
+   superculsters passing the selection cuts:
+
+   h_goodSCPt_Barrel (the denominator of the fake rate for EB)
+   h_goodEleSCPt_Barrel (the numerator of the fake rate for EB)
+   h_goodSCPt_Endcap (the denominator of the fake rate for EE)
+   h_goodEleSCPt_Endcap (the numerator of the fake rate for EE)
+
+   Do the usual check/combine/merge for both a and b.
+
+   The above histograms will be used by the macro 
+   rootNtupleMacrosV2/plotting/QCD_FakeRate_fitting.py 
+   to produce fake rate plots for the endcap and barrel,
+   to perform a linear fit, and to print to screen the
+   fake rate values. 
+   Edit the macro and change File2....
+
+FIXME: 
+to take use the output of 
    analysisClass_SCFakeRate.C as the input.
    Run this macro to produce fake rate plots for the endcap and barrel 
    and to perform the linear fit.
    The fit parameters are printed to the screen, the barrel first and then the endcap.
+
+FIXME:
+   ---- Check to contamination and rescale the fake rates to account for it (add details here)
+
+
+2) Predict number of QCD events to final analysis sample:
+   ------------------------------------------------------
+
+  2a) enujj analysis: predict n. of enujj events using cnujj events
+  2b) eejj analysis: predict n. of eejj events using ccjj events
+
+
+  2a) Use macro analysisClass_enujjSample_QCD.C  
+      and cut file cutTable_enujjSample_QCD.txt
+  2b) Use macro analysisClass_eejjSample_QCD.C  
+      and cut file cutTable_eejjSample_QCD.txt
+
+  Edit the precut lines for:
+    fakeRate_Barrel	      
+    fakeRate_Endcap	      
+  for the cut file of 2a) or 2b) and set the fake rates from 1a) or 1b).
+
+  Run the macros+cuts file on DATA only (electron/photon contamination is 
+  negligible for the ccjj or cnujj samples). 
+  QCD bkg plots will be found in the final root files.
+
+  NOTE: remember that the int. lumi for the SuperCluster Skim is usually different
+  than the one for the Electron skim. Use the appropriate value when using
+  ./scripts/combineTablesTemplate.py 
+  ./scripts/combinePlotsTemplate.py 
+
+3) Run the ecj closure test (occasionally):
+   ----------------------------------------
+
+   - the code is 
+     analysisClass_ecj_ClosureTest.C
+     cutTable_ecj_ClosureTest.txt
+   
+   a) Predict the number of ecj events:
+
+     - modify cutTable_ecj_ClosureTest.txt:
+       - take the contamination-corrected from 1a) and set them in the lines
+         fakeRate_Barrel       .005092      0
+         fakeRate_Endcap       .01836       0
+       - remove the request of electrons by setting:
+         nEle_HEEP                       -inf         +inf
+
+     - modify analysisClass_ecj_ClosureTest.C:
+       - uncomment the line 
+         double weight = p1+p2;
+       - comment the line
+         double weight = 1;
+
+     - make clean; make 
+
+     - run the macro on data only (contamination of the ccj sample is negligible, no need
+     to estimate it from MC)
+
+   b) Determine the true number of ecj events:
+
+     - modify cutTable_ecj_ClosureTest.txt:
+       - add the request of 1 or more electrons by setting:
+         nEle_HEEP                       0         +inf
+
+     - modify analysisClass_ecj_ClosureTest.C:
+       - comment the line
+         double weight = p1+p2;
+       - uncomment the line
+         double weight = 1;
+
+     - make clean; make 
+
+     - run the macro on data and MC (contamination of the ecj sample is substantial)
+
+
+
+FIXME --- old instructions below
 
 3) Adjust the fake rate fit parameters in the cutTable_SCPredictions.txt
    and run analysisClass_SCPredictions.C on the data.
