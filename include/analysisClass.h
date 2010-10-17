@@ -7,7 +7,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <iomanip>
-
+#include <memory>
 
 using namespace std;
 
