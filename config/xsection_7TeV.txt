@@ -25,14 +25,14 @@
 /TTbarJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO            165
 /TTbar/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO				165
 /SingleTop_sChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   4.6
-/SingleTop_tChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   63.2
+/SingleTop_tChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   64.6
 /SingleTop_tWChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO  10.6
 /VVJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO               4.8
 /QCD_Pt100to250-madgraph/Spring10-START3X_V26_S09-v2/GEN-SIM-RECO	7000000
 /QCD_Pt250to500-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO	171000
 /QCD_Pt500to1000-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO	5200
 /QCD_Pt1000toInf-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO	83
-/ZJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO		2907
+/ZJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO		3048
 /Z0Jets_Pt0to100-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO        2545.68
 /Z1Jets_Pt0to100-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO        493.867
 /Z1Jets_Pt100to300-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO      12.3531
