@@ -214,6 +214,7 @@ Create lists:
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101006_194357 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146428-146644_20101006_162408 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146804-147114_20101009_001302 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2_146511-146513_147115-147454_20101018_051044 \
 -o config/ElectronSkim
 
 
