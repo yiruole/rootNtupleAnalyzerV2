@@ -1,17 +1,84 @@
+############################
+# TODO list all LQ analyses:
+############################
 
-
-TODO list for the rootNtupleAnalyzerV2 package:
-
-Priorities:
-----------
-
-
-Lower priorities:
+High priority:
 ----------------
+
+
+Low priority:
+---------------
+- Define procedure to combine lljj and lnjj
+- define estimator for discovery: ScP?
+
+
+##############################
+# TODO list for eejj analysis:
+##############################
+
+High priority:
+----------------
+- check electron efficiency as a function of i) jet multiplicity , ii) number of primary vertices 
+  --> sent request to HEEP group
+
+
+Low priority:
+---------------
+- move to PFjets (already done in enujj analysis)
+- check if cuts optimized for exclusion are good also for discovery
+
+
+###############################
+# TODO list for enujj analysis:
+###############################
+
+High priority:
+----------------
+
+- Create reduced ntuples for events in data passing pre-selection
+- Study two bumps in Mej distribution for 10.9 pb-1
+- Study impact of ECAL dead cells on enujj channel (--> Francesco)
+  --> see hn "Dealing with dead/masked ECAL towers in SUSY searches"
+- Understand data MC disagreement in the MT(e,MET) region
+- study asymmetry in QCD eta 1st jet distribution
+- calculate fake rate + and - 
+- Check data MC agreement in W+ and W- separately 
+- Study effect of pile-up on enujj analysis
+   --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
+   --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
+- Redo optimization with QCD background included (--> Dinko)
+- Check MC estimation of TTBAR background: emujj, b-jets, high jet multiplicity bins
+
+
+Low priority:
+---------------
+- Write AN/PAS
+- Develop data driven method for W+jets estimation
+- Contact Gavin Hesketh about MC generators to get W Pt spectrum: FEWZ, ResBos, ..
+- check range of W width generated in MC
+- look at uT = MET - Pt(e) ~ HT (vectorial sum) to possibly discriminate between W+jets and signal
+- estimate QCD contribution from events with real MET (b,c decays to electron)
+
+
+##############################################
+# TODO list for the RootNtupleMakerV2 package:
+##############################################
+
+
+
+
+#################################################
+# TODO list for the rootNtupleAnalyzerV2 package:
+#################################################
+
+High priority:
+----------------
+
+Low priority:
+---------------
 
 - use correct weights when filling all types of automatic histograms.
   Currently, only XXX_allPreviousCuts are filled with the correct weight.
-
 
 Wishes:
 ------
