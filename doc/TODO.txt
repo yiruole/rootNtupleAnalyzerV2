@@ -4,12 +4,15 @@
 
 High priority:
 ----------------
-
+- perform studies on lepton-vertex and jet-vertex association
+- Define procedure to combine lljj and lnjj
 
 Low priority:
 ---------------
-- Define procedure to combine lljj and lnjj
 - define estimator for discovery: ScP?
+- Check cl95 code implemented in RooStats
+  --> see http://indico.cern.ch/getFile.py/access?contribId=25&sessionId=2&resId=0&materialId=slides&confId=106675 
+  --> PhysicsTools/RooStatsCms/macros/examples/roostats_cl95_bc.C
 
 
 ##############################
@@ -35,10 +38,10 @@ Low priority:
 High priority:
 ----------------
 
-- Create reduced ntuples for events in data passing pre-selection
-- Study two bumps in Mej distribution for 10.9 pb-1
 - Study impact of ECAL dead cells on enujj channel (--> Francesco)
   --> see hn "Dealing with dead/masked ECAL towers in SUSY searches"
+- Redo optimization with QCD background included (--> Dinko)
+- Study two bumps in Mej distribution for 10.9 pb-1
 - Understand data MC disagreement in the MT(e,MET) region
 - study asymmetry in QCD eta 1st jet distribution
 - calculate fake rate + and - 
@@ -46,7 +49,6 @@ High priority:
 - Study effect of pile-up on enujj analysis
    --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
    --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
-- Redo optimization with QCD background included (--> Dinko)
 - Check MC estimation of TTBAR background: emujj, b-jets, high jet multiplicity bins
 
 
@@ -60,29 +62,51 @@ Low priority:
 - estimate QCD contribution from events with real MET (b,c decays to electron)
 
 
-##############################################
-# TODO list for the RootNtupleMakerV2 package:
-##############################################
+#############################################
+# TODO list for the RootTupleMakerV2 package:
+#############################################
 
 
+High priority:
+----------------
+- Create reduced ntuples for events in data passing pre-selection
+- check code to extract 36X JEC using CMSSW_3_8_X 
+- add variables for jet-vertex and lepton-vertex association
+- use recipe to fix ECAL spike cleaning in 38x
+  --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
+- inlcude type1 corrections for PFMET
+- use recipe to fix EB alignment in 2010B data
+  --> see https://hypernews.cern.ch/HyperNews/CMS/get/exotica/886.html
 
+Low priority:
+---------------
+- revisit procedure to store trigger info in the ntuples (ask Sam Harper)
+- include other PF jets as electrons,photons,muons (PF2PAT)
+- use 38x JEC
 
 #################################################
-# TODO list for the rootNtupleAnalyzerV2 package:
+# TODO list for the rootNtupleAnalyzerV2 package
+# and plotting macros:
 #################################################
 
 High priority:
 ----------------
+- add options for i)statistics box and ii) overflow bin 
+  in the .py macros to make final plots
 
 Low priority:
 ---------------
 
 - use correct weights when filling all types of automatic histograms.
   Currently, only XXX_allPreviousCuts are filled with the correct weight.
+- remove errRelN*errRelN from 
+  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleAnalyzerV2/scripts/combineTablesTemplate.py?revision=1.3&view=markup and test it.
+- fix code to make cut optimization 
+  1) fix code to accept non-integer numbers
+  2) allow configurable number of bins for the scan (Edmund wrote already this code?)
 
 Wishes:
 ------
 
 - make a function to create and fill new histograms using a simple call from the 
   user .C code. The histogram would be created at the first call.
-
