@@ -83,8 +83,8 @@ pre-2) This is needed to use correctly the python libraries for PYROOT
      for file in `cat config/inputListAllCurrent.txt`; do wc $file; done
    and look at the first number on each output line.
 
-   The option "-w 5" (not mandatory) put a <sleep> command of 5 seconds after the submission of each dataset. 
-   This is needed recently since the rate of lxbatch submissions cannot exceed some limit. 
+   The option "-w 5" (not mandatory) put a <sleep> command of 5 seconds after the submission of each dataset.
+   This is needed recently since the rate of lxbatch submissions cannot exceed some limit.
    This value might need to be tuned depending on the size of the dataset.
    5 seconds is found to be a good cut for the moment.
 
@@ -215,6 +215,7 @@ Create lists:
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146428-146644_20101006_162408 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146804-147114_20101009_001302 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2_146511-146513_147115-147454_20101018_051044 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_147757-148058_20101025_012008
 -o config/ElectronSkim
 
 
@@ -225,6 +226,7 @@ Create lists:
     -i \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101007_124915 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-Photon-Run2010B-PromptReco-v2-146428-146644_20101007_144045 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_146804-148058_20101025_014657
 -o config/PhotonSkim
 
 
@@ -282,7 +284,7 @@ To check how many batch jobs you may want to give to the '-j' option of ./script
 To kill all submitted batch jobs:
   for file in `bjobs | awk '{if($1 != "JOBID") print $1}'`; do bkill $file; done
 
-  or 
+  or
 
   bkill -q QUEUE -u USERNAME 0 (put your lxplus username, i.e. santanas, and name of the queue, i.e. 1nh)
 
