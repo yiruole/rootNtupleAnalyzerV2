@@ -40,6 +40,7 @@ if($opt_q) {$queue = $opt_q;}
 if($opt_w) {$wait = $opt_w;} else {$wait=0;}
 
 system "mkdir -p $outputDir";
+system "cp $cutfile $outputDir/";
 
 open (INPUTLIST, "<$inputList") || die ("...error reading file $inputList $!");
 @inputList = <INPUTLIST>;

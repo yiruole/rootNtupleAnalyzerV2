@@ -34,6 +34,7 @@ if($opt_n) {$treename = $opt_n;}
 if($opt_c) {$cutfile = $opt_c;}
 
 system "mkdir -p $outputDir";
+system "cp $cutfile $outputDir/";
 
 open (INPUTLIST, "<$inputList") || die ("...error reading file $inputList $!");
 @inputList = <INPUTLIST>;
