@@ -38,10 +38,8 @@ Low priority:
 High priority:
 ----------------
 
-- Study impact of ECAL dead cells on enujj channel (--> Francesco)
-  --> see hn "Dealing with dead/masked ECAL towers in SUSY searches"
 - Redo optimization with QCD background included (--> Dinko)
-- Study two bumps in Mej distribution for 10.9 pb-1
+- Study two bumps in Mej distribution for 15.1 pb-1
 - Understand data MC disagreement in the MT(e,MET) region
 - study asymmetry in QCD eta 1st jet distribution
 - calculate fake rate + and - 
@@ -60,6 +58,9 @@ Low priority:
 - check range of W width generated in MC
 - look at uT = MET - Pt(e) ~ HT (vectorial sum) to possibly discriminate between W+jets and signal
 - estimate QCD contribution from events with real MET (b,c decays to electron)
+- Evaluate impact of filters/recovery algorithms from events with lost energy in ECAL dead cells 
+  (once filters available at https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary )
+
 
 
 #############################################
@@ -70,7 +71,6 @@ Low priority:
 High priority:
 ----------------
 - Create reduced ntuples for events in data passing pre-selection
-- check code to extract 36X JEC using CMSSW_3_8_X 
 - add variables for jet-vertex and lepton-vertex association
 - use recipe to fix ECAL spike cleaning in 38x
   --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
@@ -81,7 +81,7 @@ High priority:
 Low priority:
 ---------------
 - revisit procedure to store trigger info in the ntuples (ask Sam Harper)
-- include other PF jets as electrons,photons,muons (PF2PAT)
+- include other PF objets as electrons,photons,muons (PF2PAT)
 - use 38x JEC
 
 #################################################
