@@ -204,10 +204,8 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_low_mass_20100608_175052 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-ZJet-madgraph_20100828_021017 \
@@ -238,6 +236,10 @@ OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_140401-141961_20100805_023138 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_142035-143179_20100821_013157 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_143181-144114_20100907_232524 \
+//---------------------------
+OLD MC:
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 \
 //---------------------------
 
 
