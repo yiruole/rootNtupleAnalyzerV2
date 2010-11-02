@@ -48,10 +48,10 @@ void baseClass::init()
 
   //directly from string
   output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
-  
-  //  for (map<string, cut>::iterator it = cutName_cut_.begin(); 
-  //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "<<it->first)
-  //  for (vector<string>::iterator it = orderedCutNames_.begin(); 
+
+  //  for (map<string, cut>::iterator it = cutName_cut_.begin();
+  //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "f<<it->first)
+  //  for (vector<string>::iterator it = orderedCutNames_.begin();
   //       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
   //STDOUT("ends");
 }
@@ -147,7 +147,7 @@ void baseClass::readCutFile()
 	    {
 	      STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
 	      return;
-	    } 
+	    }
 
 	  int level_int = atoi( v[5].c_str() );
 	  if(level_int == -1)
@@ -157,7 +157,7 @@ void baseClass::readCutFile()
 		{
 		  STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
 		  return;
-		} 
+		}
 	      preCutInfo_ << "### Preliminary cut values: " << s <<endl;
 	      preCut thisPreCut;
 	      thisPreCut.variableName =     v[0];
@@ -174,12 +174,12 @@ void baseClass::readCutFile()
 	  string M1=v[2];
 	  string m2=v[3];
 	  string M2=v[4];
-	  if( m1=="-" || M1=="-" ) 
+	  if( m1=="-" || M1=="-" )
 	    {
-	      STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning."); 
+	      STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning.");
 	      return; // FIXME implement exception
-	    } 
-	  if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") ) 
+	    }
+	  if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") )
 	    {
 	      STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
 	      return; // FIXME implement exception
@@ -260,14 +260,14 @@ void baseClass::readCutFile()
 
 void baseClass::resetCuts(const string& s)
 {
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) 
+  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
     {
       cut * c = & (cc->second);
       c->filled = false;
       c->value = 0;
       c->weight = 1;
       c->passed = false;
-      if(s == "newEvent") 
+      if(s == "newEvent")
 	{
 	  c->nEvtPassedBeforeWeight_alreadyFilled = false;
 	}
@@ -287,7 +287,7 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
     {
       STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Returning");
       return;
-    } 
+    }
   else
     {
       cut * c = & (cc->second);
@@ -342,8 +342,8 @@ void baseClass::evaluateCuts()
 {
   //  resetCuts();
   combCutName_passed_.clear();
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2 ) ) )
@@ -389,8 +389,8 @@ void baseClass::runOptimizer()
 
   // first, check that all cuts (except those to be optimized) have been passed
 
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       bool ignorecut=false;
       for (unsigned int i=0; i < optimizeName_cut_.size();++i)
@@ -418,7 +418,7 @@ void baseClass::runOptimizer()
   int mysize=thesize;
   std::vector<bool> counterbins;
   for (int i=0;i<pow(10,thesize);++i) counterbins.push_back(true); // assume true
-  
+
   // lowest-numbered cut appears first in cut ordering
   // That is, for cut:  ABCDEF
   //  A is the index of cut0, B is cut 1, etc.
@@ -432,7 +432,7 @@ void baseClass::runOptimizer()
 	      // loop over  all cut values starting with current cut
 	      for (unsigned int j=(int)(i*pow(10,mysize));j<int(pow(10,thesize));++j)
 		{
-		  // if relevant digit of the cut value matches the current (failed) cut, set this cut to false 
+		  // if relevant digit of the cut value matches the current (failed) cut, set this cut to false
 		  if ((j/int(pow(10,mysize)))%10==i)
 		    counterbins[j]=false;
 		  if (j>counterbins.size())
@@ -445,8 +445,8 @@ void baseClass::runOptimizer()
   for (int i=0;i<counterbins.size();++i)
     {
       if (counterbins[i]==true)
-	h_optimizer_->Fill(i,1);
-      
+	h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
+
     }
 
   return;
@@ -458,13 +458,13 @@ bool baseClass::passedCut(const string& s)
   //  map<string, bool>::iterator vp = cutName_passed_.find(s);
   //  if( vp != cutName_passed_.end() ) return ret = vp->second;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc != cutName_cut_.end() ) 
+  if( cc != cutName_cut_.end() )
     {
       cut * c = & (cutName_cut_.find(s)->second);
       return (c->filled && c->passed);
     }
   map<string, bool>::iterator cp = combCutName_passed_.find(s);
-  if( cp != combCutName_passed_.end() ) 
+  if( cp != combCutName_passed_.end() )
     {
       return ret = cp->second;
     }
@@ -477,17 +477,17 @@ bool baseClass::passedAllPreviousCuts(const string& s)
   //STDOUT("Examining variableName = "<<s);
 
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
-    {  
+  if( cc == cutName_cut_.end() )
+    {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
       return false;
     }
 
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      if( c->variableName == s ) 
+      if( c->variableName == s )
 	{
 	  return true;
 	}
@@ -505,16 +505,16 @@ bool baseClass::passedAllOtherCuts(const string& s)
   bool ret = true;
 
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
-    {  
+  if( cc == cutName_cut_.end() )
+    {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
       return false;
     }
 
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) 
+  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
     {
       cut * c = & (cc->second);
-      if( c->variableName == s ) 
+      if( c->variableName == s )
 	{
 	  continue;
 	}
@@ -532,24 +532,24 @@ bool baseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
   bool ret = true;
   int cutLevel;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
-    {  
+  if( cc == cutName_cut_.end() )
+    {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
       return false;
     }
   else
     {
-      cutLevel = cc->second.level_int; 
+      cutLevel = cc->second.level_int;
     }
 
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++) 
+  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
     {
       cut * c = & (cc->second);
-      if( c->level_int > cutLevel || c->variableName == s ) 
+      if( c->level_int > cutLevel || c->variableName == s )
 	{
 	  continue;
 	}
-      else 
+      else
 	{
 	  if( ! (c->filled && c->passed) ) return false;
 	}
@@ -561,7 +561,7 @@ double baseClass::getPreCutValue1(const string& s)
 {
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
-  if( cc == preCutName_cut_.end() ) 
+  if( cc == preCutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
@@ -574,7 +574,7 @@ double baseClass::getPreCutValue2(const string& s)
 {
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
-  if( cc == preCutName_cut_.end() ) 
+  if( cc == preCutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
@@ -587,7 +587,7 @@ double baseClass::getPreCutValue3(const string& s)
 {
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
-  if( cc == preCutName_cut_.end() ) 
+  if( cc == preCutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
@@ -600,7 +600,7 @@ double baseClass::getPreCutValue4(const string& s)
 {
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
-  if( cc == preCutName_cut_.end() ) 
+  if( cc == preCutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
@@ -614,7 +614,7 @@ double baseClass::getCutMinValue1(const string& s)
 {
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
+  if( cc == cutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
@@ -626,7 +626,7 @@ double baseClass::getCutMaxValue1(const string& s)
 {
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
+  if( cc == cutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
@@ -638,7 +638,7 @@ double baseClass::getCutMinValue2(const string& s)
 {
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
+  if( cc == cutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
@@ -650,7 +650,7 @@ double baseClass::getCutMaxValue2(const string& s)
 {
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() ) 
+  if( cc == cutName_cut_.end() )
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
     }
@@ -755,8 +755,8 @@ double baseClass::getHistoMax(const string& s)
 bool baseClass::fillCutHistos()
 {
   bool ret = true;
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       if( c->filled )
@@ -772,10 +772,10 @@ bool baseClass::fillCutHistos()
 }
 
 bool baseClass::writeCutHistos()
-{ 
+{
   bool ret = true;
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       c->histo1.Write();
@@ -792,15 +792,15 @@ bool baseClass::writeCutHistos()
 bool baseClass::updateCutEffic()
 {
   bool ret = true;
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      if( passedAllPreviousCuts(c->variableName) )  
+      if( passedAllPreviousCuts(c->variableName) )
 	{
-	  if( passedCut(c->variableName) ) 
+	  if( passedCut(c->variableName) )
 	    {
-	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false) 
+	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
 		{
 		  c->nEvtPassedBeforeWeight += 1;
 		  c->nEvtPassedBeforeWeight_alreadyFilled = true;
@@ -818,7 +818,7 @@ bool baseClass::writeCutEfficFile()
 {
 
   bool ret = true;
-  
+
   // Set bin labels for event counter histogram
   int bincounter=1;
   eventcuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
@@ -848,13 +848,13 @@ bool baseClass::writeCutEfficFile()
   int cutIdPed=0;
   double minForFixed = 0.1;
   int precision = 4;
-  os.precision(precision); 
-  os << "################################## Cuts #####################################################################################\n" 
+  os.precision(precision);
+  os << "################################## Cuts #####################################################################################\n"
      <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
-     << setw(3) << cutIdPed 
-     << setw(25) << "nocut" 
-     << setprecision(4) 
+     << setw(3) << cutIdPed
+     << setw(25) << "nocut"
+     << setprecision(4)
      << setw(15) << "-"
      << setw(15) << "-"
      << setw(15) << "-"
@@ -862,7 +862,7 @@ bool baseClass::writeCutEfficFile()
      << setw(15) << "-"
      << setw(15) << nEntTot
      << setw(15) << nEntTot
-    //     << setprecision(11) 
+    //     << setprecision(11)
      << setw(15) << 1.
      << setw(15) << 0.
      << setw(15) << 1.
@@ -891,8 +891,8 @@ bool baseClass::writeCutEfficFile()
       effAbsErr = effRelErr;
       os << fixed
 	 << setw(3) << ++cutIdPed
-	 << setw(25) << "skim" 
-	 << setprecision(4) 
+	 << setw(25) << "skim"
+	 << setprecision(4)
 	 << setw(15) << "-"
 	 << setw(15) << "-"
 	 << setw(15) << "-"
@@ -908,8 +908,8 @@ bool baseClass::writeCutEfficFile()
       nEvtPassedBeforeWeight_previousCut = nEntRoottuple;
       nEvtPassed_previousCut = nEntRoottuple;
     }
-  for (vector<string>::iterator it = orderedCutNames_.begin(); 
-       it != orderedCutNames_.end(); it++) 
+  for (vector<string>::iterator it = orderedCutNames_.begin();
+       it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       ++bincounter;
@@ -930,7 +930,7 @@ bool baseClass::writeCutEfficFile()
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
       ssM1 << fixed << setprecision(4) << c->maxValue1;
-      if(c->minValue2 == -9999999) 
+      if(c->minValue2 == -9999999)
 	{
 	  ssm2 << "-inf";
 	}
@@ -938,7 +938,7 @@ bool baseClass::writeCutEfficFile()
 	{
 	  ssm2 << fixed << setprecision(4) << c->minValue2;
 	}
-      if(c->maxValue2 ==  9999999) 
+      if(c->maxValue2 ==  9999999)
 	{
 	  ssM2 << "+inf";
 	}
@@ -946,17 +946,17 @@ bool baseClass::writeCutEfficFile()
 	{
 	  ssM2 << fixed << setprecision(4) << c->maxValue2;
 	}
-      os << setw(3) << cutIdPed+c->id 
-	 << setw(25) << c->variableName 
+      os << setw(3) << cutIdPed+c->id
+	 << setw(25) << c->variableName
 	 << setprecision(precision)
-	 << fixed 
+	 << fixed
 	 << setw(15) << ( ( c->minValue1 == -9999999.0 ) ? "-inf" : ssm1.str() )
 	 << setw(15) << ( ( c->maxValue1 ==  9999999.0 ) ? "+inf" : ssM1.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->level_int
-	 << setw(15) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut 
-	 << setw(15) << ( (c->nEvtPassed          < minForFixed) ? (scientific) : (fixed) ) << c->nEvtPassed 
+	 << setw(15) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut
+	 << setw(15) << ( (c->nEvtPassed          < minForFixed) ? (scientific) : (fixed) ) << c->nEvtPassed
 	 << setw(15) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
 	 << setw(15) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
 	 << setw(15) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
@@ -973,8 +973,8 @@ bool baseClass::writeCutEfficFile()
       //std::string optFileName = *outputFileName_+"_optimization.txt";
       std::string optFileName = "optimizationCuts.txt";
       std::ofstream optFile( optFileName.c_str() );
-      if ( !optFile.good() ) 
-	{ 
+      if ( !optFile.good() )
+	{
 	  STDOUT("ERROR: cannot open file "<< optFileName.c_str() ) ;
 	}
 
@@ -985,13 +985,13 @@ bool baseClass::writeCutEfficFile()
 	  std::vector<int> cutindex;
 	  // cutindex will store histogram bin as a series of integers
 	  // 12345 = {1,2,3,4,5}, etc.
-	  
-	  optFile <<"Bin = "<<i; 
+
+	  optFile <<"Bin = "<<i;
 	  for (int j=Nbins/10;j>=1;j/=10)
 	    {
 	      cutindex.push_back((i/j)%10);
 	    }  // for (int j=(int)log10(Nbins);...)
-	  
+
 	  for (unsigned int j=0;j<cutindex.size();++j)
 	    {
 	      optFile <<"\t"<< optimizeName_cut_[j].variableName <<" ";
@@ -1003,7 +1003,7 @@ bool baseClass::writeCutEfficFile()
 	    } //for (unsigned int j=0;...)
 	  optFile <<endl;
 	  //optFile <<"\t Entries = "<<h_optimizer_->GetBinContent(i+1)<<endl;
-	  
+
 	} // for (int i=0;...)
 #endif // CREATE_OPT_CUT_FILE
 
@@ -1083,17 +1083,17 @@ int baseClass::getGlobalInfoNstart(char *pName)
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
   TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 ) 
+  if( !hCount1 && !hCount2 )
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
       return NBeforeSkim;
     }
-    
+
   if (hCount1) NBeforeSkim = (int)hCount1->GetBinContent(1);
   else NBeforeSkim = (int)hCount2->GetBinContent(1);
-  
-//   STDOUT(pName<<"  "<< NBeforeSkim) 
+
+//   STDOUT(pName<<"  "<< NBeforeSkim)
   f->Close();
 
   return NBeforeSkim;
@@ -1105,14 +1105,14 @@ void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Do
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
-      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup); 
+      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
       h->Sumw2();
       userTH1Ds_[nameAndTitle] = h;
       h->Fill(value);
     }
   else
     {
-      nh_h->second->Fill(value, weight);      
+      nh_h->second->Fill(value, weight);
     }
 }
 void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
@@ -1121,7 +1121,7 @@ void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t 
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
-      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup); 
+      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
       h->Sumw2();
       userTH1Ds_[nameAndTitle] = h;
     }
@@ -1140,7 +1140,7 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t 
     }
   else
     {
-      nh_h->second->Fill(value, weight);      
+      nh_h->second->Fill(value, weight);
     }
 }
 
@@ -1150,14 +1150,14 @@ void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Do
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
-      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup); 
+      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
       userTH2Ds_[nameAndTitle] = h;
       h->Fill(value_x, value_y, weight);
     }
   else
     {
-      nh_h->second->Fill(value_x, value_y, weight);      
+      nh_h->second->Fill(value_x, value_y, weight);
     }
 }
 void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
@@ -1166,7 +1166,7 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
-      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup); 
+      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
       userTH2Ds_[nameAndTitle] = h;
     }
@@ -1185,18 +1185,18 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
     }
   else
     {
-      nh_h->second->Fill(value_x, value_y, weight);      
+      nh_h->second->Fill(value_x, value_y, weight);
     }
 }
 
 bool baseClass::writeUserHistos()
-{ 
+{
   bool ret = true;
-  for (map<const char*, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++) 
+  for (map<const char*, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
     {
       uh_h->second->Write();
     }
-  for (map<const char*, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++) 
+  for (map<const char*, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       uh_h->second->Write();
