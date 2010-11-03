@@ -41,12 +41,16 @@ High priority:
 - Redo optimization with QCD background included (--> Dinko)
 - Study two bumps in Mej distribution for 15.1 pb-1
 - Understand data MC disagreement in the MT(e,MET) region
+  --> study possible variation of fake rate as a function of the distance between electron and jet 
+  (see Sara's email in "Re: Studies on QCD sample for LQ1 enujj analysis", Nov 2,3 2010)
 - study asymmetry in QCD eta 1st jet distribution
 - calculate fake rate + and - 
 - Check data MC agreement in W+ and W- separately 
 - Study effect of pile-up on enujj analysis
    --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
    --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
+   --> MC sampels with pile-up? rescaling as done in 
+       http://test-tschudi.web.cern.ch/test-tschudi/Thesis_Study/Comparison/Comparaison_Data_MC.pdf
 - Check MC estimation of TTBAR background: emujj, b-jets, high jet multiplicity bins
 
 
