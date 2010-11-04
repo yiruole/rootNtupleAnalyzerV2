@@ -1,6 +1,7 @@
 LQeejj_M100		   LQ_ue_100_7TeV_eejj
 LQeejj_M200		   LQ_ue_200_7TeV_eejj
 LQeejj_M250	           LQToUE_M-250
+LQeejj_M280	           LQToUE_M-280
 LQeejj_M300	           LQToUE_M-300
 LQeejj_M320	           LQToUE_M-320
 LQeejj_M340	           LQToUE_M-340
@@ -11,6 +12,7 @@ LQeejj_M600	           LQToUE_M-600
 LQenujj_M100		   LQ_ue_100_7TeV_enujj
 LQenujj_M200		   LQ_ue_200_7TeV_enujj
 LQenujj_M250		   LQToUE_ENuJJFilter_M-250
+LQenujj_M280		   LQToUE_ENuJJFilter_M-280
 LQenujj_M300		   LQToUE_ENuJJFilter_M-300
 LQenujj_M320		   LQToUE_ENuJJFilter_M-320
 LQenujj_M340		   LQToUE_ENuJJFilter_M-340
