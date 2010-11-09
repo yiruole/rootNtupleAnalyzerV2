@@ -38,25 +38,49 @@ Low priority:
 High priority:
 ----------------
 
-- Redo optimization with QCD background included (--> Dinko)
-- Study two bumps in Mej distribution for 15.1 pb-1
-- Understand data MC disagreement in the MT(e,MET) region
-  --> study possible variation of fake rate as a function of the distance between electron and jet 
-  (see Sara's email in "Re: Studies on QCD sample for LQ1 enujj analysis", Nov 2,3 2010)
-- study asymmetry in QCD eta 1st jet distribution
-- calculate fake rate + and - 
-- Check data MC agreement in W+ and W- separately 
+- Write AN/PAS
+  --> Tentative deadline for AN/PAS or AN/PAPER is Nov. 26
+
+- Redo optimization with QCD background included (waiting for deltaR(e,j) and eta ele/jets)
+
+- Norm. W
+  - do it at the Jacobian W peak in MT distribution
+  - check if the rescaling is the same for W+ and W- (assume same fake rate for + and - to start with)
+
+- Study ele and MET asymmetry in phi distribution 
+  --> separate barrel/endcap + study phi as a function of PtEle/ST
+
+- Uncertainty on W background
+   - Is dominant contribution from 
+    1) very off-shell Ws with "low" Pt or 
+    2) "medium" off-shell Ws with "large" Pt ?
+   - which is the uncertainty on W pT spectrum ?
+   - is data data driven method needed?
+
+- Study events in the ST tails after full selection (NOT DONE YET)
+ ==> make these studies after removing all the deltaPhi cuts to let more background in the final sample
+ ==> prepare skim of events in DATA passing full selection (not ST cut)
+ - study QCD background from b's 
+ - look at charge/eta of electrons in data to guess origin of events 
+
 - Study effect of pile-up on enujj analysis
    --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
    --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
    --> MC sampels with pile-up? rescaling as done in 
        http://test-tschudi.web.cern.ch/test-tschudi/Thesis_Study/Comparison/Comparaison_Data_MC.pdf
-- Check MC estimation of TTBAR background: emujj, b-jets, high jet multiplicity bins
 
 
 Low priority:
 ---------------
-- Write AN/PAS
+
+- Njet plot should be done with JEC uncert. included
+- Study asymmetry in QCD eta 1st jet distribution
+- Understand data MC disagreement in the MT(e,MET) region
+  --> study possible variation of fake rate as a function of the distance between electron and jet 
+  (see Sara's email in "Re: Studies on QCD sample for LQ1 enujj analysis", Nov 2,3 2010)
+- Study two bumps in Mej distribution for 15.1 pb-1
+- calculate fake rate + and - 
+- Check MC estimation of TTBAR background: emujj, b-jets, high jet multiplicity bins
 - Develop data driven method for W+jets estimation
 - Contact Gavin Hesketh about MC generators to get W Pt spectrum: FEWZ, ResBos, ..
 - check range of W width generated in MC
@@ -78,7 +102,7 @@ High priority:
 - add variables for jet-vertex and lepton-vertex association
 - use recipe to fix ECAL spike cleaning in 38x
   --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
-- inlcude type1 corrections for PFMET
+- inlcude type1 corrections for PFMET (ongoing)
 - use recipe to fix EB alignment in 2010B data
   --> see https://hypernews.cern.ch/HyperNews/CMS/get/exotica/886.html
 
@@ -97,6 +121,7 @@ High priority:
 ----------------
 - add options for i)statistics box and ii) overflow bin 
   in the .py macros to make final plots
+- add chi2 and chi2-probability to all the data/MC comparisons 
 
 Low priority:
 ---------------
