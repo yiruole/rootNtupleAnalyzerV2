@@ -27,7 +27,12 @@ baseClass::~baseClass()
     {
       STDOUT("ERROR: writeUserHistos did not complete successfully.");
     }
+  if( !writeSkimTree() )
+    {
+      STDOUT("ERROR: writeSkimTree did not complete successfully.");
+    }
   output_root_->Close();
+  if(produceSkim_) skim_file_->Close();
 }
 
 void baseClass::init()
@@ -49,6 +54,29 @@ void baseClass::init()
   //directly from string
   output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
 
+  // Skim stuff
+  produceSkim_ = false;
+  NAfterSkim_ = 0;
+  if(int(getSkimPreCutValue("produceSkim"))==1) produceSkim_ = true;
+
+  if(produceSkim_) {
+    string name = *outputFileName_;
+    string skim_file_name = name;
+    size_t pos0, pos1, pos2 = string::npos;
+    pos0 = name.find("analysisClass_");
+    if( pos0!=string::npos) pos1 = name.substr(pos0).find("/output/");
+    if( pos0!=string::npos && pos1!=string::npos) pos2 = name.substr(pos0+pos1).find("___");
+    if( pos0!=string::npos && pos1!=string::npos && pos2!=string::npos) {
+      skim_file_name = name.substr(0,pos0+pos1) + "/skim/" + name.substr(pos0+pos1+pos2+3);
+    }
+    if( skim_file_name == name ) skim_file_name = name + "_skim";
+
+    skim_file_ = new TFile((skim_file_name + ".root").c_str(),"RECREATE");
+    skim_tree_ = fChain->CloneTree(0);
+    hCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
+    hCount_->GetXaxis()->SetBinLabel(1,"all events");
+    hCount_->GetXaxis()->SetBinLabel(2,"passed");
+  }
   //  for (map<string, cut>::iterator it = cutName_cut_.begin();
   //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "f<<it->first)
   //  for (vector<string>::iterator it = orderedCutNames_.begin();
@@ -774,6 +802,7 @@ bool baseClass::fillCutHistos()
 bool baseClass::writeCutHistos()
 {
   bool ret = true;
+  output_root_->cd();
   for (vector<string>::iterator it = orderedCutNames_.begin();
        it != orderedCutNames_.end(); it++)
     {
@@ -816,8 +845,8 @@ bool baseClass::updateCutEffic()
 
 bool baseClass::writeCutEfficFile()
 {
-
   bool ret = true;
+  output_root_->cd();
 
   // Set bin labels for event counter histogram
   int bincounter=1;
@@ -1192,6 +1221,7 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
 bool baseClass::writeUserHistos()
 {
   bool ret = true;
+  output_root_->cd();
   for (map<const char*, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
     {
       uh_h->second->Write();
@@ -1201,6 +1231,52 @@ bool baseClass::writeUserHistos()
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       uh_h->second->Write();
     }
+  // Any failure mode to implement?
+  return ret;
+}
+
+double baseClass::getSkimPreCutValue(const string& s)
+{
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+      return 0;
+    }
+  preCut * c = & (cc->second);
+  if(c->value1 == -9999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  return (c->value1);
+}
+
+void baseClass::fillSkimTree()
+{
+  if(!produceSkim_) return;
+
+  skim_tree_->Fill();
+  NAfterSkim_++;
+
+  return;
+}
+
+bool baseClass::writeSkimTree()
+{
+  bool ret = true;
+
+  if(!produceSkim_) return ret;
+
+  skim_file_->cd();
+  skim_file_->mkdir("rootTupleTree");
+  skim_file_->cd("rootTupleTree");
+  skim_tree_->Write();
+
+  skim_file_->cd();
+  TDirectory *dir1 = skim_file_->mkdir("LJFilter");
+  TDirectory *dir2 = dir1->mkdir("EventCount");
+  skim_file_->cd("LJFilter/EventCount");
+  hCount_->SetBinContent(1,NBeforeSkim_);
+  hCount_->SetBinContent(2,NAfterSkim_);
+  hCount_->Write();
+
   // Any failure mode to implement?
   return ret;
 }

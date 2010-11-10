@@ -62,6 +62,7 @@ os.system("mkdir -p "+outputmain+"/log/")
 os.system("mkdir -p "+outputmain+"/input/")
 os.system("mkdir -p "+outputmain+"/src/")
 os.system("mkdir -p "+outputmain+"/output/")
+os.system("mkdir -p "+outputmain+"/skim/")
 #################################################
 # output Prefix
 outputPrefix = string.split(outputmain,"/")[-1]

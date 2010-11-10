@@ -147,7 +147,6 @@ class baseClass : public rootNtupleClass {
   double getHistoMin(const string& s);
   double getHistoMax(const string& s);
 
-
   baseClass(string * inputList, string * cutFile, string * treeName, string *outputFileName=0, string * cutEfficFile=0);
   virtual ~baseClass();
 
@@ -162,9 +161,11 @@ class baseClass : public rootNtupleClass {
   void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
   void FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
 
+  void fillSkimTree();
+
   private :
   string * configFile_;
-  string * outputFileName_; 
+  string * outputFileName_;
   TFile * output_root_;
   string * inputList_;
   string * cutFile_;
@@ -175,7 +176,7 @@ class baseClass : public rootNtupleClass {
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
-  vector<string> orderedCutNames_; 
+  vector<string> orderedCutNames_;
   map<const char* , TH1D*> userTH1Ds_;
   map<const char* , TH2D*> userTH2Ds_;
   void init();
@@ -192,7 +193,16 @@ class baseClass : public rootNtupleClass {
   bool skimWasMade_;
   int getGlobalInfoNstart( char* );
   int NBeforeSkim_;
-  
+
+  // Skim stuff
+  bool produceSkim_;
+  int NAfterSkim_;
+  double getSkimPreCutValue(const string& s);
+  TFile *skim_file_;
+  TTree *skim_tree_;
+  TH1I* hCount_;
+  bool writeSkimTree();
+
   // Optimization stuff
   map<int, Optimize> optimizeName_cut_;
   TH1F* eventcuts_; // number of events passing each cut
