@@ -4,8 +4,7 @@
 
 High priority:
 ----------------
-- perform studies on lepton-vertex and jet-vertex association
-- Define procedure to combine lljj and lnjj
+- Define procedure to combine lljj and lnujj (to be done together with LQ2 group)
 
 Low priority:
 ---------------
@@ -13,6 +12,7 @@ Low priority:
 - Check cl95 code implemented in RooStats
   --> see http://indico.cern.ch/getFile.py/access?contribId=25&sessionId=2&resId=0&materialId=slides&confId=106675 
   --> PhysicsTools/RooStatsCms/macros/examples/roostats_cl95_bc.C
+- flat for prior + log normal for nuisance parameters 
 
 
 ##############################
@@ -38,43 +38,52 @@ Low priority:
 High priority:
 ----------------
 
-- Write AN/PAS
+- Write AN/PAPER (Francesco)
   --> Tentative deadline for AN/PAS or AN/PAPER is Nov. 26
 
-- Redo optimization with QCD background included (waiting for deltaR(e,j) and eta ele/jets)
+- Redo optimization with QCD background included (waiting for deltaR(e,j) and eta ele/jets) (Dinko)
 
-- Norm. W
+- Norm. Z (Paolo)
+  - same as eejj
+
+- Norm. W 
   - do it at the Jacobian W peak in MT distribution
   - check if the rescaling is the same for W+ and W- (assume same fake rate for + and - to start with)
 
-- Study ele and MET asymmetry in phi distribution 
-  --> separate barrel/endcap + study phi as a function of PtEle/ST
-
-- Uncertainty on W background
-   - Is dominant contribution from 
+- Uncertainty on W background 
+  - Is dominant contribution from 
     1) very off-shell Ws with "low" Pt or 
     2) "medium" off-shell Ws with "large" Pt ?
-   - which is the uncertainty on W pT spectrum ?
-   - is a data driven method needed?
-   - study Stjets and WPt spectrum for events at the W peak and with high MT in MC
-   - compare data and MC at the W peak, but after applying ST cuts + preliminary min(MET/pTEle)?
+  - which is the uncertainty on W pT spectrum ?
+  - is a data driven method needed ?
+  - study Stjets and WPt spectrum for events at the W peak and with high MT in MC
+  - compare data and MC at the W peak, but after applying ST cuts + preliminary min(MET/pTEle)?
+  - keep an eye on W'->enu analysis    
 
-- Study events in the ST tails after full selection (NOT DONE YET)
+- Study events in the ST tails after full selection (Francesco)
  ==> make these studies after removing all the deltaPhi cuts to let more background in the final sample
- ==> prepare skim of events in DATA passing full selection (not ST cut)
- - study QCD background from b's 
  - look at charge/eta of electrons in data to guess origin of events 
 
-- Study effect of pile-up on enujj analysis
-   --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
-   --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
-   --> MC sampels with pile-up? rescaling as done in 
-       http://test-tschudi.web.cern.ch/test-tschudi/Thesis_Study/Comparison/Comparaison_Data_MC.pdf
+- Systematic uncertainties 
+  - new uncert. as a function of Eta/Pt
+  - JES 
+  - EES
+  - MET 
+  - JES and resolution?
 
 
 Low priority:
 ---------------
 
+ - study QCD background from b's 
+   ==> prepare skim of events in DATA passing full selection (not ST cut)
+- Study effect of pile-up on enujj analysis
+   --> MET smearing using METx,y from minbias events + <number of pile-up interactions> per event
+   --> check probability to have W-->enu + di-jet, simulating LQ enujj final state 
+   --> MC sampels with pile-up? rescaling as done in 
+       http://test-tschudi.web.cern.ch/test-tschudi/Thesis_Study/Comparison/Comparaison_Data_MC.pdf
+- Study ele and MET asymmetry in phi distribution (Francesco)
+  --> separate barrel/endcap + study phi as a function of PtEle/ST
 - see Jim's comments on JetMET at https://hypernews.cern.ch/HyperNews/CMS/get/EXO-10-008/10/1/1.html 
 - Njet plot should be done with JEC uncert. included
 - Study asymmetry in QCD eta 1st jet distribution
@@ -100,26 +109,23 @@ Low priority:
 # TODO list for the RootTupleMakerV2 package:
 #############################################
 
-
 High priority:
 ----------------
-- Create reduced ntuples for events in data passing pre-selection
-- add variables for jet-vertex and lepton-vertex association
-- use recipe to fix ECAL spike cleaning in 38x
-  --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
-- inlcude type1 corrections for PFMET (done?)
-- use recipe to fix EB alignment in 2010B data
-  --> see https://hypernews.cern.ch/HyperNews/CMS/get/exotica/886.html
-- b-tagging for PF jets
-- JetID flags
-- store the number of pile-up interactions in the MC
-- use 38x JEC
-- check that all needed single electron triggers are stored
+- Create reduced ntuples for events in data passing pre-selection (Dinko)
+- b tag for PF jets (Dinko)
+- Add variables for jet-vertex (Keti?) and lepton-vertex (Dinko) association
+- JetID flags for calojets and PFjets (Darin)
+- check that all needed single electron triggers for 2010 run and MC are stored --> ask Sam Harper (Francesco)
 
 Low priority:
 ---------------
+- use 38x JEC (when available)
 - revisit procedure to store trigger info in the ntuples (ask Sam Harper)
-- include other PF objets as electrons,photons,muons (PF2PAT)
+- include other PF objets as electrons, photons, muons (PF2PAT) 
+- use recipe to fix ECAL spike cleaning in 38x
+  --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
+- use recipe to fix EB alignment in 2010B data
+  --> see https://hypernews.cern.ch/HyperNews/CMS/get/exotica/886.html
 
 #################################################
 # TODO list for the rootNtupleAnalyzerV2 package
