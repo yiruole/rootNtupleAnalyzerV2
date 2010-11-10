@@ -55,7 +55,9 @@ High priority:
     1) very off-shell Ws with "low" Pt or 
     2) "medium" off-shell Ws with "large" Pt ?
    - which is the uncertainty on W pT spectrum ?
-   - is data data driven method needed?
+   - is a data driven method needed?
+   - study Stjets and WPt spectrum for events at the W peak and with high MT in MC
+   - compare data and MC at the W peak, but after applying ST cuts + preliminary min(MET/pTEle)?
 
 - Study events in the ST tails after full selection (NOT DONE YET)
  ==> make these studies after removing all the deltaPhi cuts to let more background in the final sample
@@ -73,6 +75,7 @@ High priority:
 Low priority:
 ---------------
 
+- see Jim's comments on JetMET at https://hypernews.cern.ch/HyperNews/CMS/get/EXO-10-008/10/1/1.html 
 - Njet plot should be done with JEC uncert. included
 - Study asymmetry in QCD eta 1st jet distribution
 - Understand data MC disagreement in the MT(e,MET) region
@@ -102,15 +105,19 @@ High priority:
 - add variables for jet-vertex and lepton-vertex association
 - use recipe to fix ECAL spike cleaning in 38x
   --> see https://hypernews.cern.ch/HyperNews/CMS/get/ecal-performance/394.html
-- inlcude type1 corrections for PFMET (ongoing)
+- inlcude type1 corrections for PFMET (done?)
 - use recipe to fix EB alignment in 2010B data
   --> see https://hypernews.cern.ch/HyperNews/CMS/get/exotica/886.html
+- b-tagging for PF jets
+- JetID flags
+- store the number of pile-up interactions in the MC
+- use 38x JEC
+- check that all needed single electron triggers are stored
 
 Low priority:
 ---------------
 - revisit procedure to store trigger info in the ntuples (ask Sam Harper)
 - include other PF objets as electrons,photons,muons (PF2PAT)
-- use 38x JEC
 
 #################################################
 # TODO list for the rootNtupleAnalyzerV2 package
@@ -122,6 +129,8 @@ High priority:
 - add options for i)statistics box and ii) overflow bin 
   in the .py macros to make final plots
 - add chi2 and chi2-probability to all the data/MC comparisons 
+- check normalization of histograms (Sarah noticed a possible discrepancies in first bins of ST at pre-sel level for enujj)
+- add new colors (following the style of eejj paper)
 
 Low priority:
 ---------------
@@ -131,8 +140,7 @@ Low priority:
 - remove errRelN*errRelN from 
   http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleAnalyzerV2/scripts/combineTablesTemplate.py?revision=1.3&view=markup and test it.
 - fix code to make cut optimization 
-  1) fix code to accept non-integer numbers
-  2) allow configurable number of bins for the scan (Edmund wrote already this code?)
+  1) allow configurable number of bins for the scan (Edmund wrote already this code?)
 
 Wishes:
 ------
