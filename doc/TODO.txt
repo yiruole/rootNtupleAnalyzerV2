@@ -119,6 +119,9 @@ High priority:
 
 Low priority:
 ---------------
+- implement recipes to suppress/recover energy lost in ECAL dead cells
+  --> Study at: https://twiki.cern.ch/twiki/pub/CMS/SusyRA2RoundTable/EcalMaskedChannelStudy_Nov5_RA2.pdf
+  --> Recipe at: https://twiki.cern.ch/twiki/bin/view/CMS/SusyEcalMaskedCellSummary 
 - use 38x JEC (when available)
 - revisit procedure to store trigger info in the ntuples (ask Sam Harper)
 - include other PF objets as electrons, photons, muons (PF2PAT) 
