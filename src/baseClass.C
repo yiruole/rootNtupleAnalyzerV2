@@ -1240,7 +1240,6 @@ double baseClass::getSkimPreCutValue(const string& s)
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
     {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
       return 0;
     }
   preCut * c = & (cc->second);
