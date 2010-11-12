@@ -60,18 +60,8 @@ void baseClass::init()
   if(int(getSkimPreCutValue("produceSkim"))==1) produceSkim_ = true;
 
   if(produceSkim_) {
-    string name = *outputFileName_;
-    string skim_file_name = name;
-    size_t pos0, pos1, pos2 = string::npos;
-    pos0 = name.find("analysisClass_");
-    if( pos0!=string::npos) pos1 = name.substr(pos0).find("/output/");
-    if( pos0!=string::npos && pos1!=string::npos) pos2 = name.substr(pos0+pos1).find("___");
-    if( pos0!=string::npos && pos1!=string::npos && pos2!=string::npos) {
-      skim_file_name = name.substr(0,pos0+pos1) + "/skim/" + name.substr(pos0+pos1+pos2+3);
-    }
-    if( skim_file_name == name ) skim_file_name = name + "_skim";
 
-    skim_file_ = new TFile((skim_file_name + ".root").c_str(),"RECREATE");
+    skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
     skim_tree_ = fChain->CloneTree(0);
     hCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");

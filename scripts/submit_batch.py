@@ -64,8 +64,11 @@ os.system("mkdir -p "+outputmain+"/src/")
 os.system("mkdir -p "+outputmain+"/output/")
 os.system("mkdir -p "+outputmain+"/skim/")
 #################################################
-# output Prefix
+# output prefix
 outputPrefix = string.split(outputmain,"/")[-1]
+#################################################
+# dataset
+dataset = string.split(outputPrefix,"___")[-1]
 #################################################
 numfiles = len(file(inputlist).readlines())
 ijobmax=int(options.ijobmax)
@@ -95,6 +98,7 @@ for ijob in range(ijobmax):
     outputfile.write("#!/bin/bash\n")
     outputfile.write("cd "+pwd+"\n")
     outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"\n")
+    outputfile.write("mv -v "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"_skim.root"+" "+outputmain+"/skim/"+dataset+"_"+str(ijob)+".root\n")
     outputfile.close
     print    ("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
     os.system("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
