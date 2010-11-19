@@ -77,7 +77,9 @@ if ijobmax > numfiles:
 filesperjob = int(numfiles/ijobmax)
 if numfiles%ijobmax!=0:
     filesperjob = filesperjob+1
-    ijobmax = int(numfiles/filesperjob)+1
+    ijobmax = int(numfiles/filesperjob)
+    if numfiles%filesperjob!=0:
+        ijobmax = ijobmax+1
 #################################################
 input = open(inputlist)
 #################################################
