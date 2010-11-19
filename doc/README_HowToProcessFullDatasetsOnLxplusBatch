@@ -218,6 +218,19 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_148952-149294_20101106_003153 \
 -o config/ElectronSkim
 
+# enujj preselection skim
+
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_low_mass_20100604_213652 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_low_mass_20100608_175052 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
+-o config/ElectronSkim
+
 
 ## Photon/EG + Supercluster skim
 
@@ -229,6 +242,14 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_146804-148058_20101025_014657 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_147754-148031_148822-148864_20101101_015743 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_148952-149294_20101106_003521 \
+-o config/PhotonSkim
+
+# enujj preselection skim (7.4 pb-1)
+
+ ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim \
 -o config/PhotonSkim
 
 
