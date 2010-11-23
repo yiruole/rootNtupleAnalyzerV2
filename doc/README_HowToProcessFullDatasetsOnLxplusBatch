@@ -229,7 +229,7 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
--o config/ElectronSkim
+-o config/ElectronSkimPresel
 
 
 ## Photon/EG + Supercluster skim
@@ -250,7 +250,7 @@ Create lists:
     -m root \
     -i \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim \
--o config/PhotonSkim
+-o config/PhotonSkimPresel
 
 
 //---------------------------
