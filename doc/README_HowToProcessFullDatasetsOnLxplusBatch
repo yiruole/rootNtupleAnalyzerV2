@@ -194,7 +194,7 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
-## Electron/EG + Electron skim (36.049 /pb)
+## Electron/EG + Electron skim (36.05 /pb)
 
   ./scripts/createList.py \
     -m root \
@@ -225,7 +225,7 @@ Create lists:
 -o config/ElectronSkimPresel
 
 
-## Photon/EG + Supercluster skim (35.837 /pb)
+## Photon/EG + Supercluster skim (35.84 /pb)
 
  ./scripts/createList.py \
     -m root \
@@ -263,14 +263,6 @@ OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_148952-149294_20101106_003521 \
 
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim \
-
-
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Jun14thReReco_v1_132440-137028_20100719_165009 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-Jul16thReReco_v2_139779-140160_20100719_181525 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_138564-139459_140180-140387_20100719_183025 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_140401-141961_20100805_023138 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_142035-143179_20100821_013157 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_143181-144114_20100907_232524 \
 //---------------------------
 OLD MC:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
