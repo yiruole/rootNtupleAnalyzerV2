@@ -207,15 +207,8 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-ZJet-madgraph_20100828_021017 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101006_194357 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146428-146644_20101006_162408 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146804-147114_20101009_001302 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2_146511-146513_147115-147454_20101018_051044 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_147757-148058_20101025_012008 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_147754-148031_148822-148864_20101101_014243 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_148952-149294_20101106_003153 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_043341 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-Electron-Run2010B-Nov4ReReco_v1_146428-149294_20101209_182617 \
 -o config/ElectronSkim
 
 # enujj preselection skim
@@ -228,7 +221,7 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_low_mass_20100608_175052 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-enujj_preselection_skim \
 -o config/ElectronSkimPresel
 
 
@@ -255,6 +248,17 @@ Create lists:
 
 //---------------------------
 OLD DATA:
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101006_194357 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146428-146644_20101006_162408 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2-146804-147114_20101009_001302 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-Electron-Run2010B-PromptReco-v2_146511-146513_147115-147454_20101018_051044 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_147757-148058_20101025_012008 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_147754-148031_148822-148864_20101101_014243 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_148952-149294_20101106_003153 \
+
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
+
+
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Jun14thReReco_v1_132440-137028_20100719_165009 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-Jul16thReReco_v2_139779-140160_20100719_181525 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_138564-139459_140180-140387_20100719_183025 \
@@ -263,6 +267,8 @@ OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_143181-144114_20100907_232524 \
 //---------------------------
 OLD MC:
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_ZeeJet_Pythia6_20100707_214138 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-ZJet-madgraph_20100828_021017 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDmadgraph_20100519_233358 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-00-08-MC-QCDPt15_20100603_100942 \
 //---------------------------
