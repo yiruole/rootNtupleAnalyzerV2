@@ -194,7 +194,7 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
-## Electron/EG + Electron skim
+## Electron/EG + Electron skim (36.049 /pb)
 
   ./scripts/createList.py \
     -m root \
@@ -225,24 +225,21 @@ Create lists:
 -o config/ElectronSkimPresel
 
 
-## Photon/EG + Supercluster skim
+## Photon/EG + Supercluster skim (35.837 /pb)
 
  ./scripts/createList.py \
     -m root \
     -i \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101007_124915 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-Photon-Run2010B-PromptReco-v2-146428-146644_20101007_144045 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_146804-148058_20101025_014657 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_147754-148031_148822-148864_20101101_015743 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_148952-149294_20101106_003521 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_054303 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-Photon-Run2010B-Nov4ReReco_v1_146428-149294_20101209_195542 \
 -o config/PhotonSkim
 
-# enujj preselection skim (7.4 pb-1)
+# enujj preselection skim
 
  ./scripts/createList.py \
     -m root \
     -i \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-QCD-enujj_preselection_skim \
 -o config/PhotonSkimPresel
 
 
@@ -257,6 +254,15 @@ OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_148952-149294_20101106_003153 \
 
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
+
+
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101007_124915 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-Photon-Run2010B-PromptReco-v2-146428-146644_20101007_144045 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_146804-148058_20101025_014657 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_147754-148031_148822-148864_20101101_015743 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Photon-Run2010B-PromptReco-v2_148952-149294_20101106_003521 \
+
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim \
 
 
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Jun14thReReco_v1_132440-137028_20100719_165009 \
