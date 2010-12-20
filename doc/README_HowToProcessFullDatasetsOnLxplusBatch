@@ -207,6 +207,7 @@ Create lists:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-PhotonJet_20100824_215127 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_043341 \
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-Electron-Run2010B-Nov4ReReco_v1_146428-149294_20101209_182617 \
 -o config/ElectronSkim
