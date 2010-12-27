@@ -37,6 +37,7 @@ ZeeJetPythia		   ZeeJet_Pt0to15 ZeeJet_Pt15to20 ZeeJet_Pt20to30 ZeeJet_Pt30to50 
 ZJetAlpgen		   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt
 ZJetMadgraph		   ZJets-madgraph
 WJetAlpgen		   W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
-ALLBKG			   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt TTbarJets-madgraph WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
-OTHERBKG		   WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt
+BJets                      BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000
+ALLBKG			   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt TTbarJets-madgraph WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000
+OTHERBKG		   WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000
 DATA			   EG__Run2010A-Nov4ReReco_v1 Electron__Run2010B-Nov4ReReco_v1
