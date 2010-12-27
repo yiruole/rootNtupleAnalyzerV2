@@ -3,26 +3,27 @@ use strict;
 
 my $castorHome = $ENV{CASTOR_HOME};
 
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022/";
-my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim/";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-TTbar_SingleTop_VV_20100519_011910";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-WW_ZZ_WZ_20100612_133148";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_low_mass_20100604_213652";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_low_mass_20100608_175052";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-enujj_20100519_011206";
+my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-BJets_TuneD6T_7TeV-madgraph-Fall10-START38_V12-v1_20101224_193503";
 
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_043341/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-Electron-Run2010B-Nov4ReReco_v1_146428-149294_20101209_182617/";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_043341";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-Electron-Run2010B-Nov4ReReco_v1_146428-149294_20101209_182617";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-enujj_preselection_skim/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_054303/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-Photon-Run2010B-Nov4ReReco_v1_146428-149294_20101209_195542/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-QCD-enujj_preselection_skim/";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_054303";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-Photon-Run2010B-Nov4ReReco_v1_146428-149294_20101209_195542";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-QCD-enujj_preselection_skim";
 
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim/";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim/";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim";
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-QCD-enujj_preselection_skim";
 
 my $listStagedFiles = "stagedFiles.txt";
 
