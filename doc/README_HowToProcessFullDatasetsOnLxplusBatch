@@ -194,6 +194,25 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
+## Electron/EG + Electron skim (36.05 /pb) ### version V00-01-04 to V00-01-06 (NEW) ###
+
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_053202 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_050514 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-TTbar_SingleTop-madgraph_Spring10-START3X_V26_S09-v1_20110105_221542 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple/RootNtuple-V00-01-04-SpringMC_Zjet_20101209_121708 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple/RootNtuple-V00-01-04-SpringMC_Wjet_20101208_164254 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-WW_WZ_ZZ_Spring10-START3X_V26_S09-v1_20110105_222352 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-GJets_TuneD6T_7TeV-madgraph-Fall10-START38_V12-v1_20110106_010744 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-QCD_TuneD6T_7TeV-madgraph_Fall10-START38_V12-v1_20110106_013229 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-BJets_TuneD6T_7TeV-madgraph-Fall10-START38_V12-v1_20101224_193503 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_043341 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-Electron-Run2010B-Nov4ReReco_v1_146428-149294_20101209_182617 \
+-o config/ElectronSkimJan11Prod
+
+
 ## Electron/EG + Electron skim (36.05 /pb)
 
   ./scripts/createList.py \
@@ -257,7 +276,6 @@ OLD DATA:
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-Electron-Run2010B-PromptReco-v2_148952-149294_20101106_003153 \
 
 /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-02-DATA-enujj_preselection_skim \
-
 
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-EG-Run2010A-Sep17ReReco_v2-132440-144114_20101007_124915 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-01-DATA-SC_Skim-Photon-Run2010B-PromptReco-v2-146428-146644_20101007_144045 \
