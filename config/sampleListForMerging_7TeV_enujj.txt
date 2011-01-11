@@ -1,5 +1,4 @@
 LQeejj_M150	           LQToUE_M-150
-LQeejj_M175	           LQToUE_M-175
 LQeejj_M200	           LQToUE_M-200
 LQeejj_M225	           LQToUE_M-225
 LQeejj_M250	           LQToUE_M-250
@@ -13,7 +12,6 @@ LQeejj_M450	           LQToUE_M-450
 LQeejj_M500	           LQToUE_M-500
 LQeejj_M600	           LQToUE_M-600
 LQenujj_M150		   LQToUE_ENuJJFilter_M-150
-LQenujj_M175		   LQToUE_ENuJJFilter_M-175
 LQenujj_M200		   LQToUE_ENuJJFilter_M-200
 LQenujj_M225		   LQToUE_ENuJJFilter_M-225
 LQenujj_M250		   LQToUE_ENuJJFilter_M-250
