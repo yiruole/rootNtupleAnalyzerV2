@@ -1,6 +1,9 @@
 /LQ_ue_100_7TeV_eejj_RAW/ferencek-LQ_ue_100_7TeV_eejj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER    386
 /LQ_ue_150_7TeV_eejj_RAW/ferencek-LQ_ue_150_7TeV_eejj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER    53.3
 /LQ_ue_200_7TeV_eejj_RAW/ferencek-LQ_ue_200_7TeV_eejj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER    11.9
+/LQToUE_M-150_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    53.3
+/LQToUE_M-200_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    11.9
+/LQToUE_M-225_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    6.26
 /LQToUE_M-250_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    3.47
 /LQToUE_M-280_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    1.82
 /LQToUE_M-300_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO					    1.21
@@ -14,6 +17,9 @@
 /LQ_ue_100_7TeV_enujj_RAW/ferencek-LQ_ue_100_7TeV_enujj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER  193
 /LQ_ue_150_7TeV_enujj_RAW/ferencek-LQ_ue_150_7TeV_enujj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER  26.65
 /LQ_ue_200_7TeV_enujj_RAW/ferencek-LQ_ue_200_7TeV_enujj_RECO-d0c450599c7f4954244d4e7cbeababc4/USER  5.95
+/LQToUE_ENuJJFilter_M-150_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         26.65
+/LQToUE_ENuJJFilter_M-200_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         5.95
+/LQToUE_ENuJJFilter_M-225_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         3.13
 /LQToUE_ENuJJFilter_M-250_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         1.735
 /LQToUE_ENuJJFilter_M-280_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.91
 /LQToUE_ENuJJFilter_M-300_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.605
