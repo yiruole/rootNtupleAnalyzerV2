@@ -1,11 +1,12 @@
-COMP=c++ 
-FLAGS = 
-#FLAGS += -DUSE_EXAMPLE 
+COMP=c++
+FLAGS =
+#FLAGS += -DUSE_EXAMPLE
+#FLAGS += -DSAVE_ALL_HISTOGRAMS
 #FLAGS += -DCREATE_OPT_CUT_FILE
-ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
-INC= -I.. -I. -I./include  -I${CLHEP}/include 
+ROOTLIBS = `root-config --glibs --cflags` -lMinuit
+INC= -I.. -I. -I./include  -I${CLHEP}/include
 ROOTINC= -I${ROOTSYS}/include
-LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib 
+LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
 SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o
 EXE = main
@@ -22,7 +23,7 @@ main: $(SRC)/main.o $(SELECTIONLIB)
 
 clean:
 	rm -f src/*.o *.lo core core.*
-	rm -f *~	
+	rm -f *~
 	rm -f *.exe
 	rm -f $(EXE)
 .cpp.o:

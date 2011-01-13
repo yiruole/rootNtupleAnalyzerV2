@@ -123,12 +123,20 @@ region limits). The user can access these values (and also those of the cuts wit
   double baseClass::getCutMaxValue2(const string& s);
 
 - Automatic histograms for cuts
-In the output root file the following histograms are generated for each cut variable with level >= 0:
+The following histograms are generated for each cut variable with level >= 0:
   no cuts applied
   passedAllPreviousCuts
   passedAllOtherSameLevelCuts
   passedAllOtherCuts
   passedAllCut
+and by default only the following subset
+  no cuts applied
+  passedAllPreviousCuts
+  passedAllOtherCuts
+is saved to the output root file. All histograms can be saved to the output root file by
+uncommenting the following line in the Makefile
+#FLAGS += -DSAVE_ALL_HISTOGRAMS
+
 
 - Automatic cut efficiency:
 the absolute and relative efficiency is calculated for each cut and stored in an output file

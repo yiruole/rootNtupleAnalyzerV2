@@ -799,9 +799,11 @@ bool baseClass::writeCutHistos()
       cut * c = & (cutName_cut_.find(*it)->second);
       c->histo1.Write();
       c->histo2.Write();
-      c->histo3.Write();
       c->histo4.Write();
+#ifdef SAVE_ALL_HISTOGRAMS
+      c->histo3.Write();
       c->histo5.Write();
+#endif // SAVE_ALL_HISTOGRAMS
     }
 
   // Any failure mode to implement?
