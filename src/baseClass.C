@@ -1148,7 +1148,7 @@ void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t 
     }
   else
     {
-      STDOUT("ERROR: trying to define an already existing histogram");
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
 void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t weight)
@@ -1157,7 +1157,7 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t 
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
-      STDOUT("ERROR: trying to fill an histogram that was not defined.");
+      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
     }
   else
     {
@@ -1193,7 +1193,7 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
     }
   else
     {
-      STDOUT("ERROR: trying to define an already existing histogram");
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
 void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
@@ -1202,7 +1202,7 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
-      STDOUT("ERROR: trying to fill an histogram that was not defined.");
+      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
     }
   else
     {
