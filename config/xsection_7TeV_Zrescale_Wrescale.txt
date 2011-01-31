@@ -65,10 +65,10 @@
 /Z5Jets_Pt100to300-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    0.625414
 /Z5Jets_Pt300to800-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    0.025002
 /Z5Jets_Pt800to1600-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    0.000095
-/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 31314
-/WJets_TuneD6T_scaledown_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 31314
-/WJets_TuneD6T_scaleup_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 31314
-/WJets_TuneD6T_matchingup_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 31314
+/WJetsToLNu_TuneD6T_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 39538.7
+/WJets_TuneD6T_scaledown_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 21885.2
+/WJets_TuneD6T_scaleup_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 56472.6
+/WJets_TuneD6T_matchingup_7TeV-madgraph-tauola/Fall10-START38_V12-v1/GEN-SIM-RECO 35600.2
 /W0Jets_Pt0to100-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    29792.224487
 /W1Jets_Pt0to100-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    5447.600127
 /W1Jets_Pt100to300-alpgen/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO    114.911185
