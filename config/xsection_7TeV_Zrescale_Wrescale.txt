@@ -23,10 +23,13 @@
 /LQToUE_ENuJJFilter_M-250_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         1.735
 /LQToUE_ENuJJFilter_M-280_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.91
 /LQToUE_ENuJJFilter_M-300_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.605
+/LQToUE_ENuJJFilter_M-300_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO                           0.605
+/LQToUE_ENuJJFilter_M-300_7TeV-pythia6/Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/GEN-SIM-RECO  0.605
 /LQToUE_ENuJJFilter_M-320_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.412
 /LQToUE_ENuJJFilter_M-340_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.285
 /LQToUE_ENuJJFilter_M-370_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.1685
 /LQToUE_ENuJJFilter_M-400_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.1025
+/LQToUE_ENuJJFilter_M-400_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO                           0.1025
 /LQToUE_ENuJJFilter_M-450_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.04745
 /LQToUE_ENuJJFilter_M-500_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.02315
 /LQToUE_ENuJJFilter_M-600_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.0062

@@ -27,6 +27,7 @@
 /LQToUE_ENuJJFilter_M-340_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.285
 /LQToUE_ENuJJFilter_M-370_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.1685
 /LQToUE_ENuJJFilter_M-400_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.1025
+/LQToUE_ENuJJFilter_M-400_7TeV-pythia6/Fall10-START38_V12-v1/GEN-SIM-RECO                           0.1025
 /LQToUE_ENuJJFilter_M-450_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO			    0.04745
 /LQToUE_ENuJJFilter_M-500_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.02315
 /LQToUE_ENuJJFilter_M-600_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.0062
