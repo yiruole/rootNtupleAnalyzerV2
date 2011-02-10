@@ -35,7 +35,7 @@
 /LQToUE_ENuJJFilter_M-600_7TeV-pythia6/Spring10-START3X_V26-v1/GEN-SIM-RECO                         0.0062
 /TTbarJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO            165
 /TTbar/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO				165
-/SingleTop_sChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   4.6
+/SingleTop_sChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   4.21
 /SingleTop_tChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO   64.6
 /SingleTop_tWChannel-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO  10.6
 /VVJets-madgraph/Spring10-START3X_V26_S09-v1/GEN-SIM-RECO               4.8
