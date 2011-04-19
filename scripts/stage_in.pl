@@ -15,8 +15,7 @@ my $castorHome = $ENV{CASTOR_HOME};
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-WW_WZ_ZZ_Spring10-START3X_V26_S09-v1_20110105_222352";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-enujj_preselection_skim";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_053202";
-# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_050514";
-my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Fall10-START38_V12-v1_20110128_005328";
+my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_050514";
 
 ## Data
 
@@ -26,6 +25,10 @@ my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-EG-Run2010A-Nov4ReReco_v1_136035-144114_20101209_054303";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-SC_Skim-Photon-Run2010B-Nov4ReReco_v1_146428-149294_20101209_195542";
 # my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-QCD-enujj_preselection_skim";
+
+## 2011 Data
+
+# my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-09-DATA-SingleElectron_Run2011A-PromptReco-v1_160431-161312_20110329_182031";
 
 
 ### Old ntuples
