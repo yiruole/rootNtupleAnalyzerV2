@@ -340,6 +340,9 @@ To kill all submitted batch jobs:
 To see a JSON decently:
   sed 's/"1/\n"1/g' Cert_132440-136297_7TeV_StreamExpress_Collisions10_JSON.txt |sort
 
+To select a printout in the log files and see the event info decently, use something like:
+  grep TwoElesTwoJets */log/*.log | tr ':' '\n' |grep -v Loop |grep -v TwoElesTwoJets |grep -v analysisClass
+
 To see entries and abs efficiency for only a selected cut, eg sT, for every sample in the merged/rescaled efficiency file
 and adding a rescaling factor:
   awk -v factor=1.0 '{if( NF==1 ) name=$1; if( $1=="sT" ) printf("%20s %20s     %f %f        %f %f \n",name,$1,$6*factor,$7*factor,$10,$11) }' ./data/output/analysisClass_eejjSample_tables.dat
