@@ -2,6 +2,7 @@
 #define baseClass_h
 
 #include "rootNtupleClass.h"
+#include "jsonParser.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -119,6 +120,8 @@ class baseClass : public rootNtupleClass {
   public :
   map<string, bool> combCutName_passed_;
 
+  int passJSON(int run, int ls, bool isData);
+
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
   void evaluateCuts();
@@ -193,6 +196,11 @@ class baseClass : public rootNtupleClass {
   bool skimWasMade_;
   int getGlobalInfoNstart( char* );
   int NBeforeSkim_;
+
+  // JSON file stuff
+  JSONParser jsonParser_;
+  bool jsonFileWasUsed_;
+  std::string jsonFileName_;
 
   // Skim stuff
   bool produceSkim_;

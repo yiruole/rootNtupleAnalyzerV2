@@ -8,7 +8,7 @@ INC= -I.. -I. -I./include  -I${CLHEP}/include
 ROOTINC= -I${ROOTSYS}/include
 LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
-SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o
+SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o
 EXE = main
 
 # ********** TEMPLATE *************

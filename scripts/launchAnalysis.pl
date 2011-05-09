@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 ###################################
 ## Code to launch the analysis   ##
@@ -36,10 +36,57 @@ if($opt_c) {$cutfile = $opt_c;}
 system "mkdir -p $outputDir";
 system "cp $cutfile $outputDir/";
 
+open CUTFILE, $cutfile or die $!;
+
+my $found_json = 0;
+my $jsonFile = "";
+
+while (<CUTFILE>) {
+    my $line = trim ($_);
+    my $first_four_characters = substr($line,0,4);
+    if (lc($first_four_characters) eq "json" )
+    {	
+	
+	@split_line = split (" ", $line) ;
+	$number_of_elements = $#split_line + 1;
+
+	if ( $found_json ) 
+	{
+	    print "ERROR: Please specify only one JSON file in your cut file!\n";
+	    exit 0;
+ 	}
+
+	if ( $#split_line != 1 ) 
+	{
+	    print "ERROR: Too many ($number_of_elements) elements in the line.  Line reads:\n";
+	    print "  $line\n";
+	    print "  Format in cut file should be:\n";
+	    print "  JSON <json file full path>\n";
+	    exit 0;
+	}
+
+	$jsonFile = @split_line[1];
+
+	open (JSONFILE, "<$jsonFile") || die ("ERROR: JSON file $jsonFile specified in $cutfile does not exist");
+	close (JSONFILE );
+   
+	$found_json=1
+    }    
+} 
+
+close (CUTFILE);
+
+if ( $found_json ) {
+    print  "cp $jsonFile $outputDir/\n";
+    system "cp $jsonFile $outputDir/";
+}
+
 open (INPUTLIST, "<$inputList") || die ("...error reading file $inputList $!");
 @inputList = <INPUTLIST>;
 #print @inputList;
 close(INPUTLIST);
+
+
 
 open (FILE, "ls -l src/analysisClass.C |") || die ("...error reading the file src/analysisClass.C $!");
 $analysisClassFull = <FILE>;
@@ -87,5 +134,11 @@ sub help(){
     die "please, try again...\n";
 }
 
-
-
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}

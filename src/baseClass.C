@@ -80,6 +80,7 @@ void baseClass::readInputList()
   TChain *chain = new TChain(treeName_->c_str());
   char pName[500];
   skimWasMade_ = true;
+  jsonFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
 
@@ -129,6 +130,27 @@ void baseClass::readCutFile()
           if (s[0] == '#' || s.empty()) continue;
 	  vector<string> v = split(s);
 	  if ( v.size() == 0 ) continue;
+
+	  STDOUT("starting JSON code");
+	  
+	  if ( v[0] == "JSON" ){ 
+
+	    if ( jsonFileWasUsed_ ){
+	      STDOUT("ERROR: Please specify only one JSON file in your cut file!");
+	      return;
+	    }
+	    
+	    if ( v.size() != 2 ){
+	      STDOUT("ERROR: In your cutfile, JSON file line must have the syntax: \"JSON <full json file path>\"");
+	    }
+	    jsonFileName_ = v[1];
+	    STDOUT("Getting JSON file: " << v[1]);
+	    jsonParser_.parseJSONFile ( & v[1] ) ;
+	    jsonParser_.printGoodLumis();
+	    jsonFileWasUsed_ = true;
+	    continue;
+	  }
+
           STDOUT("starting OPT code");
 	  if (v[1]=="OPT") // add code for grabbing optimizer objects
 	    {
@@ -862,6 +884,13 @@ bool baseClass::writeCutEfficFile()
   string cutEfficFile = *cutEfficFile_ + ".dat";
   ofstream os(cutEfficFile.c_str());
 
+  if ( jsonFileWasUsed_ ) {
+    os << "################################## JSON file used at runtime    ###################################################################\n"
+       << jsonFileName_ << "\n";
+  } else { 
+    os << "################################## NO JSON file used at runtime ###################################################################\n";
+  }
+
   os << "################################## Preliminary Cut Values ###################################################################\n"
      << "########################### variableName                        value1          value2          value3          value4          level\n"
      << preCutInfo_.str();
@@ -1270,4 +1299,16 @@ bool baseClass::writeSkimTree()
 
   // Any failure mode to implement?
   return ret;
+}
+
+int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
+  
+  if ( !this_is_data     ) return 1;
+  if ( !jsonFileWasUsed_ ) {
+    STDOUT( "ERROR: baseClass::passJSON invoked when running on data, but no JSON file was specified!" );
+    return 0;
+  }
+  
+  return jsonParser_.isAGoodLumi ( this_run, this_lumi );
+  
 }
