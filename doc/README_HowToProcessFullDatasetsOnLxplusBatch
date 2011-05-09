@@ -194,6 +194,19 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
+## SingleElectron 2011 (enujj presel. MC + full sel. data) ### temporary !! ###
+
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_053202 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_050514 \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-04-MC-enujj_preselection_skim \
+/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-enujj_preselection_skim \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-Prelim_NoSC-DATA-SingleElectron_Run2011A-PromptReco-v1_160431-161016_20110508_135446 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-Prelim_NoSC-DATA-SingleElectron_Run2011A-PromptReco-v2_162803-163757_20110508_102606 \
+-o config/ElectronSkimTmp
+
 ## Electron/EG + Electron skim (36.05 /pb) ### version V00-01-04 to V00-01-06 (NEW) ###
 
   ./scripts/createList.py \
