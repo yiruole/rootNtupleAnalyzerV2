@@ -142,8 +142,20 @@ uncommenting the following line in the Makefile
 the absolute and relative efficiency is calculated for each cut and stored in an output file
 (named data/output/cutEfficiencyFile.dat if the code is executed following the examples)
 
+The user has the option to implement a good run list using a JSON file.  This requires two edits to the cut 
+file and one edit to the analysisClass.C file.
+  A line must be inserted at the beginning of the cut file with the word "JSON" first, and then 
+    the full AFS path of the desiredJSON file. For example:
+    JSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-163369_7TeV_PromptReco_Collisions11_JSON.txt
+  In addition, the user must define the JSON file selection in the cut file.  This is done in the usual way:
+    #VariableName                   minValue1(<) maxValue1(>=)      minValue2(<)    maxValue2(>=)   level   histoNbinsMinMax
+    #------------                   ------------ -------------      ------------    -------------   -----   ----------------
+    PassJSON                        0            1                  -               -               0       2 -0.5 1.5
+  In the analysisClass.C file, the user must add the following line within the analysis loop:
+    fillVariableWithValue ( "PassJSON", passJSON (run, ls, isData));
 
-
+Note that the use of a JSON file (good run list) is optional.  If the user does not list a JSON file in the cut file,
+no selection will be made.
 
 Additional scripts for running on several datasets:
 ---------------------------------------------------
