@@ -886,7 +886,7 @@ bool baseClass::writeCutEfficFile()
 
   if ( jsonFileWasUsed_ ) {
     os << "################################## JSON file used at runtime    ###################################################################\n"
-       << jsonFileName_ << "\n";
+       << "### " << jsonFileName_ << "\n";
   } else { 
     os << "################################## NO JSON file used at runtime ###################################################################\n";
   }
