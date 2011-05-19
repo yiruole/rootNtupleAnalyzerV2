@@ -157,6 +157,9 @@ file and one edit to the analysisClass.C file.
 Note that the use of a JSON file (good run list) is optional.  If the user does not list a JSON file in the cut file,
 no selection will be made.
 
+This tool was validated on May 18, 2011.  The results of the validation study are here:
+https://twiki.cern.ch/twiki/pub/CMS/ExoticaLeptoquarkAnalyzerRootNtupleMakerV2/json_validation.pdf
+
 Additional scripts for running on several datasets:
 ---------------------------------------------------
 
