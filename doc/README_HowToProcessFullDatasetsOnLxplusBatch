@@ -204,6 +204,9 @@ Create lists:
 /castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-SingleTopMadGraph_20110528_083757 \
 /castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-TTBarMadGraph_20110528_083554 \
 /castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_ZJets_ALPGEN_20110525_203142 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_GammaJets_MADGRAPH_20110602_195843 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_WJets_MADGRAPH_20110526_153439 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_Diboson_PYTHIA_20110526_154507 \
 -o config/ElectronSkim
 
 ## SingleElectron 2011 (enujj presel. MC + full sel. data) ### temporary !! ###
