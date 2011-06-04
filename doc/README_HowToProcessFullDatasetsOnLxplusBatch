@@ -194,7 +194,7 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
-## SingleElectron + ElectronHad 2011 (full ntuples data nd MC, V00-02-01 + V00-02-02) ## Not complete yet !! ##
+## SingleElectron + ElectronHad 2011 (full ntuples data nd MC, V00-02-01 + V00-02-02) 
   ./scripts/createList.py \
     -m root \
     -i \
