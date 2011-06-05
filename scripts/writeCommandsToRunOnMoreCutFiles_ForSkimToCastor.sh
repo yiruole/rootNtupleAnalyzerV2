@@ -25,12 +25,12 @@ OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file
 #SUBDIR=enujj_analysis/7.4pb-1_v1_QCD_HLT30
 #SUBDIR=enujj_analysis/15.1pb-1_v4
 #SUBDIR=enujj_analysis/21.9pb-1_v2
-SUBDIR=enujj_analysis/enujj-skim-ElectronHad-Run2011A-PromptReco-v4-AOD
+SUBDIR=enujj_analysis/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011
 #SUBDIR=enujj_analysis/10.9pb-1_v3_EcalDeadCellsStudy
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
-CASTORDIR=pippo/pluto/paperino
+CASTORDIR=LQ/RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011
 FULLCASTORDIR=$CASTOR_HOME/$CASTORDIR #--> do not modify this line
 #------------
 ILUM=200 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
@@ -41,8 +41,8 @@ CODENAME=analysisClass_enujjSample_2011 #the actual name of the code used to pro
 #CODENAME=analysisClass_eejjSample_QCD #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
 #INPUTLIST=config/PhotonSkim/inputListAllCurrent.txt #specify input list
-#INPUTLIST=config/ElectronSkim/inputListAllCurrent.txt #specify input list
-INPUTLIST=config/ElectronSkim/input_skim.txt
+INPUTLIST=config/ElectronSkim/inputListAllCurrent.txt #specify input list
+#INPUTLIST=config/ElectronSkim/input_skim.txt
 #INPUTLIST=config/ElectronSkim/inputListAllCurrent_MC.txt #specify input list
 #------------
 XSECTION=config/xsection_7TeV_2011.txt #specify cross section file
@@ -60,7 +60,7 @@ WAIT=5 #seconds of delay between submission of different datasets
 #NJOBS=30 #number of jobs for each dataset
 #WAIT=5 #seconds of delay between submission of different datasets
 #------------
-QUEUE=1nh #bsub queue  
+QUEUE=1nd #bsub queue  
 #------------
 
 
