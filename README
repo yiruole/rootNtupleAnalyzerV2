@@ -220,3 +220,10 @@ and call the fillSkimTree() method for those events that meet the skimming crite
 
 If the above preliminary cut line is not present in the cut file, is commented out or its value1 is set to 0,
 the skim creation will be turned off and calling the fillSkimTree() method will have no effect.
+
+
+
+JSON parser (Edmund Berry):
+---------------------------
+
+See https://hypernews.cern.ch/HyperNews/CMS/get/exotica-lq/266.html
