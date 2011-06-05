@@ -198,7 +198,7 @@ Create lists:
   ./scripts/createList.py \
     -m root \
     -i \
-/castor/cern.ch/user/s/santanas/LQ//RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011 \		
+/castor/cern.ch/user/s/santanas/LQ//RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011 \
 -o config/ElectronSkimENUJJ
 
 ## SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02) 
