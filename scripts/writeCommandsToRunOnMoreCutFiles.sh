@@ -17,7 +17,7 @@
 #files=`ls $LQMACRO/config/eejj/cutTable_eejjSample_*.txt $LQMACRO/config/cutTable_eejjSample.txt` # list of cut files that will be used
 #files=`ls $LQANA/Test_eejj_QCD/cutTable_eejjSample_QCD.txt` # list of cut files that will be used
 #files=`ls $LQANA/Test_enujj_QCD/cutTable_enujjSample_QCD.txt` # list of cut files that will be used
-files=`ls $LQMACRO2011/config/cutTable_enujjSample_2011_skim.txt` # list of cut files that will be used
+files=`ls $LQMACRO2011/config/cutTable_enujjSample_2011.txt` # list of cut files that will be used
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 #SUBDIR=enujj_analysis/6.7pb-1_v2_Brussels_QCD_HLT20_noEle
@@ -25,12 +25,12 @@ OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file
 #SUBDIR=enujj_analysis/7.4pb-1_v1_QCD_HLT30
 #SUBDIR=enujj_analysis/15.1pb-1_v4
 #SUBDIR=enujj_analysis/21.9pb-1_v2
-SUBDIR=enujj_analysis/enujj-skim-TTBAR-Spring11-AOD-2
+SUBDIR=enujj_analysis/330pb-1_enujjskim
 #SUBDIR=enujj_analysis/10.9pb-1_v3_EcalDeadCellsStudy
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=200 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+ILUM=330 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 CODENAME=analysisClass_enujjSample_2011 #the actual name of the code used to process the ntuples (without the suffix ".C") 
@@ -38,8 +38,8 @@ CODENAME=analysisClass_enujjSample_2011 #the actual name of the code used to pro
 #CODENAME=analysisClass_eejjSample_QCD #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
 #INPUTLIST=config/PhotonSkim/inputListAllCurrent.txt #specify input list
-#INPUTLIST=config/ElectronSkim/inputListAllCurrent.txt #specify input list
-INPUTLIST=config/ElectronSkim/input_skim.txt
+INPUTLIST=config/ElectronSkimENUJJ/inputListAllCurrent.txt #specify input list
+#INPUTLIST=config/ElectronSkim/input_skim.txt
 #INPUTLIST=config/ElectronSkim/inputListAllCurrent_MC.txt #specify input list
 #------------
 XSECTION=config/xsection_7TeV_2011.txt #specify cross section file
@@ -51,7 +51,7 @@ XSECTION=config/xsection_7TeV_2011.txt #specify cross section file
 SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_enujj_2011.txt #specify list for sample merging
 #------------
 ##DATA
-NJOBS=10 #number of jobs for each dataset
+NJOBS=5 #number of jobs for each dataset
 WAIT=5 #seconds of delay between submission of different datasets
 ##MC
 #NJOBS=30 #number of jobs for each dataset
