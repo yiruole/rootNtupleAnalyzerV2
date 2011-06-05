@@ -340,6 +340,16 @@ for n, lin in enumerate( open( options.inputList ) ):
                        nLogFileErrors = nLogFileErrors+1
                        print logFile + "has at least one instance of the word 'error' (case insensitive)" 
                        break
+                if "segmentation" in line.lower():
+                       resubmitThisJob = True
+                       nLogFileErrors = nLogFileErrors+1
+                       print logFile + "has at least one instance of the word 'segmentation' (case insensitive)" 
+                       break
+                if "violation" in line.lower():
+                       resubmitThisJob = True
+                       nLogFileErrors = nLogFileErrors+1
+                       print logFile + "has at least one instance of the word 'violation' (case insensitive)" 
+                       break
             if (os.path.getsize(rootFile) == 0 ):
                 resubmitThisJob = True
                 nRootFileSizeErrors = nRootFileSizeErrors+1
@@ -520,7 +530,7 @@ if (nJobsToBeResubmitted == 0):
     print "=== All jobs successfull!!! ==="
 else:
     print "================================================="
-    print "Number of log files found with at least one instance of the word 'error' (case insensitive) in it = ",nLogFileErrors
+    print "Number of log files found with at least one instance of the word 'error' or 'segmentation' or 'violation' (case insensitive) in it = ",nLogFileErrors
     print "Number of .root files found with zero size = ", nRootFileSizeErrors
     print "Number of .dat files found with zero size = ", nDatFileSizeErrors
     print "================================================="
