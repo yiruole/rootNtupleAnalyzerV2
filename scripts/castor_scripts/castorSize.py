@@ -48,7 +48,9 @@ for i,root_file in enumerate(root_files):
     file_size_in_bytes = int ( subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[4] ) 
     total_size_in_bytes = total_size_in_bytes + file_size_in_bytes
 
-total_size_in_gigabytes = float ( total_size_in_bytes ) / 1073741824.0
+total_size_in_gigabytes_bin = float ( total_size_in_bytes ) / 1073741824.0
+total_size_in_gigabytes_dec = float ( total_size_in_bytes ) / 1000000000.0
 
 print "Total size = " + str ( total_size_in_bytes ) + " Bytes " 
-print "Total size = " + str ( '%.2f' % total_size_in_gigabytes ) + " GB"
+print "Total size = " + str ( '%.2f' % total_size_in_gigabytes_bin ) + " GB [bin]"
+print "Total size = " + str ( '%.2f' % total_size_in_gigabytes_dec ) + " GB [dec]"
