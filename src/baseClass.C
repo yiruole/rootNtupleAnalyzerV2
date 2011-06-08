@@ -1,7 +1,8 @@
 #define baseClass_cxx
 #include "baseClass.h"
 
-baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile)
+baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
+  PileupWeight_ ( 1.0 ) 
 {
   //STDOUT("begins");
   inputList_ = inputList;
@@ -81,6 +82,8 @@ void baseClass::readInputList()
   char pName[500];
   skimWasMade_ = true;
   jsonFileWasUsed_ = false;
+  pileupMCFileWasUsed_ = false;
+  pileupDataFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
 
@@ -148,6 +151,42 @@ void baseClass::readCutFile()
 	    jsonParser_.parseJSONFile ( & v[1] ) ;
 	    jsonParser_.printGoodLumis();
 	    jsonFileWasUsed_ = true;
+	    continue;
+	  }
+
+	  STDOUT ("starting pileup reweighting code");
+	  
+	  if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
+	    if ( pileupDataFileWasUsed_ ) { 
+	      STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
+	      return;
+	    }
+
+	    if ( v.size() != 2 ){
+	      STDOUT("ERROR: In your cutfile, PILEUP_DATA_ROOT_FILE line must have the syntax: \"PILEUP_DATA_ROOT_FILE <full pileup data file path>\"");
+	    }
+	    
+	    pileupDataFileName_ = v[1];
+	    STDOUT("Getting PILEUP_DATA_ROOT_FILE:" << v[1]);
+	    pileupReweighter_.readPileupDataFile ( & v[1] ) ;
+	    pileupDataFileWasUsed_ = true;
+	    continue;
+	  }
+
+	  if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
+	    if ( pileupMCFileWasUsed_ ) { 
+	      STDOUT("ERROR: Please specify only one PILEUP_MC_TXT_FILE in your cut file!");
+	      return;
+	    }
+
+	    if ( v.size() != 2 ){
+	      STDOUT("ERROR: In your cutfile, PILEUP_MC_TXT_FILE line must have the syntax: \"PILEUP_MC_TXT_FILE <full pileup MC file path>\"");
+	    }
+	    
+	    pileupMCFileName_ = v[1];
+	    STDOUT("Getting PILEUP_MC_TXT_FILE:" << v[1]);
+	    pileupReweighter_.readPileupMCFile ( & v[1] ) ;
+	    pileupMCFileWasUsed_ = true;
 	    continue;
 	  }
 
@@ -274,6 +313,17 @@ void baseClass::readCutFile()
 	  cutName_cut_[thisCut.variableName]=thisCut;
 
 	}
+      if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ) {
+	pileupReweighter_.calculatePileupWeights();
+	pileupReweighter_.printPileupWeights();
+      }
+      else if ( (!pileupMCFileWasUsed_) && pileupDataFileWasUsed_  ||
+		pileupMCFileWasUsed_  && (!pileupDataFileWasUsed_) ) { 
+	STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
+	if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
+	if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
+	exit(1);
+      }
       STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
     }
   else
@@ -322,6 +372,7 @@ void baseClass::resetCuts(const string& s)
 
 void baseClass::fillVariableWithValue(const string& s, const double& d, const double& w)
 {
+
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
     {
@@ -334,6 +385,10 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       c->filled = true;
       c->value = d;
       c->weight = w;
+      
+      if ( pileupReweighter_.pileupWeightsCalculated() ) 
+	c ->weight *= PileupWeight_;
+      
     }
   fillOptimizerWithValue(s, d);
   return;
@@ -891,6 +946,14 @@ bool baseClass::writeCutEfficFile()
     os << "################################## NO JSON file used at runtime ###################################################################\n";
   }
 
+  if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ){
+    os << "################################## PILEUP files used at runtime    ###################################################################\n"
+       << "### " << pileupMCFileName_ << "\n" 
+       << "### " << pileupDataFileName_ << "\n";
+  } else { 
+    os << "################################## NO PILEUP files used at runtime ###################################################################\n";
+  }
+
   os << "################################## Preliminary Cut Values ###################################################################\n"
      << "########################### variableName                        value1          value2          value3          value4          level\n"
      << preCutInfo_.str();
@@ -1311,4 +1374,16 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
   
   return jsonParser_.isAGoodLumi ( this_run, this_lumi );
   
+}
+
+double baseClass::getPileupWeight ( int npileup, bool this_is_data ) { 
+  
+  PileupWeight_ = 1.0;
+
+  if ( this_is_data )                                     return PileupWeight_;
+  if ( ! pileupReweighter_.pileupWeightsCalculated() )    return PileupWeight_;
+
+  PileupWeight_ = pileupReweighter_.getPileupWeight ( npileup ) ;
+  
+  return PileupWeight_;
 }

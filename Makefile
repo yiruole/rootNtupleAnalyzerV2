@@ -8,7 +8,7 @@ INC= -I.. -I. -I./include  -I${CLHEP}/include
 ROOTINC= -I${ROOTSYS}/include
 LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
-SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o
+SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o
 EXE = main
 
 # ********** TEMPLATE *************
@@ -26,6 +26,7 @@ clean:
 	rm -f *~
 	rm -f *.exe
 	rm -f $(EXE)
+
 .cpp.o:
 	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 

@@ -3,6 +3,7 @@
 
 #include "rootNtupleClass.h"
 #include "jsonParser.h"
+#include "pileupReweighter.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -121,6 +122,7 @@ class baseClass : public rootNtupleClass {
   map<string, bool> combCutName_passed_;
 
   int passJSON(int run, int ls, bool isData);
+  double getPileupWeight ( int npileup, bool this_is_data );
 
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
@@ -196,11 +198,19 @@ class baseClass : public rootNtupleClass {
   bool skimWasMade_;
   int getGlobalInfoNstart( char* );
   int NBeforeSkim_;
+  double PileupWeight_;
 
   // JSON file stuff
   JSONParser jsonParser_;
   bool jsonFileWasUsed_;
   std::string jsonFileName_;
+
+  // PILEUP stuff
+  PileupReweighter pileupReweighter_;
+  bool pileupMCFileWasUsed_;
+  bool pileupDataFileWasUsed_;
+  std::string pileupMCFileName_;
+  std::string pileupDataFileName_;
 
   // Skim stuff
   bool produceSkim_;
