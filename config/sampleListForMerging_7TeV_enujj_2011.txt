@@ -1,4 +1,5 @@
 ZJet_Alpgen	  Z0Jets_TuneZ2 Z1Jets_ptZ Z2Jets_ptZ Z3Jets_ptZ Z4Jets_ptZ Z5Jets_ptZ  
+ZJet_Madgraph     DYJetsToLL_TuneZ2_M-50_7TeV-madgraph
 TTbar_Madgraph	  TTJets_TuneZ2_7TeV-madgraph-tauola	   
 SingleTop	  TToBLNu_TuneZ2_tW-channel TToBLNu_TuneZ2_t-channel TToBLNu_TuneZ2_s-channel	   
 WJet_Madgraph	  WJetsToLNu_TuneZ2_7TeV-madgraph-tauola	   
