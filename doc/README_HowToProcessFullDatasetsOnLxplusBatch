@@ -201,7 +201,7 @@ Create lists:
 |_____|\___/|_|_|
 
 
-## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02 + V00-02-04) 
+## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (full ntuples data and MC, V00-02-0X) 
   ./scripts/createList.py \
     -m root \
     -i \
@@ -216,14 +216,14 @@ Create lists:
 /castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_ZJets_MADGRAPH_20110607_210002 \
 -o config/DoubleElectron
 
-## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (enujj skim data and MC, V00-02-01 + V00-02-02) 
+## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (enujj skim data and MC, V00-02-0X) 
   ./scripts/createList.py \
     -m root \
     -i \
 /castor/cern.ch/user/s/santanas/LQ//RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011 \
 -o config/SingleElectron_SkimENUJJ
 
-## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02) ==> FOR ENUJJ
+## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (full ntuples data and MC, V00-02-0X)
   ./scripts/createList.py \
     -m root \
     -i \
