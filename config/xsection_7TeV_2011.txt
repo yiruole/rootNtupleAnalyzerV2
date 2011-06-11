@@ -1,6 +1,10 @@
 /ElectronHad/Run2011A-PromptReco-v4/AOD      -1
 /SingleElectron/Run2011A-PromptReco-v4/AOD   -1 
 /SingleElectron/Run2011A-May10ReReco-v1/AOD  -1
+/DoubleElectron/Run2011A-PromptReco-v4/AOD   -1
+/DoubleElectron/Run2011A-May10ReReco-v1/AOD  -1
+/Photon/Run2011A-PromptReco-v4/AOD           -1
+/Photon/Run2011A-May10ReReco-v1/AOD          -1
 /TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          10.56
 /TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  63.3
 /TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  0.99
