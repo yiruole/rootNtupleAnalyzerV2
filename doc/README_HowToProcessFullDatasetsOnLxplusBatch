@@ -194,14 +194,36 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
-## SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (enujj skim data and MC, V00-02-01 + V00-02-02) 
+ ____   ___  _ _
+|___ \ / _ \/ / |
+  __) | | | | | |
+ / __/| |_| | | |
+|_____|\___/|_|_|
+
+
+## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02 + V00-02-04) 
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-02-DATA-DoubleElectron-Run2011A-May10ReReco-v1-160329-163869_20110606_134121 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-02-DATA-DoubleElectron-Run2011A-PromptReco-v4-165088-166021_20110606_134838 \
+/castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-SingleTopMadGraph_20110528_083757 \
+/castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-TTBarMadGraph_20110528_083554 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_ZJets_ALPGEN_20110525_203142 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_GammaJets_MADGRAPH_20110602_195843 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_WJets_MADGRAPH_20110526_153439 \
+/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_Diboson_PYTHIA_20110526_154507 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_ZJets_MADGRAPH_20110607_210002 \
+-o config/DoubleElectron
+
+## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (enujj skim data and MC, V00-02-01 + V00-02-02) 
   ./scripts/createList.py \
     -m root \
     -i \
 /castor/cern.ch/user/s/santanas/LQ//RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011 \
--o config/ElectronSkimENUJJ
+-o config/SingleElectron_SkimENUJJ
 
-## SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02) 
+## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (full ntuples data and MC, V00-02-01 + V00-02-02) ==> FOR ENUJJ
   ./scripts/createList.py \
     -m root \
     -i \
@@ -214,20 +236,14 @@ Create lists:
 /castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_WJets_MADGRAPH_20110526_153439 \
 /castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_Diboson_PYTHIA_20110526_154507 \
 /castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_ZJets_MADGRAPH_20110607_210002 \
--o config/ElectronSkim
+-o config/SingleElectron
 
-## SingleElectron 2011 (enujj presel. MC + full sel. data) ### temporary !! ###
+ ____   ___  _  ___ 
+|___ \ / _ \/ |/ _ \ 
+  __) | | | | | | | |
+ / __/| |_| | | |_| |
+|_____|\___/|_|\___/ 
 
-  ./scripts/createList.py \
-    -m root \
-    -i \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_053202 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-LQToUE_ENuJJFilter_7TeV-pythia6_Spring10-START3X_V26-v1_20110106_050514 \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-04-MC-enujj_preselection_skim \
-/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-enujj_preselection_skim \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-Prelim_NoSC-DATA-SingleElectron_Run2011A-PromptReco-v1_160431-161016_20110508_135446 \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-Prelim_NoSC-DATA-SingleElectron_Run2011A-PromptReco-v2_162803-163757_20110508_102606 \
--o config/ElectronSkimTmp
 
 ## Electron/EG + Electron skim (36.05 /pb) ### version V00-01-04 to V00-01-06 (NEW) ###
 
