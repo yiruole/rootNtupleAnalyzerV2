@@ -23,6 +23,11 @@ double PileupReweighter::getPileupWeight ( int n_pileup ) {
     return -1; 
   }
   
+  if ( n_pileup == -1 ) {
+    std::cout << "ERROR: System is asking for n(pileup) = " << n_pileup << ", which is not a valid index number" << std::endl;
+    return -1; 
+  }
+
   return m_pileup_weights[n_pileup];
   
 }

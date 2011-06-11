@@ -1382,6 +1382,7 @@ double baseClass::getPileupWeight ( int npileup, bool this_is_data ) {
 
   if ( this_is_data )                                     return PileupWeight_;
   if ( ! pileupReweighter_.pileupWeightsCalculated() )    return PileupWeight_;
+  if ( npileup == -1 )                                    return PileupWeight_;
 
   PileupWeight_ = pileupReweighter_.getPileupWeight ( npileup ) ;
   
