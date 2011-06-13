@@ -186,6 +186,25 @@ pre-2) This is needed to use correctly the python libraries for PYROOT
    You'll be asked for arguments, and be prompted with an example usage.
 
 
+###################################################################################
+
+To Produce skims starting from existing Ntuples on CASTOR.
+
+Prepare your .C code and .txt cutfile:
+
+see the README file at the section "Producing an ntuple skim (Dinko Ferencek):"
+
+
+Run the following scripts in sequence:
+
+1) scripts/writeCommandsToRunOnMoreCutFiles_ForSkimToCastor.sh --> it will create two commands (see 2) and 3) ) 
+that should be run in sequence
+
+2) scripts/launchAnalysis_batch_ForSkimToCastor.pl ...  --> to submit the jobs in lxbatch
+     - it will launches submit_batch_ForSkimToCastor.py for each job)
+
+3) scripts/check_combine_output_batch_ForSkimToCastor.py ... --> to check that everything is ok (output, log, etc..)
+
 
 ###################################################################################
 
