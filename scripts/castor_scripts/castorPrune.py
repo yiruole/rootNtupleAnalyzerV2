@@ -43,12 +43,13 @@ if len ( sys.argv ) != 2:
 #--------------------------------------------------------------------------------------
 
 castor_folder = sys.argv[1]
-command = "nsls "+ castor_folder
-root_files = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()
+command = "rfdir "+ castor_folder
+output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()
+root_files = []
 
-for root_file in root_files: 
-    getBaseName ( root_file ) 
-    if root_file[-5:] != ".root" : root_files.remove (root_file)
+for entry in output: 
+    if ".root" not in entry : continue
+    root_files.append ( entry ) 
 
 if len ( root_files ) == 0 : 
     print "No root files in folder "+castor_folder
@@ -147,8 +148,8 @@ for i, root_file_to_download in enumerate ( root_files_to_download ) :
     full_target_path = target_folder + "/" + root_file_to_download
     
     if os.path.exists ( full_target_path ) :
-        castor_size_command = "nsls -l " + full_castor_path
-        local_size_command  = "ls -l "   + full_target_path
+        castor_size_command = "rfdir " + full_castor_path
+        local_size_command  = "ls -l " + full_target_path
 
         castor_size = int ( subprocess.Popen ( castor_size_command , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[4] ) 
         local_size  = int ( subprocess.Popen ( local_size_command  , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[4] ) 
@@ -157,8 +158,12 @@ for i, root_file_to_download in enumerate ( root_files_to_download ) :
             print "WARNING:" 
             print "   File " + full_local_path  + " has size " + str(local_size )
             print "   It had size " + str( castor_size ) + " on castor " 
+            redownload = raw_input ( "Redownload this file? [yes/no] : " )
+            if redownload != "yes" : continue
 
-        continue
+        else : 
+            print "File : " + full_target_path + " exists... skipping "
+            continue
 
     command = "rfcp " + full_castor_path + " " + target_folder 
     
