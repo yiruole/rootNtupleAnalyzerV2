@@ -158,8 +158,7 @@ for i, root_file_to_download in enumerate ( root_files_to_download ) :
             print "WARNING:" 
             print "   File " + full_local_path  + " has size " + str(local_size )
             print "   It had size " + str( castor_size ) + " on castor " 
-            redownload = raw_input ( "Redownload this file? [yes/no] : " )
-            if redownload != "yes" : continue
+            print "   Redownloading..."
 
         else : 
             print "File : " + full_target_path + " exists... skipping "
