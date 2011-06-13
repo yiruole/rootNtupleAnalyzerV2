@@ -219,6 +219,12 @@ Create lists:
  / __/| |_| | | |
 |_____|\___/|_|_|
 
+## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (ee skim data and MC, V00-02-0X) 
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-ee_preselection_skim_11062011 \
+-o config/DoubleElectron_SkimEE
 
 ## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (full ntuples data and MC, V00-02-0X) 
   ./scripts/createList.py \
