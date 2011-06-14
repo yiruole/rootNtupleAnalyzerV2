@@ -230,16 +230,18 @@ Create lists:
   ./scripts/createList.py \
     -m root \
     -i \
-/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-02-DATA-DoubleElectron-Run2011A-May10ReReco-v1-160329-163869_20110606_134121 \
 /castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-02-DATA-DoubleElectron-Run2011A-PromptReco-v4-165088-166021_20110606_134838 \
-/castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-SingleTopMadGraph_20110528_083757 \
-/castor/cern.ch/user/e/eberry/LQ/RootNtupleSpring11/RootNtuple-V00-02-01-Spring11MC-TTBarMadGraph_20110528_083554 \
-/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_ZJets_ALPGEN_20110525_203142 \
-/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_GammaJets_MADGRAPH_20110602_195843 \
-/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_WJets_MADGRAPH_20110526_153439 \
-/castor/cern.ch/user/b/barfuss/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_Diboson_PYTHIA_20110526_154507 \
+/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-02-DATA-DoubleElectron-Run2011A-May10ReReco-v1-160329-163869_20110606_134121 \
 /castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_ZJets_MADGRAPH_20110607_210002 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_SingleTop_MADGRAPH_20110608_014439  \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_TTBar_MADGRAPH_20110607_210901 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_GammaJets_MADGRAPH_20110607_222949 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_WJets_MADGRAPH_20110608_015158 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_Diboson_PYTHIA_20110607_222451 \
+/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC/RootNtuple-V00-02-01-Spring11MC_ZJets_ALPGEN_20110525_203142 \
 -o config/DoubleElectron
+
+
 
 ## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (enujj skim data and MC, V00-02-0X) 
   ./scripts/createList.py \
