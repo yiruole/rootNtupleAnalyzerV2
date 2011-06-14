@@ -8,7 +8,7 @@
 /TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          10.56
 /TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  63.3
 /TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  0.99
-/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          121
+/TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          168
 /Z0Jets_TuneZ2_7TeV-alpgen-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM                  1929.0
 /Z1Jets_ptZ-0to100_TuneZ2_7TeV-alpgen-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM       380.8
 /Z1Jets_ptZ-100to300_TuneZ2_7TeV-alpgen-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM     8.721
@@ -37,3 +37,4 @@
 /ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  4.297
 /WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  10.4
 /WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  27.79
+/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM	  3048
