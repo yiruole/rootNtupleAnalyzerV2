@@ -229,7 +229,46 @@ JSON parser (Edmund Berry):
 See https://hypernews.cern.ch/HyperNews/CMS/get/exotica-lq/266.html
 
 
+
 PU reweight (Edmund Berry):
 ---------------------------
 
 See https://twiki.cern.ch/twiki/pub/CMS/Exo2011LQ1AndLQ2Analyses/PileupReweightingCode.pdf
+
+
+
+Producing a new ntuple with a subset of cutFile variables and a subset of events (Paolo, Francesco, Edmund):
+------------------------------------------------------------------------------------------------------------
+
+The class baseClass provides the ability to produce a new ntuple with a subset of the variables defined
+in the cutFile, and with a subset of events.
+In order to do so, the following preliminary cut line has to be added to the cut file
+
+#VariableName         value1            value2          value3          value4          level
+#------------         ------------      -------------   ------------    -------------   -----
+produceReducedSkim              1               -               -               -               -1
+
+then each variable that needs to be included in the new tree has to be flagged with SAVE in 
+the cutFile at the end of the line where the variabole is defined, as for pT1stEle and pT2ndEle
+below:
+
+#VariableName	      minValue1(<) maxValue1(>=)	minValue2(<)	maxValue2(>=)	level	histoNbinsMinMax  OptionalFlag
+#------------	      ------------ -------------	------------	-------------	-----	----------------  ------------
+nEleFinal	      1		   +inf			-		-		0	11 -0.5 10.5
+pT1stEle              85           +inf                 -               -               1       100 0 1000        SAVE
+pT2ndEle	      30	   +inf			-	        -	        1	100 0 1000        SAVE
+invMass_ee	      0		   80			100	        +inf	        1	120 0 1200
+
+(do not put anything for those variables that do not need to be saved, such as for  nEleFinaland invMass_ee)
+
+finally, call fillReducedSkimTree() in the analysisClass for the subset of events that need to be saved, e.g.:
+
+    if( passedCut("nEleFinal") ) fillReducedSkimTree();
+
+If the above preliminary cut line is not present in the cut file, is commented out or its value1 is set to 0,
+the skim creation will be turned off and calling the fillReducedSkimTree() method will have no effect.
+The new ntuple will be created in a file named as the std output root file with _reduced_skim appended
+before the .root and the tree name will be as in the input root file.
+
+
+

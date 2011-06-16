@@ -32,8 +32,13 @@ baseClass::~baseClass()
     {
       STDOUT("ERROR: writeSkimTree did not complete successfully.");
     }
+  if( !writeReducedSkimTree() )
+    {
+      STDOUT("ERROR: writeReducedSkimTree did not complete successfully.");
+    }
   output_root_->Close();
   if(produceSkim_) skim_file_->Close();
+  if(produceReducedSkim_) reduced_skim_file_->Close();
 }
 
 void baseClass::init()
@@ -68,6 +73,27 @@ void baseClass::init()
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
   }
+
+  // Reduced Skim stuff
+  produceReducedSkim_ = false;
+  NAfterReducedSkim_ = 0;
+  if(int(getSkimPreCutValue("produceReducedSkim"))==1) produceReducedSkim_ = true;
+
+  if(produceReducedSkim_) {
+
+    reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
+    reduced_skim_tree_= new TTree(fChain->GetName(),"Reduced Skim");
+    hReducedCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
+    hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
+    hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
+    for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
+      {
+	cut * c = & (cc->second);
+	if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
+      }
+  }
+
+
   //  for (map<string, cut>::iterator it = cutName_cut_.begin();
   //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "f<<it->first)
   //  for (vector<string>::iterator it = orderedCutNames_.begin();
@@ -274,6 +300,8 @@ void baseClass::readCutFile()
 	  thisCut.histoNBins = atoi( v[6].c_str() );
 	  thisCut.histoMin   = atof( v[7].c_str() );
 	  thisCut.histoMax   = atof( v[8].c_str() );
+	  thisCut.saveVariableInReducedSkim = ( v.size()==10 && v[9]=="SAVE" ) ? true : false;
+
 	  // Not filled from file
 	  thisCut.id=++id;
 	  string s1;
@@ -1341,6 +1369,16 @@ void baseClass::fillSkimTree()
   return;
 }
 
+void baseClass::fillReducedSkimTree()
+{
+  if(!produceReducedSkim_) return;
+
+  reduced_skim_tree_->Fill();
+  NAfterReducedSkim_++;
+
+  return;
+}
+
 bool baseClass::writeSkimTree()
 {
   bool ret = true;
@@ -1359,6 +1397,29 @@ bool baseClass::writeSkimTree()
   hCount_->SetBinContent(1,NBeforeSkim_);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->Write();
+
+  // Any failure mode to implement?
+  return ret;
+}
+
+bool baseClass::writeReducedSkimTree()
+{
+  bool ret = true;
+
+  if(!produceReducedSkim_) return ret;
+
+  reduced_skim_file_->cd();
+  reduced_skim_file_->mkdir("rootTupleTree");
+  reduced_skim_file_->cd("rootTupleTree");
+  reduced_skim_tree_->Write();
+
+  reduced_skim_file_->cd();
+  TDirectory *dir1 = reduced_skim_file_->mkdir("LJFilter");
+  TDirectory *dir2 = dir1->mkdir("EventCount");
+  reduced_skim_file_->cd("LJFilter/EventCount");
+  hReducedCount_->SetBinContent(1,NBeforeSkim_);
+  hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
+  hReducedCount_->Write();
 
   // Any failure mode to implement?
   return ret;

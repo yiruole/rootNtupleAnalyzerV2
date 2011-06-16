@@ -51,6 +51,7 @@ struct cut {
   double nEvtPassed;
   double nEvtPassedErr2;
   bool nEvtPassedBeforeWeight_alreadyFilled;
+  bool saveVariableInReducedSkim;
 };
 
 struct preCut {
@@ -167,6 +168,7 @@ class baseClass : public rootNtupleClass {
   void FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
 
   void fillSkimTree();
+  void fillReducedSkimTree();
 
   private :
   string * configFile_;
@@ -220,6 +222,15 @@ class baseClass : public rootNtupleClass {
   TTree *skim_tree_;
   TH1I* hCount_;
   bool writeSkimTree();
+
+  //Reduced Skim stuff
+  bool produceReducedSkim_;
+  int NAfterReducedSkim_;
+  double getReducedSkimPreCutValue(const string& s);
+  TFile *reduced_skim_file_;
+  TTree *reduced_skim_tree_;
+  TH1I* hReducedCount_;
+  bool writeReducedSkimTree();
 
   // Optimization stuff
   map<int, Optimize> optimizeName_cut_;

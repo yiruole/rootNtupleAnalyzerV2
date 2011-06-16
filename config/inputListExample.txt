@@ -1,5 +1,6 @@
 #### list of root files, including path, to be analyzed in chain
-rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-300_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_1_1.root
+rfio:/castor/cern.ch/user/d/darinb/LQ/RootNtuple_Spring2011MC_V2/RootNtuple-V00-02-04-Spring11MC_ZJets_MADGRAPH_20110607_210002/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola__Spring11-PU_S1_START311_V1G1-v1__AODSIM_100_1_Z3x.root
+#rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412/LQToUE_M-300_7TeV-pythia6__Spring10-START3X_V26-v1__GEN-SIM-RECO_1_1.root
 #rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-12-DATA-EG-Run2010A-PromptReco-v4_138564-139459_140180-140387_20100719_183025/EG__Run2010A-PromptReco-v4__RECO_1_1_5Bp.root
 #rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-Z_plus_Jets_20100520_171604/Z2Jets_Pt100to300-alpgen__Spring10-START3X_V26_S09-v1__GEN-SIM-RECO_1_3.root
 #rfio:/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-W_plus_Jets_20100521_141022/W2Jets_Pt0to100-alpgen__Spring10-START3X_V26_S09-v1__GEN-SIM-RECO_10_1.root

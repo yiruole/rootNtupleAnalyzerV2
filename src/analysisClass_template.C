@@ -68,11 +68,11 @@ void analysisClass::Loop()
 #ifdef USE_EXAMPLE
      // Electrons
      vector<int> v_idx_ele_final;
-     for(int iele=0;iele<eleCount;iele++)
+     for(int iele=0;iele<ElectronPt->size();iele++)
        {
 	 // ECAL barrel fiducial region
 	 bool pass_ECAL_FR=false;
-	 if( fabs(eleEta[iele]) < getPreCutValue1("eleFidRegion") )	v_idx_ele_final.push_back(iele);
+	 if( fabs(ElectronEta->at(iele)) < getPreCutValue1("eleFidRegion") )	v_idx_ele_final.push_back(iele);
        }     
 
      // Set the evaluation of the cuts to false and clear the variable values and filled status
@@ -82,28 +82,34 @@ void analysisClass::Loop()
      fillVariableWithValue("nEleFinal", v_idx_ele_final.size()) ;
      if( v_idx_ele_final.size() >= 1 ) 
        {
-	 fillVariableWithValue( "pT1stEle", elePt[v_idx_ele_final[0]] );
+	 fillVariableWithValue( "pT1stEle", ElectronPt->at(v_idx_ele_final[0]) );
        }
      if( v_idx_ele_final.size() >= 2 ) 
        {
-	 fillVariableWithValue( "pT2ndEle", elePt[v_idx_ele_final[1]] );
+	 fillVariableWithValue( "pT2ndEle", ElectronPt->at(v_idx_ele_final[1]) );
 	 // Calculate Mee
 	 TLorentzVector v_ee, ele1, ele2;
-	 ele1.SetPtEtaPhiM(elePt[v_idx_ele_final[0]],eleEta[v_idx_ele_final[0]],elePhi[v_idx_ele_final[0]],0);
-	 ele2.SetPtEtaPhiM(elePt[v_idx_ele_final[1]],eleEta[v_idx_ele_final[1]],elePhi[v_idx_ele_final[1]],0);
+	 ele1.SetPtEtaPhiM(ElectronPt->at(v_idx_ele_final[0]),ElectronEta->at(v_idx_ele_final[0]),ElectronPhi->at(v_idx_ele_final[0]),0);
+	 ele2.SetPtEtaPhiM(ElectronPt->at(v_idx_ele_final[1]),ElectronEta->at(v_idx_ele_final[1]),ElectronPhi->at(v_idx_ele_final[1]),0);
 	 v_ee = ele1 + ele2;
 	 fillVariableWithValue( "invMass_ee", v_ee.M() ) ;
        }
 
      // Evaluate cuts (but do not apply them)
      evaluateCuts();
+
+     // optional call to fill a skim with the full content of the input roottuple
+     if( passedCut("nEleFinal") ) fillSkimTree();     
+
+     // optional call to fill a skim with a subset of the variables defined in the cutFile (use flag SAVE)
+     if( passedCut("nEleFinal") ) fillReducedSkimTree();     
      
      // Fill histograms and do analysis based on cut evaluation
      h_nEleFinal->Fill(v_idx_ele_final.size());
      //if( v_idx_ele_final.size()>=1 ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
      //if( v_idx_ele_final.size()>=2 && (elePt[v_idx_ele_final[0]])>85 ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
-     if( passedCut("pT1stEle") ) h_pT1stEle->Fill(elePt[v_idx_ele_final[0]]);
-     if( passedCut("pT2ndEle") ) h_pT2ndEle->Fill(elePt[v_idx_ele_final[1]]);
+     if( passedCut("pT1stEle") ) h_pT1stEle->Fill(ElectronPt->at(v_idx_ele_final[0]));
+     if( passedCut("pT2ndEle") ) h_pT2ndEle->Fill(ElectronPt->at(v_idx_ele_final[1]));
      
      // retrieve value of previously filled variables (after making sure that they were filled)
      double totpTEle;
