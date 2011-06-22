@@ -82,7 +82,7 @@ void baseClass::init()
   if(produceReducedSkim_) {
 
     reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
-    reduced_skim_tree_= new TTree(fChain->GetName(),"Reduced Skim");
+    reduced_skim_tree_= new TTree("tree","Reduced Skim");
     hReducedCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
@@ -416,7 +416,6 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       
       if ( pileupReweighter_.pileupWeightsCalculated() ) 
 	c ->weight *= PileupWeight_;
-      
     }
   fillOptimizerWithValue(s, d);
   return;
@@ -689,7 +688,7 @@ double baseClass::getPreCutValue1(const string& s)
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
   preCut * c = & (cc->second);
-  if(c->value1 == -9999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   return (c->value1);
 }
 
@@ -702,7 +701,7 @@ double baseClass::getPreCutValue2(const string& s)
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
   preCut * c = & (cc->second);
-  if(c->value2 == -9999999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
+  if(c->value2 == -99999999999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
   return (c->value2);
 }
 
@@ -715,7 +714,7 @@ double baseClass::getPreCutValue3(const string& s)
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
   preCut * c = & (cc->second);
-  if(c->value3 == -9999999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
+  if(c->value3 == -99999999999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
   return (c->value3);
 }
 
@@ -728,7 +727,7 @@ double baseClass::getPreCutValue4(const string& s)
       STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
     }
   preCut * c = & (cc->second);
-  if(c->value4 == -9999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
+  if(c->value4 == -99999999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
   return (c->value4);
 }
 
@@ -1071,7 +1070,7 @@ bool baseClass::writeCutEfficFile()
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
       ssM1 << fixed << setprecision(4) << c->maxValue1;
-      if(c->minValue2 == -9999999)
+      if(c->minValue2 == -99999999999)
 	{
 	  ssm2 << "-inf";
 	}
@@ -1079,7 +1078,7 @@ bool baseClass::writeCutEfficFile()
 	{
 	  ssm2 << fixed << setprecision(4) << c->minValue2;
 	}
-      if(c->maxValue2 ==  9999999)
+      if(c->maxValue2 ==  99999999999)
 	{
 	  ssM2 << "+inf";
 	}
@@ -1091,8 +1090,8 @@ bool baseClass::writeCutEfficFile()
 	 << setw(25) << c->variableName
 	 << setprecision(precision)
 	 << fixed
-	 << setw(15) << ( ( c->minValue1 == -9999999.0 ) ? "-inf" : ssm1.str() )
-	 << setw(15) << ( ( c->maxValue1 ==  9999999.0 ) ? "+inf" : ssM1.str() )
+	 << setw(15) << ( ( c->minValue1 == -99999999999.0 ) ? "-inf" : ssm1.str() )
+	 << setw(15) << ( ( c->maxValue1 ==  99999999999.0 ) ? "+inf" : ssM1.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(15) << c->level_int
@@ -1202,11 +1201,11 @@ double baseClass::decodeCutValue(const string& s)
   double ret;
   if( s == "inf" || s == "+inf" )
     {
-       ret = 9999999;
+       ret = 99999999999;
     }
   else if ( s == "-inf" || s == "-" )
     {
-       ret = -9999999;
+       ret = -99999999999;
     }
   else
     {
@@ -1355,7 +1354,7 @@ double baseClass::getSkimPreCutValue(const string& s)
       return 0;
     }
   preCut * c = & (cc->second);
-  if(c->value1 == -9999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   return (c->value1);
 }
 
