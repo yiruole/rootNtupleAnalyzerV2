@@ -3,6 +3,12 @@ LQenujj_M300               LQToUE_ENuJJFilter_M-300
 LQenujj_M340               LQToUE_ENuJJFilter_M-340
 SingleTop                  SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel
 TTbar_Madgraph             TTbarJets-madgraph
+TTbarMadgraph_Fall10       TTJets_TuneD6T_7TeV-madgraph
+TTbarMadgraph_matchingdown TTJets_TuneD6T_matchingdown
+TTbarMadgraph_matchingup   TTJets_TuneD6T_matchingup
+TTbarMadgraph_scaledown    TTJets_TuneD6T_scaledown
+TTbarMadgraph_scaleup      TTJets_TuneD6T_scaleup
+TTbarMCatNLO               TT_7TeV-mcatnlo
 WW                         WW__Spring10-START3X_V26_S09
 WZ                         WZ__Spring10-START3X_V26_S09
 ZZ                         ZZ__Spring10-START3X_V26_S09
