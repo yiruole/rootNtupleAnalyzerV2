@@ -72,6 +72,9 @@ my $inputdir = "/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-
 #my $inputdir = "/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-06-MC-WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall10-E7TeV_ProbDist_2010Data_BX156_START38_V12-v1_20110216_112909";
 #my $inputdir = "/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-01-06-MC-WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall10-START38_V12-v1_20110215_142129";
 
+##--> Studies on ttbar
+#my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-07-MC-TTbar_7TeV_Fall10-START38_V12_20110624_072949";
+
 ### MC (V00-00-XX)
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_low_mass_20100604_213652";
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412";
@@ -114,6 +117,7 @@ my $inputdir = "/castor/cern.ch/user/s/santanas/LQ/RootNtuple/RootNtuple-V00-02-
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-06-MC-enujj_preselection_skim";
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-enujj_preselection_skim";
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-05-DATA-QCD-enujj_preselection_skim";
+#my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-01-07-MC-enujj_preselection_skim";
 
 ## NOV 4RERECO (+ V00-00-XX MC ntuples)
 #my $inputdir = "/castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-enujj_preselection_skim/";
