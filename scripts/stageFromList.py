@@ -31,8 +31,9 @@ sub_txt_file_paths = []
 root_file_paths    = []
 root_file_statuses = {}
 
-n_staged_total = 0 
+n_staged_total   = 0 
 n_unstaged_total = 0
+n_staging_total  = 0 
 
 #-------------------------------------------------------
 # There should be only one argument (input list)
@@ -74,8 +75,11 @@ for entry in txt_file :
     elif entry_suffix == "root" : 
         status = subprocess.Popen ( "stager_qry -M "+entry , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[2]
 
-        if ( status == "STAGED" ) : n_staged_total    = n_staged_total   + 1 
-        else                      : n_unstaged_total  = n_unstaged_total + 1
+        if   ( status == "STAGED"  ) : n_staged_total    = n_staged_total   + 1 
+        elif ( status == "STAGEIN" ) : n_staging_total   = n_staging_total  + 1 
+        else                         : 
+            n_unstaged_total  = n_unstaged_total + 1
+            subprocess.Popen ( "stager_get -M "+entry , shell=True, stdout=subprocess.PIPE )
 
         root_file_paths.append    ( entry )
         root_file_statuses[entry] = status
@@ -101,6 +105,7 @@ for i, sub_txt_file_path in enumerate(sub_txt_file_paths):
     
     n_staged   = 0
     n_unstaged = 0
+    n_staging  = 0
 
     # Logging...
     print "File [",i+1,"/",len (sub_txt_file_paths),"]:",sub_txt_file_path,"has", file_len ( sub_txt_file_path ), "files"
@@ -114,37 +119,42 @@ for i, sub_txt_file_path in enumerate(sub_txt_file_paths):
             print "  --> Bailing."
             sys.exit() 
             
-        status = subprocess.Popen ( "stager_qry -M "+entry , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[2]
+        command = "stager_qry -M "+entry 
 
-        if ( status == "STAGED" ) : n_staged    = n_staged   + 1 
-        else                      : n_unstaged  = n_unstaged + 1
-        if ( status == "STAGED" ) : n_staged_total    = n_staged_total   + 1 
-        else                      : n_unstaged_total  = n_unstaged_total + 1
+        output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE ).communicate()[0]
+
+        if ( len ( output.split() ) >= 3 ):
+
+            status = output.split()[2]
+            
+            if   ( status == "STAGED" ) : 
+                n_staged         = n_staged         + 1 
+                n_staged_total   = n_staged_total   + 1 
+            elif ( status == "STAGEIN" ) : 
+                n_staging        = n_staging        + 1
+                n_staging_total  = n_staging_total  + 1
+            else                     : 
+                n_unstaged       = n_unstaged       + 1
+                n_unstaged_total = n_unstaged_total + 1
+                subprocess.Popen ( "stager_get -M "+entry , shell=True, stdout=subprocess.PIPE )
+
+        else : 
+            print "ERROR:"
+            print "\t command = " + command 
+            print "\t stdout  = " + output 
 
         root_file_paths.append ( entry ) 
         root_file_statuses[entry] = status
     
     print "  -->", n_staged  , "files staged"
-    print "  -->", n_unstaged, "files NOT staged"
+    if n_staging  != 0 : print "  -->", n_staging , "files already staging"
+    if n_unstaged != 0 : print "  -->", n_unstaged, "files NOT staging, stage command issued"
     
 #-------------------------------------------------------
 # Loop over files and stage the ones that need staging
 #-------------------------------------------------------
 
 print "I have found",len(root_file_paths),"root files in total"
-print "  -->", n_staged_total  , "files staged"
-print "  -->", n_unstaged_total, "files NOT staged"
-
-if n_staged_total == len(root_file_paths): 
-    print "  --> Done!" 
-    sys.exit()
-
-for i,root_file_path in enumerate(root_file_paths):
-
-    if (i+1)%10 == 0 or i == 0 or i+1 == len ( root_file_paths ) :
-        print "Checking file [",i+1,",",len (root_file_paths),"]"
-
-    if root_file_statuses [ root_file_path ] != "STAGED" :
-        command = "stager_get -M "+root_file_path
-        os.system ( command ) 
-
+print "  -->", n_staged_total  , "files were staged"
+if n_staging_total  != 0 : print "  -->", n_staging_total , "files were staging"
+if n_unstaged_total != 0 : print "  -->", n_unstaged_total, "files were NOT staged, but a stage command was issued"
