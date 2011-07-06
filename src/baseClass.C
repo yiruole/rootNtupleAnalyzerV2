@@ -2,7 +2,12 @@
 #include "baseClass.h"
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
-  PileupWeight_ ( 1.0 ) 
+  PileupWeight_ ( 1.0 ),
+  fillSkim_                         ( true ) ,
+  fillAllPreviousCuts_              ( true ) ,
+  fillAllOtherCuts_                 ( true ) ,
+  fillAllSameLevelAndLowerLevelCuts_( true ) ,
+  fillAllCuts_                      ( true ) 
 {
   //STDOUT("begins");
   inputList_ = inputList;
@@ -883,11 +888,16 @@ bool baseClass::fillCutHistos()
       cut * c = & (cutName_cut_.find(*it)->second);
       if( c->filled )
 	{
-	  c->histo1.Fill( c->value, c->weight );
-	  if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
-	  if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value, c->weight );
-	  if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
-	  if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
+	  if ( fillSkim_ ) 
+	    c->histo1.Fill( c->value, c->weight );
+	  if ( fillAllPreviousCuts_ ) 
+	    if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
+	  if( fillAllSameLevelAndLowerLevelCuts_) 
+	    if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value, c->weight );
+	  if( fillAllOtherCuts_ ) 
+	    if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
+	  if( fillAllCuts_ ) 
+	    if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
 	}
     }
   return ret;
@@ -901,12 +911,12 @@ bool baseClass::writeCutHistos()
        it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      c->histo1.Write();
-      c->histo2.Write();
-      c->histo4.Write();
-#ifdef SAVE_ALL_HISTOGRAMS
-      c->histo3.Write();
-      c->histo5.Write();
+      if ( fillSkim_                          ) c->histo1.Write();
+      if ( fillAllPreviousCuts_               ) c->histo2.Write();
+      if ( fillAllOtherCuts_                  ) c->histo4.Write();
+#ifdef SAVE_ALL_HISTOGRAMS 
+      if ( fillAllSameLevelAndLowerLevelCuts_ ) c->histo3.Write();
+      if ( fillAllCuts_                       ) c->histo5.Write();
 #endif // SAVE_ALL_HISTOGRAMS
     }
 
@@ -993,7 +1003,7 @@ bool baseClass::writeCutEfficFile()
      <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
      << fixed
      << setw(3) << cutIdPed
-     << setw(25) << "nocut"
+     << setw(35) << "nocut"
      << setprecision(4)
      << setw(15) << "-"
      << setw(15) << "-"
@@ -1031,7 +1041,7 @@ bool baseClass::writeCutEfficFile()
       effAbsErr = effRelErr;
       os << fixed
 	 << setw(3) << ++cutIdPed
-	 << setw(25) << "skim"
+	 << setw(35) << "skim"
 	 << setprecision(4)
 	 << setw(15) << "-"
 	 << setw(15) << "-"
@@ -1087,7 +1097,7 @@ bool baseClass::writeCutEfficFile()
 	  ssM2 << fixed << setprecision(4) << c->maxValue2;
 	}
       os << setw(3) << cutIdPed+c->id
-	 << setw(25) << c->variableName
+	 << setw(35) << c->variableName
 	 << setprecision(precision)
 	 << fixed
 	 << setw(15) << ( ( c->minValue1 == -99999999999.0 ) ? "-inf" : ssm1.str() )

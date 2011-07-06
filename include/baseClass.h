@@ -128,6 +128,13 @@ class baseClass : public rootNtupleClass {
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
   void evaluateCuts();
+  
+  void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
+  void fillAllPreviousCuts                ( bool b ) { fillAllPreviousCuts_               = b; } 
+  void fillAllOtherCuts                   ( bool b ) { fillAllOtherCuts_                  = b; } 
+  void fillAllSameLevelAndLowerLevelCuts  ( bool b ) { fillAllSameLevelAndLowerLevelCuts_ = b; } 
+  void fillAllCuts                        ( bool b ) { fillAllCuts_                       = b; } 
+  
   bool passedCut(const string& s);
   bool passedAllPreviousCuts(const string& s);
   bool passedAllOtherCuts(const string& s);
@@ -213,6 +220,13 @@ class baseClass : public rootNtupleClass {
   bool pileupDataFileWasUsed_;
   std::string pileupMCFileName_;
   std::string pileupDataFileName_;
+  
+  // Which plots to fill
+  bool fillSkim_;
+  bool fillAllPreviousCuts_;
+  bool fillAllOtherCuts_;
+  bool fillAllSameLevelAndLowerLevelCuts_;
+  bool fillAllCuts_;
 
   // Skim stuff
   bool produceSkim_;
