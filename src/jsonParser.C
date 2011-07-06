@@ -34,21 +34,22 @@ std::string JSONParser::getFileContent ( const char * file_name ) {
   typedef std::auto_ptr<char> char_ptr;
   
   char_ptr buffer;
+  std::string line;
+  std::string retval;
   std::ifstream f(file_name);
-  if (f.good())
+  if (f.is_open())
+  {
+    while ( f.good() )
     {
-      f.seekg(0, std::ios::end);
-      unsigned long size = f.tellg();
-      f.seekg(0, std::ios::beg);
-      buffer = char_ptr(new char[size]);
-      f.read(buffer.get(), size);
+      getline (f,line);
+      retval += line ;
     }
-
+    f.close();
+  }
+  
   else { 
     std::cout << "ERROR: JSON file " << file_name << " does not exist.  Code will crash." << std::endl;
   }
-
-  std::string retval ( buffer.get());
 
   return retval;
 }
