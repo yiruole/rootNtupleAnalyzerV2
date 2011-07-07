@@ -90,10 +90,12 @@ for line in cut_file:
             print "ERROR. JSON file in cut file does not exist"
             print "   Cut file is:  " + options.cut_file
             print "   JSON path is: " + line.split()[1]
+            sys.exit() 
         else : 
             command = "cp " + line.split()[1] + " " + options.output_dir 
             print command
             os.system ( command ) 
+            found_json = True
 
 cut_file.close() 
 
