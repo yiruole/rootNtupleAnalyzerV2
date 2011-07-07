@@ -23,6 +23,30 @@ def file_len(fname):
     f.close()
     return length
 
+def recover ( command , stderr ) : 
+
+    print "Non-empty stderr from stage command:" 
+    print "  Command = " + command 
+    print "  Error   = [" + stderr + "]"
+
+    if "Maximum number of requests exceeded" in stderr : 
+        print "Sleeping for 500 seconds, then retrying the command." 
+        print 
+        os.system ( "sleep 500" ) 
+        print "... I am awake again.  Retrying the command."
+        output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        stdout, stderr_new = output.communicate() 
+
+        if stderr_new != "" :
+            stdout = recover ( command, stderr_new ) 
+        else : 
+            return stdout
+
+        print "... Command submitted. Continuing as usual."
+    else :
+        print "Bailing."
+        sys.exit() 
+
 #-------------------------------------------------------
 # Get your lists, dictionaries, and counters ready
 #-------------------------------------------------------
@@ -62,6 +86,7 @@ txt_file = open ( txt_file_path, "r" )
 #-------------------------------------------------------
 
 n_root_files = 0
+n_queries = 0
 
 for entry in txt_file :
     if entry[-1] == "\n"    : entry = entry[:-1]
@@ -73,13 +98,26 @@ for entry in txt_file :
         sub_txt_file_paths.append ( entry ) 
 
     elif entry_suffix == "root" : 
-        status = subprocess.Popen ( "stager_qry -M "+entry , shell=True, stdout=subprocess.PIPE ).communicate()[0].split()[2]
+
+        command = "stager_qry -M "+entry 
+
+        output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        stdout, stderr = output.communicate()
+        
+        if stderr != "": 
+            stdout = recover ( command, stderr ) 
+            
+        status = stdout.split()[2]
 
         if   ( status == "STAGED"  ) : n_staged_total    = n_staged_total   + 1 
         elif ( status == "STAGEIN" ) : n_staging_total   = n_staging_total  + 1 
         else                         : 
+            command = "stager_get -M "+entry 
+            output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+            stdout, stderr = output.communicate() 
+            if stderr != "" :
+                stdout = recover ( command, stderr ) 
             n_unstaged_total  = n_unstaged_total + 1
-            subprocess.Popen ( "stager_get -M "+entry , shell=True, stdout=subprocess.PIPE )
 
         root_file_paths.append    ( entry )
         root_file_statuses[entry] = status
@@ -121,11 +159,15 @@ for i, sub_txt_file_path in enumerate(sub_txt_file_paths):
             
         command = "stager_qry -M "+entry 
 
-        output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE ).communicate()[0]
+        output = subprocess.Popen ( command , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        stdout, stderr = output.communicate() 
 
-        if ( len ( output.split() ) >= 3 ):
+        if stderr != "":
+            stdout = recover ( command, stderr ) 
 
-            status = output.split()[2]
+        if ( len ( stdout.split() ) >= 3 ):
+
+            status = stdout.split()[2]
             
             if   ( status == "STAGED" ) : 
                 n_staged         = n_staged         + 1 
