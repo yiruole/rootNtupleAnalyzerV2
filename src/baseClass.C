@@ -7,7 +7,8 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   fillAllPreviousCuts_              ( true ) ,
   fillAllOtherCuts_                 ( true ) ,
   fillAllSameLevelAndLowerLevelCuts_( true ) ,
-  fillAllCuts_                      ( true ) 
+  fillAllCuts_                      ( true ) ,
+  oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
   inputList_ = inputList;
@@ -185,7 +186,7 @@ void baseClass::readCutFile()
 	    continue;
 	  }
 
-	  STDOUT ("starting pileup reweighting code");
+	  STDOUT ("starting pileup reweighting code 1");
 	  
 	  if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
 	    if ( pileupDataFileWasUsed_ ) { 
@@ -203,6 +204,8 @@ void baseClass::readCutFile()
 	    pileupDataFileWasUsed_ = true;
 	    continue;
 	  }
+
+	  STDOUT ("starting pileup reweighting code 2");
 
 	  if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
 	    if ( pileupMCFileWasUsed_ ) { 
@@ -1458,3 +1461,43 @@ double baseClass::getPileupWeight ( int npileup, bool this_is_data ) {
   
   return PileupWeight_;
 }
+
+void baseClass::getTriggers(std::string * HLTKey ,  
+			    std::vector<std::string> * names, 
+			    std::vector<bool>        * decisions,
+			    std::vector<int>         * prescales ){
+  if ( HLTKey -> compare ( oldKey_ ) != 0 ){ 
+    oldKey_ = *HLTKey;
+    triggerDecisionMap_.clear();
+    triggerPrescaleMap_.clear();
+    
+    int ntriggers = names -> size();
+    
+    for (int i = 0; i < ntriggers; ++i){
+      triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
+      triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
+    }
+    STDOUT("New HLTKey: " << * HLTKey );
+    printTriggers();
+  }
+}
+
+void baseClass::printTriggers(){
+  std::map<std::string, int>::iterator i     = triggerPrescaleMap_.begin();
+  std::map<std::string, int>::iterator i_end = triggerPrescaleMap_.end();
+  STDOUT( "Triggers include: ")
+    for (; i != i_end; ++i) STDOUT( "\t" << i -> second << "\t\"" << i -> first << "\"" );
+}
+
+bool baseClass::triggerFired ( const char* name ) {
+  std::map<std::string, bool>::iterator i = triggerDecisionMap_.find ( name ) ;
+  if ( i == triggerDecisionMap_.end()) return false;
+  else return i -> second;
+}
+
+int baseClass::triggerPrescale ( const char* name ) { 
+  std::map<std::string, int>::iterator i = triggerPrescaleMap_.find ( name ) ;
+  if ( i == triggerPrescaleMap_.end()) return -999;
+  else return i -> second;
+}
+

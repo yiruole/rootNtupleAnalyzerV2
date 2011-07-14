@@ -124,7 +124,14 @@ class baseClass : public rootNtupleClass {
 
   int passJSON(int run, int ls, bool isData);
   double getPileupWeight ( int npileup, bool this_is_data );
-
+  bool triggerFired    ( const char* name );
+  int  triggerPrescale ( const char* name );
+  void printTriggers();
+  void getTriggers(std::string * HLTKey ,   
+		   std::vector<std::string> * names, 
+		   std::vector<bool>        * decisions,
+		   std::vector<int >        * prescales);
+    
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
   void evaluateCuts();
@@ -213,6 +220,11 @@ class baseClass : public rootNtupleClass {
   JSONParser jsonParser_;
   bool jsonFileWasUsed_;
   std::string jsonFileName_;
+
+  // Trigger stuff
+  std::string oldKey_; 
+  std::map<std::string, bool> triggerDecisionMap_; 
+  std::map<std::string, int > triggerPrescaleMap_; 
 
   // PILEUP stuff
   PileupReweighter pileupReweighter_;
