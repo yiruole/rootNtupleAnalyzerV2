@@ -113,7 +113,8 @@ for ijob in range(ijobmax):
     outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+" "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+"\n")
     outputfile.write("mv -v "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
     outputfile.write("mv -v "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
-    outputfile.write("rfcp "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+"_skim.root"+" "+outputcastordir+"/"+dataset+"_"+str(ijob)+".root\n")
+    outputfile.write("rfcp "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+"_reduced_skim.root"+" "+outputcastordir+"/"+dataset+"_"+str(ijob)+".root\n")
+    ### outputfile.write("rfcp "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+"_skim.root"+" "+outputcastordir+"/"+dataset+"_"+str(ijob)+".root\n")
     #    outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"\n")
     #    outputfile.write("mv -v "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"_skim.root"+" "+outputmain+"/skim/"+dataset+"_"+str(ijob)+".root\n")
     outputfile.close
