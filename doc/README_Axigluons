@@ -1,0 +1,15 @@
+Create lists:
+
+ ____   ___  _ _
+|___ \ / _ \/ / |
+  __) | | | | | |
+ / __/| |_| | | |
+|_____|\___/|_|_|
+
+## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (skim Ele30MET30, data and MC, V00-02-0X) 
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/home/data/Ntuples2011/Axigluons/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011 \
+-o config/SingleElectron_axigluons_enujj_skimEle30MET30
+
