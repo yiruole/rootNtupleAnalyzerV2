@@ -62,7 +62,8 @@ if not os.path.isfile ( options.input_list ) :
 
 if not os.path.isdir ( options.output_dir ) : 
     print "Making directory: " + options.output_dir
-    os.mkdir ( options.output_dir ) 
+    #os.mkdir ( options.output_dir )
+    os.makedirs ( options.output_dir ) 
 
 #----------------------------------------------------------------
 # Can you find a JSON file? If so, save it
