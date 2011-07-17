@@ -5,9 +5,9 @@
 /DoubleElectron/Run2011A-May10ReReco-v1/AOD  -1
 /Photon/Run2011A-PromptReco-v4/AOD           -1
 /Photon/Run2011A-May10ReReco-v1/AOD          -1
-/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          10.56
-/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  63.3
-/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  0.99
+/TToBLNu_TuneZ2_tW-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          10.6
+/TToBLNu_TuneZ2_t-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  64.6
+/TToBLNu_TuneZ2_s-channel_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  4.6
 /TTJets_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM	          168
 /Z0Jets_TuneZ2_7TeV-alpgen-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM                  1929.0
 /Z1Jets_ptZ-0to100_TuneZ2_7TeV-alpgen-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM       380.8
@@ -33,10 +33,10 @@
 /GJets_TuneD6T_HT-40To100_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM            23620.0 
 /GJets_TuneD6T_HT-200_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM                3476.0
 /GJets_TuneD6T_HT-100To200_7TeV-madgraph/Spring11-PU_S1_START311_V1G1-v1/AODSIM           485.0
-/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  24640
-/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  4.297
-/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  10.4
-/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  27.79
+/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  31314
+/ZZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  5.9
+/WZtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  18.2
+/WWtoAnything_TuneZ2_7TeV-pythia6-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM		  43
 /DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Spring11-PU_S1_START311_V1G1-v1/AODSIM	  3048
 /LQToUE_M-850_7TeV-pythia6/Summer11-START311_V2-v1/AODSIM                                 0.000732
 /LQToUE_M-750_7TeV-pythia6/Summer11-START311_V2-v1/AODSIM                                 0.00214
