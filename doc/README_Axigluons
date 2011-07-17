@@ -1,10 +1,21 @@
-Create lists:
-
  ____   ___  _ _
 |___ \ / _ \/ / |
   __) | | | | | |
  / __/| |_| | | |
 |_____|\___/|_|_|
+
+
+--------
+Output :
+--------
+
+- 330pb-1 , 17/07/2011 , Test
+pcuscms46.cern.ch : /home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj/330pb-1_17072011/output_cutTable_axigluons_enujj/
+
+
+-------------
+Create lists:
+-------------
 
 ## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (skim Ele30MET30, data and MC, V00-02-0X) 
   ./scripts/createList.py \
