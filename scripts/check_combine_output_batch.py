@@ -335,7 +335,7 @@ for n, lin in enumerate( open( options.inputList ) ):
             resubmitThisJob = True
         else:
             for line in open(logFile):
-                if "error" in line.lower():
+                if "error" in line.lower() and "Error checking device name: LABEL" not in line:
                        resubmitThisJob = True
                        nLogFileErrors = nLogFileErrors+1
                        print logFile + "has at least one instance of the word 'error' (case insensitive)" 
