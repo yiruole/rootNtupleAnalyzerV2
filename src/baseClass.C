@@ -1406,7 +1406,9 @@ bool baseClass::writeSkimTree()
   TDirectory *dir1 = skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   skim_file_->cd("LJFilter/EventCount");
-  hCount_->SetBinContent(1,NBeforeSkim_);
+  int nEntRoottuple = fChain->GetEntriesFast();
+  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->Write();
 
@@ -1429,7 +1431,9 @@ bool baseClass::writeReducedSkimTree()
   TDirectory *dir1 = reduced_skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   reduced_skim_file_->cd("LJFilter/EventCount");
-  hReducedCount_->SetBinContent(1,NBeforeSkim_);
+  int nEntRoottuple = fChain->GetEntriesFast();
+  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->Write();
 
