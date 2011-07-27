@@ -1470,19 +1470,14 @@ void baseClass::getTriggers(std::string * HLTKey ,
 			    std::vector<std::string> * names, 
 			    std::vector<bool>        * decisions,
 			    std::vector<int>         * prescales ){
-  if ( HLTKey -> compare ( oldKey_ ) != 0 ){ 
-    oldKey_ = *HLTKey;
-    triggerDecisionMap_.clear();
-    triggerPrescaleMap_.clear();
+  triggerDecisionMap_.clear();
+  triggerPrescaleMap_.clear();
     
-    int ntriggers = names -> size();
-    
-    for (int i = 0; i < ntriggers; ++i){
-      triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
-      triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
-    }
-    STDOUT("New HLTKey: " << * HLTKey );
-    printTriggers();
+  int ntriggers = names -> size();
+  
+  for (int i = 0; i < ntriggers; ++i){
+    triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
+    triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
   }
 }
 
