@@ -213,11 +213,40 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
 
 Create lists:
 
- ____   ___  _ _
-|___ \ / _ \/ / |
-  __) | | | | | |
- / __/| |_| | | |
-|_____|\___/|_|_|
+ ____   ___  _ _           __                                     _ _ 
+|___ \ / _ \/ / |         / _\_   _ _ __ ___  _ __ ___   ___ _ __/ / |
+  __) | | | | | |  _____  \ \| | | | '_ ` _ \| '_ ` _ \ / _ \ '__| | |
+ / __/| |_| | | | |_____| _\ \ |_| | | | | | | | | | | |  __/ |  | | |
+|_____|\___/|_|_|         \__/\__,_|_| |_| |_|_| |_| |_|\___|_|  |_|_|
+
+
+## Summer11 MC , V00-02-06 (ele pT>20GeV  OR  muon pT>20 GeV  OR  tau pT>15 GeV skim for SM backgrounds, no skim for signal) : 
+./scripts/createList.py \
+  -m root \
+  -i \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_AxigluonV_CalcHEP_PYTHIA_NoFilter_20110831_231701 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_DiBoson_PYTHIA_20110903_032914 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_SingleTop_MG_20110903_031945 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_TTBarJets_MG_20110903_030731 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_SHERPA_20110903_031551 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_MG_20110903_034409 \
+-o config/Summer11MC
+
+Missing files:
+WW_PYTHIA ==> 1/43 jobs missing
+ZZ_PYTHIA ==> 1/42 jobs missing
+T_tchannel_MG ==> 1/27 jobs missing
+TTBAR_MG ==> 2/103 jobs missing
+WJets_SHERPA ==> 12/412 jobs missing
+WJets_MG ==> 32/431 jobs missing
+
+
+ ____   ___  _ _           __            _             _ _ 
+|___ \ / _ \/ / |         / _\_ __  _ __(_)_ __   __ _/ / |
+  __) | | | | | |  _____  \ \| '_ \| '__| | '_ \ / _` | | |
+ / __/| |_| | | | |_____| _\ \ |_) | |  | | | | | (_| | | |
+|_____|\___/|_|_|         \__/ .__/|_|  |_|_| |_|\__, |_|_|
+                             |_|                 |___/     
 
 ## FOR EEJJ : DoubleElectron 2011 + Spring11 MC (ee skim data and MC, V00-02-0X) 
   ./scripts/createList.py \
