@@ -179,6 +179,7 @@ for i, sub_txt_file_path in enumerate(sub_txt_file_paths):
                 n_unstaged       = n_unstaged       + 1
                 n_unstaged_total = n_unstaged_total + 1
                 subprocess.Popen ( "stager_get -M "+entry , shell=True, stdout=subprocess.PIPE )
+                #print "LIST: " + entry
 
         else : 
             print "ERROR:"
