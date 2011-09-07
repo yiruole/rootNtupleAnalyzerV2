@@ -1,0 +1,38 @@
+LQeejj_M150	           LQToUE_M-150
+LQeejj_M200	           LQToUE_M-200
+LQeejj_M225	           LQToUE_M-225
+LQeejj_M250	           LQToUE_M-250
+LQeejj_M280	           LQToUE_M-280
+LQeejj_M300	           LQToUE_M-300
+LQeejj_M320	           LQToUE_M-320
+LQeejj_M340	           LQToUE_M-340
+LQeejj_M370	           LQToUE_M-370
+LQeejj_M400	           LQToUE_M-400
+LQeejj_M450	           LQToUE_M-450
+LQeejj_M500	           LQToUE_M-500
+LQeejj_M600	           LQToUE_M-600
+LQenujj_M150		   LQToUE_ENuJJFilter_M-150
+LQenujj_M200		   LQToUE_ENuJJFilter_M-200
+LQenujj_M225		   LQToUE_ENuJJFilter_M-225
+LQenujj_M250		   LQToUE_ENuJJFilter_M-250
+LQenujj_M280		   LQToUE_ENuJJFilter_M-280
+LQenujj_M300		   LQToUE_ENuJJFilter_M-300
+LQenujj_M320		   LQToUE_ENuJJFilter_M-320
+LQenujj_M340		   LQToUE_ENuJJFilter_M-340
+LQenujj_M370		   LQToUE_ENuJJFilter_M-370
+LQenujj_M400		   LQToUE_ENuJJFilter_M-400
+LQenujj_M450		   LQToUE_ENuJJFilter_M-450
+LQenujj_M500		   LQToUE_ENuJJFilter_M-500
+LQenujj_M600		   LQToUE_ENuJJFilter_M-600
+SingleTop		   SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel
+TTbar_Madgraph		   TTbarJets-madgraph
+WW			   WW__Spring10-START3X_V26_S09
+WZ			   WZ__Spring10-START3X_V26_S09
+ZZ			   ZZ__Spring10-START3X_V26_S09
+ZJetAlpgen		   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt
+WJetAlpgen		   W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt
+BJets                      BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000
+PhotonJets		   GJets_TuneD6T_HT-40To100 GJets_TuneD6T_HT-100To200 GJets_TuneD6T_HT-200
+OTHERBKG		   WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000
+ALLBKG			   Z0Jets_Pt Z1Jets_Pt Z2Jets_Pt Z3Jets_Pt Z4Jets_Pt Z5Jets_Pt TTbarJets-madgraph WW WZ ZZ SingleTop_sChannel SingleTop_tChannel SingleTop_tWChannel W0Jets_Pt W1Jets_Pt W2Jets_Pt W3Jets_Pt W4Jets_Pt W5Jets_Pt BJets_HT-100To250 BJets_HT-250To500 BJets_HT-500To1000 BJets_HT-1000 GJets_TuneD6T_HT-40To100 GJets_TuneD6T_HT-100To200 GJets_TuneD6T_HT-200
+DATA                       EG__Run2010A-Nov4ReReco_v1 Photon__Run2010B-Nov4ReReco_v1
