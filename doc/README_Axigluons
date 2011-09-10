@@ -21,6 +21,20 @@ pcuscms46.cern.ch : /home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj
 Create lists:
 -------------
 
+
+## 09/09/2011 : Summer11 MC (V00-02-06, ele or muon pt > 20 GeV , MET > 20 GeV, jet1 pt > 30 GeV, jet2 pt > 30 GeV)
+
+* reduced ntuples 
+pcuscms46: 
+/home/data/Ntuples2011/Axigluons/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011
+castor: 
+/castor/cern.ch/user/s/santanas/Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011
+
+* logs:
+pcuscms46: 
+/home/santanas/Data/NtupleSkims/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011
+
+
 ## FOR ENUJJ : SingleElectron 2011 + ElectronHad 2011 + Spring11 MC (skim Ele30MET30, data and MC, V00-02-0X) 
   ./scripts/createList.py \
     -m root \
