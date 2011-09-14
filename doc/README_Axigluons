@@ -9,9 +9,17 @@
 Output :
 --------
 
+- MC study , 10-14/09/2011 , First look at Axigluon+W-->enujj , lepton efficiency studies, etc...
+pcuscms46.cern.ch : 
+/home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj/5fb-1_Summer11MC_AxigluonW_enujj_13092011/output_cutTable_axigluons_enujj
+/home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj/5fb-1_Summer11MC_AxigluonW_enujj_Mjj500cut_13092011_2/output_cutTable_axigluons_enujj (Mjj>500)
+/home/santanas/Axigluons/data/output_fromAFS/axigluons_lnujj/AxigluonW_GenStudies_13092011
+dropbox:
+https://www.dropbox.com/home#/Axigluons/enujj/axigluons_enujj__Summer11MC_AxigluonW_enujj_13092011:::57153193
+
 - 330pb-1 , 21/07/2011 , Reproduced LQ1 enujj preselection 2011
 pcuscms46.cern.ch : /home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj/330pb-1_21072011/output_cutTable_axigluons_enujj/
-  - dropbox: Plots/Axigluons/enujj/axigluons_enujj__330pb-1_Spring11MC_LQ1enujjpresel2010_noQCD_noMCRescale_21072011
+dropbox: Plots/Axigluons/enujj/axigluons_enujj__330pb-1_Spring11MC_LQ1enujjpresel2010_noQCD_noMCRescale_21072011
 
 - 330pb-1 , 17/07/2011 , Test
 pcuscms46.cern.ch : /home/santanas/Axigluons/data/output_fromAFS/axigluons_enujj/330pb-1_17072011/output_cutTable_axigluons_enujj/
@@ -23,6 +31,13 @@ Create lists:
 
 
 ## 09/09/2011 : Summer11 MC (V00-02-06, ele or muon pt > 20 GeV , MET > 20 GeV, jet1 pt > 30 GeV, jet2 pt > 30 GeV)
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/home/data/Ntuples2011/Axigluons/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011 \
+-o config/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011
 
 * reduced ntuples 
 pcuscms46: 
