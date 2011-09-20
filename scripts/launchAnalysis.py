@@ -27,7 +27,7 @@ parser.add_option ("--input_list", "-i" , dest = "input_list", type=str, help="T
 parser.add_option ("--output_dir", "-o" , dest = "output_dir", type=str, help="Directory where output will be stored" ) 
 parser.add_option ("--tree_name" , "-n" , dest = "tree_name" , type=str, help="Name of TTree in .root files to be analyzed")
 parser.add_option ("--cut_file"  , "-c" , dest = "cut_file"  , type=str, help="Text file containing cut values" ) 
-parser.add_option ("--ncores"    , "-p", dest = "ncores"     , type=int, help="Number of processor cores to be used to run the job" )
+parser.add_option ("--ncores"    , "-p" , dest = "ncores"    , type=int, help="Number of processor cores to be used to run the job" )
 
 (options, args) = parser.parse_args()
 
