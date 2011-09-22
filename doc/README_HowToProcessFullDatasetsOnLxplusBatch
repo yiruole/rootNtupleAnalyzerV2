@@ -212,7 +212,6 @@ NOTE: to run on several datasets with roottuples stored in DIFFERENT CASTOR LOCA
       one could do:
 
 Create lists:
-
  ____   ___  _ _           __                                     _ _ 
 |___ \ / _ \/ / |         / _\_   _ _ __ ___  _ __ ___   ___ _ __/ / |
   __) | | | | | |  _____  \ \| | | | '_ ` _ \| '_ ` _ \ / _ \ '__| | |
@@ -230,6 +229,11 @@ Create lists:
 /castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_TTBarJets_MG_20110903_030731 \
 /castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_SHERPA_20110903_031551 \
 /castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_MG_20110903_034409 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_GammaJets_MG_20110909_183455 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaHalf_NoFilter_20110920_192420 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaOne_NoFilter_20110909_182056 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_MG_20110909_183645 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_SHERPA_20110915_104308 \
 -o config/Summer11MC
 
 Missing files:
@@ -239,8 +243,10 @@ T_tchannel_MG ==> 1/27 jobs missing
 TTBAR_MG ==> 2/103 jobs missing
 WJets_SHERPA ==> 12/412 jobs missing
 WJets_MG ==> 32/431 jobs missing
-
-
+GammaJets_MG ==> 3/140  jobs missing
+LQ, Beta 1/2 ==> 1/110  jobs missing
+ZJets_MG     ==> 3/410  jobs missing
+ZJets_SHERPA ==> 24/461 jobs missing
  ____   ___  _ _           __            _             _ _ 
 |___ \ / _ \/ / |         / _\_ __  _ __(_)_ __   __ _/ / |
   __) | | | | | |  _____  \ \| '_ \| '__| | '_ \ / _` | | |
