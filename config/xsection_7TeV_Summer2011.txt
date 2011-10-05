@@ -1,3 +1,15 @@
+/SingleElectron/Run2011A-PromptReco-v4/AOD                                                     -1 
+/SingleElectron/Run2011A-PromptReco-v6/AOD                                                     -1 
+/SingleElectron/Run2011A-05Aug2011-v1/AOD                                                      -1 
+/SingleElectron/Run2011A-May10ReReco-v1/AOD                                                    -1 
+/ElectronHad/Run2011A-PromptReco-v4/AOD                                                        -1 
+/ElectronHad/Run2011A-PromptReco-v6/AOD                                                        -1 
+/ElectronHad/Run2011A-05Aug2011-v1/AOD                                                         -1 
+/ElectronHad/Run2011A-May10ReReco-v1/AOD                                                       -1 
+/Photon/Run2011A-PromptReco-v4/AOD                                                             -1
+/Photon/Run2011A-PromptReco-v6/AOD                                                             -1
+/Photon/Run2011A-05Aug2011-v1/AOD                                                              -1
+/Photon/Run2011A-May10ReReco-v1/AOD                                                            -1
 /WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM                             43
 /WZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM			        18.2
 /ZZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM			        5.9
@@ -67,4 +79,3 @@
 /AxigluonG_M-500_TuneZ2_7TeV-calchep-pythia/Summer11-PU_S4_START42_V11-v1/AODSIM	        24.0034
 /AxigluonG_M-1000_TuneZ2_7TeV-calchep-pythia/Summer11-PU_S4_START42_V11-v1/AODSIM	        1.4911
 /AxigluonG_M-1500_TuneZ2_7TeV-calchep-pythia/Summer11-PU_S4_START42_V11-v1/AODSIM	        0.1739
-
