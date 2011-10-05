@@ -234,6 +234,18 @@ Create lists:
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaOne_NoFilter_20110909_182056 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_MG_20110909_183645 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_SHERPA_20110915_104308 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-SingleElectron_20110928_221842 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-SingleElectron_20111004_224800 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-SingleElectron_20111004_224919 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-SingleElectron_20111004_225132 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-ElectronHad_20111004_230018 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-ElectronHad_20111004_230027 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-ElectronHad_20110929_111544 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-ElectronHad_20110929_111719 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-Photon_20110929_163827 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-Photon_20110929_164824 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-Photon_20110929_164411 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-Photon_20110929_163130 \
 -o config/Summer11MC
 
 Missing files:
