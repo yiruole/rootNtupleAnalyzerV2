@@ -246,6 +246,36 @@ Create lists:
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-ElectronHad_20110929_111719 \
 -o config/Summer11MCAnd2011Data
 
+Missing files:
+WW_PYTHIA ==> 1/43 jobs missing
+ZZ_PYTHIA ==> 1/42 jobs missing
+T_tchannel_MG ==> 1/27 jobs missing
+TTBAR_MG ==> 2/103 jobs missing
+WJets_SHERPA ==> 12/412 jobs missing
+WJets_MG ==> 32/431 jobs missing
+GammaJets_MG ==> 3/140  jobs missing
+LQ, Beta 1/2 ==> 1/110  jobs missing
+ZJets_MG     ==> 3/410  jobs missing
+ZJets_SHERPA ==> 24/461 jobs missing
+
+
+## Summer11 MC , V00-02-06 (ele pT>20GeV  OR  muon pT>20 GeV  OR  tau pT>15 GeV skim for SM backgrounds,                             
+                            no skim for LQ and Axigluon signal) : 
+./scripts/createList.py \
+  -m root \
+  -i \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_AxigluonV_CalcHEP_PYTHIA_NoFilter_20110831_231701 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaHalf_NoFilter_20110920_192420 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaOne_NoFilter_20110909_182056 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_DiBoson_PYTHIA_20110903_032914 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_SingleTop_MG_20110903_031945 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_TTBarJets_MG_20110903_030731 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_SHERPA_20110903_031551 \
+/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_WJets_MG_20110903_034409 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_GammaJets_MG_20110909_183455 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_MG_20110909_183645 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_ZJets_SHERPA_20110915_104308 \
+-o config/Summer11MC
 
 Missing files:
 WW_PYTHIA ==> 1/43 jobs missing
