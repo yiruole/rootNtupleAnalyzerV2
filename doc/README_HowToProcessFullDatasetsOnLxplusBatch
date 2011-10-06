@@ -244,6 +244,10 @@ Create lists:
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-ElectronHad_20111004_230027 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-ElectronHad_20110929_111544 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-ElectronHad_20110929_111719 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-DoubleElectron_20110929_111959 \	  	  	  	  
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-DoubleElectron_20110929_112603 \	  	  	  	  
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-DoubleElectron_20110929_112758	  \	  	  	  
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-DoubleElectron_20110929_113026 \	
 -o config/Summer11MCAnd2011Data
 
 Missing files:
