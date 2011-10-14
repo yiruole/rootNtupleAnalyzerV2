@@ -225,7 +225,6 @@ Create lists:
 ./scripts/createList.py \
   -m root \
   -i \
-/castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_AxigluonV_CalcHEP_PYTHIA_NoFilter_20110831_231701 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaHalf_NoFilter_20110920_192420 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_LQToUE_BetaOne_NoFilter_20110909_182056 \
 /castor/cern.ch/user/s/santanas/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-Summer11MC_DiBoson_PYTHIA_20110903_032914 \
@@ -244,10 +243,14 @@ Create lists:
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-ElectronHad_20111004_230027 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-ElectronHad_20110929_111544 \
 /castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-ElectronHad_20110929_111719 \
-/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-DoubleElectron_20110929_111959 \	  	  	  	  
-/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-DoubleElectron_20110929_112603 \	  	  	  	  
-/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-DoubleElectron_20110929_112758	  \	  	  	  
-/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-DoubleElectron_20110929_113026 \	
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-DoubleElectron_20110929_111959 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-DoubleElectron_20110929_112603 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-DoubleElectron_20110929_112758	  \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-DoubleElectron_20110929_113026 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_May10-Photon_20111011_112421	\
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v4-Photon_20111011_112405 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-ReReco_Aug05-Photon_20111011_112431 \
+/castor/cern.ch/user/e/eberry/LeptonsPlusJets/RootNtuple2011/RootNtuple-V00-02-06-2011AData-PromptReco_v6-Photon_20111011_112418 \
 -o config/Summer11MCAnd2011Data
 
 Missing files:
@@ -261,7 +264,6 @@ GammaJets_MG ==> 3/140  jobs missing
 LQ, Beta 1/2 ==> 1/110  jobs missing
 ZJets_MG     ==> 3/410  jobs missing
 ZJets_SHERPA ==> 24/461 jobs missing
-
 
 ## Summer11 MC , V00-02-06 (ele pT>20GeV  OR  muon pT>20 GeV  OR  tau pT>15 GeV skim for SM backgrounds,                             
                             no skim for LQ and Axigluon signal) : 
