@@ -12,23 +12,28 @@
 
 #### INPUTS HERE ####
 #------------
-files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_enujj.txt` # list of cut files that will be used
+#files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_enujj.txt` # list of cut files that will be used
+files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_munujj.txt` # list of cut files that will be used
 #------------
 OUTDIRPATH=$AXIGLUONDATA  # a subdir will be created for each cut file 
-SUBDIR=axigluons_enujj/330pb-1_17072011
+#SUBDIR=axigluons_enujj/5fb-1_Summer11MC_AxigluonW_enujj_noSHERPA_24102011
+SUBDIR=axigluons_enujj/5fb-1_Summer11MC_AxigluonW_munujj_noSHERPA_24102011
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=330 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+ILUM=5000 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
-CODENAME=analysisClass_axigluons_enujj #the actual name of the code used to process the ntuples (without the suffix ".C") 
+#CODENAME=analysisClass_axigluons_enujj #the actual name of the code used to process the ntuples (without the suffix ".C") 
+CODENAME=analysisClass_axigluons_munujj #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
-INPUTLIST=config/SingleElectron_axigluons_enujj_skimEle30MET30/inputListAllCurrent.txt #specify input list
+#INPUTLIST=config/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011/inputListAllCurrent.txt #specify input list
+INPUTLIST=config/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st30Jet2nd30_09092011/inputListAllCurrent_noSHERPA.txt #specify input list
+
 #------------
-XSECTION=config/xsection_7TeV_2011.txt #specify cross section file
+XSECTION=config/xsection_7TeV_Summer2011.txt #specify cross section file
 #------------
-SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_axigluons_enujj_2011.txt #specify list for sample merging
+SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_axigluons_lnujj_2011.txt #specify list for sample merging
 #------------
 NCORES=2 #Number of processor cores to be used to run the job
 #------------

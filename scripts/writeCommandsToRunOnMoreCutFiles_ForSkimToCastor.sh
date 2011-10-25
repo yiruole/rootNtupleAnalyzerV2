@@ -12,53 +12,38 @@
 
 #### INPUTS HERE ####
 #------------
-#files=`ls $LQMACRO/config/cutTable_enujjSample.txt` # list of cut files that will be used
-#files=`ls $LQMACRO/config/cutTable_enujjSample_QCD.txt` # list of cut files that will be used
 #files=`ls $LQMACRO/config/eejj/cutTable_eejjSample_*.txt $LQMACRO/config/cutTable_eejjSample.txt` # list of cut files that will be used
-#files=`ls $LQANA/Test_eejj_QCD/cutTable_eejjSample_QCD.txt` # list of cut files that will be used
-#files=`ls $LQANA/Test_enujj_QCD/cutTable_enujjSample_QCD.txt` # list of cut files that will be used
-files=`ls $LQMACRO2011/config/cutTable_enujjSample_2011_skim.txt` # list of cut files that will be used
+#files=`ls $LQMACRO2011/config/cutTable_enujjSample_2011_skim.txt` # list of cut files that will be used
+#files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_lnujj_skim.txt` # list of cut files that will be used
+files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_skim.txt` # list of cut files that will be used
 #------------
-OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-#SUBDIR=enujj_analysis/6.7pb-1_v2_Brussels_QCD_HLT20_noEle
-#SUBDIR=enujj_analysis/6.7pb-1_v2_Brussels_noDeltaPhi
-#SUBDIR=enujj_analysis/7.4pb-1_v1_QCD_HLT30
-#SUBDIR=enujj_analysis/15.1pb-1_v4
+OUTDIRPATH=$AXIGLUONDATA  # a subdir will be created for each cut file 
 #SUBDIR=enujj_analysis/21.9pb-1_v2
-SUBDIR=enujj_analysis/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011
-#SUBDIR=enujj_analysis/10.9pb-1_v3_EcalDeadCellsStudy
+#SUBDIR=axigluons_lnujj/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
+#SUBDIR=axigluons_lnujj/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
+SUBDIR=axigluons_lljj/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
-CASTORDIR=LQ/RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011
+#CASTORDIR=LQ/RootNtuple/RootNtuple-V00-02-0X-DATA-MC-2011-enujj_preselection_skim_05062011
+#CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
+#CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
+CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
 FULLCASTORDIR=$CASTOR_HOME/$CASTORDIR #--> do not modify this line
 #------------
-ILUM=200 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
-FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
+#CODENAME=analysisClass_axigluons_lnujj_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
+CODENAME=analysisClass_axigluons_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
-CODENAME=analysisClass_enujjSample_2011 #the actual name of the code used to process the ntuples (without the suffix ".C") 
-#CODENAME=analysisClass_enujjSample_QCD #the actual name of the code used to process the ntuples (without the suffix ".C") 
-#CODENAME=analysisClass_eejjSample_QCD #the actual name of the code used to process the ntuples (without the suffix ".C") 
+#INPUTLIST=config/Summer11MC/inputListAllCurrent.txt #specify input list
+#INPUTLIST=config/Summer11MC/inputListAllCurrent_Axigluons.txt #signal only
+#INPUTLIST=config/Summer11MC/inputListAllCurrent_smallBkg.txt #small samples 
+INPUTLIST=config/Summer11MC/inputListAllCurrent_largeBkg.txt #large samples
+#INPUTLIST=config/Summer11MC/inputListAllCurrent_edmundFiles.txt #large samples
 #------------
-#INPUTLIST=config/PhotonSkim/inputListAllCurrent.txt #specify input list
-INPUTLIST=config/ElectronSkim/inputListAllCurrent.txt #specify input list
-#INPUTLIST=config/ElectronSkim/input_skim.txt
-#INPUTLIST=config/ElectronSkim/inputListAllCurrent_MC.txt #specify input list
-#------------
-XSECTION=config/xsection_7TeV_2011.txt #specify cross section file
-#XSECTION=config/xsection_7TeV_Zrescale_Wrescale.txt #specify cross section file
-#XSECTION=config/xsection_7TeV_Zrescale.txt #specify cross section file
-#------------
-#SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV.txt #specify list for sample merging
-#SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_enujj_QCD.txt #specify list for sample merging
-SAMPLELISTFORMERGING=config/sampleListForMerging_7TeV_enujj_2011.txt #specify list for sample merging
-#------------
-##DATA
-NJOBS=20 #number of jobs for each dataset
+#NJOBS=1 #number of jobs for each dataset - #signal only
+#NJOBS=5 #number of jobs for each dataset - #small samples  was 10
+NJOBS=40 #number of jobs for each dataset - #large samples  was 100
 WAIT=5 #seconds of delay between submission of different datasets
-##MC
-#NJOBS=30 #number of jobs for each dataset
-#WAIT=5 #seconds of delay between submission of different datasets
 #------------
 QUEUE=1nd #bsub queue  
 #------------
@@ -88,6 +73,22 @@ cat >> $COMMANDFILE <<EOF
     -w $WAIT \
     -d $CASTORDIR \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/launch_${suffix}.log
+
+#### OR 
+
+  ./scripts/launchAnalysis_batch_ForSkimToCastor.py \
+    -i $INPUTLIST \
+    -n rootTupleTree/tree \
+    -c $file \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix  \
+    -j $NJOBS \
+    -q $QUEUE \
+    -w $WAIT \
+    -d $CASTORDIR \
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/launch_${suffix}.log
+
+
+#### THEN
 
   ./scripts/check_combine_output_batch_ForSkimToCastor.py \
     -i $INPUTLIST \
