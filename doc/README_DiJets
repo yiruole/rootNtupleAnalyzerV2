@@ -16,7 +16,15 @@ Create lists:
 
 ## 11/11/2011 : Skim of HT_150 OR HT_200 OR HT_250 in the PhysicsDST event content for the run range (179959-180252)
 
-* files:
+* reduced ntuples for dijet analysis
+cmsphys04:
+/data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252_dijets_allEvents_11112011
+
+* big ntuples with RootTupleMakerV2:
+cmsphys04:
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootTupleMakerV2_output_DATA_HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252.root
+
+* original EDM files:
 cmsphys04:
 /data/santanas/Data/HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252
 
@@ -30,7 +38,7 @@ cmsphys04:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011 \
 -o config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
 
-*logs
+* logs
 cmsphys04:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
 
