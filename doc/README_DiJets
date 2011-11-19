@@ -13,11 +13,46 @@ Output :
 Create lists:
 -------------
 
-## 16/11/2011 : Q*-->JJ MC samples for tests, with PhysicsDST event content, HEAD Nov 3rd 2011
+## 19/11/2011 : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, same as Nov expect no pT cut on PF Jets)
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/castor/cern.ch/user/s/santanas/DiJets/RootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219 \
+-o config/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
+
+* logs
+cmsphys04:
+/data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
+
+
+## 18/11/2011 : PhysicsDST Data (HEAD Nov, 3, 2011, no filter, 2011BData, run range 179959-180282, reduced ntuples for dijet analysis, JECL23Res)
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011 \
+-o config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
+
+* reduced ntuples
+cmsphys04:
+/data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
+castor:
+/castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
+
+* logs
+cmsphys04:
+/data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_14112011
+
+
+## 16-18/11/2011 : Q*-->JJ MC samples for tests, with PhysicsDST event content, HEAD Nov 3rd 2011
 
 * reduced ntuples for dijet analysis
 cmsphys04:
-/data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-MCFall11-QstarToJJ-ForTest_16112011
+NOJEC       /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-MCFall11-QstarToJJ-ForTest_16112011
+JEC (L23)   /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-MCFall11-QstarToJJ-ForTest_JECL23_18112011
 
 * big ntuples with RootTupleMakerV2:
 cmsphys04:
