@@ -34,6 +34,8 @@ double PileupReweighter::getPileupWeight ( int n_pileup ) {
 
 void PileupReweighter::readPileupDataFile ( std::string * file_name ) { 
   
+  m_data_file_name = * file_name ;
+  
   TFile * file = new TFile ( file_name -> c_str() ) ;
   
   if ( !file ) { 
@@ -89,33 +91,24 @@ std::vector<std::string> PileupReweighter::split(const std::string& s, const std
 
 
 void PileupReweighter::readPileupMCFile ( std::string * file_name ) { 
-  typedef std::auto_ptr<char> char_ptr;
-  
-  char_ptr buffer;
-  std::ifstream f(file_name->c_str());
-  if (f.good())
-    {
-      f.seekg(0, std::ios::end);
-      unsigned long size = f.tellg();
-      f.seekg(0, std::ios::beg);
-      buffer = char_ptr(new char[size]);
-      f.read(buffer.get(), size);
-    }
-  
-  else { 
-    std::cout << "ERROR: PILEUP_MC_TXT_FILE " << file_name << " does not exist.  Code will crash." << std::endl;
-  }
 
-  std::string raw_pdf_string ( buffer.get());
+  m_mc_file_name = * file_name ;
+  
+  std::ifstream f (file_name -> c_str());
+  std::stringstream buffer;
+  buffer << f.rdbuf();
+
+  std::string raw_pdf_string ( buffer.str());
   
   std::vector<std::string> split_pdf_strings = split ( raw_pdf_string , std::string(","));
 
   m_mc_pileup_pdf.resize( split_pdf_strings.size() );
-  
+
   for (int i = 0; i < (int) split_pdf_strings.size() ; ++i) {
     double pdf = atof ( split_pdf_strings[i].c_str() );
     m_mc_pileup_pdf[i] = pdf;
   }
+
 }
 
 void PileupReweighter::printPileupWeights() { 
@@ -125,12 +118,25 @@ void PileupReweighter::printPileupWeights() {
   }
 }
 
+void PileupReweighter::normalizeVector ( std::vector<double> & v, int max_n_pileup ) {
+  
+  double integral = 0.0;
+  double new_integral = 0.0;
+  
+  for ( int n_pileup = 0 ; n_pileup < max_n_pileup; ++n_pileup) integral += v [ n_pileup ];
+  for ( int n_pileup = 0 ; n_pileup < max_n_pileup; ++n_pileup) v[ n_pileup ] /=  integral;
+
+}
+
 void PileupReweighter::calculatePileupWeights() {
   
   if ( m_mc_pileup_pdf.size() < m_data_pileup_pdf.size() ) 
     m_max_n_pileup = m_mc_pileup_pdf.size();
   else 
     m_max_n_pileup = m_data_pileup_pdf.size();
+
+  normalizeVector ( m_mc_pileup_pdf  , m_max_n_pileup );
+  normalizeVector ( m_data_pileup_pdf, m_max_n_pileup ) ;
 
   m_pileup_weights.resize ( m_max_n_pileup ) ;
 
