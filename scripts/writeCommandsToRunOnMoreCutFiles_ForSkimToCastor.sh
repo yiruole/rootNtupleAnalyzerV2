@@ -25,7 +25,7 @@ OUTDIRPATH=$DIJETDATA  # a subdir will be created for each cut file
 #SUBDIR=axigluons_lnujj/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
 #SUBDIR=axigluons_lnujj/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
 #SUBDIR=axigluons_lljj/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
-SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
+SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -33,7 +33,7 @@ SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
-CASTORDIR=DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
+CASTORDIR=DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 FULLCASTORDIR=$CASTOR_HOME/$CASTORDIR #--> do not modify this line
 #------------
 #CODENAME=analysisClass_axigluons_lnujj_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
@@ -45,7 +45,8 @@ CODENAME=analysisClass_dijetPhysicsDST_skim #the actual name of the code used to
 #INPUTLIST=config/Summer11MC/inputListAllCurrent_smallBkg.txt #small samples 
 #INPUTLIST=config/Summer11MC/inputListAllCurrent_largeBkg.txt #large samples
 #INPUTLIST=config/Summer11MC/inputListAllCurrent_edmundFiles.txt #large samples
-INPUTLIST=config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_20111104_140216/inputListAllCurrent.txt #large samples
+#INPUTLIST=config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_20111104_140216/inputListAllCurrent.txt #large samples
+INPUTLIST=config/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219/inputListAllCurrent.txt
 #------------
 #NJOBS=1 #number of jobs for each dataset - #signal only
 #NJOBS=5 #number of jobs for each dataset - #small samples  was 10
