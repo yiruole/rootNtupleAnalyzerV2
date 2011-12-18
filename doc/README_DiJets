@@ -36,7 +36,7 @@ cmsphys04:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 
 ###############
-## 19/11/2011 : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, same as Nov expect no pT cut on PF Jets)
+## 19/11/2011 : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, same as Nov but no pT cut on PF Jets)
 ###############
 
 * create list command
