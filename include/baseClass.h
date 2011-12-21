@@ -124,6 +124,7 @@ class baseClass : public rootNtupleClass {
 
   int passJSON(int run, int ls, bool isData);
   double getPileupWeight ( int npileup, bool this_is_data );
+  void   setPileupWeight ( double weight );
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
   void printTriggers();

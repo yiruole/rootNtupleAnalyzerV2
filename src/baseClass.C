@@ -1466,6 +1466,11 @@ double baseClass::getPileupWeight ( int npileup, bool this_is_data ) {
   return PileupWeight_;
 }
 
+void baseClass::setPileupWeight ( double weight ) { 
+  PileupWeight_ = weight;
+  return;
+}
+
 void baseClass::getTriggers(std::string * HLTKey ,  
 			    std::vector<std::string> * names, 
 			    std::vector<bool>        * decisions,
