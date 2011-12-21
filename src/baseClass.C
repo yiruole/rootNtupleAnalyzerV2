@@ -99,7 +99,6 @@ void baseClass::init()
       }
   }
 
-
   //  for (map<string, cut>::iterator it = cutName_cut_.begin();
   //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "f<<it->first)
   //  for (vector<string>::iterator it = orderedCutNames_.begin();
@@ -1254,13 +1253,13 @@ int baseClass::getGlobalInfoNstart(char *pName)
 
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
-  map<const char* , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
       h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
       h->Sumw2();
-      userTH1Ds_[nameAndTitle] = h;
+      userTH1Ds_[std::string(nameAndTitle)] = h;
       h->Fill(value);
     }
   else
@@ -1270,13 +1269,13 @@ void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
-  map<const char* , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
       h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
       h->Sumw2();
-      userTH1Ds_[nameAndTitle] = h;
+      userTH1Ds_[std::string(nameAndTitle)] = h;
     }
   else
     {
@@ -1285,7 +1284,7 @@ void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 }
 void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t weight)
 {
-  map<const char* , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
+  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   TH1D * h;
   if( nh_h == userTH1Ds_.end() )
     {
@@ -1299,13 +1298,13 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t 
 
 void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<const char* , TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
       h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
-      userTH2Ds_[nameAndTitle] = h;
+      userTH2Ds_[std::string(nameAndTitle)] = h;
       h->Fill(value_x, value_y, weight);
     }
   else
@@ -1315,13 +1314,13 @@ void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
-  map<const char* , TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
       h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
       h->Sumw2();
-      userTH2Ds_[nameAndTitle] = h;
+      userTH2Ds_[std::string(nameAndTitle)] = h;
     }
   else
     {
@@ -1330,7 +1329,7 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 }
 void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<const char* , TH2D*>::iterator nh_h = userTH2Ds_.find(nameAndTitle);
+  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   TH2D * h;
   if( nh_h == userTH2Ds_.end() )
     {
@@ -1346,11 +1345,12 @@ bool baseClass::writeUserHistos()
 {
   bool ret = true;
   output_root_->cd();
-  for (map<const char*, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
+  for (map<std::string, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
     {
+      output_root_->cd();
       uh_h->second->Write();
     }
-  for (map<const char*, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
+  for (map<std::string, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       uh_h->second->Write();
@@ -1466,11 +1466,6 @@ double baseClass::getPileupWeight ( int npileup, bool this_is_data ) {
   return PileupWeight_;
 }
 
-void baseClass::setPileupWeight ( double weight ) { 
-  PileupWeight_ = weight;
-  return;
-}
-
 void baseClass::getTriggers(std::string * HLTKey ,  
 			    std::vector<std::string> * names, 
 			    std::vector<bool>        * decisions,
@@ -1505,3 +1500,8 @@ int baseClass::triggerPrescale ( const char* name ) {
   else return i -> second;
 }
 
+void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name ) { 
+  int prescale = triggerPrescale(hlt_path);
+  if ( triggerFired (hlt_path) ) fillVariableWithValue(variable_name, prescale      ) ; 
+  else                           fillVariableWithValue(variable_name, prescale * -1 ) ;
+}

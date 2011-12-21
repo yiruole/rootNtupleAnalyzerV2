@@ -124,9 +124,10 @@ class baseClass : public rootNtupleClass {
 
   int passJSON(int run, int ls, bool isData);
   double getPileupWeight ( int npileup, bool this_is_data );
-  void   setPileupWeight ( double weight );
+  void setPileupWeight ( double weight ) { PileupWeight_ = weight; } 
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
+  void fillTriggerVariable ( const char * hlt_path, const char* variable_name ) ;
   void printTriggers();
   void getTriggers(std::string * HLTKey ,   
 		   std::vector<std::string> * names, 
@@ -175,20 +176,23 @@ class baseClass : public rootNtupleClass {
   void fillOptimizerWithValue(const string& s, const double& d);
   void runOptimizer();
 
-  void CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
-  void CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
-  void FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t weight=1);
-  void CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
-  void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
-  void FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
+  void CreateUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
+  void FillUserTH1D(const char*  nameAndTitle, Double_t value, Double_t weight=1);
+  void CreateAndFillUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void CreateUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
+  void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
 
+  PileupReweighter pileupReweighter_;
+
+  TFile * output_root_;
+
   private :
   string * configFile_;
   string * outputFileName_;
-  TFile * output_root_;
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
@@ -199,8 +203,8 @@ class baseClass : public rootNtupleClass {
   map<string, preCut> preCutName_cut_;
   map<string, cut> cutName_cut_;
   vector<string> orderedCutNames_;
-  map<const char* , TH1D*> userTH1Ds_;
-  map<const char* , TH2D*> userTH2Ds_;
+  map<std::string , TH1D*> userTH1Ds_;
+  map<std::string , TH2D*> userTH2Ds_;
   void init();
   void readInputList();
   void readCutFile();
@@ -228,7 +232,7 @@ class baseClass : public rootNtupleClass {
   std::map<std::string, int > triggerPrescaleMap_; 
 
   // PILEUP stuff
-  PileupReweighter pileupReweighter_;
+
   bool pileupMCFileWasUsed_;
   bool pileupDataFileWasUsed_;
   std::string pileupMCFileName_;
