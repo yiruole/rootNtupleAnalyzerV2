@@ -15,6 +15,40 @@ Create lists:
 
 
 ###############
+## 22/12/2012 : Samples for HLT vs RECO comparison (AODSIM + PhysicsDST event content, V00-02-08)
+###############
+
+DATA (HT, part of run 180250 , ~20k):
+
+* big ntuples with RootTupleMakerV2:
+CERN T3:
+/eos/cms/store/cmst3/user/santanas/DiJets/RootNtuple-V00-02-08-DATA2011B-AODPlusPhysicsDST-HT-180250_04012012
+cmsphys03: 
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-08-DATA2011B-AODPlusPhysicsDST-HT-180250_04012012
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-08-DATA2011B-AODPlusPhysicsDST-HT-180250_04012012 \
+-o config/RootNtuple-V00-02-08-DATA2011B-AODPlusPhysicsDST-HT-180250_04012012
+
+
+MC (Fall11 QstarToJJ M500 , ~86k):
+CERN T3:
+/eos/cms/store/cmst3/user/santanas/DiJets/RootNtuple-V00-02-08-MCFall11-AODPlusPhysicsDST-QstarToJJ_M-500_20122011/
+cmsphys03:
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-08-MCFall11-AODPlusPhysicsDST-QstarToJJ_M-500_20122011
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-08-MCFall11-AODPlusPhysicsDST-QstarToJJ_M-500_20122011 \
+-o config/RootNtuple-V00-02-08-MCFall11-AODPlusPhysicsDST-QstarToJJ_M-500_20122011
+
+
+###############
 ## 23/11/2011 : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, reduced ntuples for dijet analysis, JECL123Res)
 ###############
 
@@ -26,13 +60,13 @@ Create lists:
 -o config/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 
 * reduced ntuples
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 castor:
 /castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
 
 ###############
@@ -47,7 +81,7 @@ cmsphys04:
 -o config/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
 
 ###############
@@ -62,13 +96,13 @@ cmsphys04:
 -o config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
 
 * reduced ntuples
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
 castor:
 /castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL23Res_18112011/
 
 ###############
@@ -76,16 +110,16 @@ cmsphys04:
 ###############
 
 * reduced ntuples for dijet analysis
-cmsphys04:
+cmsphys03:
 NOJEC       /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-MCFall11-QstarToJJ-ForTest_16112011
 JEC (L23)   /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-MCFall11-QstarToJJ-ForTest_JECL23_18112011
 
 * big ntuples with RootTupleMakerV2:
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/BigNtuplesForTests/QstarToJJ_ForTests_16112011
 
 * original EDM files:
-cmsphys04:
+cmsphys03:
 /data/santanas/Data/QstarToJJ_PhysicsDST_ForTest_16_11_2011
 
 ###############
@@ -100,13 +134,13 @@ cmsphys04:
 -o config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_14112011
 
 * reduced ntuples
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_14112011
 castor:
 /castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_14112011
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_14112011
 
 ###############
@@ -114,15 +148,15 @@ cmsphys04:
 ###############
 
 * reduced ntuples for dijet analysis
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252_dijets_allEvents_11112011
 
 * big ntuples with RootTupleMakerV2:
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/BigNtuplesForTests/RootTupleMakerV2_output_DATA_HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252.root
 
 * original EDM files:
-cmsphys04:
+cmsphys03:
 /data/santanas/Data/HT150_OR_HT200_OR_HT250__PhysicsDSTContent__179959-180252
 
 ###############
@@ -130,13 +164,13 @@ cmsphys04:
 ###############
 
 * reduced ntuples
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
 castor:
 /castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_dijets_allEvents_08112011
 
 ###############
@@ -151,7 +185,7 @@ cmsphys04:
 -o config/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_20111104_140216
 
 * logs
-cmsphys04:
+cmsphys03:
 /data/santanas/Ntuples/2011_logs/RootNtuple-HEAD_Nov3-2011BData-PhysicsDST-179959-180282_20111104_140216
 
 
