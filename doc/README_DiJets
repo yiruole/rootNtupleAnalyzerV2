@@ -15,6 +15,22 @@ Create lists:
 
 
 ###############
+## 30/01/2012 : DATA and MC Reduced ntuples for final analysis, 
+##              DATA : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, JECL123Res, 2011Sel)
+##              MC   : Q*-->JJ, Z'-->JJ, RSGraviton-->JJ samples (V00-02-07, GEN (not everything) + PileupInfo + PhysicsDST event content, JECL123, 2011Sel)
+###############
+
+* DATA (PhysicsDST, 179959-180282):
+
+castor:
+/castor/cern.ch/user/s/santanas/DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_2011Sel_30012012
+
+* MC ( Q*-->JJ, Z'-->JJ, RSGraviton-->JJ):
+
+cmsphys03: 
+/data/santanas/Ntuples/2011/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ_JECL123_2011Sel_30012012
+
+###############
 ## 22/12/2012 : Samples for HLT vs RECO comparison (AODSIM + PhysicsDST event content, V00-02-08)
 ###############
 
@@ -49,7 +65,7 @@ cmsphys03:
 
 
 ###############
-## 22/12/2012 : MC Samples, Q*-->JJ, Z'-->JJ, RSGraviton-->JJ samples, GEN (not everything) + PileupInfo + PhysicsDST event content, 
+## 17/12/2011 : MC Samples, Q*-->JJ, Z'-->JJ, RSGraviton-->JJ samples, GEN (not everything) + PileupInfo + PhysicsDST event content, 
 ##              V00-02-07 (for limit and efficiency calculation) 
 ###############
 
