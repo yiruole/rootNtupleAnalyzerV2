@@ -49,6 +49,25 @@ cmsphys03:
 
 
 ###############
+## 22/12/2012 : MC Samples, Q*-->JJ, Z'-->JJ, RSGraviton-->JJ samples, GEN (not everything) + PileupInfo + PhysicsDST event content, 
+##              V00-02-07 (for limit and efficiency calculation) 
+###############
+
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ-17122011 \
+-o config/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ-17122011
+
+* big ntuples
+CERN T3:
+/eos/cms/store/cmst3/user/santanas/DiJets/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ-17122011
+cmsphys03:
+/data/santanas/Ntuples/2011/BigNtuplesForTests/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ-17122011
+
+
+###############
 ## 23/11/2011 : PhysicsDST Data (HEAD Nov, 19, 2011, no filter, 2011BData, run range 179959-180282, reduced ntuples for dijet analysis, JECL123Res)
 ###############
 
@@ -79,6 +98,10 @@ cmsphys03:
     -i \
 /castor/cern.ch/user/s/santanas/DiJets/RootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219 \
 -o config/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
+
+* Test files 
+CERN T3:
+/eos/cms/store/cmst3/user/santanas/DiJets/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_20111119_120219
 
 * logs
 cmsphys03:
