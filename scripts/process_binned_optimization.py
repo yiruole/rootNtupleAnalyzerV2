@@ -1,4 +1,4 @@
-import os, copy, math, sys
+import os, copy, math, sys, numpy
 from ROOT import *
 
 mc_filepath         = os.environ["LQDATA"] + "eejj_analysis/eejj_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_Optimization_plots.root"
@@ -331,6 +331,9 @@ for signal_sample in d_signal_filepaths_list:
 
 print "\n\n"
 
+x_array = []
+d_cutVariable_yArray = {}
+
 to_print = "LQ mass \t"
 for signal_sample in d_signal_filepaths_list:
     to_print = to_print + signal_sample.keys()[0] + "\t"
@@ -338,11 +341,48 @@ print to_print
 print "-------------------------------------------------------------------------------------------"
 
 for cut_variable in cut_variables:
+    d_cutVariable_yArray [cut_variable ] = []
     to_print = cut_variable + "\t"
     for i, signal_sample in enumerate(d_signal_filepaths_list):
+        lq_mass = int ( signal_sample.keys()[0] )
         cut_value = int (d_cutVariable_maxCutValues[cut_variable][i])
         to_print = to_print + str(cut_value ) + "\t"
+
+        if ( lq_mass not in x_array ) : x_array.append ( float ( lq_mass ) )
+        d_cutVariable_yArray [cut_variable ].append ( float ( cut_value )  )
+
     print to_print
 
 
 print "\n\n"
+
+    
+func2 = TF1("func2", "pol2(0)", 250., 850. )
+func1 = TF1("func1", "pol1(0)", 250., 850. )
+
+fit_functions = [ "func1", "func2" ]
+
+
+for cut_variable in cut_variables:
+    for fit_function in fit_functions:
+
+        canvas = TCanvas()
+        canvas.cd()
+    
+        graph = TGraph( len ( x_array ), numpy.array ( x_array ), numpy.array ( d_cutVariable_yArray[cut_variable ] ) )
+
+        
+        graph.Draw("AP")
+        
+        graph.GetXaxis().SetTitle("LQ mass [GeV]")
+        graph.GetYaxis().SetTitle(cut_variable)
+        graph.GetXaxis().SetRangeUser(0, 1500)
+
+        maximum = graph.GetHistogram().GetMaximum()
+        graph.GetHistogram().SetMaximum ( maximum * 1.5 ) 
+        
+        graph.Fit ( fit_function )
+        
+        graph.Draw("AP")
+        
+        canvas.SaveAs(cut_variable + "_" + fit_function + ".gif" )
