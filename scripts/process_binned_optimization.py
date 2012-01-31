@@ -7,11 +7,11 @@ qcd_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/
 
 txt_file_path        = "/afs/cern.ch/user/e/eberry/scratch0/rootNtupleAnalyzer/CMSSW_4_2_3/src/rootNtupleAnalyzerV2/optimizationCuts.txt"
 
-jitter = 2 
+jitter = 2
 
 d_background_filepaths = { 
-    "ttbar" : [ "DATA"        , ttbar_data_filepath, 0.49 ],
-    # "ttbar" : [ "TTbar_Madgraph", mc_filepath      , 1.0  ],
+    # "ttbar" : [ "DATA"        , ttbar_data_filepath, 0.49 ],
+    "ttbar" : [ "TTbar_Madgraph", mc_filepath      , 1.0  ],
     "qcd"   : [ "DATA"        , qcd_data_filepath  , 1.0  ],
     "wjet"  : [ "WJet_Sherpa" , mc_filepath        , 1.0  ],
     "zjet"  : [ "ZJet_Sherpa" , mc_filepath        , 1.0  ],
@@ -22,22 +22,26 @@ d_background_filepaths = {
     }
 
 d_signal_filepaths_list = [ 
-    { "LQ_M250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
-    { "LQ_M350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
-    { "LQ_M400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
-    { "LQ_M450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
-    { "LQ_M500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
-    { "LQ_M550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
-    { "LQ_M600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
-    { "LQ_M650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
-    { "LQ_M750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
-    { "LQ_M850" : ["LQ_M850", mc_filepath, 1.0 ] }  
+    { "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
+    { "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
+    { "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
+    { "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
+    { "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
+    { "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
+    { "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
+    { "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
+    { "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
+    { "850" : ["LQ_M850", mc_filepath, 1.0 ] }  
 ]
+
+d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath, 1.0 ] }
 
 cut_variables = []
 cut_requirements = []
 cut_values = []
 bin_numbers = []
+
+d_cutVariable_maxCutValues = {}
     
 d_binNumber_cutValuesString      = {}
 d_binNumber_cutVariable_cutValue = {}
@@ -241,6 +245,7 @@ parse_txt_file ()
 print "...Parsed txt file"
 
 d_binNumber_nB = parse_root_file( d_background_filepaths )
+d_binNumber_nD = parse_root_file( d_data_filepaths )
 
 for signal_sample in d_signal_filepaths_list: 
     d_binNumber_nS = parse_root_file( signal_sample ) 
@@ -249,11 +254,13 @@ for signal_sample in d_signal_filepaths_list:
     max_value = -999
     max_nS = -999
     max_nB = -999
+    max_nD = -999
     max_string = ""
 
     for binNumber in bin_numbers:
         nS = d_binNumber_nS [ binNumber ] 
         nB = d_binNumber_nB [ binNumber ] 
+        nD = d_binNumber_nD [ binNumber ] 
         value = evaluate ( binNumber, d_binNumber_nS, d_binNumber_nB )
         
         if value > max_value : 
@@ -261,10 +268,11 @@ for signal_sample in d_signal_filepaths_list:
             max_bin = binNumber
             max_nS = nS
             max_nB = nB
+            max_nD = nD
             max_string = d_binNumber_cutValuesString [ max_bin ]
             
-    print signal_sample.keys()[0], ": Bin with best value was bin #" + str ( max_bin ), "\tCut info was:\t" +  max_string , "\t v =", max_value
-    
+    print signal_sample.keys()[0], ": Bin with best value was bin #" + str ( max_bin ), "\tCut info was:\t" +  max_string , "\t v = %.2f" % max_value, " nS = %.2f" % max_nS, ", nB = %.2f" % max_nB, ", nD = %d" % max_nD
+
     max_bins = string_to_bins ( max_string ) 
     test_max_string = bins_to_string ( max_bins ) 
     test_binNumber = d_cutValuesString_binNumber [ test_max_string ]
@@ -278,11 +286,18 @@ for signal_sample in d_signal_filepaths_list:
         sys.exit()
         
     for i,cut_variable in enumerate(cut_variables):
+
+        if cut_variable not in d_cutVariable_maxCutValues.keys():
+            d_cutVariable_maxCutValues[ cut_variable ] = []
+
         this_bin = max_bins[i]
+
+        this_cut_value = d_cutVariable_cutValues[ cut_variable][this_bin]
+
         n_bins = len ( d_cutVariable_cutValues [ cut_variable ] ) 
 
         lower_jitter_bin = max ( 0     , this_bin - jitter ) 
-        upper_jitter_bin = min ( n_bins, this_bin + jitter ) 
+        upper_jitter_bin = min ( n_bins - 1, this_bin + jitter ) 
         
         new_max_bins_lower_jitter = max_bins[:i] + [ lower_jitter_bin ] + max_bins[i+1:]
         new_max_bins_upper_jitter = max_bins[:i] + [ upper_jitter_bin ] + max_bins[i+1:]
@@ -311,4 +326,23 @@ for signal_sample in d_signal_filepaths_list:
 
         print to_print
         
+        d_cutVariable_maxCutValues[ cut_variable].append ( this_cut_value ) 
 
+
+print "\n\n"
+
+to_print = "LQ mass \t"
+for signal_sample in d_signal_filepaths_list:
+    to_print = to_print + signal_sample.keys()[0] + "\t"
+print to_print
+print "-------------------------------------------------------------------------------------------"
+
+for cut_variable in cut_variables:
+    to_print = cut_variable + "\t"
+    for i, signal_sample in enumerate(d_signal_filepaths_list):
+        cut_value = int (d_cutVariable_maxCutValues[cut_variable][i])
+        to_print = to_print + str(cut_value ) + "\t"
+    print to_print
+
+
+print "\n\n"
