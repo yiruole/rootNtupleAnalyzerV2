@@ -41,8 +41,16 @@ cmsphys03:
 
 ** MC ( Q*-->JJ, Z'-->JJ, RSGraviton-->JJ):
 
+* create list command
+  ./scripts/createList.py \
+    -m root \
+    -i \
+/data/santanas/Ntuples/2011/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ_JECL123_2011Sel_30012012/reducedNtuples \
+-o config/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ_JECL123_2011Sel_30012012
+
+* reduced ntuples
 cmsphys03: 
-/data/santanas/Ntuples/2011/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ_JECL123_2011Sel_30012012
+/data/santanas/Ntuples/2011/RootNtuple-V00-02-07-MCFall11-Qstar-Zprime-RSGraviton-ToJJ_JECL123_2011Sel_30012012/reducedNtuples
 
 ###############
 ## 22/12/2012 : Samples for HLT vs RECO comparison (AODSIM + PhysicsDST event content, V00-02-08)
