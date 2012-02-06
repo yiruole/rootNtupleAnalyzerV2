@@ -1,0 +1,97 @@
+# 2011 JSON file
+#JSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/Prompt/Cert_160404-165970_7TeV_PromptReco_Collisions11_JSON.txt
+JSON /afs/cern.ch/user/s/santanas/public/GoodLumiSummary_20111104_140216_json.txt
+# Pileup reweighting files ( https://twiki.cern.ch/twiki/bin/view/CMS/PileupMCReweightingUtilities ) --> FOR SKIM: COMMENT THE FOLLOWING TWO LINES
+#PILEUP_DATA_ROOT_FILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_to_172802_LP_LumiScale.root
+#PILEUP_DATA_ROOT_FILE /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions11/7TeV/PileUp/Pileup_2011_EPS_8_jul.root
+#PILEUP_DATA_ROOT_FILE /afs/cern.ch/user/e/eberry/public/LQ_PILEUP/pileup_all.root
+#PILEUP_MC_TXT_FILE /afs/cern.ch/user/s/santanas/public/PILEUP/pileup_mc_pdf_file_Summer11_PU_S4_3BX.txt
+#PILEUP_MC_TXT_FILE /afs/cern.ch/user/s/santanas/public/PILEUP/pileup_mc_pdf_file_Summer11_PU_S4_1BX.txt
+#PILEUP_MC_TXT_FILE    /afs/cern.ch/user/e/eberry/public/LQ_PILEUP/pileup_mc_pdf_file.txt
+#
+#############################     Example of file with list of cuts
+#
+#
+#------------------------ Preliminary cut variables and values (cut level -1) here -----------------------------
+# This first list of variable names and values are used to pass configurable values to the user code associated
+# to a variable name.
+# The user can retrieve the values associated to a variable name via a provided function call
+# [e.g. getPreCutValue1("eleFidRegion") and similarly for value2, value3 and value4 ]
+# The idea is that the user can use these values to define the list of objects (electrons, jets, etc.) used in
+# analysis. No cut is automatically evaluated on these variables and the cut level must be equal to -1.
+# Variable names must be unique.
+#
+#VariableName         value1            value2          value3          value4          level
+#------------         ------------      -------------   ------------    -------------   -----
+#produceSkim          1                 -               -               -               -1
+printMass	      1			-		-		-		-1
+nominalSignalMass     500		700		1200		2000		-1	      
+#
+#--------------------------------- Cuts (level 0,1,2,3 ... n) below --------------------------------------------
+# The cut variable names, cut boundaries and histogram binnings are provided here by the user.
+# In the event loop of the analysisClass_template.C, the user have to fill each variable with its value using
+# a provided function call [ e.g. fillVariableWithValue("nEleFinal", number_of_electrons) ]
+# The variable names in the user code has to match the names provided here.
+# Variable names must be unique.
+# The cut will be declared "passed" if
+#    ( minValue1 < VariableName <= maxValue1 )
+# in case only the first range (minValue1, maxValue1) is provided,
+# otherwise the cut will be declared "passed" if
+#    ( minValue1 < VariableName <= maxValue1 )  OR  ( minValue2 < VariableName <= maxValue2 )
+# in case even the second range (minValue2, maxValue2) is provided.
+# The level of the cut (0,1,2 ... n) is provided by the user and can be used in the code to easily determine if
+# groups of same-level cuts have passed or failed.
+#
+#VariableName                   minValue1(<) maxValue1(>=)      minValue2(<)    maxValue2(>=)   level   histoNbinsMinMax      OptionalFlag
+#------------                   ------------ -------------      ------------    -------------   -----   ----------------      ------------
+#                          _           _   _             
+# _ __  _ __ ___  ___  ___| | ___  ___| |_(_) ___  _ __  
+#| '_ \| '__/ _ \/ __|/ _ \ |/ _ \/ __| __| |/ _ \| '_ \ 
+#| |_) | | |  __/\__ \  __/ |  __/ (__| |_| | (_) | | | |
+#| .__/|_|  \___||___/\___|_|\___|\___|\__|_|\___/|_| |_|
+#|_|                    
+#
+# ==================> PLEASE NOTE THE CUT LEVEL NUMBER!!!! <============================
+#
+ggFinalState			-inf	     +inf		-		-		0       2 -0.5 1.5	      
+qgFinalState			0	     1			-		-		0       2 -0.5 1.5	      
+qqFinalState			-inf	     +inf		-		-		0       2 -0.5 1.5	      
+#
+PassJSON			0            1			-               -               0       2 -0.5 1.5	      
+HLT_HT350orM400			0	     1			-		-		0	2 -0.5 1.5	      
+PassPrimaryVertex		0            1			-               -               0       2 -0.5 1.5
+#	      
+PFJet1_Pt			30	     +inf		-		-		0	500 0 5000	      
+PFJet1_Eta			-2.5         +2.5               -               -               0       100 -5 5	      
+PFJet1_PassJetID		0	     1			-		-		0	2 -0.5 1.5	      
+PFJet2_Pt			30	     +inf		-		-		0	500 0 5000	      
+PFJet2_Eta			-2.5         +2.5               -               -               0       100 -5 5	      
+PFJet2_PassJetID		0	     1			-		-		0	2 -0.5 1.5	      
+#
+DPhi_PFJet1PFJet2		-inf	     -1.047		1.047		+inf		1	200 -3.1416 3.1416    
+DEta_PFJet1PFJet2		-inf	     1.3		-		-		1	100 0 10	     
+M_PFJet1PFJet2			-inf	     +inf               -               -               1       1000 0 10000	      
+#
+DPhi_FatPFJet1FatPFJet2		-inf	     -1.047		1.047		+inf		2	200 -3.1416 3.1416    
+DEta_FatPFJet1FatPFJet2		-inf	     +1.3		-		-		2	100 0 10	      
+M_FatPFJet1FatPFJet2		-inf	     +inf               -               -               2       1000 0 10000	      
+#
+nVertex_good			-inf	     +inf		-		-		3	201 -0.5 200.5
+HLT_M300			0	     1			-		-		3	2 -0.5 1.5	      
+HLT_M400			0	     1			-		-		3	2 -0.5 1.5	      
+HLT_HT350			0	     1			-		-		3	2 -0.5 1.5	      
+#
+#  __ _             _            _           _   _             
+# / _(_)_ __   __ _| |  ___  ___| | ___  ___| |_(_) ___  _ __  
+#| |_| | '_ \ / _` | | / __|/ _ \ |/ _ \/ __| __| |/ _ \| '_ \ 
+#|  _| | | | | (_| | | \__ \  __/ |  __/ (__| |_| | (_) | | | |
+#|_| |_|_| |_|\__,_|_| |___/\___|_|\___|\___|\__|_|\___/|_| |_|
+#
+#
+#
+#
+#---------------------------------------- Cut Optimizer --------------------------------------------------
+#VariableName                   must be OPT   > or <    RangeMin        RangeMax        unused
+#------------                   -----------   ------    ------------    -------------   ------
+#minMETPt1stEle                  OPT           >         55              100             1
+#minDRej                         OPT           >         0               0.9             1
