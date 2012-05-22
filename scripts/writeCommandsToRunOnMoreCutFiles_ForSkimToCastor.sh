@@ -16,7 +16,7 @@
 #files=`ls $LQMACRO2011/config/cutTable_enujjSample_2011_skim.txt` # list of cut files that will be used
 #files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_lnujj_skim.txt` # list of cut files that will be used
 #files=`ls $AXIGLUONMACRO/config2011/cutTable_axigluons_skim.txt` # list of cut files that will be used
-files=`ls $DIJETMACRO/config2011/cutTable_dijetPhysicsDST_skim.txt` # list of cut files that will be used
+files=`ls $DIJETMACRO/config2011/cutTable_dijetPhysicsDST_2011Sel_skim.txt` # list of cut files that will be used          
 #------------
 #OUTDIRPATH=$AXIGLUONDATA  # a subdir will be created for each cut file 
 OUTDIRPATH=$DIJETDATA  # a subdir will be created for each cut file 
@@ -25,7 +25,8 @@ OUTDIRPATH=$DIJETDATA  # a subdir will be created for each cut file
 #SUBDIR=axigluons_lnujj/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
 #SUBDIR=axigluons_lnujj/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
 #SUBDIR=axigluons_lljj/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
-SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
+#SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
+SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_2011Sel_30012012
          # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
          # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -33,12 +34,13 @@ SUBDIR=dijets_PhysicsDST/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-18028
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-0X__DATA2011_160329_165969_330pb-1__MCSpring11__axigluons_enujj_skimEle30MET30_16072011
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lnujj_skimEleORMu20MET20Jet1st20Jet2nd20_09092011
 #CASTORDIR=Vjj/RootNtuple/RootNtuple-V00-02-06__MCSummer11__axigluons_lljj_skimDiEleORDiMu20Jet1st30Jet2nd30_25102011
-CASTORDIR=DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_23112011
+CASTORDIR=DiJets/ReducedRootNtuple2011/RootNtuple-HEAD_Nov19-2011BData-PhysicsDST-179959-180282_dijets_allEvents_JECL123Res_2011Sel_30012012
 FULLCASTORDIR=$CASTOR_HOME/$CASTORDIR #--> do not modify this line
 #------------
 #CODENAME=analysisClass_axigluons_lnujj_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #CODENAME=analysisClass_axigluons_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
-CODENAME=analysisClass_dijetPhysicsDST_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
+#CODENAME=analysisClass_dijetPhysicsDST_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
+CODENAME=analysisClass_dijetPhysicsDST_2011Sel_skim #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #------------
 #INPUTLIST=config/Summer11MC/inputListAllCurrent.txt #specify input list
 #INPUTLIST=config/Summer11MC/inputListAllCurrent_Axigluons.txt #signal only
