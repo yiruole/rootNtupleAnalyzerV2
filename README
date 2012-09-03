@@ -26,16 +26,24 @@ chain of root files and a file to provide a cut list) and executes the analysisC
 Instructions:
 -------------
 
-1) Checkout the code:
+1) Environment setup:
+   The following (or newer) is needed for lxplus batch jobs working on root files in EOS.
+   cd CMSSW_5_2_6/src/; 
+   export SCRAM_ARCH=slc5_amd64_gcc462;
+   cmsenv;	
+   source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
+   source /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.01/x86_64-slc5-gcc43-opt/root/bin/thisroot.sh
+
+2) Checkout the code:
    export CVSROOT=:gserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
    cvs checkout -d rootNtupleAnalyzerV2 UserCode/Leptoquarks/rootNtupleAnalyzerV2
 
-2) Generate the rootNtupleClass:
+3) Generate the rootNtupleClass:
    cd rootNtupleAnalyzerV2/
    ./scripts/make_rootNtupleClass.sh
       (you will be asked for input arguments)
 
-3) Copy the analysis template file into your own file:
+4) Copy the analysis template file into your own file:
      cp -i src/analysisClass_template.C src/analysisClass_myCode.C
    and make a symbolic link analysisClass.C by:
      ln -s analysisClass_myCode.C src/analysisClass.C
@@ -43,20 +51,20 @@ Instructions:
    NOTE: the macro analysisClass_template.C might not be compatible with the dataformat of your ntuples
          you have to write a consistent macro.
 
-4) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
+5) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
    make clean
    make
 
-5) Add your analysis code to the method Loop() of analysisClass_myCode.C
+6) Add your analysis code to the method Loop() of analysisClass_myCode.C
 
    NOTE: to access variables use
    variable->at(i)
    instead of
    variable[i]
 
-6) Compile as in 4.
+7) Compile as in 4.
 
-7) Run:
+8) Run:
    ./main
       (you will be asked for input arguments)
 
