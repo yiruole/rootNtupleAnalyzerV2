@@ -26,6 +26,19 @@ def unique(keys):
     return unique
 
 
+
+def make_filenamelist_eos(inputDir):
+    filenamelist = []
+    proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/0.2.5/bin/eos.select ls ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    output = proc.communicate()[0]
+    if proc.returncode != 0:
+        print output
+        sys.exit(1)
+    for line in output.splitlines():
+        filenamelist.append(line.strip())
+
+    return filenamelist
+
 def make_filenamelist_castor(inputDir):
     filenamelist = []
     proc = subprocess.Popen( [ 'rfdir', inputDir ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
@@ -37,7 +50,6 @@ def make_filenamelist_castor(inputDir):
         filenamelist.append(line.strip().split()[8])
 
     return filenamelist
-
 
 def make_filenamelist_default(inputDir):
     if not os.path.isdir(inputDir):
@@ -61,6 +73,9 @@ def process_input_dir(inputDir, match, filelist):
     if( re.search("^/castor/cern.ch/", inputDir) ):
         prefix = 'rfio:'
         filenamelist = make_filenamelist_castor(inputDir)
+    elif( re.search("^/eos/cms/", inputDir) ):
+        prefix = "root://eoscms/"
+        filenamelist = make_filenamelist_eos(inputDir)
     else:
         filenamelist = make_filenamelist_default(inputDir)
 
