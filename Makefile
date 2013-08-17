@@ -1,20 +1,14 @@
-COMP=c++
+COMP=g++
 FLAGS =
 #FLAGS += -DUSE_EXAMPLE
-FLAGS += -DSAVE_ALL_HISTOGRAMS
-#FLAGS += -DCREATE_OPT_CUT_FILE
-ROOTLIBS = `root-config --glibs --cflags` -lMinuit
+FLAGS += -DSAVE_ALL_HISTOGRAMS 
+# FLAGS += -DCREATE_OPT_CUT_FILE
+ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
 INC= -I.. -I. -I./include  -I${CLHEP}/include
-### For JEC with FWLite
-#INC= -I.. -I. -I./include  -I${CLHEP}/include -I${CMSSW_RELEASE_BASE}/src -I/afs/cern.ch/cms/${SCRAM_ARCH}/external/boost/1.44.0-cms3/include
 ROOTINC= -I${ROOTSYS}/include
 LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
-### For JEC with FWLite
-#LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib -L${CMSSW_RELEASE_BASE}/lib/${SCRAM_ARCH} -L${CMSSW_RELEASE_BASE}/external/${SCRAM_ARCH}/lib -L/afs/cern.ch/cms/${SCRAM_ARCH}/external/boost/1.44.0-cms3/lib
 SRC= ./src
-SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o
-### For JEC with FWLite
-#SELECTIONLIB = $(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o ${CMSSW_RELEASE_BASE}/lib/${SCRAM_ARCH}/libFWCoreFWLite.so ${CMSSW_RELEASE_BASE}/lib/${SCRAM_ARCH}/libCondFormatsJetMETObjects.so
+SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
 EXE = main
 
 # ********** TEMPLATE *************
@@ -24,7 +18,7 @@ EXE = main
 
 all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB)
+main: $(SRC)/main.o $(SELECTIONLIB) 
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
 clean:
