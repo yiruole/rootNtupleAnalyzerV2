@@ -4,6 +4,7 @@
 #include "rootNtupleClass.h"
 #include "jsonParser.h"
 #include "pileupReweighter.h"
+#include "eventListHelper.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -56,6 +57,10 @@ struct cut {
 
 struct preCut {
   string variableName;
+  string string1;
+  string string2;
+  string string3;
+  string string4;
   double value1;
   double value2;
   double value3;
@@ -68,18 +73,19 @@ struct preCut {
 class Optimize {
  public:
   Optimize(){count=0; variableName=""; minvalue=0; maxvalue=0; testgreater=false; level_int=-10;};
-  Optimize(int x0, string x1, double x2, double x3, bool x4, int x5)
+  Optimize(int x0, string x1, double x2, double x3, bool x4, int x5, int x6)
     {
       count=x0;
       variableName=x1;
       minvalue=x2;
       maxvalue=x3;
+      nCuts = x6;
       if (minvalue>maxvalue)
         {
           maxvalue=x2;
           minvalue=x3;
         }
-      increment=(maxvalue-minvalue)/9.;
+      increment=(maxvalue-minvalue)/(nCuts - 1);
       if (increment<=0)
         increment=1;
       testgreater=x4;
@@ -87,6 +93,7 @@ class Optimize {
       value=-999999; // dummy start value
     };
   ~Optimize(){};
+  int nCuts;
   int count; // store number for ordering of optimization cuts
   string variableName; // store name of variable
   double minvalue; // minimum threshold value to test
@@ -154,6 +161,10 @@ class baseClass : public rootNtupleClass {
   double getPreCutValue2(const string& s);
   double getPreCutValue3(const string& s);
   double getPreCutValue4(const string& s);
+  string getPreCutString1(const string& s);
+  string getPreCutString2(const string& s);
+  string getPreCutString3(const string& s);
+  string getPreCutString4(const string& s);
   double getCutMinValue1(const string& s);
   double getCutMaxValue1(const string& s);
   double getCutMinValue2(const string& s);
@@ -181,7 +192,9 @@ class baseClass : public rootNtupleClass {
   void FillUserTH1D(const char*  nameAndTitle, Double_t value, Double_t weight=1);
   void CreateAndFillUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
   void CreateUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
+  void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
   void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void FillUserTH2DLower(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
@@ -191,12 +204,14 @@ class baseClass : public rootNtupleClass {
   TFile * output_root_;
 
   private :
+  int nOptimizerCuts_;
   string * configFile_;
   string * outputFileName_;
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
-  TTree * tree_; // main tree
+  //TChain * chain_; // Original TChain
+  TChain * tree_; // main tree
   TTree * tree2_; // tree for globalInfo
   string * cutEfficFile_;
   std::stringstream preCutInfo_;

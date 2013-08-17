@@ -1,5 +1,6 @@
 #define baseClass_cxx
 #include "baseClass.h"
+#include <boost/lexical_cast.hpp>
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
   PileupWeight_ ( 1.0 ),
@@ -11,6 +12,8 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
+  // nOptimizerCuts_ = 26;
+  nOptimizerCuts_ = 20;
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -70,9 +73,9 @@ void baseClass::init()
   produceSkim_ = false;
   NAfterSkim_ = 0;
   if(int(getSkimPreCutValue("produceSkim"))==1) produceSkim_ = true;
-
+  
   if(produceSkim_) {
-
+    
     skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
     skim_tree_ = fChain->CloneTree(0);
     hCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
@@ -145,6 +148,15 @@ void baseClass::readInputList()
     }
   is.close();
 
+}
+
+bool is_number(const std::string& s) {
+  try {
+    double number = boost::lexical_cast<double>(s);
+  } catch(boost::bad_lexical_cast& e) {
+    return false;
+  }
+  return true;
 }
 
 void baseClass::readCutFile()
@@ -248,7 +260,7 @@ void baseClass::readCutFile()
 	      if (v[2]=="<") greaterthan=false;
 	      double minval=atof(v[3].c_str());
 	      double maxval=atof(v[4].c_str());
-	      Optimize opt(optimize_count,v[0],minval, maxval, greaterthan, level_int);
+	      Optimize opt(optimize_count,v[0],minval, maxval, greaterthan, level_int, nOptimizerCuts_ );
 	      optimizeName_cut_[optimize_count]=opt; // order cuts by cut #, rather than name, so that optimization histogram is consistently ordered
 	      ++optimize_count;
 	      continue;
@@ -273,10 +285,14 @@ void baseClass::readCutFile()
 	      preCutInfo_ << "### Preliminary cut values: " << s <<endl;
 	      preCut thisPreCut;
 	      thisPreCut.variableName =     v[0];
-	      thisPreCut.value1  = decodeCutValue( v[1] );
-	      thisPreCut.value2  = decodeCutValue( v[2] );
-	      thisPreCut.value3  = decodeCutValue( v[3] );
-	      thisPreCut.value4  = decodeCutValue( v[4] );
+	      if ( is_number ( v[1] ) ) thisPreCut.value1  = decodeCutValue( v[1] );
+	      else                      thisPreCut.string1 = v[1];
+	      if ( is_number ( v[2] ) ) thisPreCut.value2  = decodeCutValue( v[2] );
+	      else                      thisPreCut.string2 = v[2];
+	      if ( is_number ( v[3] ) ) thisPreCut.value1  = decodeCutValue( v[3] );
+	      else                      thisPreCut.string3 = v[3];
+	      if ( is_number ( v[4] ) ) thisPreCut.value2  = decodeCutValue( v[4] );
+	      else                      thisPreCut.string4 = v[4];
 	      preCutName_cut_[thisPreCut.variableName]=thisPreCut;
 	      continue;
 	    }
@@ -369,8 +385,8 @@ void baseClass::readCutFile()
   // make optimizer histogram
   if (optimizeName_cut_.size()>0)
     {
-      h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(10,optimizeName_cut_.size()),0,
-			    pow(10,optimizeName_cut_.size()));
+      h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
     }
 
   // Create a histogram that will show events passing cuts
@@ -421,8 +437,8 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       c->value = d;
       c->weight = w;
       
-      if ( pileupReweighter_.pileupWeightsCalculated() ) 
-	c ->weight *= PileupWeight_;
+// if ( pileupReweighter_.pileupWeightsCalculated() ) 
+// 	c ->weight *= PileupWeight_;
     }
   fillOptimizerWithValue(s, d);
   return;
@@ -546,7 +562,7 @@ void baseClass::runOptimizer()
   int thesize=optimizeName_cut_.size();
   int mysize=thesize;
   std::vector<bool> counterbins;
-  for (int i=0;i<pow(10,thesize);++i) counterbins.push_back(true); // assume true
+  for (int i=0;i<pow(nOptimizerCuts_,thesize);++i) counterbins.push_back(true); // assume true
 
   // lowest-numbered cut appears first in cut ordering
   // That is, for cut:  ABCDEF
@@ -554,15 +570,15 @@ void baseClass::runOptimizer()
   for (int cc=0;cc<thesize;++cc) // loop over all cuts, starting at cut 0
     {
       --mysize;
-      for (int i=0;i<10;++i) // loop over 10 cuts for each
+      for (int i=0;i<nOptimizerCuts_;++i) // loop over 10 cuts for each
 	{
 	  if (!optimizeName_cut_[cc].Compare(i)) // cut failed; set all values associated with cut to false
 	    {
 	      // loop over  all cut values starting with current cut
-	      for (unsigned int j=(int)(i*pow(10,mysize));j<int(pow(10,thesize));++j)
+	      for (unsigned int j=(int)(i*pow(nOptimizerCuts_,mysize));j<int(pow(nOptimizerCuts_,thesize));++j)
 		{
 		  // if relevant digit of the cut value matches the current (failed) cut, set this cut to false
-		  if ((j/int(pow(10,mysize)))%10==i)
+		  if ((j/int(pow(nOptimizerCuts_,mysize)))%nOptimizerCuts_==i)
 		    counterbins[j]=false;
 		  if (j>counterbins.size())
 		    continue; // shouldn't ever happen
@@ -737,6 +753,39 @@ double baseClass::getPreCutValue4(const string& s)
   if(c->value4 == -99999999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
   return (c->value4);
 }
+
+
+
+
+
+
+string baseClass::getPreCutString1(const string& s)
+{
+  string ret;
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  if( cc == preCutName_cut_.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
+    }
+  preCut * c = & (cc->second);
+  return (c->string1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 double baseClass::getCutMinValue1(const string& s)
@@ -958,8 +1007,10 @@ bool baseClass::writeCutEfficFile()
 
   // Set bin labels for event counter histogram
   int bincounter=1;
+
   eventcuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
   ++bincounter;
+
   if (skimWasMade_)
     {
       eventcuts_->GetXaxis()->SetBinLabel(bincounter,"Skim");
@@ -1139,9 +1190,9 @@ bool baseClass::writeCutEfficFile()
 	  // 12345 = {1,2,3,4,5}, etc.
 
 	  optFile <<"Bin = "<<i;
-	  for (int j=Nbins/10;j>=1;j/=10)
+	  for (int j=Nbins/nOptimizerCuts_;j>=1;j/=nOptimizerCuts_)
 	    {
-	      cutindex.push_back((i/j)%10);
+	      cutindex.push_back((i/j)%nOptimizerCuts_);
 	    }  // for (int j=(int)log10(Nbins);...)
 
 	  for (unsigned int j=0;j<cutindex.size();++j)
@@ -1312,6 +1363,7 @@ void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Do
       nh_h->second->Fill(value_x, value_y, weight);
     }
 }
+
 void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
   map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
@@ -1327,6 +1379,24 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
       STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
+
+
+void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
+{
+  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
+  TH2D * h;
+  if( nh_h == userTH2Ds_.end() )
+    {
+      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y );
+      h->Sumw2();
+      userTH2Ds_[std::string(nameAndTitle)] = h;
+    }
+  else
+    {
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+    }
+}
+
 void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
   map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
@@ -1341,10 +1411,52 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
     }
 }
 
+
+void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
+{
+  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
+  // TH2D * h;
+  if( nh_h == userTH2Ds_.end() )
+    {
+      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+    }
+  else
+    {
+      TH2D * hist = nh_h->second;
+      TAxis * x_axis   = hist -> GetXaxis();
+      TAxis * y_axis   = hist -> GetYaxis();
+      int     n_bins_x = hist -> GetNbinsX();
+      int     n_bins_y = hist -> GetNbinsY();
+      
+      for ( int i_bin_x = 1; i_bin_x <= n_bins_x; ++i_bin_x ){
+	
+	double x_min  = x_axis -> GetBinLowEdge( i_bin_x );
+	double x_max  = x_axis -> GetBinUpEdge ( i_bin_x );
+	double x_mean = x_axis -> GetBinCenter ( i_bin_x );
+
+	if ( value_x <= x_min ) continue;
+	
+	for ( int i_bin_y = 1; i_bin_y <= n_bins_y; ++i_bin_y ){
+	  
+	  double y_min  = y_axis -> GetBinLowEdge( i_bin_y );
+	  double y_mean = y_axis -> GetBinCenter ( i_bin_y );
+	  
+	  if ( value_y <= y_min ) continue;
+	  
+	  hist -> Fill (x_mean,y_mean, weight);
+	  
+	}
+      }
+    }
+}
+
+
 bool baseClass::writeUserHistos()
 {
+
   bool ret = true;
   output_root_->cd();
+
   for (map<std::string, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
     {
       output_root_->cd();
@@ -1353,6 +1465,7 @@ bool baseClass::writeUserHistos()
   for (map<std::string, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
+      output_root_->cd();
       uh_h->second->Write();
     }
   // Any failure mode to implement?
@@ -1396,12 +1509,7 @@ bool baseClass::writeSkimTree()
   bool ret = true;
 
   if(!produceSkim_) return ret;
-
-  skim_file_->cd();
-  skim_file_->mkdir("rootTupleTree");
-  skim_file_->cd("rootTupleTree");
-  skim_tree_->Write();
-
+  
   skim_file_->cd();
   TDirectory *dir1 = skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
@@ -1411,6 +1519,20 @@ bool baseClass::writeSkimTree()
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->Write();
+
+  if ( fChain -> GetEntries() == 0 ){
+    skim_file_->cd();
+    skim_file_->mkdir("rootTupleTree");
+    skim_file_->cd("rootTupleTree");
+    fChain -> CloneTree(0) -> Write("tree");
+  }
+  
+  else { 
+    skim_file_->cd();
+    skim_file_->mkdir("rootTupleTree");
+    skim_file_->cd("rootTupleTree");
+    skim_tree_ -> Write("tree");
+  }
 
   // Any failure mode to implement?
   return ret;
