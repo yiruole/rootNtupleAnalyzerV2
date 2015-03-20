@@ -13,8 +13,8 @@ class Object {
   Object( Collection& collection,  short raw_index );
   Object( Collection& collection,  short raw_index, const char* name );
 
-  Object( Collection& collection,  short raw_index,  short hlt_filter_index );
-  Object( Collection& collection,  short raw_index,  short hlt_filter_index, const char* name );
+  Object( Collection& collection,  short raw_index,  short trigObj_index );
+  Object( Collection& collection,  short raw_index,  short trigObj_index, const char* name );
   ~Object();
   
   const char* Name() const { return m_name; }
@@ -66,7 +66,7 @@ class Object {
 
   Collection * m_collection;
   short m_raw_index;
-  short m_hlt_filter_index;
+  short m_trigObj_index;
   const char * m_name;
 
 };

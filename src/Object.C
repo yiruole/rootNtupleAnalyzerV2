@@ -7,42 +7,42 @@ Object::Object():
   m_name ("NO_NAME"),
   m_collection(0),
   m_raw_index ( -1 ),
-  m_hlt_filter_index (-1)
+  m_trigObj_index (-1)
 {}
 
 Object::Object(const Object & o):
   m_name(o.m_name),
   m_collection(o.m_collection),
   m_raw_index(o.m_raw_index),
-  m_hlt_filter_index ( o.m_hlt_filter_index )
+  m_trigObj_index ( o.m_trigObj_index )
 {}
 
 Object::Object(Collection & collection, short raw_index):
   m_name ("NO_NAME"),
   m_collection ( & collection ),
   m_raw_index (raw_index),
-  m_hlt_filter_index (-1)
+  m_trigObj_index (-1)
 {}
 
-Object::Object(Collection & collection, short raw_index, short hlt_filter_index):
+Object::Object(Collection & collection, short raw_index, short trigObj_index):
   m_name ("NO_NAME"),
   m_collection ( & collection ),
   m_raw_index (raw_index),
-  m_hlt_filter_index (hlt_filter_index)
+  m_trigObj_index (trigObj_index)
 {}
 
 Object::Object(Collection & collection, short raw_index, const char* name):
   m_name (name),
   m_collection ( & collection ),
   m_raw_index (raw_index),
-  m_hlt_filter_index (-1)
+  m_trigObj_index (-1)
 {}
 
-Object::Object(Collection & collection, short raw_index, short hlt_filter_index, const char* name):
+Object::Object(Collection & collection, short raw_index, short trigObj_index, const char* name):
   m_name (name),
   m_collection ( & collection ),
   m_raw_index (raw_index),
-  m_hlt_filter_index (hlt_filter_index)
+  m_trigObj_index (trigObj_index)
 {}
 
 double Object::DeltaR( Object * other_object ) { 

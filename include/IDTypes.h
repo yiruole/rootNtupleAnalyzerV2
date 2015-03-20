@@ -6,8 +6,8 @@ enum ID {
   EGAMMA_LOOSE             = 1, 
   EGAMMA_MEDIUM            = 2, 
   EGAMMA_TIGHT             = 3, 
-  HEEP                     = 4,
-  HEEP_LOOSE               = 5,
+  HEEP51                   = 4,
+  HEEP                     = 5,
   MVA                      = 6,
   ECAL_FIDUCIAL            = 7,
   		        
@@ -27,9 +27,22 @@ enum ID {
   GEN_ELE_HARD_SCATTER     = 19,
   GEN_ZGAMMA_HARD_SCATTER  = 20,
   GEN_W_HARD_SCATTER       = 21,
-  GEN_NU_FROM_W  	   = 22,
-  GEN_ELE_FROM_W  	   = 23,
-  GEN_ELE_FROM_DY  	   = 24,
+  GEN_NU_FROM_W  	         = 22,
+  GEN_ELE_FROM_W  	       = 23,
+  GEN_ELE_FROM_DY  	       = 24,
+
+  EGAMMA_BUILTIN_TIGHT     = 40,
+  EGAMMA_BUILTIN_MEDIUM    = 41,
+  EGAMMA_BUILTIN_LOOSE     = 42,
+  EGAMMA_BUILTIN_VETO      = 43,
+
+  // HLT
+  // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h
+  TRIGGER_PHOTON           = 81,
+  TRIGGER_ELECTRON         = 82,
+  TRIGGER_MUON             = 83,
+  TRIGGER_TAU              = 84,
+  TRIGGER_JET              = 85,
 
   NULL_ID                  = 999
 };

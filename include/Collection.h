@@ -30,7 +30,7 @@ class Collection {
   // Set functions
   //-------------------------------------------------------------
   
-  void SetHLTFilterObjectIndex ( short i ) { m_hlt_filter_index = i; } 
+  void SetTriggerObjectIndex ( short i ) { m_trigObj_index = i; } 
   void SetRawIndices( std::vector<unsigned short> & i ) { m_raw_indices  = i; }
   void SetLeadNConstituents ( unsigned short n ) {
     m_raw_indices.clear();
@@ -43,7 +43,7 @@ class Collection {
   //-------------------------------------------------------------
   
   template<class Object1> Object1 GetConstituent(unsigned short i) { 
-    if ( m_hlt_filter_index > 0 ) return Object1 (*this, m_raw_indices[i], m_hlt_filter_index ); 
+    if ( m_trigObj_index > 0 ) return Object1 (*this, m_raw_indices[i], m_trigObj_index ); 
     else                          return Object1 (*this, m_raw_indices[i]);
   }
   
@@ -86,13 +86,13 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByID( ID id, bool verbose = false ) { 
     CollectionPtr new_collection ( new Collection(*m_data ,0 ));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     new_collection -> Clear();
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
       Object1 constituent = GetConstituent<Object1> (i);
       if ( constituent.PassUserID (id, verbose) ) 
-	new_collection -> Append ( constituent.GetRawIndex() );
+        new_collection -> Append ( constituent.GetRawIndex() );
     }
     return new_collection;
   }
@@ -102,7 +102,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByMinPt ( double min_pt ) { 
     CollectionPtr new_collection ( new Collection(*m_data,0 ));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
       Object1 constituent = GetConstituent<Object1> (i);
@@ -117,7 +117,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByEtaRange ( double min_eta, double max_eta ) { 
     CollectionPtr new_collection ( new Collection(*m_data,0 ));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
       Object1 constituent = GetConstituent<Object1> (i);
@@ -143,7 +143,7 @@ class Collection {
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
     CollectionPtr new_collection ( new Collection(*m_data,0 ));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -163,7 +163,7 @@ class Collection {
     CollectionPtr SkimByVetoDRMatch ( Object2 & other_object, double min_dr ){
     unsigned short this_collection_size = GetSize();
     CollectionPtr new_collection ( new Collection(*m_data,0 ));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
       double dr = this_collection_constituent.DeltaR ( & other_object );
@@ -188,7 +188,7 @@ class Collection {
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
     CollectionPtr new_collection  ( new Collection(*m_data,0));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -229,7 +229,7 @@ class Collection {
   template <class Object1> 
     CollectionPtr RemoveDuplicates () { 
     CollectionPtr new_collection  ( new Collection(*m_data,0));
-    new_collection -> SetHLTFilterObjectIndex ( m_hlt_filter_index );
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short this_collection_size = GetSize();
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -378,7 +378,7 @@ class Collection {
   //------------------------------------------------------------------------------------------
   
  protected:
-  short m_hlt_filter_index;
+  short m_trigObj_index;
   std::vector<unsigned short> m_raw_indices; 
   rootNtupleClass * m_data;
   

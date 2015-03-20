@@ -14,10 +14,12 @@ class Electron : public Object {
   // Kinematic variables
   
   double & Pt                 ();
+  double & PtHeep             ();
   double & Eta                (); 
   double & Phi                (); 
   double SCEta                (); 
   double SCPhi                (); 
+  double SCEnergy             (); 
   double Charge               (); 
 
   // Energy resolution scale factors
@@ -38,12 +40,16 @@ class Electron : public Object {
   double IsEE                 ();
   bool   EcalSeed             ();
   double DeltaEta             ();
+  double DeltaEtaSeed         ();
   double DeltaPhi             ();
   double HoE                  ();
   double SigmaIEtaIEta        ();
+  double Full5x5SigmaIEtaIEta ();
   double SigmaEtaEta          ();
   double E1x5OverE5x5         ();
   double E2x5OverE5x5         ();
+  double Full5x5E1x5OverE5x5     ();
+  double Full5x5E2x5OverE5x5     ();
   double LeadVtxDistXY        ();
   double LeadVtxDistZ         ();
   double VtxDistXY            ();
@@ -52,6 +58,7 @@ class Electron : public Object {
   double DCotTheta            ();
   double ValidFrac            ();
   double CaloEnergy           ();
+  double EcalEnergy           ();
   double ESuperClusterOverP   ();
   double FBrem                ();
   double NBrems               ();
@@ -62,6 +69,7 @@ class Electron : public Object {
   double GsfScPixCharge       ();
   double GsfCtfCharge         ();
   double Classif              ();
+  float  RhoForHEEP           ();
 
 
   // EGamma bits
@@ -73,12 +81,12 @@ class Electron : public Object {
   int    PassEGammaIDTrigTight();
   int    PassEGammaIDTrigWP70 ();
   int    PassEGammaIDVeto     ();
+  int    PassHEEPID           ();
   
   // Conversion variables		      	
   
   int    MissingHitsEG        ();
   int    MissingHits          ();
-  double ConvFitProb          ();
   
   // Isolation variables		       	
   
@@ -89,15 +97,12 @@ class Electron : public Object {
   double PFChargedHadronIso03 ();
   double PFPhotonIso03        ();
   double PFNeutralHadronIso03 ();
+  double PFPUIso03            ();
 
   double PFChargedHadronIso04 ();
   double PFPhotonIso04        ();
   double PFNeutralHadronIso04 ();
   
-  // Isolation rho correction factors
-
-  double RhoForHEEPv4p0       ();
-  double RhoForEGamma2012     ();
   
   // GEN matching
 
@@ -107,8 +112,6 @@ class Electron : public Object {
 
   // Isolation variables
 
-  double HEEPCaloIsolation    ();
-  double HEEPCorrIsolation    ();
   double TrackPt              ();
   double RawEnergy            ();
 
@@ -116,9 +119,10 @@ class Electron : public Object {
 
   double m_rawSuperClusterPt;
 
-  bool   PassUserID_HEEPv4p1           (bool verbose);
-  bool   PassUserID_HEEPv4p0           (bool verbose);
-  bool   PassUserID_EGamma2012( ID id,  bool verbose);
+  bool   PassUserID_BuiltIn_HEEPv5p1   ();
+  bool   PassUserID_HEEP               (bool verbose);
+  bool   PassUserID_BuiltIn_EGamma     ( ID id);
+  bool   PassUserID_EGamma             ( ID id,  bool verbose);
   bool   PassUserID_MVA                (bool verbose);
   bool   PassUserID_ECALFiducial       (bool verbose);
   bool   PassUserID_FakeRateLooseID    (bool verbose);
