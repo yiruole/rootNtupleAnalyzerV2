@@ -12,6 +12,7 @@ SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o 
 COLLECTIONLIB=$(SRC)/Collection.o
 PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/Muon.o $(SRC)/HighPtMuon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
 IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/HighPtMuonIDs.o $(SRC)/PFJetIDs.o
+TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o 
 EXE = main
 
 # ********** TEMPLATE *************
@@ -21,8 +22,8 @@ EXE = main
 
 all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB)
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(SRC)/$@.o
+main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o
 
 clean:
 	rm -f src/*.o *.lo core core.*

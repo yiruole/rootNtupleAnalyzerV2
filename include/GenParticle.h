@@ -17,6 +17,7 @@ class GenParticle : public Object {
   double & Pt() ;
   double & Eta();
   double & Phi();
+  double & Mass();
 
   // IDs 
 
@@ -45,6 +46,8 @@ class GenParticle : public Object {
   bool PassUserID_GenNuFromW          (bool verbose);
   bool PassUserID_GenEleFromW         (bool verbose);
   bool PassUserID_GenEleFromDY        (bool verbose);
+
+  bool PassUserID_GenLQ               (bool verbose);
 
 
 };

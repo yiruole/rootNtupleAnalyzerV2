@@ -110,6 +110,25 @@ class Electron : public Object {
   double MatchedGenParticleEta(); 
   double MatchedGenParticlePhi();
 
+  
+  // HLT matching
+  bool IsHLTEleJetJetMatched();
+  bool IsHLTDoubleEleMatched();
+  bool IsHLTSingleEleMatched();
+  bool IsHLTSingleEleWP85Matched();
+  double HLTEleJetJetMatchPt();
+  double HLTEleJetJetMatchEta();
+  double HLTEleJetJetMatchPhi();
+  double HLTDoubleEleMatchPt();
+  double HLTDoubleEleMatchEta();
+  double HLTDoubleEleMatchPhi();
+  double HLTSingleEleMatchPt();
+  double HLTSingleEleMatchEta();
+  double HLTSingleEleMatchPhi();
+  double HLTSingleEleWP85MatchPt();
+  double HLTSingleEleWP85MatchEta();
+  double HLTSingleEleWP85MatchPhi();
+
   // Isolation variables
 
   double TrackPt              ();

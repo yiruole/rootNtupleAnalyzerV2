@@ -68,6 +68,7 @@ void baseClass::init()
 
   //directly from string
   output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
+  std::cout << "made the output_root_ file" << std::endl;
 
   // Skim stuff
   produceSkim_ = false;

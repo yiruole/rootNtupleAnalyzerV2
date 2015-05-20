@@ -30,6 +30,7 @@ enum ID {
   GEN_NU_FROM_W  	         = 22,
   GEN_ELE_FROM_W  	       = 23,
   GEN_ELE_FROM_DY  	       = 24,
+  GEN_LQ  	               = 25,
 
   EGAMMA_BUILTIN_TIGHT     = 40,
   EGAMMA_BUILTIN_MEDIUM    = 41,

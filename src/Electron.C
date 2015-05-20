@@ -101,6 +101,24 @@ double Electron::MatchedGenParticlePt (){ return m_collection -> GetData() -> El
 double Electron::MatchedGenParticleEta(){ return m_collection -> GetData() -> ElectronMatchedGenParticleEta -> at ( m_raw_index ); } 
 double Electron::MatchedGenParticlePhi(){ return m_collection -> GetData() -> ElectronMatchedGenParticlePhi -> at ( m_raw_index ); }
 
+// HLT matching
+bool Electron::IsHLTEleJetJetMatched(){ return m_collection -> GetData() -> ElectronHLTEleJetJetMatched  -> at ( m_raw_index ); }
+bool Electron::IsHLTDoubleEleMatched(){ return m_collection -> GetData() -> ElectronHLTDoubleEleMatched  -> at ( m_raw_index ); }
+bool Electron::IsHLTSingleEleMatched(){ return m_collection -> GetData() -> ElectronHLTSingleEleMatched  -> at ( m_raw_index ); }
+bool Electron::IsHLTSingleEleWP85Matched(){ return m_collection -> GetData() -> ElectronHLTSingleEleWP85Matched  -> at ( m_raw_index ); }
+double Electron::HLTEleJetJetMatchPt() { return m_collection -> GetData() -> ElectronHLTEleJetJetMatchPt  -> at ( m_raw_index ); }
+double Electron::HLTEleJetJetMatchEta(){ return m_collection -> GetData() -> ElectronHLTEleJetJetMatchEta  -> at ( m_raw_index ); };
+double Electron::HLTEleJetJetMatchPhi(){ return m_collection -> GetData() -> ElectronHLTEleJetJetMatchPhi  -> at ( m_raw_index ); };
+double Electron::HLTDoubleEleMatchPt() { return m_collection -> GetData() -> ElectronHLTDoubleEleMatchPt  -> at ( m_raw_index ); }
+double Electron::HLTDoubleEleMatchEta(){ return m_collection -> GetData() -> ElectronHLTDoubleEleMatchEta  -> at ( m_raw_index ); };
+double Electron::HLTDoubleEleMatchPhi(){ return m_collection -> GetData() -> ElectronHLTDoubleEleMatchPhi  -> at ( m_raw_index ); };
+double Electron::HLTSingleEleMatchPt() { return m_collection -> GetData() -> ElectronHLTSingleEleMatchPt  -> at ( m_raw_index ); }
+double Electron::HLTSingleEleMatchEta(){ return m_collection -> GetData() -> ElectronHLTSingleEleMatchEta  -> at ( m_raw_index ); };
+double Electron::HLTSingleEleMatchPhi(){ return m_collection -> GetData() -> ElectronHLTSingleEleMatchPhi  -> at ( m_raw_index ); };
+double Electron::HLTSingleEleWP85MatchPt() { return m_collection -> GetData() -> ElectronHLTSingleEleWP85MatchPt  -> at ( m_raw_index ); }
+double Electron::HLTSingleEleWP85MatchEta(){ return m_collection -> GetData() -> ElectronHLTSingleEleWP85MatchEta  -> at ( m_raw_index ); };
+double Electron::HLTSingleEleWP85MatchPhi(){ return m_collection -> GetData() -> ElectronHLTSingleEleWP85MatchPhi  -> at ( m_raw_index ); };
+
 // Isolation variables
 
 double Electron::TrackPt          (){ return m_collection -> GetData() -> ElectronTrackPt -> at ( m_raw_index ); }
