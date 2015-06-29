@@ -180,7 +180,7 @@ class baseClass : public rootNtupleClass {
   double getHistoMin(const string& s);
   double getHistoMax(const string& s);
 
-  baseClass(string * inputList, string * cutFile, string * treeName, string *outputFileName=0, string * cutEfficFile=0);
+  baseClass(string * inputList, string * cutFile, string * treeName, string* mergedTreeName=0,string *outputFileName=0, string * cutEfficFile=0);
   virtual ~baseClass();
 
   // Optimization stuff
@@ -210,9 +210,10 @@ class baseClass : public rootNtupleClass {
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
+  string * mergedTreeName_;
   //TChain * chain_; // Original TChain
   TChain * tree_; // main tree
-  TTree * tree2_; // tree for globalInfo
+  TChain * tree2_; // tree for globalInfo
   string * cutEfficFile_;
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;

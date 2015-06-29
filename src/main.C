@@ -25,9 +25,9 @@ int main(int argc, char* argv[])
 {
   const int Nparam=5;   // NUMBER OF PARAMETERS
 
-  if(argc!=Nparam+1)
+  if(argc<Nparam+1)
     {
-      cout << "main() : arcg = " << argc << " is different from " << Nparam+1 <<". Exiting." <<endl;
+      cout << "main() : arcg = " << argc << " is less than " << Nparam+1 <<". Exiting." <<endl;
       cout << "Usage  : ./main inputList cutFile treeName outputRootFileWithoutExtension outputEfficiencyFileWithoutExtension" << endl;
       cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt RootTupleMaker data/output/rootFile data/output/cutEfficiencyFile" << endl;
       cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt treeCreator/RootTupleMakerPAT data/output/rootFile data/output/cutEfficiencyFile" << endl;
@@ -40,8 +40,11 @@ int main(int argc, char* argv[])
   string * treeName       = new  string(argv[3]);
   string * outputFileName = new  string(argv[4]);
   string * cutEfficFile   = new  string(argv[5]);
+  string* tree2Name = 0;
+  if(argc==7)
+    tree2Name = new string(argv[6]);
 
-  analysisClass analysisClass_(inputList, cutFile, treeName, outputFileName, cutEfficFile);
+  analysisClass analysisClass_(inputList, cutFile, treeName, tree2Name, outputFileName, cutEfficFile);
   analysisClass_.Loop();
 
 }

@@ -2,7 +2,7 @@
 #include "baseClass.h"
 #include <boost/lexical_cast.hpp>
 
-baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
+baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string* mergedTreeName, string * outputFileName, string * cutEfficFile):
   PileupWeight_ ( 1.0 ),
   fillSkim_                         ( true ) ,
   fillAllPreviousCuts_              ( true ) ,
@@ -17,6 +17,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
+  mergedTreeName_ = mergedTreeName;
   outputFileName_ = outputFileName;
   cutEfficFile_ = cutEfficFile;
   init();
@@ -60,7 +61,7 @@ void baseClass::init()
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
     return;
   }
-  Init(tree_);
+  Init(tree_,tree2_);
 
   //char output_root_title[200];
   //sprintf(output_root_title,"%s%s",&std::string(*outputFileName_)[0],".root");
@@ -114,6 +115,9 @@ void baseClass::readInputList()
 {
 
   TChain *chain = new TChain(treeName_->c_str());
+  TChain *chain2;
+  if(mergedTreeName_->size() > 0)
+    chain2 = new TChain(mergedTreeName_->c_str());
   char pName[500];
   skimWasMade_ = true;
   jsonFileWasUsed_ = false;
@@ -135,11 +139,13 @@ void baseClass::readInputList()
 	  if (pName[0] == '\n') continue;// simple protection against blank lines
           STDOUT("Adding file: " << pName);
           chain->Add(pName);
+          chain2->Add(pName);
 	  NBeforeSkim = getGlobalInfoNstart(pName);
 	  NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
 	  STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
         }
       tree_ = chain;
+      tree2_ = chain2;
       STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
     }
   else

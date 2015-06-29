@@ -66,7 +66,7 @@ done
 
 cat >> temporaryMacro.C <<EOF
   c.MakeClass("rootNtupleClass");
-  c.MakeClass("rootNtupleClassMergedTree");
+  c2.MakeClass("rootNtupleClassMergedTree");
 }
 EOF
 
@@ -84,15 +84,27 @@ sed '
 \/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nrootNtupleClassMergedTree *fMergedChain; \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
 ' < tmp1.h > tmp2.h
 sed '
-/rootNtupleClass\:\:rootNtupleClass(TTree \*tree) : fChain(0)/ c\
-\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nrootNtupleClass::rootNtupleClass(TTree \*tree, TTree \*tree2) : fChain(0) \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+/rootNtupleClass(TTree \*tree=0);/ c\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nrootNtupleClass(TTree \*tree=0, TTree \*tree2=0); \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
 ' < tmp2.h > tmp3.h
 sed '
-/Init(tree);/ a\
-\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nfMergedChain = new rootNtupleClassMergedTree(tree2); \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+/virtual[[:blank:]]*void[[:blank:]]*Init(TTree \*tree);/ c\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nvirtual void Init(TTree \*tree,TTree \*tree2=0); \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
 ' < tmp3.h > tmp4.h
-mv tmp4.h rootNtupleClass.h
-rm tmp1.h tmp2.h tmp3.h
+sed '
+/void[[:blank:]]*rootNtupleClass::Init(TTree \*tree)/ c\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nvoid rootNtupleClass::Init(TTree \*tree,TTree \*tree2) \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+' < tmp4.h > tmp5.h
+sed '
+/rootNtupleClass\:\:rootNtupleClass(TTree \*tree) : fChain(0)/ c\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nrootNtupleClass::rootNtupleClass(TTree \*tree, TTree \*tree2) : fChain(0) \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+' < tmp5.h > tmp6.h
+sed '
+/\/\/ The Init() function is called when the selector needs to initialize/ i\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \nfMergedChain = new rootNtupleClassMergedTree(tree2); \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+' < tmp6.h > tmp7.h
+mv tmp7.h rootNtupleClass.h
+rm tmp1.h tmp2.h tmp3.h tmp4.h tmp5.h tmp6.h
 
 if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
@@ -108,6 +120,13 @@ else
     echo "Error: files rootNtupleClass.h/C have not been created."
 fi
 
+
+# insert additional lines needed by rootNtupleClass.h
+sed '
+/\<TROOT\.h\>/ i\
+\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \n\#include \<vector\> \nusing namespace std\; \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
+' < rootNtupleClassMergedTree.h > tmp1.h
+mv tmp1.h rootNtupleClassMergedTree.h
 if [ -f "rootNtupleClassMergedTree.h" ] && [ -f "rootNtupleClassMergedTree.C" ]; then
     echo "Moving rootNtupleClassMergedTree.h/C to ./include/ and ./src/ directories ..."
     mv -i rootNtupleClassMergedTree.h include/

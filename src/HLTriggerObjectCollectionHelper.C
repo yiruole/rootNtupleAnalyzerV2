@@ -4,7 +4,7 @@
 #include "rootNtupleClass.h"
 #include "TBranchElement.h"
 
-
+// if prefix is given, assume this comes from merged tree
 HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( rootNtupleClass & d, std::string prefix ):
   m_data ( & d ),
   m_prefix ( prefix )
@@ -12,7 +12,11 @@ HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( rootNtupleClas
 
 std::vector<std::vector<int> >* HLTriggerObjectCollectionHelper::GetHLTriggerObjTypeIds()
 {
-  return reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fChain->GetBranch((m_prefix+"HLTriggerObjTypeIds").c_str()))->GetObject());
+  //m_data->fMergedChain->fChain->Print();
+  if(m_prefix.size() > 0)
+    return reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fMergedChain->fChain->GetBranch((m_prefix+"HLTriggerObjTypeIds").c_str()))->GetObject());
+  else
+    return reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fChain->GetBranch("HLTriggerObjTypeIds"))->GetObject());
 }
 
 void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
@@ -37,7 +41,7 @@ void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
     if(idItr+1 < objIds.end())
       std::cout  << *idItr << ", ";
     else
-      std::cout  << *idItr << "}, ";
+      std::cout  << *idItr << "}, Paths= {";
   std::vector<std::string> pathNamesVec = m_data->HLTriggerObjPathNames->at(i);
   for(std::vector<std::string>::const_iterator pathItr = pathNamesVec.begin(); pathItr != pathNamesVec.end(); ++pathItr)
     if(pathItr+1 < pathNamesVec.end())
@@ -76,12 +80,12 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const 
   // first, look at each object in the HLTriggerObj collection
   for (unsigned short i = 0; i < m_data->HLTriggerObjPt->size() ; ++i)
   {
-    if(verbose)
-      PrintObjectInfo(i);
 
     short pathIndex = IndexOfAssociatedPath(path_name, i);
     if(pathIndex > -1)
     {
+      if(verbose)
+        PrintObjectInfo(i);
       // if it is associated to a path, check to see if it passed an L3 filter in the path
       if(m_data->HLTriggerObjPassedPathL3Filter->at(i).at(pathIndex))
         matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
@@ -101,12 +105,12 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( cons
   // first, look at each object in the HLTriggerObj collection
   for (unsigned short i = 0; i < m_data->HLTriggerObjPt->size() ; ++i)
   {
-    if(verbose)
-      PrintObjectInfo(i);
 
     short pathIndex = IndexOfAssociatedPath(path_name, i);
     if(pathIndex > -1)
     {
+      if(verbose)
+        PrintObjectInfo(i);
       // if it is associated to a path, check to see if it passed the last filter in the path
       if(m_data->HLTriggerObjPassedPathLastFilter->at(i).at(pathIndex))
         matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
