@@ -108,9 +108,9 @@ bool Electron::PassUserID_HEEP (bool verbose){
 		   pass_caloIsolation ); 
 
   if ( verbose ) {
-    if ( decision ) std::cout << "Electron #" << m_raw_index << " PASS FakeRateLooseID" << std::endl;
+    if ( decision ) std::cout << "Electron #" << m_raw_index << " PASS HEEPID" << std::endl;
     else { 
-      std::cout << "Electron #" << m_raw_index << " FAIL FakeRateLooseID" << std::endl;
+      std::cout << "Electron #" << m_raw_index << " FAIL HEEPID" << std::endl;
       if ( !pass_et            ) std::cout << "\tfail et            " << std::endl;
       if ( !pass_ecalDriven    ) std::cout << "\tfail ecalDriven    " << std::endl;
       if ( !pass_deltaEtaSeed  ) std::cout << "\tfail deltaEtaSeed  " << std::endl;
