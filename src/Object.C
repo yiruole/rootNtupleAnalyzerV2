@@ -64,8 +64,8 @@ double Object::Phi_mpi_pi ( double x ) {
   return x;
 }
 
-bool Object::IsGenEBFiducial       () { return bool ( fabs(Eta()) < 1.442 ); }
-bool Object::IsGenEEFiducial       () { return bool ( ( fabs(Eta()) > 1.56 ) && ( fabs(Eta()) < 2.50 ) ); }
+bool Object::IsGenEBFiducial       () { return bool ( fabs(Eta()) < 1.4442 ); }
+bool Object::IsGenEEFiducial       () { return bool ( ( fabs(Eta()) > 1.566 ) && ( fabs(Eta()) < 2.50 ) ); }
 bool Object::IsGenElectronFiducial () { return ( IsGenEBFiducial() || IsGenEEFiducial() ); }
 bool Object::IsMuonFiducial     () { return bool (fabs(Eta()) < 2.1); }
 bool Object::IsNULL             () { return bool ( m_raw_index < 0 ); }
