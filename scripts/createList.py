@@ -26,19 +26,34 @@ def unique(keys):
     return unique
 
 
-
+# NB: now use eos find to find the files in subdirectories, and (therefore) returns full paths
 def make_filenamelist_eos(inputDir):
+    #path = inputDir
     filenamelist = []
-    proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/0.2.5/bin/eos.select ls ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    #proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/pro/bin/eos.select ls ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/pro/bin/eos.select find -f ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    # this gives the full path though
     output = proc.communicate()[0]
     if proc.returncode != 0:
         print output
         sys.exit(1)
     for line in output.splitlines():
-        filenamelist.append(line.strip())
+        filename = os.path.split(line)[1]
+        # if it's not a root file, forget about it
+        if re.search('.root$', filename) is None:
+            continue
+        print 'line=',line
+        filenamelist.append(line)
+        #filenamelist.append(filename)
+        ##print 'added:',filenamelist[-1]
+        #dirname=os.path.split(line)[0]
+        #if path != dirname:
+        #  path = dirname
+        #  path+='/'
 
     return filenamelist
 
+#FIXME now should return the full path
 def make_filenamelist_castor(inputDir):
     filenamelist = []
     proc = subprocess.Popen( [ 'rfdir', inputDir ], stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
@@ -51,6 +66,7 @@ def make_filenamelist_castor(inputDir):
 
     return filenamelist
 
+#FIXME now should return the full path
 def make_filenamelist_default(inputDir):
     if not os.path.isdir(inputDir):
         print ('%s is not a directory'%(inputDir))
@@ -79,10 +95,14 @@ def process_input_dir(inputDir, match, filelist):
     else:
         filenamelist = make_filenamelist_default(inputDir)
 
-    path = prefix+inputDir;
-
-    for filename in filenamelist:
-        if( not re.search('.root$', filename) ):
+    #path = prefix+dirpath;
+    for fullfilepath in filenamelist:
+        #path = prefix+fullfilepath
+        path = prefix+os.path.split(fullfilepath)[0]+'/'
+        filename = os.path.split(fullfilepath)[1]
+        #print 'filename=',filename
+        #print re.search('.root$',filename)
+        if re.search('.root$', filename) is None:
             continue
         if ( match!=None and not re.search(match, filename) ):
             continue
