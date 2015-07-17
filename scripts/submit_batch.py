@@ -4,6 +4,7 @@ import sys
 import string
 import re
 from optparse import OptionParser
+import stat
 
 usage = "usage: %prog [options] \nExample: ./scripts/submit_batch.py -i HeepStudies_v1/MinimumBias__Commissioning10-SD_EG-v9__RECO_short.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -o TestFrancesco/Mydataset -t rootTupleTree/tree -n 2 -q 1nh"
 
@@ -99,9 +100,15 @@ for ijob in range(ijobmax):
     outputfile = open(outputname,"w")
     outputfile.write("#!/bin/bash\n")
     outputfile.write("cd "+pwd+"\n")
-    if "amd64" in os.getenv ("SCRAM_ARCH"): outputfile.write(". /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh\n")
+    #if "amd64" in os.getenv ("SCRAM_ARCH"): outputfile.write(". /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh\n")
+    outputfile.write("cmsenv\n")
     outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+" "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"\n")
     outputfile.write("mv -v "+outputmain+"/output/"+outputPrefix+"_"+str(ijob)+"_skim.root"+" "+outputmain+"/skim/"+dataset+"_"+str(ijob)+".root\n")
     outputfile.close
-    print    ("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
-    os.system("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
+    # make it executable
+    st = os.stat(outputname)
+    os.chmod(outputname, st.st_mode | stat.S_IEXEC)
+    #print    ("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
+    #os.system("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log source "+outputname)
+    print    ("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log "+outputname)
+    os.system("bsub -q "+options.queue+" -o "+outputmain+"/log/"+outputPrefix+"_"+str(ijob)+".log "+outputname)
