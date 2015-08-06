@@ -38,11 +38,14 @@ def make_filenamelist_eos(inputDir):
         print output
         sys.exit(1)
     for line in output.splitlines():
+        # ignore failed jobs
+        if 'failed' in line:
+          continue
         filename = os.path.split(line)[1]
         # if it's not a root file, forget about it
         if re.search('.root$', filename) is None:
             continue
-        print 'line=',line
+        #print 'line=',line
         filenamelist.append(line)
         #filenamelist.append(filename)
         ##print 'added:',filenamelist[-1]
