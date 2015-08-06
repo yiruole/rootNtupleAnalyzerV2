@@ -138,7 +138,7 @@ class Electron : public Object {
 
   double m_rawSuperClusterPt;
 
-  bool   PassUserID_BuiltIn_HEEPv5p1   ();
+  bool   PassUserID_BuiltIn_HEEPv6p0   ();
   bool   PassUserID_HEEP               (bool verbose);
   bool   PassUserID_BuiltIn_EGamma     ( ID id);
   bool   PassUserID_EGamma             ( ID id,  bool verbose);

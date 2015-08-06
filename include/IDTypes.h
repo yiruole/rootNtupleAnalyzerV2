@@ -6,8 +6,8 @@ enum ID {
   EGAMMA_LOOSE             = 1, 
   EGAMMA_MEDIUM            = 2, 
   EGAMMA_TIGHT             = 3, 
-  HEEP51                   = 4,
-  HEEP                     = 5,
+  HEEP60                   = 4,
+  HEEP51                   = 5,
   MVA                      = 6,
   ECAL_FIDUCIAL            = 7,
   		        

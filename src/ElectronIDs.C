@@ -5,8 +5,8 @@
 #include "IDTypes.h"
 
 bool Electron::PassUserID (ID id, bool verbose){ 
-  if      ( id == HEEP51                ) return PassUserID_BuiltIn_HEEPv5p1  ();
-  else if ( id == HEEP                  ) return PassUserID_HEEP              (verbose);
+  if      ( id == HEEP60                ) return PassUserID_BuiltIn_HEEPv6p0  ();
+  else if ( id == HEEP51                ) return PassUserID_HEEP              (verbose);
   else if ( id == EGAMMA_BUILTIN_TIGHT  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
   else if ( id == EGAMMA_BUILTIN_MEDIUM ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
   else if ( id == EGAMMA_BUILTIN_LOOSE  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
@@ -25,7 +25,7 @@ bool Electron::PassUserID_ECALFiducial (bool verbose){
   else return false;
 }
 
-bool Electron::PassUserID_BuiltIn_HEEPv5p1 (){
+bool Electron::PassUserID_BuiltIn_HEEPv6p0 (){
   return PassHEEPID();
 }
 
@@ -33,6 +33,7 @@ bool Electron::PassUserID_BuiltIn_HEEPv5p1 (){
 bool Electron::PassUserID_HEEP (bool verbose){
   // See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
   // apply cuts manually based on variables here
+  // this is version 5.1
 
   //----------------------------------------------------------------------
   //  Bools that are the same whether barrel or endcap
