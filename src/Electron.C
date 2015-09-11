@@ -121,6 +121,9 @@ double Electron::HLTSingleEleWP85MatchPhi(){ return m_collection -> GetData() ->
 
 // Isolation variables
 
+
+double Electron::HEEPCaloIsolation(){ return (EcalIsoDR03() + HcalIsoD1DR03()); }
+double Electron::HEEPCorrIsolation(){ return ( HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
 double Electron::TrackPt          (){ return m_collection -> GetData() -> ElectronTrackPt -> at ( m_raw_index ); }
 
 // Fiduciality

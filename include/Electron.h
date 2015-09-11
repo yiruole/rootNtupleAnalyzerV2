@@ -131,6 +131,8 @@ class Electron : public Object {
 
   // Isolation variables
 
+  double HEEPCaloIsolation    ();
+  double HEEPCorrIsolation    ();
   double TrackPt              ();
   double RawEnergy            ();
 

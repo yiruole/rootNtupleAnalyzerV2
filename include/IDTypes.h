@@ -32,6 +32,8 @@ enum ID {
   GEN_ELE_FROM_DY  	       = 24,
   GEN_LQ  	               = 25,
 
+  FAKE_RATE_HEEP_LOOSE     = 30,
+
   EGAMMA_BUILTIN_TIGHT     = 40,
   EGAMMA_BUILTIN_MEDIUM    = 41,
   EGAMMA_BUILTIN_LOOSE     = 42,

@@ -17,6 +17,7 @@ bool Electron::PassUserID (ID id, bool verbose){
   else if ( id == EGAMMA_VETO           ) return PassUserID_EGamma            (EGAMMA_VETO  , verbose);
   else if ( id == MVA                   ) return PassUserID_MVA               (verbose);
   else if ( id == ECAL_FIDUCIAL         ) return PassUserID_ECALFiducial      (verbose);
+  else if ( id == FAKE_RATE_HEEP_LOOSE  ) return PassUserID_FakeRateLooseID(verbose);
   else return false;
 }
 
@@ -266,7 +267,7 @@ bool Electron::PassUserID_MVA (bool verbose){
 
 bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   return false;
-  // FIXME?
+  // TODO FIXME
   //bool pass_ecalDriven    = bool ( EcalSeed()    == 1    );
   //bool pass_missingHits   = bool ( MissingHits() <= 1    );
   //bool pass_dxy           = false;

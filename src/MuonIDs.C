@@ -10,6 +10,8 @@ bool Muon::PassUserID (ID id, bool verbose){
   else return false;
 }
 
+// see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
+// this hasn't changed since Run I.
 bool Muon::PassUserID_MuonTight_PFIso04 ( bool verbose ){
 
   double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();

@@ -4,6 +4,9 @@
 #include "PFJet.h"
 #include "IDTypes.h"
 
+// see: https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+// has not changed from Run I, but there is nothing defined as medium
+
 bool PFJet::PassUserID (ID id, bool verbose){ 
   if      ( id == PFJET_LOOSE  ) return PassUserID_PFJetLoose  (verbose);
   else if ( id == PFJET_MEDIUM ) return PassUserID_PFJetMedium (verbose);
