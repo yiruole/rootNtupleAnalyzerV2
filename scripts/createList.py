@@ -95,6 +95,9 @@ def process_input_dir(inputDir, match, filelist):
     elif( re.search("^/eos/cms/", inputDir) ):
         prefix = "root://eoscms/"
         filenamelist = make_filenamelist_eos(inputDir)
+    elif( re.search("^/store/", inputDir) ):
+        prefix = "root://eoscms//eos/cms"
+        filenamelist = make_filenamelist_eos(inputDir)
     else:
         filenamelist = make_filenamelist_default(inputDir)
 
