@@ -126,27 +126,31 @@ void baseClass::readInputList()
 
   ifstream is(inputList_->c_str());
   if(is.good())
+  {
+    STDOUT("baseClass::readInputList: Starting reading list: " << *inputList_ );
+    while( is.getline(pName, 500, '\n') )
     {
-      STDOUT("baseClass::readInputList: Starting reading list: " << *inputList_ );
-      while( is.getline(pName, 500, '\n') )
-        {
-          if (pName[0] == '#') continue;
-	  //if (pName[0] == ' ') continue; // do we want to skip lines that start with a space?
-	  if (pName[0] == '\n') continue;// simple protection against blank lines
-          STDOUT("Adding file: " << pName);
-          chain->Add(pName);
-	  NBeforeSkim = getGlobalInfoNstart(pName);
-	  NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
-	  STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
-        }
-      tree_ = chain;
-      STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
+      if (pName[0] == '#') continue;
+      //if (pName[0] == ' ') continue; // do we want to skip lines that start with a space?
+      if (pName[0] == '\n') continue;// simple protection against blank lines
+      // if it's just /store (e.g., via crab3) add the necessary prefix
+      std::string name(pName);
+      if(name.find("/store") != std::string::npos && name.find("/store")==0)
+        name.insert(0,"root://eoscms//eos/cms");
+      STDOUT("Adding file: " << name);
+      chain->Add(name.c_str());
+      NBeforeSkim = getGlobalInfoNstart(name.c_str());
+      NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
+      STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
     }
+    tree_ = chain;
+    STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
+  }
   else
-    {
-      STDOUT("baseClass::readInputList: ERROR opening inputList:" << *inputList_ );
-      exit (1);
-    }
+  {
+    STDOUT("baseClass::readInputList: ERROR opening inputList:" << *inputList_ );
+    exit (1);
+  }
   is.close();
 
 }
@@ -1052,25 +1056,26 @@ bool baseClass::writeCutEfficFile()
   int cutIdPed=0;
   double minForFixed = 0.1;
   int precision = 4;
+  int mainFieldWidth=20;
   os.precision(precision);
-  os << "################################## Cuts #####################################################################################\n"
-     <<"#id             variableName           min1           max1           min2           max2          level              N          Npass         EffRel      errEffRel         EffAbs      errEffAbs"<<endl
+  os << "################################## Cuts #########################################################################################################################################################################################################################\n"
+     <<"#id                       variableName                min1                max1                min2                max2               level                   N               Npass              EffRel           errEffRel              EffAbs           errEffAbs"<<endl
      << fixed
      << setw(3) << cutIdPed
      << setw(35) << "nocut"
      << setprecision(4)
-     << setw(15) << "-"
-     << setw(15) << "-"
-     << setw(15) << "-"
-     << setw(15) << "-"
-     << setw(15) << "-"
-     << setw(15) << nEntTot
-     << setw(15) << nEntTot
+     << setw(mainFieldWidth) << "-" //min1
+     << setw(mainFieldWidth) << "-" //max1
+     << setw(mainFieldWidth) << "-" //min2
+     << setw(mainFieldWidth) << "-" //max2
+     << setw(mainFieldWidth) << "-" //level
+     << setw(mainFieldWidth) << nEntTot //N
+     << setw(mainFieldWidth) << nEntTot //Npass
     //     << setprecision(11)
-     << setw(15) << 1.
-     << setw(15) << 0.
-     << setw(15) << 1.
-     << setw(15) << 0.
+     << setw(mainFieldWidth) << 1. //EffRell
+     << setw(mainFieldWidth) << 0. //errEffRel
+     << setw(mainFieldWidth) << 1. //EffAbs
+     << setw(mainFieldWidth) << 0. //errEffAbs
      << endl;
 
   double effRel;
@@ -1097,17 +1102,17 @@ bool baseClass::writeCutEfficFile()
 	 << setw(3) << ++cutIdPed
 	 << setw(35) << "skim"
 	 << setprecision(4)
-	 << setw(15) << "-"
-	 << setw(15) << "-"
-	 << setw(15) << "-"
-	 << setw(15) << "-"
-	 << setw(15) << "-"
-	 << setw(15) << NBeforeSkim_
-	 << setw(15) << nEntRoottuple
-	 << setw(15) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
-	 << setw(15) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
-	 << setw(15) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
-	 << setw(15) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
+	 << setw(mainFieldWidth) << "-"
+	 << setw(mainFieldWidth) << "-"
+	 << setw(mainFieldWidth) << "-"
+	 << setw(mainFieldWidth) << "-"
+	 << setw(mainFieldWidth) << "-"
+	 << setw(mainFieldWidth) << NBeforeSkim_
+	 << setw(mainFieldWidth) << nEntRoottuple
+	 << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
+	 << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
+	 << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
+	 << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
 	 << fixed << endl;
       nEvtPassedBeforeWeight_previousCut = nEntRoottuple;
       nEvtPassed_previousCut = nEntRoottuple;
@@ -1154,17 +1159,17 @@ bool baseClass::writeCutEfficFile()
 	 << setw(35) << c->variableName
 	 << setprecision(precision)
 	 << fixed
-	 << setw(15) << ( ( c->minValue1 == -99999999999.0 ) ? "-inf" : ssm1.str() )
-	 << setw(15) << ( ( c->maxValue1 ==  99999999999.0 ) ? "+inf" : ssM1.str() )
-	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
-	 << setw(15) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
-	 << setw(15) << c->level_int
-	 << setw(15) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut
-	 << setw(15) << ( (c->nEvtPassed          < minForFixed) ? (scientific) : (fixed) ) << c->nEvtPassed
-	 << setw(15) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
-	 << setw(15) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
-	 << setw(15) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
-	 << setw(15) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
+	 << setw(mainFieldWidth) << ( ( c->minValue1 == -99999999999.0 ) ? "-inf" : ssm1.str() )
+	 << setw(mainFieldWidth) << ( ( c->maxValue1 ==  99999999999.0 ) ? "+inf" : ssM1.str() )
+	 << setw(mainFieldWidth) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
+	 << setw(mainFieldWidth) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
+	 << setw(mainFieldWidth) << c->level_int
+	 << setw(mainFieldWidth) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut
+	 << setw(mainFieldWidth) << ( (c->nEvtPassed          < minForFixed) ? (scientific) : (fixed) ) << c->nEvtPassed
+	 << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
+	 << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
+	 << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
+	 << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
 	 << fixed << endl;
       nEvtPassedBeforeWeight_previousCut = c->nEvtPassedBeforeWeight;
       nEvtPassed_previousCut = c->nEvtPassed;
@@ -1278,7 +1283,7 @@ double baseClass::decodeCutValue(const string& s)
   return ret;
 }
 
-int baseClass::getGlobalInfoNstart(char *pName)
+int baseClass::getGlobalInfoNstart(const char *pName)
 {
   int NBeforeSkim = 0;
   STDOUT(pName<<"  "<< NBeforeSkim)
