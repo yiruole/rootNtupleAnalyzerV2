@@ -232,7 +232,7 @@ class baseClass : public rootNtupleClass {
   vector<string> split(const string& s);
   double decodeCutValue(const string& s);
   bool skimWasMade_;
-  int getGlobalInfoNstart( char* );
+  int getGlobalInfoNstart(const char* );
   int NBeforeSkim_;
   double PileupWeight_;
 
