@@ -1,12 +1,24 @@
 #!/usr/bin/env python
 import os
+import sys
+import subprocess
 from optparse import OptionParser
 
 #
 # Use commands like ./multicrab.py -c status -d runBetaOneLQ1MC/testTag_2015Jul13_104935/
 #   This will check the status of the submitted crab jobs over multiple datasets.
 
-from CRABAPI.RawCommand import crabCommand
+try:
+  from CRABAPI.RawCommand import crabCommand
+except ImportError:
+  print
+  print 'ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:'
+  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  exit(-1)
+
+from CRABClient.ClientExceptions import CachefileNotFoundException
+from CRABClient.ClientExceptions import ConfigurationException
+from httplib import HTTPException
 
 
 def getOptions():
@@ -29,6 +41,9 @@ def getOptions():
     parser.add_option("-m", "--moveFiles", dest="moveFiles",
          help=("move non-skim files from EOS to local outputdir"),
          metavar="moveFiles",default=True,action="store_true")
+    parser.add_option("-i", "--ignoreCache", dest="ignoreMulticrabCache",
+         help=("don't use cache file to skip checking status of jobs already done"),
+         metavar="ignoreCache",default=False,action="store_true")
 
     (options, args) = parser.parse_args()
 
@@ -50,6 +65,15 @@ def main():
     """
     options = getOptions()
 
+    completedTasksFromCache = []
+    if not options.ignoreMulticrabCache:
+      # read our cache file (don't check status for completed tasks each time)
+      if os.path.isfile(os.path.abspath('./multicrab.cache')):
+        ourCacheFile = open(os.path.abspath('./multicrab.cache'),'r')
+        for line in ourCacheFile:
+          completedTasksFromCache.append(line.strip())
+        ourCacheFile.close()
+
     tasksStatusDict = {}
     # Execute the command with its arguments for each task.
     for task in os.listdir(options.projDir):
@@ -59,10 +83,24 @@ def main():
         # ignore non-crab dirs
         if 'workdir' in task or 'cfgfiles' in task or 'output' in task:
           continue
+        if task in completedTasksFromCache:
+          print "Don't check status of task, was already completed:",task
+          continue
         print
         print ("Executing (the equivalent of): crab %s %s %s" %
               (options.crabCmd, task, options.crabCmdOptions))
-        res = crabCommand(options.crabCmd, task, *options.crabCmdOptions.split())
+        try:
+          res = crabCommand(options.crabCmd, task, *options.crabCmdOptions.split())
+        except HTTPException, hte:
+          print '-----> there was a problem. see below.'
+          print hte.headers
+          tasksStatusDict[task] = 'httpException'
+          continue
+        except CachefileNotFoundException:
+          print 'task:',task,'has no .requestcache file; something wrong (or deleted dir?) continue'
+          tasksStatusDict[task] = 'noCacheFile'
+          continue
+
         if 'failed' in res['jobsPerStatus'].keys():
           tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
         else:
@@ -73,43 +111,132 @@ def main():
     tasksSubmitted = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITTED']
     tasksFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='FAILED']
     tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed]
-    print
-    print
-    print 'SUMMARY'
-    if len(tasksCompleted) > 0:
-      print 'Tasks completed:',len(tasksCompleted),'/',totalTasks
-    if len(tasksSubmitted) > 0:
-      print 'Tasks submitted:',len(tasksSubmitted),'/',totalTasks
-    if len(tasksFailed) > 0:
-      print 'Tasks failed:',len(tasksFailed),'/',totalTasks
-    if len(tasksOther) > 0:
-      print 'Tasks with other status:',len(tasksOther),'/',totalTasks
-      for tasks in tasksOther:
-        print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
-    if len(tasksFailed) > 0:
-      print 'commands to resubmit failed tasks (or tasks with failed jobs):'
-      for task in tasksFailed:
-        print '\tcrab resubmit',task
 
+    exceptionTasks = []
     # move files for completed tasks
     if options.moveFiles and options.projDir is not None:
       if options.projDir[-1] != '/':
         options.projDir+='/'
       for taskName in tasksCompleted:
-        res = crabCommand('getoutput',taskName,'--dump')
+        # redirect the dump output so it doesn't fill up the screen
+        print 'getting output file list for task:',taskName
+        sys.stdout = open(os.devnull,'w')
+        try:
+          res = crabCommand('getoutput',taskName,'--dump')
+        except HTTPException, hte:
+          sys.stdout = sys.__stdout__
+          print '-----> there was a problem running crab getoutput --dump %s see below.'%taskName
+          print hte.headers
+          exceptionTasks.append(taskName)
+          continue
+        sys.stdout = sys.__stdout__
         #print res
-        outputFileLFNs = res['lfn']
+        try:
+          outputFileLFNs = res['lfn']
+        except KeyError:
+          print 'ERROR: no key called "lfn" found in result for task',taskName,'.'
+          print 'result looks like:',res
+          print "can't move files; continue"
+          continue
         outputFilesToMove = [name for name in outputFileLFNs if not 'reduced_skim' in name]
+        outputFilesNotMoved = [fname for fname in outputFilesToMove if not os.path.isfile(taskName+'/'+fname.split('/')[-1])]
+        print 'outputFilesToMove length=',len(outputFilesToMove)
+        print 'outputFilesNotMoved length=',len(outputFilesNotMoved)
+        if len(outputFilesNotMoved) == 0:
+          continue
+        #print 'outputFilesNotMoved[0]:',outputFilesNotMoved[0]
+        #print 'os.path.isfile('+taskName+'/'+outputFilesNotMoved[0].split('/')[-1]+')',os.path.isfile(taskName+'/'+outputFilesNotMoved[0].split('/')[-1])
+        #exit(-1)
+        eos = '/afs/cern.ch/project/eos/installation/pro/bin/eos.select'
         print 'completed task:',taskName
-        print '      moving files below to',options.projDir
-        for fn in outputFilesToMove:
-          print '\t',fn
-          cmd = 'eos cp /eos/cms'+fn+' '+options.projDir
-          print cmd
-          cmd = 'eos rm /eos/cms'+fn
-          print cmd
+        print '      moving',len(outputFilesNotMoved),'files to',taskName
+        #print outputFilesNotMoved
+        #exit(-1)
+        for fn in outputFilesNotMoved:
+          #print '\t',fn
+          cmd = eos+' cp /eos/cms'+fn+' '+taskName+'/'
+          ret = subprocess.call(cmd.split())
+          #print cmd
+          if ret != 0:
+            continue
+          cmd = eos+' rm /eos/cms'+fn
+          subprocess.call(cmd.split())
+          #print cmd
+        print '      Done moving files'
+
+    if len(exceptionTasks) > 0:
+      print 'The following tasks had exceptions on crab getoutput:'
+      for taskn in exceptionTasks:
+        print taskn
+      print
+
+    # redefine completed tasks
+    tasksCompleted = [task for task in tasksCompleted if not task in exceptionTasks]
 
 
+    # crab purge
+    purgeExceptionTasks = []
+    # TODO add option to not purge
+    for taskName in tasksCompleted:
+      try:
+        res = crabCommand('purge',taskName)
+      except HTTPException, hte:
+        print '-----> there was a problem running crab purge %s see below.'%taskName
+        print hte.headers
+        purgeExceptionTasks.append(taskName)
+        continue
+      except ConfigurationException:
+        print '-----> there was a problem running crab purge %s see below.'%taskName
+        print hte.headers
+        purgeExceptionTasks.append(taskName)
+        continue
+
+    if len(purgeExceptionTasks) > 0:
+      print 'The following tasks had exceptions on crab purge:'
+      for taskn in purgeExceptionTasks:
+        print taskn
+      print
+
+    # copy files even if purge failed
+
+    # write cache for completed tasks
+    if not options.ignoreMulticrabCache:
+      ourCacheFile = open(os.path.abspath('./multicrab.cache'),'a')
+      for taskName in tasksCompleted:
+        if taskName in purgeExceptionTasks:
+          continue
+        if not taskName in completedTasksFromCache:
+          ourCacheFile.write(taskName+'\n')
+      ourCacheFile.close()
+
+    # summary and resubmit commands
+    totalTasks+=len(completedTasksFromCache)
+    print
+    print
+    print 'SUMMARY'
+    if len(tasksCompleted) > 0 or len(completedTasksFromCache) > 0:
+      print 'Tasks completed:',len(tasksCompleted)+len(completedTasksFromCache),'/',totalTasks
+    if len(tasksSubmitted) > 0:
+      print 'Tasks submitted:',len(tasksSubmitted),'/',totalTasks
+      print 'commands to get status:'
+      for task in tasksSubmitted:
+        print '\tcrab status',task
+    if len(tasksOther) > 0:
+      print 'Tasks with other status:',len(tasksOther),'/',totalTasks
+      for tasks in tasksOther:
+        print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
+    if len(tasksFailed) > 0:
+      print 'Tasks failed:',len(tasksFailed),'/',totalTasks
+      for task in tasksFailed:
+        try:
+          res = crabCommand('status',task)
+        except HTTPException, hte:
+          print '-----> there was a problem running crab getoutput --dump %s see below.'%taskName
+          print hte.headers
+      for task in tasksFailed:
+        print
+        print 'commands to resubmit failed tasks (or tasks with failed jobs):'
+        print '\tcrab resubmit',task
 
 if __name__ == '__main__':
     main()
