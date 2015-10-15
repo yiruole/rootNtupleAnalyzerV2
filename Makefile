@@ -2,6 +2,7 @@ COMP=g++
 FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 FLAGS += -DSAVE_ALL_HISTOGRAMS 
+FLAGS += -std=c++11
 # FLAGS += -DCREATE_OPT_CUT_FILE
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
 INC= -I.. -I. -I./include
