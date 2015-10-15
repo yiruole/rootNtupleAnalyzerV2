@@ -3,10 +3,20 @@
 from optparse import OptionParser
 import os,sys, errno, time
 import subprocess as sp
+try:
+  from CRABClient.UserUtilities import config, getUsernameFromSiteDB
+except ImportError:
+  print
+  print 'ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:'
+  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  exit(-1)
 
-#--------------------------------------------------------------------------------
-# Helper functions
-#--------------------------------------------------------------------------------
+import deleteCrabSandboxes
+
+#-------------------------------------------------------------------------------------------------------------
+# Notes
+# Use this script first, which then calls the submit_crab3 script to actually submit the jobs for each dataset
+#-------------------------------------------------------------------------------------------------------------
 
 
 #--------------------------------------------------------------------------------
@@ -60,6 +70,13 @@ if ( not options.inputlist
 
 if not options.treeName:
   options.treeName='rootTupleTree/tree'
+
+#--------------------------------------------------------------------------------
+# Delete crab sandboxes
+#--------------------------------------------------------------------------------
+print 'First, delete existing crab sandboxes'
+deleteCrabSandboxes.main()
+print 'Done'
 
 #--------------------------------------------------------------------------------
 # Make the output directory
@@ -157,8 +174,10 @@ print "Launching jobs..."
 inputlist_file = file ( options.inputlist,"r" )
 
 total_jobs = 0
+failedCommands = ''
 
 for line in inputlist_file: 
+    if line[0] == "#" : continue
     dataset = line.strip().split("/")[-1].split(".txt")[0]
     
     sublist = line.strip()
@@ -176,14 +195,19 @@ for line in inputlist_file:
     #command = command + " -q " + options.queue
     command = command + " -d " + options.eosDir
     
-    #print command
+    print command
     ret = os.system  ( command ) 
     if ret != 0:
       print 'ERROR: something went wrong when running the command:'
       print '\t'+command
+      print 'add to list'
+      failedCommands+=command
+      failedCommands+='\n'
     #time.sleep (  float( options.wait ) ) 
 
 inputlist_file.close() 
 
+print 'list of failed commands:'
+print failedCommands
 #print "total jobs =", total_jobs
 
