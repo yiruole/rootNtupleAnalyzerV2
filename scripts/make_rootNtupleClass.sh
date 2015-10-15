@@ -16,7 +16,7 @@ usage ()
         exit 1;
 }
 
-if [ $# -le 3 ]; then usage; fi;
+if [ $# -lt 2 ]; then usage; fi;
 while [ $# -gt 0 ]; # till there are parameters
 do
   case "$1" in
@@ -32,6 +32,12 @@ if [ ! -z "${FILENAME}" ] && [ ! -z "${DIRNAME}" ] ; then
   usage;
   exit;
 fi
+
+if [ -z "${TTREENAME}" ]; then
+  TTREENAME=rootTupleTree/tree
+  echo "No TTree name given; using default of $TTREENAME"
+fi
+
 
 cd `dirname $0`/../ ; # go to the directory rootNtupleAnalyzer/
 
