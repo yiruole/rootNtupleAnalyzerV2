@@ -96,17 +96,14 @@ def process_input_dir(inputDir, match, filelist):
         prefix = "root://eoscms/"
         filenamelist = make_filenamelist_eos(inputDir)
     elif( re.search("^/store/", inputDir) ):
-        prefix = "root://eoscms//eos/cms"
+        prefix = "root://eoscms/"
         filenamelist = make_filenamelist_eos(inputDir)
     else:
         filenamelist = make_filenamelist_default(inputDir)
 
-    #path = prefix+dirpath;
     for fullfilepath in filenamelist:
-        #path = prefix+fullfilepath
         path = prefix+os.path.split(fullfilepath)[0]+'/'
         filename = os.path.split(fullfilepath)[1]
-        #print 'filename=',filename
         #print re.search('.root$',filename)
         if re.search('.root$', filename) is None:
             continue
