@@ -1,0 +1,1 @@
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-1-0-SingleEleLoose_eejjSigAndSomeBackground/DYJetsToLL_M-700to800/LQSkim/151001_091407/0000/DYJetsToLL_M-700to800_reduced_skim_1.root

@@ -1,0 +1,8 @@
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_1.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_2.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_3.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_4.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_5.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_6.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_7.root
+root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1750_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153301/0000/LQToUE_M-1750_BetaOne_8.root

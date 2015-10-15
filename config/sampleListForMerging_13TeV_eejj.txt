@@ -1,0 +1,59 @@
+ZJet_Madgraph    DYJetsToLL_M-5to50_ DYJetsToLL_M-50_ DYJetsToLL_M-50_HT-100to200_ DYJetsToLL_M-50_HT-200to400_ DYJetsToLL_M-50_HT-400to600_ DYJetsToLL_M-50_HT-600toInf_
+ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50_
+ZJet_Madgraph_M-50            DYJetsToLL_M-50_
+ZJet_Madgraph_HT100to200      DYJetsToLL_M-50_HT-100to200_
+ZJet_Madgraph_HT200to400      DYJetsToLL_M-50_HT-200to400_
+ZJet_Madgraph_HT400to600      DYJetsToLL_M-50_HT-400to600_
+ZJet_Madgraph_HT600toInf      DYJetsToLL_M-50_HT-600toInf_
+ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
+ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200_
+ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400_
+ZJet_amcatnlo_M-400to500      DYJetsToLL_M-400to500_
+ZJet_amcatnlo_M-500to700      DYJetsToLL_M-500to700_
+ZJet_amcatnlo_M-700to800      DYJetsToLL_M-700to800_
+ZJet_amcatnlo_M-800to1000     DYJetsToLL_M-800to1000_
+ZJet_amcatnlo_M-1000to1500    DYJetsToLL_M-1000to1500_
+ZJet_amcatnlo_M-1500to2000    DYJetsToLL_M-1500to2000_
+ZJet_amcatnlo_M-2000to3000    DYJetsToLL_M-2000to3000_
+TTbar_Madgraph	TTJets_DiLept_ TTJets_SingleLeptFromT TTJets_SingleLeptFromTbar TTJets_
+TTbar_FromData  SingleMu__Run2012A-recover-06Aug2012-v1 SingleMu__Run2012A-13Jul2012-v1 SingleMu__Run2012B-13Jul2012-v1 SingleMu__Run2012C-24Aug2012-v1 SingleMu__Run2012C-PromptReco-v2 SingleMu__Run2012D-PromptReco-v1
+SingleTop	Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel
+PhotonJets	G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800
+DIBOSON		WW_ WZ_ ZZ_
+ALLBKG		DY0JetsToLL_M-50 DY1JetsToLL_M-50 DY2JetsToLL_M-50 DY3JetsToLL_M-50 DY4JetsToLL_M-50 WJetsToLNu W1JetsToLNu 	 W2JetsToLNu 	  W3JetsToLNu 	   W4JetsToLNu TTJets_FullLeptMGDecays TTJets_SemiLeptMGDecays TTJets_HadronicMGDecays Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800 WW_ WZ_ ZZ_		
+OTHERBKG	WJetsToLNu 	W1JetsToLNu 	 W2JetsToLNu 	  W3JetsToLNu 	   W4JetsToLNu Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800 WW_ WZ_ ZZ_	
+LQ_M300		LQToUE_M-300_BetaOne_
+LQ_M350		LQToUE_M-350_BetaOne_ 
+LQ_M400		LQToUE_M-400_BetaOne_ 
+LQ_M450		LQToUE_M-450_BetaOne_ 
+LQ_M500		LQToUE_M-500_BetaOne_ 
+LQ_M550		LQToUE_M-550_BetaOne_ 
+LQ_M600		LQToUE_M-600_BetaOne_ 
+LQ_M650		LQToUE_M-650_BetaOne_ 
+LQ_M700		LQToUE_M-700_BetaOne_ 
+LQ_M750		LQToUE_M-750_BetaOne_ 
+LQ_M800		LQToUE_M-800_BetaOne_ 
+LQ_M850		LQToUE_M-850_BetaOne_ 
+LQ_M900		LQToUE_M-900_BetaOne_ 
+LQ_M950		LQToUE_M-950_BetaOne_ 
+LQ_M1000	LQToUE_M-1000_BetaOne_
+LQ_M1050	LQToUE_M-1050_BetaOne_
+LQ_M1100	LQToUE_M-1100_BetaOne_
+LQ_M1150	LQToUE_M-1150_BetaOne_
+LQ_M1200	LQToUE_M-1200_BetaOne_
+LQ_M1200	LQToUE_M-1250_BetaOne_
+LQ_M1200	LQToUE_M-1300_BetaOne_
+LQ_M1200	LQToUE_M-1350_BetaOne_
+LQ_M1200	LQToUE_M-1400_BetaOne_
+LQ_M1200	LQToUE_M-1450_BetaOne_
+LQ_M1200	LQToUE_M-1500_BetaOne_
+LQ_M1200	LQToUE_M-1550_BetaOne_
+LQ_M1200	LQToUE_M-1600_BetaOne_
+LQ_M1200	LQToUE_M-1650_BetaOne_
+LQ_M1200	LQToUE_M-1700_BetaOne_
+LQ_M1200	LQToUE_M-1750_BetaOne_
+LQ_M1200	LQToUE_M-1800_BetaOne_
+LQ_M1200	LQToUE_M-1850_BetaOne_
+LQ_M1200	LQToUE_M-1900_BetaOne_
+LQ_M1200	LQToUE_M-1950_BetaOne_
+LQ_M1200	LQToUE_M-2000_BetaOne_

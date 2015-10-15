@@ -1,0 +1,6 @@
+config/DYJetsToLLMG/DYJetsToLL_M-50.txt
+config/DYJetsToLLMG/DYJetsToLL_M-50_HT-100to200.txt
+config/DYJetsToLLMG/DYJetsToLL_M-50_HT-200to400.txt
+config/DYJetsToLLMG/DYJetsToLL_M-50_HT-400to600.txt
+config/DYJetsToLLMG/DYJetsToLL_M-50_HT-600toInf.txt
+config/DYJetsToLLMG/DYJetsToLL_M-5to50.txt
