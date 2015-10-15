@@ -111,9 +111,10 @@ for ijob in range(ijobmax):
     outputfile.write("#!/bin/bash\n")
     #outputfile.write("cd $LQCRAB \n")
     # modified SIC December 9 2014 for use with SLC6 machines
-    outputfile.write("cd /afs/cern.ch/user/s/scooper/work/private/cmssw/721p4/ReRunHLTLQ1/src/ \n")
-    outputfile.write("eval `scramv1 runtime -sh`\n")
+    #outputfile.write("cd /afs/cern.ch/user/s/scooper/work/private/cmssw/721p4/ReRunHLTLQ1/src/ \n")
+    #outputfile.write("eval `scramv1 runtime -sh`\n")
     outputfile.write("cd "+pwd+"\n")
+    outputfile.write("eval `scramv1 runtime -sh`\n")
     # if "amd64" in os.getenv ("SCRAM_ARCH"): outputfile.write(". /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh\n")
     outputfile.write("./main "+inputfilename+" "+cutfile+" "+options.treeName+" "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+" "+"$WORKDIR/"+outputPrefix+"_"+str(ijob)+"\n")
     outputfile.write("ls -rtlh $WORKDIR/*\n")
