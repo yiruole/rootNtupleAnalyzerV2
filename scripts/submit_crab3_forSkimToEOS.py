@@ -17,13 +17,19 @@ except ImportError:
 from CRABAPI.RawCommand import crabCommand
 from httplib import HTTPException
 
-def crabSubmit(config):
+
+def crabSubmit(config,dryRun=False):
     try:
-        crabCommand('submit', 'dryrun',config = config)
+      if dryRun:
+        print 'doing crab3 dryrun'
+        crabCommand('submit','dryrun',config = config)
+      else:
+        crabCommand('submit',config = config)
     except HTTPException, hte:
       print '-----> there was a problem. see below.'
       print hte.headers
       print 'quit here'
+      exit(-1)
     
 def validateOptions(options):
   error = ''
@@ -71,6 +77,10 @@ parser.add_option("-d", "--eosDir", dest="eosDir",
                   help="eos directory for the output; defaults to /store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/USERNAME/",
                   metavar="EOSDIR")
 
+# SIC: this doesn't work when using the API?
+parser.add_option("-r", "--dryrun", dest="dryRun",
+                  help="dry run crab instead of full submit",
+                  metavar="DRYRUN",default=False,action="store_true")
 
 (options, args) = parser.parse_args()
 
@@ -173,11 +183,18 @@ inputlist = outputmain+'/'+inputListName
 #  shutil.copy2(cutfile,outputmain+'/'+cutfile)
 
 # cut down output file name
-outputFilePref = outputPrefix[outputPrefix.find('___'):outputPrefix.find('_Tune')]
+outputFilePref = outputPrefix[outputPrefix.find('___')+3:]
 # make the script (run by CRAB3)
 scriptname = outputmain+"/src/submit_"+dataset+".sh"
 scriptfile = open(scriptname,"w")
-scriptfile.write("#!/bin/bash\n")
+scriptfile.write("""#!/bin/bash
+echo "================= Dumping Input files ===================="
+""")
+scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))"\n')
+scriptfile.write('echo "Put into '+inputListName+'"\n')
+scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
+scriptfile.write('echo "cat '+inputListName+':"\n')
+scriptfile.write('cat '+inputListName+'\n')
 scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 #scriptfile.write("# localoutputdirectory="+workingDir+"\n")
 # define our own exit code for crab; see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Define_your_own_exit_code_and_ex
@@ -231,8 +248,6 @@ config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat',outpu
 config.Data.primaryDataset = dataset.split('__')[0]
 # read input list, convert to LFN
 config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
-# TEST ONE FILE
-#config.Data.userInputFiles = ['/store/user/scooper/LQ/RootNtuple/LQToUE_M-1850_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_153359/0000/LQToUE_M-1850_BetaOne_10.root']
 #print 'userInputFiles=',config.Data.userInputFiles
 # check length of input files
 maxLengthPath = max(config.Data.userInputFiles, key=len)
@@ -250,7 +265,8 @@ config.Data.publishDataName = 'LQSkim'
 # notes on how the output will be stored: see https://twiki.cern.ch/twiki/bin/view/CMSPublic/Crab3DataHandling
 #  <lfn-prefix>/<primary-dataset>/<publication-name>/<time-stamp>/<counter>[/log]/<file-name> 
 #   LFNDirBase /                 / requestName      / stuff automatically done   / outputFilePref_999.root
-config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/%s/' % (getUsernameFromSiteDB())
+config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/'
+#config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/%s/' % (getUsernameFromSiteDB())
 #config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 if outputLFN is not None:
   if not outputLFN.startswith('/store'):
@@ -258,11 +274,13 @@ if outputLFN is not None:
     print 'ERROR: eosDir must start with /store and you specified:',outputLFN
     print 'quit'
     exit(-1)
-  if not getUsernameFromSiteDB() in outputLFN:
-    outputLFN.rstrip('/')
-    config.Data.outLFNDirBase = outputLFN+'/%s/' % (getUsernameFromSiteDB())
-  else:
-    config.Data.outLFNDirBase = outputLFN
+  # add username if not already -- don't do this for now
+  #if not getUsernameFromSiteDB() in outputLFN:
+  #  outputLFN.rstrip('/')
+  #  config.Data.outLFNDirBase = outputLFN+'/%s/' % (getUsernameFromSiteDB())
+  #else:
+  #  config.Data.outLFNDirBase = outputLFN
+  config.Data.outLFNDirBase = outputLFN
 if not config.Data.outLFNDirBase[-1]=='/':
   config.Data.outLFNDirBase+='/'
 print 'Using outLFNDirBase:',config.Data.outLFNDirBase
@@ -272,13 +290,16 @@ storagePath=config.Data.outLFNDirBase+config.Data.primaryDataset+'/'+config.Data
 #print '\twhich has length:',len(storagePath)
 if len(storagePath) > 255:
   print
-  print 'we might have a problem with output path lengths too long (if we want to run crab over these).'
+  print 'warning: we might have a problem with output path lengths too long (if we want to run crab over these).'
   print 'example output will look like:'
   print storagePath
   print 'which has length:',len(storagePath)
-  print 'cowardly refusing to submit the jobs; exiting'
-  exit(-2)
+  print 'proceeding anyway'
+  #print 'cowardly refusing to submit the jobs; exiting'
+  #exit(-2)
 else:
+  print 'example output will look like:'
+  print storagePath
   print 'ok, output files will have length about:',len(storagePath),'chars'
 
 config.Site.storageSite = 'T2_CH_CERN'
@@ -295,5 +316,5 @@ config.JobType.inputFiles += ['FrameworkJobReport.xml']
 #print 'using outLFNDirBase=',config.Data.outLFNDirBase
 print 'submit!'
 
-crabSubmit(config)
+crabSubmit(config,options.dryRun)
 
