@@ -27,16 +27,16 @@ Instructions:
 -------------
 
 1) Environment setup:
-   The following (or newer) is needed for lxplus batch jobs working on root files in EOS.
-   cd CMSSW_5_2_6/src/; 
-   export SCRAM_ARCH=slc5_amd64_gcc462;
-   cmsenv;	
-   source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.sh
-   source /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.01/x86_64-slc5-gcc43-opt/root/bin/thisroot.sh
+   scram project CMSSW CMSSW_7_4_14
+   cd CMSSW_7_4_14/src/
+   cmsenv
 
 2) Checkout the code:
-   export CVSROOT=:gserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
-   cvs checkout -d rootNtupleAnalyzerV2 UserCode/Leptoquarks/rootNtupleAnalyzerV2
+   git clone git@github.com:CMSLQ/rootNtupleAnalyzerV2 Leptoquarks/analyzer/rootNtupleAnalyzerV2
+You will probably also want the macros package:
+   git clone git@github.com:CMSLQ/rootNtupleMacrosV2 Leptoquarks/analyzer/rootNtupleMacrosV2
+Here we insert an extra directory so that scram will ignore the source files here 
+(in case you have other CMSSW stuff in that area).
 
 3) Generate the rootNtupleClass:
    cd rootNtupleAnalyzerV2/
@@ -54,6 +54,8 @@ Instructions:
 5) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
    make clean
    make
+Note that if you run on full RootTupleMakerV2-produced ntuples, you have to use Makefile_fullNtuple:
+   make -f Makefile_fullNtuple
 
 6) Add your analysis code to the method Loop() of analysisClass_myCode.C
 
@@ -78,11 +80,11 @@ Note1:
   and compile/run as above.
 
 Note2:
-  a CVS area to commit all the analysis macros such as analysisClass_XXX.C
-  has been prepared in
-  http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/Leptoquarks/rootNtupleMacrosV2/src/
-  This will allow to separate the developments of the rootNtupleAnalyzerV2 package
-  and the developments of the analysis macros.
+  a github area to commit all the analysis macros such as analysisClass_XXX.C
+  has been prepared (as noted above) here:
+    https://github.com/CMSLQ/rootNtupleMacrosV2
+  This will allow separate development of the rootNtupleAnalyzerV2 package
+  from the development of the analysis macros.
   In order to compile and run an analysis macro
     /...fullPath.../rootNtupleMacros/src/analysisClass_XXX.C
   do:
