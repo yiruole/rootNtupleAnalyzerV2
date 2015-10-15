@@ -7,7 +7,9 @@ from optparse import OptionParser
 import os.path
 from ROOT import *
 import re
+import math
 
+from combineCommon import *
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -135,14 +137,14 @@ def CalculateEfficiency(table):
                              }
         else:
             N = float(table[j]['N']) 
-            errN = sqrt(float(table[j]["errN"]))
+            errN = math.sqrt(float(table[j]["errN"]))
             if( float(N) > 0 ):
                 errRelN = errN / N 
             else:
                 errRelN = float(0)
 
             Npass = float(table[j]['Npass']) 
-            errNpass = sqrt(float(table[j]["errNpass"]))
+            errNpass = math.sqrt(float(table[j]["errNpass"]))
             if( float(Npass) > 0 ):
                 errRelNpass = errNpass / Npass
             else:
@@ -150,7 +152,7 @@ def CalculateEfficiency(table):
 
             if(Npass > 0  and N >0 ):
                 EffRel = Npass / N
-                errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
+                errRelEffRel = math.sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
                 errEffRel = errRelEffRel * EffRel
             
                 EffAbs = Npass / float(table[0]['N'])
@@ -324,25 +326,8 @@ for n, lin in enumerate( open( options.inputList ) ):
         print "exiting..."
         sys.exit()
 
-    for lin1 in open( options.xsection ):
-
-        lin1 = string.strip(lin1,"\n")
-
-        (dataset , xsection_val) = string.split(lin1)
-        print dataset + " " + xsection_val
-
-        dataset_mod_1 = dataset[1:].replace('/','__')
-        #print dataset_mod_1 + " " + xsection_val
-
-        if(dataset_mod_1 == dataset_mod):
-            xsectionIsFound = True
-            break
-
-    if(xsectionIsFound == False):
-        print "ERROR: xsection for dataset" + dataset + " not found in " + options.xsection
-        print "exiting..."
-        sys.exit()
-        
+    # TODO: rewrite to just parse the xsec file once
+    dataset,xsection_val = lookupXSection(dataset_mod,options.xsection)
     #this is the current cross section
     #print xsection_val
 
@@ -351,6 +336,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     column=[]
     lineCounter = int(0)
 
+    print 'opening:',inputDataFile
     for j,line in enumerate( open( inputDataFile ) ):
 
         if( re.search("^###", line) ):
@@ -390,7 +376,8 @@ for n, lin in enumerate( open( options.inputList ) ):
             weight = float(0)
         else:
             weight = xsection_X_intLumi / Ntot 
-    print "weight: " + str(weight)
+    print "xsection: " + xsection_val
+    print "weight: " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
     
     #---Create new table using weight
     newtable={}
@@ -409,10 +396,11 @@ for n, lin in enumerate( open( options.inputList ) ):
                               }
 
         else:
+            #print 'data[j]=',data[j]
             N = ( float(data[j]['N']) * weight )
             errN = ( float(data[j-1]["errEffAbs"]) * xsection_X_intLumi )
-            print data[j]['variableName']
-            print "errN: " , errN
+            #print data[j]['variableName']
+            #print "errN: " , errN
             if(str(errN) == "nan"):
                 errN = 0
                 
@@ -423,8 +411,8 @@ for n, lin in enumerate( open( options.inputList ) ):
             
             Npass = ( float(data[j]['Npass']) * weight) 
             errNpass = ( float(data[j]["errEffAbs"]) * xsection_X_intLumi )
-            print "errNPass " , errNpass
-            print ""
+            #print "errNPass " , errNpass
+            #print ""
             if(str(errNpass) == "nan"):
                 errNpass = 0
 

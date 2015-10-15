@@ -8,6 +8,7 @@ import os.path
 from ROOT import *
 import re
 
+from combineCommon import *
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -111,24 +112,25 @@ for n, lin in enumerate( open( options.inputList ) ):
         print "exiting..."
         sys.exit()
 
-    for lin1 in open( options.xsection ):
+    #for lin1 in open( options.xsection ):
 
-        lin1 = string.strip(lin1,"\n")
+    #    lin1 = string.strip(lin1,"\n")
 
-        (dataset , xsection_val) = string.split(lin1)
-        #print dataset + " " + xsection_val
+    #    (dataset , xsection_val) = string.split(lin1)
+    #    #print dataset + " " + xsection_val
 
-        dataset_mod_1 = dataset[1:].replace('/','__')
-        #print dataset_mod_1 + " " + xsection_val
+    #    dataset_mod_1 = dataset[1:].replace('/','__')
+    #    #print dataset_mod_1 + " " + xsection_val
 
-        if(dataset_mod_1 == dataset_mod):
-            xsectionIsFound = True
-            break
+    #    if(dataset_mod_1 == dataset_mod):
+    #        xsectionIsFound = True
+    #        break
 
-    if(xsectionIsFound == False):
-        print "ERROR: xsection for dataset" + dataset + " not found in " + options.xsection
-        print "exiting..."
-        sys.exit()
+    #if(xsectionIsFound == False):
+    #    print "ERROR: xsection for dataset" + dataset + " not found in " + options.xsection
+    #    print "exiting..."
+    #    sys.exit()
+    dataset,xsection_val = lookupXSection(dataset_mod,options.xsection)
         
     #this is the current cross section
     #print xsection_val
