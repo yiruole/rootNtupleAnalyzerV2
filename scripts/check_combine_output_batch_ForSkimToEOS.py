@@ -8,6 +8,7 @@ import os.path
 from ROOT import *
 import re
 import commands
+import math
 
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -108,14 +109,14 @@ def CalculateEfficiency(table):
                              }
         else:
             N = float(table[j]['N']) 
-            errN = sqrt(float(table[j]["errN"]))
+            errN = math.sqrt(float(table[j]["errN"]))
             if( float(N) > 0 ):
                 errRelN = errN / N 
             else:
                 errRelN = float(0)
 
             Npass = float(table[j]['Npass']) 
-            errNpass = sqrt(float(table[j]["errNpass"]))
+            errNpass = math.sqrt(float(table[j]["errNpass"]))
             if( float(Npass) > 0 ):
                 errRelNpass = errNpass / Npass
             else:
@@ -123,7 +124,7 @@ def CalculateEfficiency(table):
 
             if(Npass > 0  and N >0 ):
                 EffRel = Npass / N
-                errRelEffRel = sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
+                errRelEffRel = math.sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
                 errEffRel = errRelEffRel * EffRel
                 if(Npass==N):
                     errEffRel = 0                
