@@ -281,7 +281,8 @@ def WriteTable(table, precutlist, file):
 
 #Open file containing the jobs to be resubmitted (one for all datasets)
 ToBeResubmitted_name = "ToBeResubmitted.list"
-ToBeResubmitted = open(ToBeResubmitted_name,'w')
+#ToBeResubmitted = open(ToBeResubmitted_name,'w')
+ToBeResubmitted = open(ToBeResubmitted_name,'a')
 
 #error counters
 nLogFileErrors = 0
