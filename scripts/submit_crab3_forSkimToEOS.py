@@ -77,7 +77,7 @@ parser.add_option("-d", "--eosDir", dest="eosDir",
                   help="eos directory for the output; defaults to /store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/USERNAME/",
                   metavar="EOSDIR")
 
-# SIC: this doesn't work when using the API?
+# FIXME SIC: this doesn't work when using the API?
 parser.add_option("-r", "--dryrun", dest="dryRun",
                   help="dry run crab instead of full submit",
                   metavar="DRYRUN",default=False,action="store_true")
@@ -175,7 +175,11 @@ inputListName = inputlist.split('/')[-1]
 
 # make a copy of the input list for this dataset
 if not os.path.isfile(outputmain+'/'+inputListName):
-  shutil.copy2(os.path.abspath(inputlist),outputmain+'/'+inputListName)
+  if os.path.isfile(os.path.abspath(inputlist)):
+    shutil.copy2(os.path.abspath(inputlist),outputmain+'/'+inputListName)
+  else:
+    print 'could not find file:',os.path.abspath(inputlist)
+    exit(-1)
 inputlist = outputmain+'/'+inputListName
 # already done in launch_crab3 script
 ## same for cutfile
@@ -239,13 +243,17 @@ config.General.transferOutputs = True
 config.General.transferLogs = False
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
+config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
 # collect the output (root plots, dat, and skim)
 config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat',outputFilePref+'_reduced_skim.root']
 
-config.Data.primaryDataset = dataset.split('__')[0]
+#config.Data.primaryDataset = dataset.split('__')[0]
+#XXX FIXME for crab server bug
+# https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1035/1/1.html
+config.Data.primaryDataset = '/'+dataset.split('__')[0]+'/x/Y'
+
 # read input list, convert to LFN
 config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
 #print 'userInputFiles=',config.Data.userInputFiles
@@ -311,7 +319,12 @@ config.Site.whitelist = ['T2_CH_CERN']
 config.JobType.scriptExe = scriptname
 # don't run cmsRun in the job (pass in template FrameworkJobReport.xml)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Do_not_run_cmsRun_at_all_in_the
-config.JobType.inputFiles += ['FrameworkJobReport.xml']
+config.JobType.inputFiles += ['scripts/FrameworkJobReport.xml']
+
+## print out config object
+#attrs = vars(config)
+#print ', '.join("%s: %s" % item for item in attrs.items())
+#exit(-1)
 
 #print 'using outLFNDirBase=',config.Data.outLFNDirBase
 print 'submit!'
