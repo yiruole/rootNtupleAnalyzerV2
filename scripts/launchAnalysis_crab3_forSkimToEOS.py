@@ -43,9 +43,9 @@ parser.add_option("-c", "--cutfile", dest="cutfile",
                   help="name of the cut file",
                   metavar="CUTFILE")
 
-parser.add_option("-j", "--ijobmax", dest="ijobmax",
-                  help="max number of jobs, limited automatically to the number of files in inputlist",
-                  metavar="IJOBMAX")
+#parser.add_option("-j", "--ijobmax", dest="ijobmax",
+#                  help="max number of jobs, limited automatically to the number of files in inputlist",
+#                  metavar="IJOBMAX")
 
 # TODO: eventually support this by using the crab scheduler?
 #parser.add_option("-q", "--queue", dest="queue",
@@ -75,7 +75,10 @@ if not options.treeName:
 # Delete crab sandboxes
 #--------------------------------------------------------------------------------
 print 'First, delete existing crab sandboxes'
-deleteCrabSandboxes.main()
+try:
+  deleteCrabSandboxes.main()
+except deleteCrabSandboxes.Crab3ToolsException:
+  print 'WARNING: Something went wrong deleting the existing crab sandboxes; proceeding anyway but we might run out of quota'
 print 'Done'
 
 #--------------------------------------------------------------------------------
