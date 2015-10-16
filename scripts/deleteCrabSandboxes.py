@@ -15,7 +15,7 @@ class UserCacheHelper:
         if proxy is None:
             proxy = os.getenv('X509_USER_PROXY')
         if not proxy or not os.path.isfile(proxy):
-            raise Crab3ToolsException('X509_USER_PROXY is %r, get grid proxy first' % proxy)
+            raise Crab3ToolsException('X509_USER_PROXY is %r, get grid proxy first with grid-proxy-init' % proxy)
         self.proxy = proxy
 
         if user is None:
@@ -69,7 +69,6 @@ class UserCacheHelper:
 
 
 def main():
-  print 'deleteCrabSandboxes.py: main()'
   h = UserCacheHelper('/tmp/x509up_u3830')
   for x in h.filelist():
       if '.log' in x:
