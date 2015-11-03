@@ -12,9 +12,9 @@ GenJet::GenJet(Collection& c, unsigned short i, short j ):
 
 // Kinematic variables
 
-double & GenJet::Pt  () { return m_collection -> GetData() -> GenJetPt  -> at ( m_raw_index ); }
-double & GenJet::Eta () { return m_collection -> GetData() -> GenJetEta -> at ( m_raw_index ); } 
-double & GenJet::Phi () { return m_collection -> GetData() -> GenJetPhi -> at ( m_raw_index ); } 
+double & GenJet::Pt  () { return m_collection -> GetData() -> GenJetPtAK5  -> at ( m_raw_index ); }
+double & GenJet::Eta () { return m_collection -> GetData() -> GenJetEtaAK5 -> at ( m_raw_index ); } 
+double & GenJet::Phi () { return m_collection -> GetData() -> GenJetPhiAK5 -> at ( m_raw_index ); } 
 
 std::ostream& operator<<(std::ostream& stream, GenJet& object) {
   stream << object.Name() << " " << ": "
