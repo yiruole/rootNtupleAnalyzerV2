@@ -1,3 +1,0 @@
-config/DiBoson/WW.txt
-config/DiBoson/WZ.txt
-config/DiBoson/ZZ.txt

@@ -1,0 +1,5 @@
+config/ReducedSkimDatasets/GJets_HT-40To100_reduced_skim.txt
+config/ReducedSkimDatasets/GJets_HT-100To200_reduced_skim.txt
+config/ReducedSkimDatasets/GJets_HT-200To400_reduced_skim.txt
+config/ReducedSkimDatasets/GJets_HT-400To600_reduced_skim.txt
+config/ReducedSkimDatasets/GJets_HT-600ToInf_reduced_skim.txt

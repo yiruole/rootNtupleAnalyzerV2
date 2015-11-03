@@ -1,2 +1,0 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-1-0_2015Aug25_151028/DYJetsToLL_M-800to1000_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_LQRootTuple/150825_132541/0000/DYJetsToLL_M-800to1000_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-1-0_2015Aug25_151028/DYJetsToLL_M-800to1000_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/crab_LQRootTuple/150825_132541/0000/DYJetsToLL_M-800to1000_2.root

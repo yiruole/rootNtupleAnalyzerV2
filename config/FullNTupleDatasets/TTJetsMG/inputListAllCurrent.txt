@@ -1,5 +1,0 @@
-TTJets_MG/TTJets.txt
-TTJets_MG/TTJets_DiLept.txt
-TTJets_MG/TTJets_DiLept_ext1.txt
-TTJets_MG/TTJets_SingleLeptFromT.txt
-TTJets_MG/TTJets_SingleLeptFromTbar.txt

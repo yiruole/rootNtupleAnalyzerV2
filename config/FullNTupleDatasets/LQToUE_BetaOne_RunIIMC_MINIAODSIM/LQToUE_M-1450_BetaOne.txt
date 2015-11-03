@@ -1,4 +1,0 @@
-root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1450_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_152948/0000/LQToUE_M-1450_BetaOne_1.root
-root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1450_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_152948/0000/LQToUE_M-1450_BetaOne_2.root
-root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1450_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_152948/0000/LQToUE_M-1450_BetaOne_3.root
-root://eoscms//eos/cms/store/user/scooper/LQ/RootNtuple/LQToUE_M-1450_BetaOne_TuneCUETP8M1_13TeV-pythia8/crab_LQRootTuple/150820_152948/0000/LQToUE_M-1450_BetaOne_4.root
