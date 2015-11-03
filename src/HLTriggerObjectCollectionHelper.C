@@ -54,7 +54,12 @@ void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 // is this trigger object associated to the given HLT path?
 short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_name, unsigned short trigObjIndex)
 {
+  //std::cout << "HLTriggerObjectCollectionHelper::IndexOfAssociatedPath("<<path_name<<","<<trigObjIndex<< ")"<<std::endl;
   std::vector<std::string> pathNames = m_data->HLTriggerObjPathNames->at(trigObjIndex);
+  
+  //for(std::vector<std::string>::const_iterator itr = pathNames.begin(); itr != pathNames.end(); ++itr)
+  //  std::cout << "\t found path: " << *itr << std::endl;
+  
   std::vector<std::string>::iterator it = std::find ( pathNames.begin(),
       pathNames.end(),
       std::string( path_name ));
@@ -65,7 +70,20 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
     return idx;
   }
   else
+  {
+    // try to look by prefix of given path name: if path_name is find in a pathNames entry
+    auto found = find_if(pathNames.begin(), pathNames.end(), [path_name] (const std::string& s) { 
+        return s.find(path_name) != std::string::npos;
+        });
+    if(found!=pathNames.end())
+    {
+      unsigned short idx = std::distance(pathNames.begin(),found);
+      //std::cout << "Found matching trigger path for search '" << path_name << "' = " << *found << " with index = " << idx << std::endl;
+      return idx;
+    }
+    //std::cout << "ERROR: could not find associated index for given path name: " << path_name << std::endl;
     return -1;
+  }
 }
 
 
