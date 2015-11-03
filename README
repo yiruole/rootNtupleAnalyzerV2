@@ -244,6 +244,21 @@ PU reweight (Edmund Berry):
 ---------------------------
 
 See https://twiki.cern.ch/twiki/pub/CMS/Exo2011LQ1AndLQ2Analyses/PileupReweightingCode.pdf
+Some of the above is outdated.
+1) To get the PILEUP_DATA_ROOT_FILE
+Recipe is documented here: https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData#Calculating_Your_Pileup_Distribu
+And also for 2015 especially: https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData#2015_Pileup_JSON_Files
+See also: https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2451/1/2/1/1/2/2.html
+Lumi/pileup JSON can be found here: /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt
+See https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/522.html
+Example command:
+pileupCalc.py -i ../../submitJobsWithCrabV2/runData2015D_singleElectron/v1-4-0_2015Oct25_093223/crab_SingleElectron__Run2015D-05Oct2015-v1/results/lumiSummary.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt --calcMode true  --minBiasXsec 80000 --maxPileupBin 80 --numPileupBins 80  Pileup_SingleElectron__Run2015D-05Oct2015-v1.root
+2) To get the PILEUP_MC_TXT_FILE
+For 2015 MC at 25 ns, the pileup distribution used is here: SimGeneral/MixingModule/python/mix_2015_25ns_Startup_PoissonOOTPU_cfi.py
+See here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVPileUpDescription#Startup2015
+This was checked with this dataset: /DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIWinter15GS-MCRUN2_71_V1-v1/GEN-SIM
+Simply take the contents of mix.input.nbPileupEvents.probValue and put it in a file.
+For 2015 this is in github.
 
 
 
