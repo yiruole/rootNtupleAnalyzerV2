@@ -136,6 +136,7 @@ class baseClass : public rootNtupleClass {
   int  triggerPrescale ( const char* name );
   void fillTriggerVariable ( const char * hlt_path, const char* variable_name ) ;
   void printTriggers();
+  void printFiredTriggers();
   void getTriggers(std::string * HLTKey ,   
 		   std::vector<std::string> * names, 
 		   std::vector<bool>        * decisions,

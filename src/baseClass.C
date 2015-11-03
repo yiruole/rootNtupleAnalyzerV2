@@ -58,7 +58,7 @@ void baseClass::init()
   readCutFile();
   if(tree_ == NULL){
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
-    return;
+    exit(-1);
   }
   Init(tree_);
 
@@ -68,7 +68,6 @@ void baseClass::init()
 
   //directly from string
   output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
-  std::cout << "made the output_root_ file" << std::endl;
 
   // Skim stuff
   produceSkim_ = false;
@@ -149,7 +148,7 @@ void baseClass::readInputList()
   else
   {
     STDOUT("baseClass::readInputList: ERROR opening inputList:" << *inputList_ );
-    exit (1);
+    exit (-1);
   }
   is.close();
 
@@ -1574,7 +1573,7 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
   if ( !this_is_data     ) return 1;
   if ( !jsonFileWasUsed_ ) {
     STDOUT( "ERROR: baseClass::passJSON invoked when running on data, but no JSON file was specified!" );
-    return 0;
+    exit(-1);
   }
   
   return jsonParser_.isAGoodLumi ( this_run, this_lumi );
@@ -1606,6 +1605,7 @@ void baseClass::getTriggers(std::string * HLTKey ,
   for (int i = 0; i < ntriggers; ++i){
     triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
     triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
+    //STDOUT("INFO: Filled trigger prescale map: name=" << (*names)[i] << " prescale=" << (*prescales)[i]);
   }
 }
 
@@ -1616,20 +1616,72 @@ void baseClass::printTriggers(){
     for (; i != i_end; ++i) STDOUT( "\t" << i -> second << "\t\"" << i -> first << "\"" );
 }
 
+void baseClass::printFiredTriggers()
+{
+  std::map<std::string, bool>::iterator i     = triggerDecisionMap_.begin();
+  std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
+  STDOUT( "Fired triggers: ");
+  for (; i != i_end; ++i)
+  {
+    if(i->second)
+      STDOUT("\t\"" << i -> first << "\"" );
+  }
+}
+
 bool baseClass::triggerFired ( const char* name ) {
   std::map<std::string, bool>::iterator i = triggerDecisionMap_.find ( name ) ;
-  if ( i == triggerDecisionMap_.end()) return false;
-  else return i -> second;
+  if ( i == triggerDecisionMap_.end())
+  {
+    // try to look by prefix of given path name
+    auto itr = triggerDecisionMap_.lower_bound( name );
+    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    {
+      //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
+      return itr->second;
+      ++itr;
+    }
+    printTriggers();
+    STDOUT("ERROR: could not find trigger " << name << " in triggerDecisionMap_!");
+    exit(-1);
+  }
+  else
+  {
+    //STDOUT("INFO: Found matching trigger: " << i->first << " with result: " << i->second);
+    return i -> second;
+  }
 }
 
 int baseClass::triggerPrescale ( const char* name ) { 
   std::map<std::string, int>::iterator i = triggerPrescaleMap_.find ( name ) ;
-  if ( i == triggerPrescaleMap_.end()) return -999;
-  else return i -> second;
+  if ( i == triggerPrescaleMap_.end() )
+  {
+    // try to look by prefix of given path name
+    auto itr = triggerPrescaleMap_.lower_bound( name );
+    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    {
+      //STDOUT("Found matching trigger: " << itr->first << " with prescale=" << itr->second);
+      return itr->second;
+      ++itr;
+    }
+    printTriggers();
+    STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
+    exit(-1);
+  }
+  else {
+    //STDOUT("INFO: Found matching trigger: " << i->first << " with prescale: " << i->second);
+    return i->second;
+  }
 }
 
 void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name ) { 
   int prescale = triggerPrescale(hlt_path);
-  if ( triggerFired (hlt_path) ) fillVariableWithValue(variable_name, prescale      ) ; 
-  else                           fillVariableWithValue(variable_name, prescale * -1 ) ;
+  if ( triggerFired (hlt_path) ) {
+    //STDOUT("INFO: triggerFired! fillVariableWithValue("<<variable_name<<","<<prescale<<") for hlt_path="<<hlt_path);
+    fillVariableWithValue(variable_name, prescale      ) ; 
+  }
+  else {
+    //STDOUT("INFO: fillVariableWithValue("<<variable_name<<","<<-1*prescale<<") for hlt_path="<<hlt_path);
+    fillVariableWithValue(variable_name, prescale * -1 ) ;
+  }
 }
+
