@@ -311,12 +311,12 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #---Check if .root and .dat file exist
     if(os.path.isfile(inputRootFile) == False):
-        print "ERROR: file " + inputRootFile + " not found in " + options.inputDir
+        print "ERROR: file " + inputRootFile + " not found"
         print "exiting..."
         sys.exit()
 
     if(os.path.isfile(inputDataFile) == False):
-        print "ERROR: file " + inputDataFile + " not found in " + options.inputDir
+        print "ERROR: file " + inputDataFile + " not found"
         print "exiting..."
         sys.exit()
 

@@ -97,12 +97,12 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     #---Check if .root and .dat file exist
     if(os.path.isfile(inputRootFile) == False):
-        print "ERROR: file " + inputRootFile + " not found in " + options.inputDir
+        print "ERROR: file " + inputRootFile + " not found"
         print "exiting..."
         sys.exit()
 
     if(os.path.isfile(inputDataFile) == False):
-        print "ERROR: file " + inputDataFile + " not found in " + options.inputDir
+        print "ERROR: file " + inputDataFile + " not found"
         print "exiting..."
         sys.exit()
 
@@ -179,7 +179,8 @@ for n, lin in enumerate( open( options.inputList ) ):
             weight = float(0)
         else:
             weight = xsection_X_intLumi / Ntot 
-    print "weight: " + str(weight)
+    print "xsection: " + xsection_val
+    print "weight: " + str(weight) + " = " + str(xsection_val) + "*" + str(options.intLumi) + "/" + str(Ntot)
     
     #---Combine histograms using PYROOT
     file = TFile(inputRootFile)
