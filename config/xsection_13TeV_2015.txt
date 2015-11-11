@@ -117,3 +117,4 @@
 /LQToUE_ENuJJFilter_M-2000_BetaHalf_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM    7.75e-06 
 /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD -1
 /SingleElectron/Run2015D-PromptReco-v4/MINIAOD -1
+/SingleElectron_Nov4update/Run2015D-PromptReco-v4/MINIAOD -1
