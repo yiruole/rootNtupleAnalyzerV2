@@ -249,10 +249,7 @@ config.JobType.inputFiles = [cutfile,inputlist,'main']
 # collect the output (root plots, dat, and skim)
 config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat',outputFilePref+'_reduced_skim.root']
 
-#config.Data.primaryDataset = dataset.split('__')[0]
-#XXX FIXME for crab server bug
-# https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/1035/1/1.html
-config.Data.primaryDataset = '/'+dataset.split('__')[0]+'/x/Y'
+config.Data.outputPrimaryDataset = dataset.split('__')[0]
 
 # read input list, convert to LFN
 config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
@@ -269,7 +266,7 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1 # 1 file per job
 config.Data.totalUnits = -1
 config.Data.publication = False
-config.Data.publishDataName = 'LQSkim'
+config.Data.outputDatasetTag = 'LQSkim'
 # notes on how the output will be stored: see https://twiki.cern.ch/twiki/bin/view/CMSPublic/Crab3DataHandling
 #  <lfn-prefix>/<primary-dataset>/<publication-name>/<time-stamp>/<counter>[/log]/<file-name> 
 #   LFNDirBase /                 / requestName      / stuff automatically done   / outputFilePref_999.root
@@ -293,7 +290,7 @@ if not config.Data.outLFNDirBase[-1]=='/':
   config.Data.outLFNDirBase+='/'
 print 'Using outLFNDirBase:',config.Data.outLFNDirBase
 
-storagePath=config.Data.outLFNDirBase+config.Data.primaryDataset+'/'+config.Data.publishDataName+'/'+'YYMMDD_hhmmss/0000/'+outputFilePref+'_reduced_skim_999.root'
+storagePath=config.Data.outLFNDirBase+config.Data.outputPrimaryDataset+'/'+config.Data.outputDatasetTag+'/'+'YYMMDD_hhmmss/0000/'+outputFilePref+'_reduced_skim_999.root'
 #print 'will store (example):',storagePath
 #print '\twhich has length:',len(storagePath)
 if len(storagePath) > 255:
