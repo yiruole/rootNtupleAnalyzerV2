@@ -187,6 +187,7 @@ inputlist = outputmain+'/'+inputListName
 #  shutil.copy2(cutfile,outputmain+'/'+cutfile)
 
 # cut down output file name
+# (something like TTJets_SemiLeptMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM )
 outputFilePref = outputPrefix[outputPrefix.find('___')+3:]
 # make the script (run by CRAB3)
 scriptname = outputmain+"/src/submit_"+dataset+".sh"
