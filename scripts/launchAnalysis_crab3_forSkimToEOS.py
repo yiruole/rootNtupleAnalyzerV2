@@ -184,13 +184,15 @@ for line in inputlist_file:
     dataset = line.strip().split("/")[-1].split(".txt")[0]
     
     sublist = line.strip()
+    if len(sublist) <= 0:
+      continue
 
     #jobs_to_submit = int(options.ijobmax)
     
     #total_jobs = total_jobs + jobs_to_submit
 
     command = "./scripts/submit_crab3_forSkimToEOS.py"
-    command = command + " -i " + line.strip() 
+    command = command + " -i " + sublist
     command = command + " -c " + options.outputDir+'/'+options.cutfile.split('/')[-1]
     command = command + " -t " + options.treeName 
     command = command + " -o " + options.outputDir + "/" + code_name + "___" + dataset
