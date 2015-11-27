@@ -11,222 +11,6 @@ import math
 
 from combineCommon import *
 
-#--- Functions
-#def AddHisto(inputHistoName, outputHisto, inputRootFileName, currentWeight,
-#             rebin=int(1), currentColor=int(1), currentFillStyle=int(1001), currentMarker=int(1)):
-
-def UpdateTable(inputTable, outputTable):
-    if not outputTable:
-        for j,line in enumerate( inputTable ):
-            outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
-                                 'min1': inputTable[j]['min1'],
-                                 'max1': inputTable[j]['max1'],
-                                 'min2': inputTable[j]['min2'],
-                                 'max2': inputTable[j]['max2'],
-                                 'N':       float(inputTable[j]['N']),
-                                 'errN':    pow( float(inputTable[j]['errN']), 2 ),
-                                 'Npass':       float(inputTable[j]['Npass']),
-                                 'errNpass':    pow( float(inputTable[j]['errNpass']), 2 ),
-                                 'EffRel':      float(0),
-                                 'errEffRel':   float(0),
-                                 'EffAbs':      float(0),
-                                 'errEffAbs':   float(0),
-                                 }
-    else:
-        for j,line in enumerate( inputTable ):
-            outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
-                                 'min1': inputTable[j]['min1'],
-                                 'max1': inputTable[j]['max1'],
-                                 'min2': inputTable[j]['min2'],
-                                 'max2': inputTable[j]['max2'],
-                                 'N':       float(outputTable[int(j)]['N']) + float(inputTable[j]['N']),
-                                 'errN':    float(outputTable[int(j)]['errN']) + pow( float(inputTable[j]['errN']), 2 ),
-                                 'Npass':       float(outputTable[int(j)]['Npass']) + float(inputTable[j]['Npass']),
-                                 'errNpass':    float(outputTable[int(j)]['errNpass']) + pow( float(inputTable[j]['errNpass']), 2 ),
-                                 'EffRel':      float(0),
-                                 'errEffRel':   float(0),
-                                 'EffAbs':      float(0),
-                                 'errEffAbs':   float(0),
-                                 }
-    return
-            
-
-def CalculateEfficiency(table):
-    for j,line in enumerate( table ):
-        if( j == 0):
-            table[int(j)] = {'variableName':       table[int(j)]['variableName'],
-                             'min1':        table[int(j)]['min1'],
-                             'max1':        table[int(j)]['max1'],
-                             'min2':        table[int(j)]['min2'],
-                             'max2':        table[int(j)]['max2'],
-                             'N':          float(table[j]['N']) ,
-                             'errN':       int(0), 
-                             'Npass':      float(table[j]['Npass']) ,
-                             'errNpass':   int(0), 
-                             'EffRel':     int(1),
-                             'errEffRel':  int(0),
-                             'EffAbs':     int(1),
-                             'errEffAbs':  int(0),
-                             }
-        else:
-            N = float(table[j]['N']) 
-            errN = math.sqrt(float(table[j]["errN"]))
-            if( float(N) > 0 ):
-                errRelN = errN / N 
-            else:
-                errRelN = float(0)
-
-            Npass = float(table[j]['Npass']) 
-            errNpass = math.sqrt(float(table[j]["errNpass"]))
-            if( float(Npass) > 0 ):
-                errRelNpass = errNpass / Npass
-            else:
-                errRelNpass = float(0)
-
-            if(Npass > 0  and N >0 ):
-                EffRel = Npass / N
-                errRelEffRel = math.sqrt( errRelNpass*errRelNpass + errRelN*errRelN )
-                errEffRel = errRelEffRel * EffRel
-            
-                EffAbs = Npass / float(table[0]['N'])
-                errEffAbs = errNpass / float(table[0]['N'])
-            else:
-                EffRel = 0
-                errEffRel = 0
-                EffAbs = 0
-                errEffAbs = 0 
-            
-            table[int(j)]={'variableName': table[int(j)]['variableName'],
-                           'min1': table[int(j)]['min1'],
-                           'max1': table[int(j)]['max1'],
-                           'min2': table[int(j)]['min2'],
-                           'max2': table[int(j)]['max2'],
-                           'N':       N,
-                           'errN':    errN, 
-                           'Npass':       Npass,
-                           'errNpass':    errNpass, 
-                           'EffRel':      EffRel,
-                           'errEffRel':   errEffRel,
-                           'EffAbs':      EffAbs,
-                           'errEffAbs':   errEffAbs,
-                           }
-            #print table[j]
-    return
-
-
-#--- TODO: FIX TABLE FORMAT (NUMBER OF DECIMAL PLATES AFTER THE 0)
-
-def WriteTable(table, name, file):
-    print >>file, name
-    print >>file, "variableName".rjust(25),
-    print >>file, "min1".rjust(15),
-    print >>file, "max1".rjust(15),
-    print >>file, "min2".rjust(15),
-    print >>file, "max2".rjust(15),
-    print >>file, "Npass".rjust(17),
-    print >>file, "errNpass".rjust(17),
-    print >>file, "EffRel".rjust(15),
-    print >>file, "errEffRel".rjust(15),
-    print >>file, "EffAbs".rjust(15),
-    print >>file, "errEffAbs".rjust(15)
-
-    for j, line in enumerate(table):
-        print >>file, table[j]['variableName'].rjust(25),
-        print >>file, table[j]['min1'].rjust(15),
-        print >>file, table[j]['max1'].rjust(15),
-        print >>file, table[j]['min2'].rjust(15),
-        print >>file, table[j]['max2'].rjust(15),
-        ###
-        if( table[j]['Npass'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['Npass']).rjust(17),
-        else:
-            print >>file, ("%.04e" % table[j]['Npass']).rjust(17),
-        ### 
-        if( table[j]['errNpass'] >= 0.1):    
-            print >>file, ("%.04f" % table[j]['errNpass']).rjust(17),
-        else:
-            print >>file, ("%.04e" % table[j]['errNpass']).rjust(17),
-        ### 
-        if( table[j]['EffRel'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['EffRel']).rjust(15),
-        else:
-            print >>file, ("%.04e" % table[j]['EffRel']).rjust(15),
-        ### 
-        if( table[j]['errEffRel'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['errEffRel']).rjust(15),    
-        else:
-            print >>file, ("%.04e" % table[j]['errEffRel']).rjust(15),
-        ### 
-        if( table[j]['EffAbs'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['EffAbs']).rjust(15),
-        else:
-            print >>file, ("%.04e" % table[j]['EffAbs']).rjust(15),
-        ### 
-        if( table[j]['errEffAbs'] >= 0.1 ):
-            print >>file, ("%.04f" % table[j]['errEffAbs']).rjust(15)
-        else:
-            print >>file, ("%.04e" % table[j]['errEffAbs']).rjust(15)         
-        ###
-            
-    print >>file, "\n"
-
-    #--- print to screen
-    
-    print "\n"
-    print name
-    print "variableName".rjust(25),
-    print "min1".rjust(15),
-    print "max1".rjust(15),
-    print "min2".rjust(15),
-    print "max2".rjust(15),
-    print "Npass".rjust(17),
-    print "errNpass".rjust(17),
-    print "EffRel".rjust(15),
-    print "errEffRel".rjust(15),
-    print "EffAbs".rjust(15),
-    print "errEffAbs".rjust(15)
-
-    for j, line in enumerate(table):
-        print table[j]['variableName'].rjust(25),
-        print table[j]['min1'].rjust(15),
-        print table[j]['max1'].rjust(15),
-        print table[j]['min2'].rjust(15),
-        print table[j]['max2'].rjust(15),
-        ###
-        if( table[j]['Npass'] >= 0.1 ):
-            print ("%.04f" % table[j]['Npass']).rjust(17),
-        else:
-            print ("%.04e" % table[j]['Npass']).rjust(17),
-        ### 
-        if( table[j]['errNpass'] >= 0.1):    
-            print ("%.04f" % table[j]['errNpass']).rjust(17),
-        else:
-            print ("%.04e" % table[j]['errNpass']).rjust(17),
-        ### 
-        if( table[j]['EffRel'] >= 0.1 ):
-            print ("%.04f" % table[j]['EffRel']).rjust(15),
-        else:
-            print ("%.04e" % table[j]['EffRel']).rjust(15),
-        ### 
-        if( table[j]['errEffRel'] >= 0.1 ):
-            print ("%.04f" % table[j]['errEffRel']).rjust(15),    
-        else:
-            print ("%.04e" % table[j]['errEffRel']).rjust(15),
-        ### 
-        if( table[j]['EffAbs'] >= 0.1 ):
-            print ("%.04f" % table[j]['EffAbs']).rjust(15),
-        else:
-            print ("%.04e" % table[j]['EffAbs']).rjust(15),
-        ### 
-        if( table[j]['errEffAbs'] >= 0.1 ):
-            print ("%.04f" % table[j]['errEffAbs']).rjust(15)
-        else:
-            print ("%.04e" % table[j]['errEffAbs']).rjust(15)         
-        ###
-
-    return
-
-
 #---Run
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
@@ -295,6 +79,8 @@ for key in dictSamples.iterkeys():
 
 #--- Declare efficiency tables
 dictFinalTables = {}
+#--- Declare histograms
+dictFinalHisto = {}
 
 #---Loop over datasets in the inputlist
 print
@@ -367,6 +153,7 @@ for n, lin in enumerate( open( options.inputList ) ):
     Ntot = float(data[0]['N'])
     if( xsection_val == "-1" ):
         weight = 1.0
+        plotWeight = 1.0
         xsection_X_intLumi = Ntot
     else:
         xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
@@ -374,8 +161,9 @@ for n, lin in enumerate( open( options.inputList ) ):
             weight = float(0)
         else:
             weight = xsection_X_intLumi / Ntot 
+        plotWeight = weight/1000.0
     print "xsection: " + xsection_val,
-    print "weight: " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
+    print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
     
     #---Create new table using weight
     newtable={}
@@ -433,7 +221,13 @@ for n, lin in enumerate( open( options.inputList ) ):
             #print newtable
 
 
-    #---Combine tables from different datasets
+    #---Combine histograms using PYROOT
+    file = TFile(inputRootFile)
+    nHistos = int( file.GetListOfKeys().GetEntries() )
+    #print "nHistos: " , nHistos, "\n"
+
+
+    #---Combine tables and plots from different datasets
     
     # loop over samples defined in sampleListForMerging
     for sample,pieceList in dictSamples.iteritems():
@@ -441,17 +235,8 @@ for n, lin in enumerate( open( options.inputList ) ):
 
         if n == 0: 
             dictFinalTables[sample] = {}
+            dictFinalHisto[sample] = {}
 
-        #toBeUpdated = False
-        #for mS, matchString in enumerate (dictSamples[sample]):
-        #    #print matchString
-        #    if re.search(matchString, dataset_fromInputList):
-        #        print "piece:",matchString,'added to dataset',sample
-        #        toBeUpdated = True
-        #        break
-        ##print toBeUpdated
-        #if(toBeUpdated):
-        #    UpdateTable(newtable, dictFinalTables[sample])
         toBeUpdated = False
         matchingPiece = dataset_fromInputList
         if matchingPiece in pieceList:
@@ -465,6 +250,32 @@ for n, lin in enumerate( open( options.inputList ) ):
         if toBeUpdated:
             UpdateTable(newtable,dictFinalTables[sample])
             dictSamplesPiecesAdded[sample].append(matchingPiece)
+
+        # loop over histograms in rootfile
+        for h in range(0, nHistos):
+            histoName = file.GetListOfKeys()[h].GetName()
+            htemp = file.Get(histoName)
+
+            #
+            #temporary
+            #
+            if "TDir" in htemp.__repr__():
+                htemp = file.Get(histoName + "/optimizer")
+
+            #thanks Riccardo
+            if(n == 0):
+                if "TH2" in htemp.__repr__():
+                    dictFinalHisto[sample][h] = TH2F()
+                    dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )
+                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
+                    #continue
+
+                else:
+                    dictFinalHisto[sample][h] = TH1F()
+                    dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
+                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
+            if toBeUpdated:
+                dictFinalHisto[sample][h].Add(htemp, plotWeight)
 
     #---End of the loop over datasets---#
 
@@ -482,6 +293,9 @@ for sample,pieceList in dictSamples.iteritems():
     print '\tRefusing to proceed.'
     exit(-1)
 
+if not os.path.isdir(options.outputDir):
+  os.makedirs(options.outputDir)
+
 outputTableFile = open(options.outputDir + "/" + options.analysisCode + "_tables.dat",'w')
 
 for S,sample in enumerate( dictSamples ):
@@ -495,6 +309,38 @@ for S,sample in enumerate( dictSamples ):
 
 outputTableFile.close
 
+# write histos
+outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
+
+# get total hists
+nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
+maxSteps = 50
+if nHistos < maxSteps:
+  steps = nHistos
+else:
+  steps = maxSteps
+
+print 'Writing histos:'
+progressString = '0% ['+' '*steps+'] 100%'
+print progressString,
+print '\b'*(len(progressString)-3),
+sys.stdout.flush()
+
+nForProgress = 0
+for sample in dictFinalHisto:
+    for n, histo in enumerate ( dictFinalHisto[sample] ):
+        if (nForProgress % (nHistos/steps))==0:
+            print '\b.',
+            sys.stdout.flush()
+        dictFinalHisto[sample][histo].Write()
+        nForProgress+=1
+
+print '\b] 100%'
+
+
+outputTfile.Close()
+
+print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
 print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat"
 
 #---TODO: CREATE LATEX TABLE (PYTEX?) ---#

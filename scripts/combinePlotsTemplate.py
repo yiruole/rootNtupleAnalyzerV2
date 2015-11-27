@@ -60,24 +60,22 @@ if(os.path.isfile(options.sampleListForMerging) == False):
     sys.exit()
 
 
+#---Check if xsection file exist
+if(os.path.isfile(options.xsection) == False):
+    print "ERROR: file " + options.xsection + " not found"
+    print "exiting..."
+    sys.exit()
+
+xsectionDict = ParseXSectionFile(options.xsection)
+
+
+dictSamples = GetSamplesToCombineDict(options.sampleListForMerging)
+dictSamplesPiecesAdded = {}
+for key in dictSamples.iterkeys():
+  dictSamplesPiecesAdded[key] = []
+
 #--- Declare histograms
-dictSamples = {}
-
-for l,line in enumerate( open( options.sampleListForMerging ) ):
-    line = string.strip(line,"\n")
-    print line
-    
-    for i,piece in enumerate(line.split()):
-        print "i=", i , "  piece= " , piece
-        if (i == 0):
-            key = piece
-            dictSamples[key] = []
-        else:
-            dictSamples[key].append(piece)
-
 dictFinalHisto = {}
-
-#--- functions
 
 #---Loop over datasets
 print "\n"
@@ -85,6 +83,8 @@ for n, lin in enumerate( open( options.inputList ) ):
 
     lin = string.strip(lin,"\n")
     #print lin
+    if lin.startswith('#'):
+      continue
     
     dataset_mod = string.split( string.split(lin, "/" )[-1], ".")[0]
     print "\n" + str(n) + " " + dataset_mod + " ... "
