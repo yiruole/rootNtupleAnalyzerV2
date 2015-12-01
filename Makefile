@@ -11,10 +11,11 @@ LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
 FULLNTUPLELIB=$(SRC)/rootNtupleClass.o
 SKIMMEDNTUPLELIB=$(SRC)/rootSkimmedNtupleClass.o
-ANALYSISCLASSES=$(shell find $(LQSRC) -name '*.C')
+VPATH=$(LQSRC)
+ANALYSISCLASSES=$(shell find $(LQSRC) -name '*.C' -exec basename \{} \;)
 ANALYSISOBJS=$(patsubst %.C,%.o,$(ANALYSISCLASSES))
 #ANALYSISOBJS := $(ANALYSISCLASSES:$(LQSRC)/%.C=$(LQSRC)/%.o)
-ANALYSISPROGS=$(patsubst %.C,%,$(ANALYSISCLASSES))
+ANALYSISPROGS=$(patsubst %.C,bin/%,$(ANALYSISCLASSES))
 ANALYSISCLASS=$(SRC)/analysisClass.o 
 SKIMCLASS=$(SRC)/analysisClass_skim.o 
 SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
@@ -60,11 +61,12 @@ clean:
 	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 $(ANALYSISPROGS): $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(ANALYSISOBJS)
+	@mkdir -p bin
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
 
-$(ANALYSISOBJS): $(LQSRC)/%.o : $(LQSRC)/%.C
-	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
-	@echo "Compiled "$<""
+$(ANALYSISOBJS): %.o : %.C
+	@mkdir -p obj
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o obj/$@ $<
 
 #$(LQSRC)/%.o: $(LQSRC)/%.C
 #	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
