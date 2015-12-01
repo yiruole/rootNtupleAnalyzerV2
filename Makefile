@@ -11,6 +11,10 @@ LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
 FULLNTUPLELIB=$(SRC)/rootNtupleClass.o
 SKIMMEDNTUPLELIB=$(SRC)/rootSkimmedNtupleClass.o
+ANALYSISCLASSES=$(shell find $(LQSRC) -name '*.C')
+ANALYSISOBJS=$(patsubst %.C,%.o,$(ANALYSISCLASSES))
+#ANALYSISOBJS := $(ANALYSISCLASSES:$(LQSRC)/%.C=$(LQSRC)/%.o)
+ANALYSISPROGS=$(patsubst %.C,%,$(ANALYSISCLASSES))
 ANALYSISCLASS=$(SRC)/analysisClass.o 
 SKIMCLASS=$(SRC)/analysisClass_skim.o 
 SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
@@ -25,10 +29,11 @@ EXE = main main_skim
 #	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(ROOTLIBS) -o $@  $(SELECTIONLIB) $@.o
 # *********************************
 
-all: ${EXE}
+#all: ${EXE}
+all: $(ANALYSISPROGS)
 
-main: $(SRC)/main.o $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(ANALYSISCLASS)
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(SRC)/$@.o
+#main: $(SRC)/main.o $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(ANALYSISCLASS)
+#	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(SRC)/$@.o
 
 main_skim: $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
@@ -51,4 +56,17 @@ clean:
 .C.o:
 	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
+%.o: %.C
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
+
+$(ANALYSISPROGS): $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(ANALYSISOBJS)
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
+
+$(ANALYSISOBJS): $(LQSRC)/%.o : $(LQSRC)/%.C
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
+	@echo "Compiled "$<""
+
+#$(LQSRC)/%.o: $(LQSRC)/%.C
+#	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
+#	@echo "Compiled "$<" using rule1"
 
