@@ -5,12 +5,20 @@ FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++11
 # FLAGS += -DCREATE_OPT_CUT_FILE
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
-INC= -I.. -I. -I./include
+INC= -I.. -I. -I./include  -I${CLHEP}/include
 ROOTINC= -I${ROOTSYS}/include
-LIBS= -L.  ${ROOTLIBS}
+LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
-SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
-EXE = main
+FULLNTUPLELIB=$(SRC)/rootNtupleClass.o
+SKIMMEDNTUPLELIB=$(SRC)/rootSkimmedNtupleClass.o
+ANALYSISCLASS=$(SRC)/analysisClass.o 
+SKIMCLASS=$(SRC)/analysisClass_skim.o 
+SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
+COLLECTIONLIB=$(SRC)/Collection.o
+PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/Muon.o $(SRC)/HighPtMuon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
+IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/HighPtMuonIDs.o $(SRC)/PFJetIDs.o
+TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o 
+EXE = main main_skim
 
 # ********** TEMPLATE *************
 # mainProg: mainProg.o $(SELECTIONLIB)
@@ -19,8 +27,11 @@ EXE = main
 
 all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB) 
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
+main: $(SRC)/main.o $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(ANALYSISCLASS)
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(SRC)/$@.o
+
+main_skim: $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
 
 clean:
 	rm -f src/*.o *.lo core core.*
