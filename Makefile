@@ -11,9 +11,9 @@ LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
 SRC= ./src
 FULLNTUPLELIB=$(SRC)/rootNtupleClass.o
 SKIMMEDNTUPLELIB=$(SRC)/rootSkimmedNtupleClass.o
-VPATH=$(LQSRC)
+VPATH=$(shell find $(LQSRC) -type d)
 ANALYSISCLASSES=$(shell find $(LQSRC) -name '*.C' -exec basename \{} \;)
-ANALYSISOBJS=$(patsubst %.C,%.o,$(ANALYSISCLASSES))
+ANALYSISOBJS=$(patsubst %.C,obj/%.o,$(ANALYSISCLASSES))
 #ANALYSISOBJS := $(ANALYSISCLASSES:$(LQSRC)/%.C=$(LQSRC)/%.o)
 ANALYSISPROGS=$(patsubst %.C,bin/%,$(ANALYSISCLASSES))
 ANALYSISCLASS=$(SRC)/analysisClass.o 
@@ -64,9 +64,9 @@ $(ANALYSISPROGS): $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(
 	@mkdir -p bin
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
 
-$(ANALYSISOBJS): %.o : %.C
+$(ANALYSISOBJS): obj/%.o : %.C
 	@mkdir -p obj
-	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o obj/$@ $<
+	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
 #$(LQSRC)/%.o: $(LQSRC)/%.C
 #	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
