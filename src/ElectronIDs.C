@@ -266,59 +266,57 @@ bool Electron::PassUserID_MVA (bool verbose){
 }
 
 bool Electron::PassUserID_FakeRateLooseID(bool verbose){
-  return false;
-  // TODO FIXME
-  //bool pass_ecalDriven    = bool ( EcalSeed()    == 1    );
-  //bool pass_missingHits   = bool ( MissingHits() <= 1    );
-  //bool pass_dxy           = false;
-  //bool pass_sigmaIEtaIEta = false;
-  //bool pass_hoe           = false;
-  //bool is_barrel = false;
-  //bool is_endcap = false;
+  bool pass_ecalDriven    = bool ( EcalSeed()    == 1    );
+  bool pass_missingHits   = bool ( MissingHits() <= 1    );
+  bool pass_dxy           = false;
+  bool pass_sigmaIEtaIEta = false;
+  bool pass_hoe           = false;
+  bool is_barrel = false;
+  bool is_endcap = false;
 
-  //if ( fabs(Eta()) < 1.442 ){
-  //  is_barrel = true;
-  //  pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.02  );
-  //  pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.013 );
-  //  pass_hoe              = bool ( HoE()                 < 0.15  );
-  //}
-  //
-  //else if ( fabs(Eta()) > 1.56 && fabs(Eta()) < 2.5 ){ 
-  //  is_endcap = true;
-  //  pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.05  );
-  //  pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.034 );
-  //  pass_hoe              = bool ( HoE()                 < 0.10  );
-  //}
-  //
-  //bool decision = ( pass_ecalDriven    && 
-	//	    pass_missingHits   && 
-	//	    pass_dxy           && 
-	//	    pass_sigmaIEtaIEta && 
-	//	    pass_hoe           );
-  //
-  //
-  //if ( verbose ) { 
-  //  std::cout << std::endl;
-  //  if ( !decision ){
-  //    if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) FAIL FakeRateLooseID" << std::endl; 
-  //    else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) FAIL FakeRateLooseID" << std::endl; 
-  //    else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) FAIL FakeRateLooseID" << std::endl; 
-  //    if ( is_barrel || is_endcap ) { 
-	//if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    :\t " << EcalSeed()      << std::endl;
-	//if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
-	//if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
-	//if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << SigmaIEtaIEta() << std::endl;
-	//if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
-  //    }
-  //    else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
-  //  }
-  //  else { 
-  //    if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) PASS FakeRateLooseID" << std::endl; 
-  //    else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) PASS FakeRateLooseID" << std::endl; 
-  //    else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) PASS FakeRateLooseID" << std::endl;  
-  //  }
-  //}
-  //
-  //return decision;
+  if ( fabs(Eta()) < 1.4442 ){
+    is_barrel = true;
+    pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.02  );
+    pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.013 );
+    pass_hoe              = bool ( HoE()                 < 0.15  );
+  }
+  
+  else if ( fabs(Eta()) > 1.566 && fabs(Eta()) < 2.5 ){ 
+    is_endcap = true;
+    pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.05  );
+    pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.034 );
+    pass_hoe              = bool ( HoE()                 < 0.10  );
+  }
+  
+  bool decision = ( pass_ecalDriven    && 
+		    pass_missingHits   && 
+		    pass_dxy           && 
+		    pass_sigmaIEtaIEta && 
+		    pass_hoe           );
+  
+  
+  if ( verbose ) { 
+    std::cout << std::endl;
+    if ( !decision ){
+      if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) FAIL FakeRateLooseID" << std::endl; 
+      else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) FAIL FakeRateLooseID" << std::endl; 
+      else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) FAIL FakeRateLooseID" << std::endl; 
+      if ( is_barrel || is_endcap ) { 
+	if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    :\t " << EcalSeed()      << std::endl;
+	if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
+	if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
+	if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << SigmaIEtaIEta() << std::endl;
+	if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+      }
+      else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
+    }
+    else { 
+      if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) PASS FakeRateLooseID" << std::endl; 
+      else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) PASS FakeRateLooseID" << std::endl; 
+      else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) PASS FakeRateLooseID" << std::endl;  
+    }
+  }
+  
+  return decision;
 
 }
