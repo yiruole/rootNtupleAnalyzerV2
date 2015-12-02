@@ -1,0 +1,5 @@
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/QCD_Pt_2400to3200/LQSkim/151201_160332/0000/QCD_Pt_2400to3200_reduced_skim_1.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/QCD_Pt_2400to3200/LQSkim/151201_160332/0000/QCD_Pt_2400to3200_reduced_skim_2.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/QCD_Pt_2400to3200/LQSkim/151201_160332/0000/QCD_Pt_2400to3200_reduced_skim_3.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/QCD_Pt_2400to3200/LQSkim/151201_160332/0000/QCD_Pt_2400to3200_reduced_skim_4.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/QCD_Pt_2400to3200/LQSkim/151201_160332/0000/QCD_Pt_2400to3200_reduced_skim_5.root

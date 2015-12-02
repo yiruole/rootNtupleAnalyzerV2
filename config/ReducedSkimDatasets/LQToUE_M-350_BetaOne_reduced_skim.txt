@@ -1,1 +1,1 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_MostMCBack_EEJJSig_SingleEleData/LQToUE_M-350_BetaOne/LQSkim/151030_094054/0000/LQToUE_M-350_BetaOne_reduced_skim_1.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-0_SingleEleLoose_AK5_inputListAllCurrent/LQToUE_M-350_BetaOne/LQSkim/151201_155321/0000/LQToUE_M-350_BetaOne_reduced_skim_1.root
