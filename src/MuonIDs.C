@@ -11,7 +11,7 @@ bool Muon::PassUserID (ID id, bool verbose){
 }
 
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
-// this hasn't changed since Run I.
+//   since Run I: changed PFISO cut from 0.12 to 0.15
 bool Muon::PassUserID_MuonTight_PFIso04 ( bool verbose ){
 
   double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
@@ -25,7 +25,7 @@ bool Muon::PassUserID_MuonTight_PFIso04 ( bool verbose ){
   bool pass_dz        = bool ( fabs(BestTrackVtxDistZ ())    < 0.5 );
   bool pass_pixelHits = bool ( TrkPixelHits()                > 0   );
   bool pass_trkLayers = bool ( TrackLayersWithMeasurement()  > 5   );
-  bool pass_pfiso04   = bool ( pfiso04                       < 0.12);
+  bool pass_pfiso04   = bool ( pfiso04                       < 0.15);
   
   bool decision = ( pass_isGlobal  && 
 		    pass_isPF      && 
