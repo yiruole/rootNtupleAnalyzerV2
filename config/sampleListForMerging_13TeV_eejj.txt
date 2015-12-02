@@ -1,66 +1,74 @@
-ZJet_Madgraph    DYJetsToLL_M-50_HT-100to200_ DYJetsToLL_M-50_HT-200to400_ DYJetsToLL_M-50_HT-400to600_ DYJetsToLL_M-50_HT-600toInf_
-ZJet_Madgraph_Inc    DYJetsToLL_M-5to50_ DYJetsToLL_M-50_
-ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50_
-ZJet_Madgraph_M-50            DYJetsToLL_M-50_
-ZJet_Madgraph_HT100to200      DYJetsToLL_M-50_HT-100to200_
-ZJet_Madgraph_HT200to400      DYJetsToLL_M-50_HT-200to400_
-ZJet_Madgraph_HT400to600      DYJetsToLL_M-50_HT-400to600_
-ZJet_Madgraph_HT600toInf      DYJetsToLL_M-50_HT-600toInf_
-ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
-ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200_
-ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400_
-ZJet_amcatnlo_M-400to500      DYJetsToLL_M-400to500_
-ZJet_amcatnlo_M-500to700      DYJetsToLL_M-500to700_
-ZJet_amcatnlo_M-700to800      DYJetsToLL_M-700to800_
-ZJet_amcatnlo_M-800to1000     DYJetsToLL_M-800to1000_
-ZJet_amcatnlo_M-1000to1500    DYJetsToLL_M-1000to1500_
-ZJet_amcatnlo_M-1500to2000    DYJetsToLL_M-1500to2000_
-ZJet_amcatnlo_M-2000to3000    DYJetsToLL_M-2000to3000_
-TTbar_Madgraph       	TTJets_DiLept_ TTJets_SingleLeptFromT TTJets_SingleLeptFromTbar
-TTbar_Madgraph_Inc    TTJets_
-TTbar_FromData  SingleMu__Run2012A-recover-06Aug2012-v1 SingleMu__Run2012A-13Jul2012-v1 SingleMu__Run2012B-13Jul2012-v1 SingleMu__Run2012C-24Aug2012-v1 SingleMu__Run2012C-PromptReco-v2 SingleMu__Run2012D-PromptReco-v1
-#SingleTop	Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel
-SingleTop  ST_tW_top_5f_ ST_tW_antitop_5f_ ST_t-channel_top_4f_ ST_t-channel_antitop_4f_
-PhotonJets	G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800
-PhotonJets_Madgraph  GJets_HT-40To100_ GJets_HT-100To200_ GJets_HT-200To400_ GJets_HT-400To600_ GJets_HT-600ToInf_
-DIBOSON		WW_ WZ_ ZZ_
-ALLBKG		DY0JetsToLL_M-50 DY1JetsToLL_M-50 DY2JetsToLL_M-50 DY3JetsToLL_M-50 DY4JetsToLL_M-50 WJetsToLNu W1JetsToLNu 	 W2JetsToLNu 	  W3JetsToLNu 	   W4JetsToLNu TTJets_FullLeptMGDecays TTJets_SemiLeptMGDecays TTJets_HadronicMGDecays Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800 WW_ WZ_ ZZ_		
-OTHERBKG	ST_tW_top_5f_ ST_tW_antitop_5f_ ST_t-channel_top_4f_ ST_t-channel_antitop_4f_ WW_ WZ_ ZZ_	GJets_HT-40To100_ GJets_HT-100To200_ GJets_HT-200To400_ GJets_HT-400To600_ GJets_HT-600ToInf_
-LQ_M300		LQToUE_M-300_BetaOne_
-LQ_M350		LQToUE_M-350_BetaOne_ 
-LQ_M400		LQToUE_M-400_BetaOne_ 
-LQ_M450		LQToUE_M-450_BetaOne_ 
-LQ_M500		LQToUE_M-500_BetaOne_ 
-LQ_M550		LQToUE_M-550_BetaOne_ 
-LQ_M600		LQToUE_M-600_BetaOne_ 
-LQ_M650		LQToUE_M-650_BetaOne_ 
-LQ_M700		LQToUE_M-700_BetaOne_ 
-LQ_M750		LQToUE_M-750_BetaOne_ 
-LQ_M800		LQToUE_M-800_BetaOne_ 
-LQ_M850		LQToUE_M-850_BetaOne_ 
-LQ_M900		LQToUE_M-900_BetaOne_ 
-LQ_M950		LQToUE_M-950_BetaOne_ 
-LQ_M1000	LQToUE_M-1000_BetaOne_
-LQ_M1050	LQToUE_M-1050_BetaOne_
-LQ_M1100	LQToUE_M-1100_BetaOne_
-LQ_M1150	LQToUE_M-1150_BetaOne_
-LQ_M1200	LQToUE_M-1200_BetaOne_
-LQ_M1200	LQToUE_M-1250_BetaOne_
-LQ_M1200	LQToUE_M-1300_BetaOne_
-LQ_M1200	LQToUE_M-1350_BetaOne_
-LQ_M1200	LQToUE_M-1400_BetaOne_
-LQ_M1200	LQToUE_M-1450_BetaOne_
-LQ_M1200	LQToUE_M-1500_BetaOne_
-LQ_M1200	LQToUE_M-1550_BetaOne_
-LQ_M1200	LQToUE_M-1600_BetaOne_
-LQ_M1200	LQToUE_M-1650_BetaOne_
-LQ_M1200	LQToUE_M-1700_BetaOne_
-LQ_M1200	LQToUE_M-1750_BetaOne_
-LQ_M1200	LQToUE_M-1800_BetaOne_
-LQ_M1200	LQToUE_M-1850_BetaOne_
-LQ_M1200	LQToUE_M-1900_BetaOne_
-LQ_M1200	LQToUE_M-1950_BetaOne_
-LQ_M1200	LQToUE_M-2000_BetaOne_
-DATA SingleElectron_Run2015D-05Oct2015-v1 SingleElectron_Run2015D-PromptReco-v4
-SingleElectron2015DOct05  SingleElectron_Run2015D-05Oct2015-v1
-SingleElectron2015DPromptRecoV4  SingleElectron_Run2015D-PromptReco-v4
+ZJet_Madgraph_HT    DYJetsToLL_M-50_HT-100to200 DYJetsToLL_M-50_HT-200to400 DYJetsToLL_M-50_HT-400to600 DYJetsToLL_M-50_HT-600toInf
+ZJet_Madgraph_Inc    DYJetsToLL_M-5to50 DYJetsToLL_M-50
+#ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
+#ZJet_Madgraph_M-50            DYJetsToLL_M-50
+ZJet_Madgraph_HT100to200      DYJetsToLL_M-50_HT-100to200
+ZJet_Madgraph_HT200to400      DYJetsToLL_M-50_HT-200to400
+ZJet_Madgraph_HT400to600      DYJetsToLL_M-50_HT-400to600
+ZJet_Madgraph_HT600toInf      DYJetsToLL_M-50_HT-600toInf
+#ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
+#ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
+#ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
+#ZJet_amcatnlo_M-400to500      DYJetsToLL_M-400to500
+#ZJet_amcatnlo_M-500to700      DYJetsToLL_M-500to700
+#ZJet_amcatnlo_M-700to800      DYJetsToLL_M-700to800
+#ZJet_amcatnlo_M-800to1000     DYJetsToLL_M-800to1000
+#ZJet_amcatnlo_M-1000to1500    DYJetsToLL_M-1000to1500
+#ZJet_amcatnlo_M-1500to2000    DYJetsToLL_M-1500to2000
+#ZJet_amcatnlo_M-2000to3000    DYJetsToLL_M-2000to3000
+WJet_Madgraph_HT    WJetsToLNu_HT-100To200 WJetsToLNu_HT-200To400 WJetsToLNu_HT-400To600 WJetsToLNu_HT-600To800 WJetsToLNu_HT-800To1200 WJetsToLNu_HT-1200To2500 WJetsToLNu_HT-2500ToInf
+WJet_Madgraph_HT100to200    WJetsToLNu_HT-100To200
+WJet_Madgraph_HT200to400    WJetsToLNu_HT-200To400
+WJet_Madgraph_HT400to600    WJetsToLNu_HT-400To600
+WJet_Madgraph_HT600to800    WJetsToLNu_HT-600To800
+WJet_Madgraph_HT800to1200   WJetsToLNu_HT-800To1200
+WJet_Madgraph_HT1200to2500  WJetsToLNu_HT-1200To2500
+WJet_Madgraph_HT2500toInf   WJetsToLNu_HT-2500ToInf
+TTbar_Madgraph       	TTJets_DiLept_ext1 TTJets_SingleLeptFromT TTJets_SingleLeptFromTbar_ext1
+#TEST_TTbar_Madgraph       	TTJets_DiLept TTJets_SingleLeptFromTbar_ext1
+#TTbar_Madgraph_Inc    TTJets_
+#TTbar_FromData  SingleMu__Run2012A-recover-06Aug2012-v1 SingleMu__Run2012A-13Jul2012-v1 SingleMu__Run2012B-13Jul2012-v1 SingleMu__Run2012C-24Aug2012-v1 SingleMu__Run2012C-PromptReco-v2 SingleMu__Run2012D-PromptReco-v1
+#OldSingleTop	Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel
+SingleTop  ST_tW_top_5f_inclusiveDecays ST_tW_antitop_5f_inclusiveDecays ST_t-channel_top_4f_leptonDecays ST_t-channel_antitop_4f_leptonDecays
+#PhotonJets	G_Pt-15to30 G_Pt-30to50 G_Pt-50to80 G_Pt-80to120 G_Pt-120to170 G_Pt-170to300 G_Pt-300to470 G_Pt-470to800 G_Pt-800to1400 G_Pt-1400to1800 G_Pt-1800
+PhotonJets_Madgraph  GJets_HT-40To100 GJets_HT-100To200 GJets_HT-200To400 GJets_HT-400To600 GJets_HT-600ToInf
+QCD_EMEnriched    QCD_Pt-15to20_EMEnriched QCD_Pt-20to30_EMEnriched QCD_Pt-30to50_EMEnriched QCD_Pt-50to80_EMEnriched QCD_Pt-80to120_EMEnriched QCD_Pt-120to170_EMEnriched QCD_Pt-170to300_EMEnriched QCD_Pt-300toInf_EMEnriched
+DIBOSON		WW WZ ZZ
+ALLBKG		ZJet_Madgraph_HT WJet_Madgraph_HT TTbar_Madgraph SingleTop PhotonJets_Madgraph QCD_EMEnriched DIBOSON
+OTHERBKG	SingleTop DIBOSON	PhotonJets_Madgraph QCD_EMEnriched
+LQ_M300		LQToUE_M-300_BetaOne
+LQ_M350		LQToUE_M-350_BetaOne
+LQ_M400		LQToUE_M-400_BetaOne
+LQ_M450		LQToUE_M-450_BetaOne
+LQ_M500		LQToUE_M-500_BetaOne
+LQ_M550		LQToUE_M-550_BetaOne
+LQ_M600		LQToUE_M-600_BetaOne
+LQ_M650		LQToUE_M-650_BetaOne
+LQ_M700		LQToUE_M-700_BetaOne
+LQ_M750		LQToUE_M-750_BetaOne
+LQ_M800		LQToUE_M-800_BetaOne
+LQ_M850		LQToUE_M-850_BetaOne
+LQ_M900		LQToUE_M-900_BetaOne
+LQ_M950		LQToUE_M-950_BetaOne
+LQ_M1000	LQToUE_M-1000_BetaOne
+LQ_M1050	LQToUE_M-1050_BetaOne
+LQ_M1100	LQToUE_M-1100_BetaOne
+LQ_M1150	LQToUE_M-1150_BetaOne
+LQ_M1200	LQToUE_M-1200_BetaOne
+LQ_M1200	LQToUE_M-1250_BetaOne
+LQ_M1200	LQToUE_M-1300_BetaOne
+LQ_M1200	LQToUE_M-1350_BetaOne
+LQ_M1200	LQToUE_M-1400_BetaOne
+LQ_M1200	LQToUE_M-1450_BetaOne
+LQ_M1200	LQToUE_M-1500_BetaOne
+LQ_M1200	LQToUE_M-1550_BetaOne
+LQ_M1200	LQToUE_M-1600_BetaOne
+LQ_M1200	LQToUE_M-1650_BetaOne
+LQ_M1200	LQToUE_M-1700_BetaOne
+LQ_M1200	LQToUE_M-1750_BetaOne
+LQ_M1200	LQToUE_M-1800_BetaOne
+LQ_M1200	LQToUE_M-1850_BetaOne
+LQ_M1200	LQToUE_M-1900_BetaOne
+LQ_M1200	LQToUE_M-1950_BetaOne
+LQ_M1200	LQToUE_M-2000_BetaOne
+DATA SingleElectron
