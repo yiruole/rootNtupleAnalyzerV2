@@ -11,7 +11,7 @@ enum ID {
   MVA                      = 6,
   ECAL_FIDUCIAL            = 7,
   		        
-  HIGH_PT_MUON_TRKRELISO01 = 8,
+  MUON_HIGH_PT_TRKRELISO03 = 8,
   MUON_TIGHT_PFISO04       = 9,
   MUON_FIDUCIAL            = 10,
   		        

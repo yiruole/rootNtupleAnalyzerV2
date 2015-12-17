@@ -14,6 +14,7 @@ Muon::Muon (Collection& c, unsigned int i, short j  ):
 // Kinematic variables
 
 double & Muon::Pt                      (){ return m_collection -> GetData() -> MuonPt                         -> at ( m_raw_index ); } 
+double & Muon::PtError                 (){ return m_collection -> GetData() -> MuonPtError                    -> at ( m_raw_index ); } 
 double & Muon::Eta                     (){ return m_collection -> GetData() -> MuonEta                        -> at ( m_raw_index ); } 
 double & Muon::Phi                     (){ return m_collection -> GetData() -> MuonPhi                        -> at ( m_raw_index ); } 
 double   Muon::Charge                  (){ return m_collection -> GetData() -> MuonCharge                     -> at ( m_raw_index ); } 
@@ -21,6 +22,7 @@ double   Muon::Charge                  (){ return m_collection -> GetData() -> M
 // Isolation variables				   				   
 						   				   
 double Muon::TrkIso                    (){ return m_collection -> GetData() -> MuonTrkIso                     -> at ( m_raw_index ); } 
+double Muon::TrkIsoR03SumPt            (){ return m_collection -> GetData() -> MuonTrackerIsoSumPT            -> at ( m_raw_index ); } 
 double Muon::PFIsoR04ChargedHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } 
 double Muon::PFIsoR04NeutralHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } 
 double Muon::PFIsoR04Photon            (){ return m_collection -> GetData() -> MuonPFIsoR04Photon             -> at ( m_raw_index ); } 
