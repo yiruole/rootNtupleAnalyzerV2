@@ -5,39 +5,22 @@ FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++11
 # FLAGS += -DCREATE_OPT_CUT_FILE
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
-INC= -I.. -I. -I./include  -I${CLHEP}/include
+INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
-LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib
+LIBS= -L.  ${ROOTLIBS}
 SRC= ./src
-FULLNTUPLELIB=$(SRC)/rootNtupleClass.o
-SKIMMEDNTUPLELIB=$(SRC)/rootSkimmedNtupleClass.o
-VPATH=$(shell find $(LQSRC) -type d)
-ANALYSISCLASSES=$(shell find $(LQSRC) -name '*.C' -exec basename \{} \;)
-ANALYSISOBJS=$(patsubst %.C,obj/%.o,$(ANALYSISCLASSES))
-#ANALYSISOBJS := $(ANALYSISCLASSES:$(LQSRC)/%.C=$(LQSRC)/%.o)
-ANALYSISPROGS=$(patsubst %.C,bin/%,$(ANALYSISCLASSES))
-ANALYSISCLASS=$(SRC)/analysisClass.o 
-SKIMCLASS=$(SRC)/analysisClass_skim.o 
-SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
-COLLECTIONLIB=$(SRC)/Collection.o
-PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/Muon.o $(SRC)/HighPtMuon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
-IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/HighPtMuonIDs.o $(SRC)/PFJetIDs.o
-TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o 
-EXE = main main_skim
+SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
+EXE = main
 
 # ********** TEMPLATE *************
 # mainProg: mainProg.o $(SELECTIONLIB)
 #	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(ROOTLIBS) -o $@  $(SELECTIONLIB) $@.o
 # *********************************
 
-#all: ${EXE}
-all: $(ANALYSISPROGS)
+all: ${EXE}
 
-#main: $(SRC)/main.o $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(ANALYSISCLASS)
-#	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SKIMMEDNTUPLELIB) $(SRC)/$@.o
-
-main_skim: $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
+main: $(SRC)/main.o $(SELECTIONLIB) 
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
 clean:
 	rm -f src/*.o *.lo core core.*
@@ -57,18 +40,4 @@ clean:
 .C.o:
 	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
 
-%.o: %.C
-	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
-
-$(ANALYSISPROGS): $(SRC)/main.o $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(ANALYSISOBJS)
-	@mkdir -p bin
-	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(FULLNTUPLELIB) $(SKIMCLASS) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/main.o
-
-$(ANALYSISOBJS): obj/%.o : %.C
-	@mkdir -p obj
-	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
-
-#$(LQSRC)/%.o: $(LQSRC)/%.C
-#	$(COMP) -c $(INC) $(ROOTINC) $(FLAGS) -o $@ $<
-#	@echo "Compiled "$<" using rule1"
 
