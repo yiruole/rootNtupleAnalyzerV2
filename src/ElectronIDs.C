@@ -40,7 +40,7 @@ bool Electron::PassUserID_HEEP (bool verbose){
   //  Bools that are the same whether barrel or endcap
   //----------------------------------------------------------------------
   
-  bool pass_et            = bool ( Pt()              >  35.0 );
+  bool pass_et            = bool ( PtHeep()              >  35.0 );
   bool pass_ecalDriven    = bool ( EcalSeed()        == 1    );
   bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
   bool pass_trkIsolation  = bool ( TrkIsoDR03()      <  5.0  );
