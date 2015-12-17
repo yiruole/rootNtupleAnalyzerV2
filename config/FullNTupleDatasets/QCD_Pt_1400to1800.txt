@@ -1,9 +1,0 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_2.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_3.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_4.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_5.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_6.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_7.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_8.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/scooper/v1-4-0/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/LQ/151117_170953/0000/QCD_Pt_1400to1800_9.root

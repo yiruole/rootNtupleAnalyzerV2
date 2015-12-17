@@ -1,4 +1,0 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-0/DYJetsToLL_M-400to500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ/151023_125807/0000/DYJetsToLL_M-400to500_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-0/DYJetsToLL_M-400to500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ/151023_125807/0000/DYJetsToLL_M-400to500_2.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-0/DYJetsToLL_M-400to500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ/151023_125807/0000/DYJetsToLL_M-400to500_3.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-0/DYJetsToLL_M-400to500_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ/151023_125807/0000/DYJetsToLL_M-400to500_4.root
