@@ -11,20 +11,20 @@ PFJet::PFJet (Collection& c, unsigned int i, short j ):
   Object ( c,i, "PFJet" )
 {}
                                      
-double & PFJet::Pt                       () { return m_collection -> GetData() -> PFJetPtAK5                           -> at ( m_raw_index ); } 
-double & PFJet::Eta                      () { return m_collection -> GetData() -> PFJetEtaAK5                          -> at ( m_raw_index ); } 
-double & PFJet::Phi                      () { return m_collection -> GetData() -> PFJetPhiAK5                          -> at ( m_raw_index ); } 
-double PFJet::Energy                     () { return m_collection -> GetData() -> PFJetEnergyAK5                       -> at ( m_raw_index ); }
-double PFJet::JECUnc		         () { return m_collection -> GetData() -> PFJetJECUncAK5                       -> at ( m_raw_index ); }
+double & PFJet::Pt                       () { return m_collection -> GetData() -> PFJetPtAK4CHS                           -> at ( m_raw_index ); } 
+double & PFJet::Eta                      () { return m_collection -> GetData() -> PFJetEtaAK4CHS                          -> at ( m_raw_index ); } 
+double & PFJet::Phi                      () { return m_collection -> GetData() -> PFJetPhiAK4CHS                          -> at ( m_raw_index ); } 
+double PFJet::Energy                     () { return m_collection -> GetData() -> PFJetEnergyAK4CHS                       -> at ( m_raw_index ); }
+double PFJet::JECUnc		         () { return m_collection -> GetData() -> PFJetJECUncAK4CHS                       -> at ( m_raw_index ); }
                                      
-double PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData() -> PFJetNeutralHadronEnergyFractionAK5  -> at ( m_raw_index ); } 
-double PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData() -> PFJetNeutralEmEnergyFractionAK5      -> at ( m_raw_index ); } 
-int    PFJet::NConstituents              () { return m_collection -> GetData() -> PFJetNConstituentsAK5                -> at ( m_raw_index ); } 
-double PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData() -> PFJetChargedHadronEnergyFractionAK5  -> at ( m_raw_index ); } 
-int    PFJet::ChargedMultiplicity        () { return m_collection -> GetData() -> PFJetChargedMultiplicityAK5          -> at ( m_raw_index ); } 
-double PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData() -> PFJetChargedEmEnergyFractionAK5      -> at ( m_raw_index ); } 
+double PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData() -> PFJetNeutralHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
+double PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData() -> PFJetNeutralEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
+int    PFJet::NConstituents              () { return m_collection -> GetData() -> PFJetNConstituentsAK4CHS                -> at ( m_raw_index ); } 
+double PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData() -> PFJetChargedHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
+int    PFJet::ChargedMultiplicity        () { return m_collection -> GetData() -> PFJetChargedMultiplicityAK4CHS          -> at ( m_raw_index ); } 
+double PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData() -> PFJetChargedEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
 
-double PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedSecondaryVertexBTagAK5  -> at ( m_raw_index ); }
+double PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
 
 // Energy resolution scale factors
 
