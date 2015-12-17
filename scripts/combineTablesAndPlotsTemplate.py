@@ -84,7 +84,7 @@ dictFinalHisto = {}
 
 #---Loop over datasets in the inputlist
 print
-for n, lin in enumerate( open( options.inputList ) ):
+for lin in open( options.inputList ):
 
     lin = string.strip(lin,"\n")
     #print lin
@@ -233,8 +233,10 @@ for n, lin in enumerate( open( options.inputList ) ):
     for sample,pieceList in dictSamples.iteritems():
         #print "look at sample named:",sample
 
-        if n == 0: 
+        # init if needed
+        if not sample in dictFinalTables:
             dictFinalTables[sample] = {}
+        if not sample in dictFinalHisto:
             dictFinalHisto[sample] = {}
 
         toBeUpdated = False
@@ -263,7 +265,8 @@ for n, lin in enumerate( open( options.inputList ) ):
                 htemp = file.Get(histoName + "/optimizer")
 
             #thanks Riccardo
-            if(n == 0):
+            # init histo if needed
+            if not h in dictFinalHisto[sample]:
                 if "TH2" in htemp.__repr__():
                     dictFinalHisto[sample][h] = TH2F()
                     dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )

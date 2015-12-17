@@ -120,6 +120,8 @@ input_list = open ( options.input_list, "r" )
 command_list = []
 
 for line in input_list:
+    if line.startswith('#'):
+      continue
     dataset = line.strip().split("/")[-1][:-4]
     output_file_name = options.output_dir + "/" + code_name + "___" + dataset    
     command = "./main " + line.strip() + " " + options.cut_file + " " + options.tree_name + " " + output_file_name + " " + output_file_name

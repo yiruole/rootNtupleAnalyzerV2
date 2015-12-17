@@ -23,6 +23,7 @@ do
     -f) FILENAME="$2"; shift ;;
     -d) DIRNAME="$2"; shift ;;
     -t) TTREENAME="$2"; shift ;;
+    -n) ROOTNTUPLECLASSFILENAME="$2"; shift ;;
     *) usage ;;
   esac
   shift  # get following parameters
@@ -38,6 +39,11 @@ if [ -z "${TTREENAME}" ]; then
   echo "No TTree name given; using default of $TTREENAME"
 fi
 
+
+if [ -z "${ROOTNTUPLECLASSFILENAME}" ]; then
+  ROOTNTUPLECLASSFILENAME=rootNtupleClass
+  echo "No ntuple class filename given; using default of $ROOTNTUPLECLASSFILENAME"
+fi
 
 cd `dirname $0`/../ ; # go to the directory rootNtupleAnalyzer/
 
@@ -71,12 +77,16 @@ sed '
 /\<TROOT\.h\>/ i\
 \/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \n\#include \<vector\> \nusing namespace std\; \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
 ' < rootNtupleClass.h > tmp.h
-mv tmp.h rootNtupleClass.h
+#mv tmp.h rootNtupleClass.h
+mv tmp.h ${ROOTNTUPLECLASSFILENAME}.h
 
-if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
+#if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
+if [ -f "${ROOTNTUPLECLASSFILENAME}.h" ] && [ -f "${ROOTNTUPLECLASSFILENAME}.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
-    mv -i rootNtupleClass.h include/
-    mv -i rootNtupleClass.C src/
+    #mv -i rootNtupleClass.h include/
+    #mv -i rootNtupleClass.C src/
+    mv -i ${ROOTNTUPLECLASSFILENAME}.h include/
+    mv -i ${ROOTNTUPLECLASSFILENAME}.C src/
     #if [ -f "include/rootNtupleClass.h" ] && [ -f "src/rootNtupleClass.C" ]; then echo "... done."; fi;
 
     #echo "Creating src/analysisClass.C ..."
@@ -84,7 +94,8 @@ if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
 
     echo "done";    
 else
-    echo "Error: files rootNtupleClass.h/C have not been created."
+    #echo "Error: files rootNtupleClass.h/C have not been created."
+    echo "Error: files ${ROOTNTUPLECLASSFILENAME}.h/.C have not been created."
 fi
 
 
