@@ -1,5 +1,6 @@
 ZJet_Madgraph_HT    DYJetsToLL_M-50_HT-100to200 DYJetsToLL_M-50_HT-200to400 DYJetsToLL_M-50_HT-400to600 DYJetsToLL_M-50_HT-600toInf
-ZJet_Madgraph_Inc    DYJetsToLL_M-5to50 DYJetsToLL_M-50
+#ZJet_Madgraph_Inc    DYJetsToLL_M-5to50 DYJetsToLL_M-50
+#ZJet_Madgraph_M-50    DYJetsToLL_M-50
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 #ZJet_Madgraph_M-50            DYJetsToLL_M-50
 ZJet_Madgraph_HT100to200      DYJetsToLL_M-50_HT-100to200
@@ -24,7 +25,7 @@ WJet_Madgraph_HT600to800    WJetsToLNu_HT-600To800
 WJet_Madgraph_HT800to1200   WJetsToLNu_HT-800To1200
 WJet_Madgraph_HT1200to2500  WJetsToLNu_HT-1200To2500
 WJet_Madgraph_HT2500toInf   WJetsToLNu_HT-2500ToInf
-TTbar_Madgraph       	TTJets_DiLept_ext1 TTJets_SingleLeptFromT TTJets_SingleLeptFromTbar_ext1
+TTbar_Madgraph       	TTJets_DiLept_ext1 TTJets_SingleLeptFromT_ext1 TTJets_SingleLeptFromTbar_ext1
 #TEST_TTbar_Madgraph       	TTJets_DiLept TTJets_SingleLeptFromTbar_ext1
 #TTbar_Madgraph_Inc    TTJets_
 #TTbar_FromData  SingleMu__Run2012A-recover-06Aug2012-v1 SingleMu__Run2012A-13Jul2012-v1 SingleMu__Run2012B-13Jul2012-v1 SingleMu__Run2012C-24Aug2012-v1 SingleMu__Run2012C-PromptReco-v2 SingleMu__Run2012D-PromptReco-v1
