@@ -113,6 +113,11 @@ def process_input_dir(inputDir, match, filelist):
         m2 = re.search('_\d+_\d+.root', filename)
         if( m1 ):
             dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
+            # special handling of amcAtNLO, MG, etc.
+            if 'amcatnloFXFX' in path:
+              dataset+='_amcatnloFXFX'
+            elif 'madgraphMLM' in path:
+              dataset+='_madgraphMLM'
             job = filename[m1.start():].lstrip('_').replace('.root','').split('_')
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
@@ -131,6 +136,11 @@ def process_input_dir(inputDir, match, filelist):
         elif( m2 ):
             dataset = re.split('_\d+_\d+.root', filename)[0]
             job = filename[m2.start():].lstrip('_').replace('.root','').split('_')
+            # special handling of amcAtNLO, MG, etc.
+            if 'amcatnloFXFX' in path:
+              dataset+='_amcatnloFXFX'
+            elif 'madgraphMLM' in path:
+              dataset+='_madgraphMLM'
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 filelist[dataset][path] = {}
@@ -147,6 +157,11 @@ def process_input_dir(inputDir, match, filelist):
         else:
             dataset = re.split('_\d+.root', filename)[0]
             job = filename[re.search('_\d+.root', filename).start():].lstrip('_').replace('.root','').split('_')
+            # special handling of amcAtNLO, MG, etc.
+            if 'amcatnloFXFX' in path:
+              dataset+='_amcatnloFXFX'
+            elif 'madgraphMLM' in path:
+              dataset+='_madgraphMLM'
             if dataset not in filelist.keys():
                 filelist[dataset] = {}
                 filelist[dataset][path] = {}
