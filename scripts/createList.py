@@ -26,6 +26,12 @@ def unique(keys):
     return unique
 
 
+def sortByNumber(x):
+  r = re.compile('(\d+)')
+  l = r.split(x)
+  return [int(y) if y.isdigit() else y for y in l]
+
+
 # NB: now use eos find to find the files in subdirectories, and (therefore) returns full paths
 def make_filenamelist_eos(inputDir):
     #path = inputDir
@@ -91,7 +97,9 @@ def process_input_dir(inputDir, match, filelist):
 
     if( re.search("^/castor/cern.ch/", inputDir) ):
         prefix = 'rfio:'
-        filenamelist = make_filenamelist_castor(inputDir)
+        #filenamelist = make_filenamelist_castor(inputDir)
+        print 'ERROR: unsupported access protocol'
+        exit(-1)
     elif( re.search("^/eos/cms/", inputDir) ):
         prefix = "root://eoscms/"
         filenamelist = make_filenamelist_eos(inputDir)
@@ -99,80 +107,42 @@ def process_input_dir(inputDir, match, filelist):
         prefix = "root://eoscms/"
         filenamelist = make_filenamelist_eos(inputDir)
     else:
-        filenamelist = make_filenamelist_default(inputDir)
+        #filenamelist = make_filenamelist_default(inputDir)
+        print 'ERROR: unsupported access protocol'
+        exit(-1)
 
     for fullfilepath in filenamelist:
         path = prefix+os.path.split(fullfilepath)[0]+'/'
         filename = os.path.split(fullfilepath)[1]
+        if 'LQToCMu' in path or 'MuEnriched' in path:
+            continue
         #print re.search('.root$',filename)
         if re.search('.root$', filename) is None:
             continue
         if ( match!=None and not re.search(match, filename) ):
             continue
-        m1 = re.search('_\d+_\d+_\w+.root', filename)
-        m2 = re.search('_\d+_\d+.root', filename)
-        if( m1 ):
-            dataset = re.split('_\d+_\d+_\w+.root', filename)[0]
-            # special handling of amcAtNLO, MG, etc.
-            if 'amcatnloFXFX' in path:
-              dataset+='_amcatnloFXFX'
-            elif 'madgraphMLM' in path:
-              dataset+='_madgraphMLM'
-            job = filename[m1.start():].lstrip('_').replace('.root','').split('_')
-            if dataset not in filelist.keys():
-                filelist[dataset] = {}
-                filelist[dataset][path] = {}
-                filelist[dataset][path][int(job[0])] = [[int(job[1])],[job[2]]]
-            else:
-                if path not in filelist[dataset].keys():
-                    filelist[dataset][path] = {}
-                    filelist[dataset][path][int(job[0])] = [[int(job[1])],[job[2]]]
-                else:
-                    if int(job[0]) not in filelist[dataset][path].keys():
-                        filelist[dataset][path][int(job[0])] = [[int(job[1])],[job[2]]]
-                    else:
-                        filelist[dataset][path][int(job[0])][0].append(int(job[1]))
-                        filelist[dataset][path][int(job[0])][1].append(job[2])
-        elif( m2 ):
-            dataset = re.split('_\d+_\d+.root', filename)[0]
-            job = filename[m2.start():].lstrip('_').replace('.root','').split('_')
-            # special handling of amcAtNLO, MG, etc.
-            if 'amcatnloFXFX' in path:
-              dataset+='_amcatnloFXFX'
-            elif 'madgraphMLM' in path:
-              dataset+='_madgraphMLM'
-            if dataset not in filelist.keys():
-                filelist[dataset] = {}
-                filelist[dataset][path] = {}
-                filelist[dataset][path][int(job[0])] = [[int(job[1])],[]]
-            else:
-                if path not in filelist[dataset].keys():
-                    filelist[dataset][path] = {}
-                    filelist[dataset][path][int(job[0])] = [[int(job[1])],[]]
-                else:
-                    if int(job[0]) not in filelist[dataset][path].keys():
-                        filelist[dataset][path][int(job[0])] = [[int(job[1])],[]]
-                    else:
-                        filelist[dataset][path][int(job[0])][0].append(int(job[1]))
+
+        dataset = ''
+        if '_reduced_skim' in filename:
+            dataset = filename[0:filename.find('_reduced_skim')+len('_reduced_skim')]
         else:
-            dataset = re.split('_\d+.root', filename)[0]
-            job = filename[re.search('_\d+.root', filename).start():].lstrip('_').replace('.root','').split('_')
-            # special handling of amcAtNLO, MG, etc.
-            if 'amcatnloFXFX' in path:
-              dataset+='_amcatnloFXFX'
-            elif 'madgraphMLM' in path:
-              dataset+='_madgraphMLM'
-            if dataset not in filelist.keys():
-                filelist[dataset] = {}
-                filelist[dataset][path] = {}
-                filelist[dataset][path][int(job[0])] = [[],[]]
-            else:
-                if path not in filelist[dataset].keys():
-                    filelist[dataset][path] = {}
-                    filelist[dataset][path][int(job[0])] = [[],[]]
-                else:
-                    if int(job[0]) not in filelist[dataset][path].keys():
-                        filelist[dataset][path][int(job[0])] = [[],[]]
+            # try to find [number(s)].root
+            m = re.search('_\d+.root', filename)
+            dataset = filename[0:m.start()]
+        # handle root files with same name, but actually different datasets
+        # get the dataset info from the full path
+        if 'amcatnloFXFX' in path and not 'amcatnloFXFX' in filename:
+          dataset+='_amcatnloFXFX'
+        elif 'madgraphMLM' in path and not 'madgraphMLM' in filename:
+          dataset+='_madgraphMLM'
+        elif 'pythia8' in path and not 'pythia8' in filename:
+          dataset+='_pythia8'
+
+        if dataset not in filelist.keys():
+            filelist[dataset] = []
+            filelist[dataset].append(prefix+fullfilepath)
+        else:
+            filelist[dataset].append(prefix+fullfilepath)
 
     return
 
@@ -188,22 +158,15 @@ def write_inputlists(filelist, outputDir):
     os.system('mkdir -p '+outputDir)
     mainInputList = open(outputDir+'inputListAllCurrent.txt','w')
 
-    keys.sort()
-    for dataset in keys:
+    for dataset,files in filelist.iteritems():
         inputListName = outputDir+dataset+'.txt'
         mainInputList.write(inputListName+'\n')
         inputList = open(inputListName,'w')
-        for path in filelist[dataset].keys():
-            for job in filelist[dataset][path].keys():
-                if( len(filelist[dataset][path][job][0])>0 ):
-                    if( len(filelist[dataset][path][job][1])>0 ):
-                        filename = (path+dataset+'_%i_%i_%s.root')%(job,max(filelist[dataset][path][job][0]),filelist[dataset][path][job][1][filelist[dataset][path][job][0].index(max(filelist[dataset][path][job][0]))])
-                    else:
-                        filename = (path+dataset+'_%i_%i.root')%(job,max(filelist[dataset][path][job][0]))
-                else:
-                    filename = (path+dataset+'_%i.root')%(job)
-                inputList.write(filename+'\n')
+        filesSorted = sorted(files,key=sortByNumber)
+        for path in filesSorted:
+             inputList.write(path+'\n')
         inputList.close()
+
     mainInputList.close()
 
     return
@@ -214,7 +177,7 @@ def main():
         usage='Usage: %prog [-m MATCH] -i INPUTDIR(S) -o OUTPUTDIR',
         description='Example: createList.py -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config'
     )
-    parser.add_option( '-m', '--match', metavar='MATCH', action='store', help='Only files containing the MATCH string in their names will be considered' )
+    parser.add_option( '-m', '--match', metavar='MATCH', action='store', help='Only files containing the MATCH string in their names will be considered',default='' )
     parser.add_option( '-i', '--inputDirs', metavar='INPUTDIR(S)', action="callback", callback=cb, dest="inputDirs", help='Specifies the input directory (or directories separated by space) containing .root files. Please use the full path. Castor directories are also supported' )
     parser.add_option( '-o', '--outputDir', metavar='OUTPUTDIR', action='store', help='Specifies the output directory where the .txt list files will be stored. Please use the full path' )
 
