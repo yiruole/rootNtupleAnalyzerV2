@@ -20,6 +20,7 @@ from CRABClient.ClientExceptions import CachefileNotFoundException
 from CRABClient.ClientExceptions import ConfigurationException
 from httplib import HTTPException
 
+eos = '/afs/cern.ch/project/eos/installation/pro/bin/eos.select'
 
 def getOptions():
     """
@@ -59,10 +60,28 @@ def getOptions():
     return options
 
 
+def MoveFiles(outputFilesNotMoved,taskName):
+  global eos
+  for fn in outputFilesNotMoved:
+    #print '\t',fn
+    cmd = eos+' cp /eos/cms'+fn+' '+taskName+'/'
+    ret = subprocess.call(cmd.split())
+    #print cmd
+    if ret != 0:
+      continue
+    cmd = eos+' rm /eos/cms'+fn
+    subprocess.call(cmd.split())
+    #print cmd
+    if ret == 0:
+      outputFilesNotMoved.remove(fn)
+  return outputFilesNotMoved
+
+
 def main():
     """
     Main
     """
+    global eos
     options = getOptions()
 
     completedTasksFromCache = []
@@ -101,17 +120,22 @@ def main():
           tasksStatusDict[task] = 'noCacheFile'
           continue
 
+        if options.crabCmd != 'status':
+          continue
         if 'failed' in res['jobsPerStatus'].keys():
           tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
         else:
           tasksStatusDict[task] = res['status']
 
+    if options.crabCmd != 'status':
+      exit(0)
     totalTasks = len(tasksStatusDict)
     tasksCompleted = [task for task in tasksStatusDict if tasksStatusDict[task]=='COMPLETED']
     tasksSubmitted = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITTED']
     tasksFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='FAILED']
     tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed]
 
+    ourCacheFile = open(os.path.abspath('./multicrab.cache'),'a')
     exceptionTasks = []
     # move files for completed tasks
     if options.moveFiles and options.projDir is not None:
@@ -147,22 +171,19 @@ def main():
         #print 'outputFilesNotMoved[0]:',outputFilesNotMoved[0]
         #print 'os.path.isfile('+taskName+'/'+outputFilesNotMoved[0].split('/')[-1]+')',os.path.isfile(taskName+'/'+outputFilesNotMoved[0].split('/')[-1])
         #exit(-1)
-        eos = '/afs/cern.ch/project/eos/installation/pro/bin/eos.select'
         print 'completed task:',taskName
         print '      moving',len(outputFilesNotMoved),'files to',taskName
         #print outputFilesNotMoved
         #exit(-1)
-        for fn in outputFilesNotMoved:
-          #print '\t',fn
-          cmd = eos+' cp /eos/cms'+fn+' '+taskName+'/'
-          ret = subprocess.call(cmd.split())
-          #print cmd
-          if ret != 0:
-            continue
-          cmd = eos+' rm /eos/cms'+fn
-          subprocess.call(cmd.split())
-          #print cmd
-        print '      Done moving files'
+        while len(outputFilesNotMoved) >= 1:
+          outputFilesNotMoved = MoveFiles(outputFilesNotMoved,taskName)
+          print 'taskName:',taskName,'still has',len(outputFilesNotMoved),'output files to move; try again'
+        print '      Successfully moved all files; write to cache.'
+        # check again, shouldn't be necessary
+        # if we moved the files, call it OK even if purge fails later
+        if not taskName in completedTasksFromCache:
+          ourCacheFile.write(taskName+'\n')
+    ourCacheFile.close()
 
     if len(exceptionTasks) > 0:
       print 'The following tasks had exceptions on crab getoutput:'
@@ -174,6 +195,7 @@ def main():
     tasksCompleted = [task for task in tasksCompleted if not task in exceptionTasks]
 
 
+
     # crab purge
     purgeExceptionTasks = []
     # TODO add option to not purge
@@ -182,7 +204,8 @@ def main():
         res = crabCommand('purge',taskName)
       except HTTPException, hte:
         print '-----> there was a problem running crab purge %s see below.'%taskName
-        print hte.headers
+        if hte.headers:
+          print hte.headers
         purgeExceptionTasks.append(taskName)
         continue
       except ConfigurationException:
@@ -199,23 +222,11 @@ def main():
 
     # copy files even if purge failed
 
-    # write cache for completed tasks
-    if not options.ignoreMulticrabCache:
-      ourCacheFile = open(os.path.abspath('./multicrab.cache'),'a')
-      for taskName in tasksCompleted:
-        if taskName in purgeExceptionTasks:
-          continue
-        if not taskName in completedTasksFromCache:
-          ourCacheFile.write(taskName+'\n')
-      ourCacheFile.close()
-
     # summary and resubmit commands
     totalTasks+=len(completedTasksFromCache)
     print
     print
     print 'SUMMARY'
-    if len(tasksCompleted) > 0 or len(completedTasksFromCache) > 0:
-      print 'Tasks completed:',len(tasksCompleted)+len(completedTasksFromCache),'/',totalTasks
     if len(tasksSubmitted) > 0:
       print 'Tasks submitted:',len(tasksSubmitted),'/',totalTasks
       print 'commands to get status:'
@@ -237,6 +248,8 @@ def main():
         print
         print 'commands to resubmit failed tasks (or tasks with failed jobs):'
         print '\tcrab resubmit',task
+    if len(tasksCompleted) > 0 or len(completedTasksFromCache) > 0:
+      print 'Tasks completed:',len(tasksCompleted)+len(completedTasksFromCache),'/',totalTasks
 
 if __name__ == '__main__':
     main()
