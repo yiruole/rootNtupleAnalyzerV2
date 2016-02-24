@@ -13,17 +13,24 @@ except ImportError:
   print 'ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:'
   print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
   exit(-1)
+try:
+  from CRABAPI.RawCommand import crabCommand
+except ImportError:
+  print
+  print 'ERROR: Could not load CRABAPI.RawCommand.  Please source the crab3 setup:'
+  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  exit(-1)
 
-from CRABAPI.RawCommand import crabCommand
 from httplib import HTTPException
 
 
 def crabSubmit(config,dryRun=False):
     try:
       if dryRun:
-        print 'doing crab3 dryrun'
+        print 'crabSubmit(): doing crab3 dryrun'
         crabCommand('submit','dryrun',config = config)
       else:
+        print "crabSubmit(): calling crabCommand('submit',config=config)"
         crabCommand('submit',config = config)
     except HTTPException, hte:
       print '-----> there was a problem. see below.'
@@ -247,6 +254,14 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
+# for using event lists
+config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
+config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
+config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
+config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
+config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
+config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
+# end of event lists
 # collect the output (root plots, dat, and skim)
 config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat',outputFilePref+'_reduced_skim.root']
 
@@ -325,7 +340,7 @@ config.JobType.inputFiles += ['scripts/FrameworkJobReport.xml']
 #exit(-1)
 
 #print 'using outLFNDirBase=',config.Data.outLFNDirBase
-print 'submit!'
+#print 'submit!'
 
 crabSubmit(config,options.dryRun)
 
