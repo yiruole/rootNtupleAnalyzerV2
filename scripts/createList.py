@@ -137,6 +137,10 @@ def process_input_dir(inputDir, match, filelist):
           dataset+='_madgraphMLM'
         elif 'pythia8' in path and not 'pythia8' in filename:
           dataset+='_pythia8'
+        # for data, add secondary dataset name
+        elif 'Run2015' in path and not 'Run2015' in filename:
+          dataset+='__'
+          dataset+=path[path.find('Run2015'):path.find('/',path.find('Run2015'))]
 
         if dataset not in filelist.keys():
             filelist[dataset] = []
@@ -158,7 +162,8 @@ def write_inputlists(filelist, outputDir):
     os.system('mkdir -p '+outputDir)
     mainInputList = open(outputDir+'inputListAllCurrent.txt','w')
 
-    for dataset,files in filelist.iteritems():
+    for dataset in sorted(filelist.iterkeys()):
+        files = filelist[dataset]
         inputListName = outputDir+dataset+'.txt'
         mainInputList.write(inputListName+'\n')
         inputList = open(inputListName,'w')
