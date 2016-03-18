@@ -90,10 +90,12 @@ def make_filenamelist_default(inputDir):
     return filenamelist
 
 
-def process_input_dir(inputDir, match, filelist):
+def process_input_dir(inputDir, match, filelist, addDataDrivenQCD):
     inputDir = inputDir.rstrip('/')+'/'
     prefix = ''
     filenamelist = []
+    if addDataDrivenQCD:
+      print 'Adding data-driven QCD "fake" datasets from data (disable with --noqcd)'
 
     if( re.search("^/castor/cern.ch/", inputDir) ):
         prefix = 'rfio:'
@@ -122,7 +124,9 @@ def process_input_dir(inputDir, match, filelist):
         if ( match!=None and not re.search(match, filename) ):
             continue
 
+        isData = False
         dataset = ''
+        datasetDDqcd = '' # for data-driven QCD
         if '_reduced_skim' in filename:
             dataset = filename[0:filename.find('_reduced_skim')+len('_reduced_skim')]
         else:
@@ -138,15 +142,31 @@ def process_input_dir(inputDir, match, filelist):
         elif 'pythia8' in path and not 'pythia8' in filename:
           dataset+='_pythia8'
         # for data, add secondary dataset name
-        elif 'Run2015' in path and not 'Run2015' in filename:
+        elif 'Run201' in path and not 'Run201' in filename:
+          isData=True
+          datasetDDqcd=dataset
           dataset+='__'
           dataset+=path[path.find('Run2015'):path.find('/',path.find('Run2015'))]
+          datasetDDqcd+='_forDataDrivenQCD'
+        # for QCD
+        elif 'Run201' in filename:
+          isData=True
+          datasetDDqcd=dataset
+          datasetDDqcd+='_forDataDrivenQCD'
 
         if dataset not in filelist.keys():
             filelist[dataset] = []
             filelist[dataset].append(prefix+fullfilepath)
         else:
             filelist[dataset].append(prefix+fullfilepath)
+        if isData and addDataDrivenQCD:
+          #print 'dataset:',dataset
+          #print 'datasetDDqcd:',datasetDDqcd
+          if datasetDDqcd not in filelist.keys():
+              filelist[datasetDDqcd] = []
+              filelist[datasetDDqcd].append(prefix+fullfilepath)
+          else:
+              filelist[datasetDDqcd].append(prefix+fullfilepath)
 
     return
 
@@ -185,6 +205,7 @@ def main():
     parser.add_option( '-m', '--match', metavar='MATCH', action='store', help='Only files containing the MATCH string in their names will be considered',default='' )
     parser.add_option( '-i', '--inputDirs', metavar='INPUTDIR(S)', action="callback", callback=cb, dest="inputDirs", help='Specifies the input directory (or directories separated by space) containing .root files. Please use the full path. Castor directories are also supported' )
     parser.add_option( '-o', '--outputDir', metavar='OUTPUTDIR', action='store', help='Specifies the output directory where the .txt list files will be stored. Please use the full path' )
+    parser.add_option( '-q', '--noqcd', metavar='QCD', action='store_false', dest='qcd', help='Whether to insert "fake" datasets for data to be used for data-driven QCD calculation',default=True)
 
     (options, args) = parser.parse_args(args=None)
 
@@ -198,7 +219,7 @@ def main():
     inputDirs = unique(options.inputDirs)
 
     for inputDir in inputDirs:
-        process_input_dir(inputDir, options.match, filelist)
+        process_input_dir(inputDir, options.match, filelist, options.qcd)
 
     write_inputlists(filelist, options.outputDir)
 
