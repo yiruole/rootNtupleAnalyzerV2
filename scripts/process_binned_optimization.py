@@ -1,28 +1,29 @@
 import os, copy, math, sys, numpy
 from ROOT import *
 
-mc_filepath         = os.environ["LQDATA"] + "eejj_analysis/eejj_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_Optimization_plots.root"
-ttbar_data_filepath = os.environ["LQDATA"] + "eejj_analysis/eejj_qcd_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_QCD_Optimization_plots.root"
-qcd_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_TTBar_Optimization_plots.root"
-
-txt_file_path        = "/afs/cern.ch/user/e/eberry/scratch0/rootNtupleAnalyzer/CMSSW_4_2_3/src/rootNtupleAnalyzerV2/optimizationCuts.txt"
+mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_24jan2016_v1-4-3_optimization/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
+#ttbar_data_filepath = os.environ["LQDATA"] + "eejj_analysis/eejj_qcd_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_QCD_Optimization_plots.root"
+#qcd_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_TTBar_Optimization_plots.root"
+#
+txt_file_path        = "/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleAnalyzerV2/optimizationCuts.txt"
 
 jitter = 2
 
 d_background_filepaths = { 
     # "ttbar" : [ "DATA"        , ttbar_data_filepath, 0.49 ],
-    "ttbar" : [ "TTbar_Madgraph", mc_filepath      , 1.0  ],
-    "qcd"   : [ "DATA"        , qcd_data_filepath  , 1.0  ],
-    "wjet"  : [ "WJet_Sherpa" , mc_filepath        , 1.0  ],
-    "zjet"  : [ "ZJet_Sherpa" , mc_filepath        , 1.0  ],
-    "stop"  : [ "SingleTop"   , mc_filepath        , 1.0  ],
-    "vv"    : [ "DIBOSON"     , mc_filepath        , 1.0  ],
-    "gjet"  : [ "PhotonJets"  , mc_filepath        , 1.0  ] 
-
+    #"qcd"   : [ "DATA"        , qcd_data_filepath  , 1.0  ],
+    "ttbar" : [ "TTbar_Madgraph"      , mc_filepath  , 1.0  ],
+    "qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
+    "wjet"  : [ "WJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
+    "zjet"  : [ "ZJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
+    "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
+    "vv"    : [ "DIBOSON"             , mc_filepath  , 1.0  ],
+    "gjet"  : [ "PhotonJets_Madgraph" , mc_filepath  , 1.0  ] 
     }
 
 d_signal_filepaths_list = [ 
-    { "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
+    #{ "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
+    { "300" : ["LQ_M300", mc_filepath, 1.0 ] } ,
     { "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
     { "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
     { "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
@@ -30,8 +31,22 @@ d_signal_filepaths_list = [
     { "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
     { "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
     { "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
+    { "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
     { "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
-    { "850" : ["LQ_M850", mc_filepath, 1.0 ] }  
+    { "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
+    { "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
+    { "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
+    { "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
+    { "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
+    { "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
+    { "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
+    { "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
+    { "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
+    { "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
+    { "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
+    { "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
+    { "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
+    { "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
 ]
 
 d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath, 1.0 ] }
@@ -175,8 +190,11 @@ def parse_root_file( d_input ) :
         sample_file = TFile ( d_input[sample][1] ) 
         sample_scale = float ( d_input[sample][2] ) 
         hist_name = "histo1D__" + sample_name + "__Optimizer"
+        #hist_name = "histo1D__" + sample_name + "__optimizer"
         
         hist = sample_file.Get(hist_name)
+        print 'getting hist',hist_name,'from:',sample_file.GetName()
+        print 'entries:',hist.GetEntries()
         hist.Scale ( sample_scale ) 
 
         if not made_hist:
@@ -240,9 +258,12 @@ def bins_to_string ( cut_bins ) :
     return cut_string
     
 
-print "Parsing txt file..."
+####################################################################################################
+# Run!
+####################################################################################################
+print "Parsing txt file...",
 parse_txt_file ()
-print "...Parsed txt file"
+print "Parsed."
 
 d_binNumber_nB = parse_root_file( d_background_filepaths )
 d_binNumber_nD = parse_root_file( d_data_filepaths )

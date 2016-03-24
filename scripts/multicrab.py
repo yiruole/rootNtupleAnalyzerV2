@@ -119,6 +119,9 @@ def main():
           print 'task:',task,'has no .requestcache file; something wrong (or deleted dir?) continue'
           tasksStatusDict[task] = 'noCacheFile'
           continue
+        except ConfigurationException:
+          print 'Got a ConfigurationException; continue to next task anyway.'
+          continue
 
         if options.crabCmd != 'status':
           continue
@@ -204,8 +207,10 @@ def main():
         res = crabCommand('purge',taskName)
       except HTTPException, hte:
         print '-----> there was a problem running crab purge %s see below.'%taskName
-        if hte.headers:
+        try:
           print hte.headers
+        except AttributeError:
+          continue
         purgeExceptionTasks.append(taskName)
         continue
       except ConfigurationException:
