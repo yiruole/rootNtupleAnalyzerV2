@@ -10,8 +10,19 @@ import re
 import math
 
 from combineCommon import *
+## for profiling
+#from cProfile import Profile
+#from pstats import Stats
+#prof = Profile()
+#prof.disable()  # i.e. don't time imports
+#import time
+#prof.enable()  # profiling back on
+## for profiling
+
 
 #---Run
+# Turn off warning messages
+gROOT.ProcessLine("gErrorIgnoreLevel=2001;")
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
 usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
@@ -46,6 +57,10 @@ parser.add_option("-s", "--sampleListForMerging", dest="sampleListForMerging",
                   help="put in the file SAMPLELIST the name of the sample with the associated strings which should  match with the dataset name (full path required)",
                   metavar="SAMPLELIST")
 
+parser.add_option("-t", "--tablesOnly", action="store_true",dest="tablesOnly",default=False,
+                  help="only combine tables, do not do plots",
+                  metavar="TABLESONLY")
+
 (options, args) = parser.parse_args()
 
 if len(sys.argv)<14:
@@ -67,6 +82,10 @@ if(os.path.isfile(options.xsection) == False):
     print "exiting..."
     sys.exit()
 
+print 'Launched like:'
+for arg in sys.argv:
+  print '\t'+arg
+
 xsectionDict = ParseXSectionFile(options.xsection)
 #print 'Dataset      XSec'
 #for key,value in xsectionDict.iteritems():
@@ -82,19 +101,46 @@ dictFinalTables = {}
 #--- Declare histograms
 dictFinalHisto = {}
 
+# check to make sure we have xsections for all samples
+for lin in open( options.inputList ):
+    lin = string.strip(lin,"\n")
+    if lin.startswith('#'):
+      continue
+    dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
+    ### XXX FIXME special hacks for datasets
+    #if dataset_fromInputList.endswith('_reduced_skim'):
+    #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
+    ###XXX FIXME
+    ### special hack for handling repated madgraphMLM samples
+    ##if dataset_fromInputList.endswith('_madgraphMLM'):
+    ##  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_madgraphMLM')]
+    ###XXX FIXME
+    ### special hack for handling repated amcatnloFXFX samples
+    ##elif dataset_fromInputList.endswith('_amcatnloFXFX'):
+    ##  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_amcatnloFXFX')]
+    #if dataset_fromInputList.endswith('_pythia8'):
+    #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_pythia8')]
+    ##if '__' in dataset_fromInputList:
+    ##  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
+
+    #xsection_val = lookupXSection(dataset_fromInputList,xsectionDict)
+    xsection_val = lookupXSection(SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+
 #---Loop over datasets in the inputlist
 print
 for lin in open( options.inputList ):
 
     lin = string.strip(lin,"\n")
-    #print lin
+    #print 'lin=',lin
     if lin.startswith('#'):
       continue
     
     dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
     # strip off the slashes and the .txt at the end
     # so this will look like 'TTJets_DiLept_reduced_skim'
-    print dataset_fromInputList + " ... ",
+    print SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
+    #print SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
+    sys.stdout.flush()
 
     inputRootFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".root"
     inputDataFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
@@ -111,7 +157,9 @@ for lin in open( options.inputList ):
         sys.exit()
 
     #---Find xsection correspondent to the current dataset
-    xsection_val = lookupXSection(dataset_fromInputList,xsectionDict)
+    #dataset_fromInputList = SanitizeDatasetNameFromInputList(dataset_fromInputList)
+    xsection_val = lookupXSection(SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+    #xsection_val = lookupXSection(dataset_fromInputList,xsectionDict)
     #this is the current cross section
     #print dataset_fromInputList,xsection_val
 
@@ -151,6 +199,7 @@ for lin in open( options.inputList ):
     #---Calculate weight
     #Ntot = int(data[0]['N'])
     Ntot = float(data[0]['N'])
+    #XXX FIXME for amc@NLO need to multiple by sum of weights
     if( xsection_val == "-1" ):
         weight = 1.0
         plotWeight = 1.0
@@ -161,6 +210,14 @@ for lin in open( options.inputList ):
             weight = float(0)
         else:
             weight = xsection_X_intLumi / Ntot 
+        #XXX HACKs for AMC@NLO
+        if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
+          if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
+            weight*=1.49
+          elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
+            weight*=1.46
+          elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
+            weight*=3.02
         plotWeight = weight/1000.0
     print "xsection: " + xsection_val,
     print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
@@ -220,11 +277,12 @@ for lin in open( options.inputList ):
 
             #print newtable
 
-
-    #---Combine histograms using PYROOT
-    file = TFile(inputRootFile)
-    nHistos = int( file.GetListOfKeys().GetEntries() )
-    #print "nHistos: " , nHistos, "\n"
+    if not options.tablesOnly:
+      #---Combine histograms using PYROOT
+      file = TFile(inputRootFile)
+      nHistos = int( file.GetListOfKeys().GetEntries() )
+      #print "nHistos: " , nHistos, "\n"
+      #print 'list of keys in this rootfile:',file.GetListOfKeys()
 
 
     #---Combine tables and plots from different datasets
@@ -240,7 +298,8 @@ for lin in open( options.inputList ):
             dictFinalHisto[sample] = {}
 
         toBeUpdated = False
-        matchingPiece = dataset_fromInputList
+        #matchingPiece = dataset_fromInputList
+        matchingPiece = SanitizeDatasetNameFromInputList(dataset_fromInputList)
         if matchingPiece in pieceList:
             toBeUpdated = True
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
@@ -253,32 +312,35 @@ for lin in open( options.inputList ):
             UpdateTable(newtable,dictFinalTables[sample])
             dictSamplesPiecesAdded[sample].append(matchingPiece)
 
-        # loop over histograms in rootfile
-        for h in range(0, nHistos):
-            histoName = file.GetListOfKeys()[h].GetName()
-            htemp = file.Get(histoName)
+        if not options.tablesOnly:
+          # loop over histograms in rootfile
+          for h in range(0, nHistos):
+              histoName = file.GetListOfKeys()[h].GetName()
+              htemp = file.Get(histoName)
 
-            #
-            #temporary
-            #
-            if "TDir" in htemp.__repr__():
-                htemp = file.Get(histoName + "/optimizer")
+              #
+              #temporary
+              #
+              if "TDir" in htemp.__repr__():
+                  print 'Getting optimizer hist!'
+                  htemp = file.Get(histoName + "/optimizer")
+                  print 'entries:',htemp.GetEntries()
 
-            #thanks Riccardo
-            # init histo if needed
-            if not h in dictFinalHisto[sample]:
-                if "TH2" in htemp.__repr__():
-                    dictFinalHisto[sample][h] = TH2F()
-                    dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )
-                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
-                    #continue
+              #thanks Riccardo
+              # init histo if needed
+              if not h in dictFinalHisto[sample]:
+                  if "TH2" in htemp.__repr__():
+                      dictFinalHisto[sample][h] = TH2F()
+                      dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )
+                      dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
+                      #continue
 
-                else:
-                    dictFinalHisto[sample][h] = TH1F()
-                    dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
-                    dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
-            if toBeUpdated:
-                dictFinalHisto[sample][h].Add(htemp, plotWeight)
+                  else:
+                      dictFinalHisto[sample][h] = TH1F()
+                      dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
+                      dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
+              if toBeUpdated:
+                  dictFinalHisto[sample][h].Add(htemp, plotWeight)
 
     #---End of the loop over datasets---#
 
@@ -289,10 +351,12 @@ for sample,pieceList in dictSamples.iteritems():
     print
     #print 'ERROR: for sample',sample,'the pieces added were:'
     #print sorted(piecesAdded)
-    #print '\twhile the pieces indicated as part of the sample were:'
-    #print sorted(pieceList)
     print 'ERROR: for sample',sample+', the following pieces requested in sampleListForMerging were not added:'
     print list(set(piecesAdded).symmetric_difference(set(pieceList)))
+    print '\twhile the pieces indicated as part of the sample were:'
+    print sorted(pieceList)
+    print '\tand the pieces added were:'
+    print sorted(piecesAdded)
     print '\tRefusing to proceed.'
     exit(-1)
 
@@ -313,39 +377,46 @@ for S,sample in enumerate( dictSamples ):
 outputTableFile.close
 
 # write histos
-outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
+if not options.tablesOnly:
+  outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
+  
+  # get total hists
+  nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
+  maxSteps = 50
+  if nHistos < maxSteps:
+    steps = nHistos
+  else:
+    steps = maxSteps
+  
+  print 'Writing histos:'
+  progressString = '0% ['+' '*steps+'] 100%'
+  print progressString,
+  print '\b'*(len(progressString)-3),
+  sys.stdout.flush()
+  
+  nForProgress = 0
+  for sample in dictFinalHisto:
+      for n, histo in enumerate ( dictFinalHisto[sample] ):
+          if (nForProgress % (nHistos/steps))==0:
+              print '\b.',
+              sys.stdout.flush()
+          dictFinalHisto[sample][histo].Write()
+          nForProgress+=1
+  
+  print '\b] 100%'
+  
+  outputTfile.Close()
+  print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
 
-# get total hists
-nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-maxSteps = 50
-if nHistos < maxSteps:
-  steps = nHistos
-else:
-  steps = maxSteps
-
-print 'Writing histos:'
-progressString = '0% ['+' '*steps+'] 100%'
-print progressString,
-print '\b'*(len(progressString)-3),
-sys.stdout.flush()
-
-nForProgress = 0
-for sample in dictFinalHisto:
-    for n, histo in enumerate ( dictFinalHisto[sample] ):
-        if (nForProgress % (nHistos/steps))==0:
-            print '\b.',
-            sys.stdout.flush()
-        dictFinalHisto[sample][histo].Write()
-        nForProgress+=1
-
-print '\b] 100%'
-
-
-outputTfile.Close()
-
-print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
 print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat"
 
 #---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
+## for profiling
+#prof.disable()  # don't profile the generation of stats
+#prof.dump_stats('mystats.stats')
+#with open('mystats_output.txt', 'wt') as output:
+#  stats = Stats('mystats.stats', stream=output)
+#  stats.sort_stats('cumulative', 'time')
+#  stats.print_stats()
 

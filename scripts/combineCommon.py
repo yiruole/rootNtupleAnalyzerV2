@@ -6,6 +6,53 @@ import string
 import math
 
 
+def SanitizeDatasetNameFromInputList(dataset_fromInputList):
+  # "hack" for data-driven QCD samples: name is created by the createInputList script
+  # do this first, since it's at the very end of the filename
+  if dataset_fromInputList.endswith('_forDataDrivenQCD'):
+    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_forDataDrivenQCD')]
+  # XXX FIXME special hacks for datasets
+  if dataset_fromInputList.endswith('_reduced_skim'):
+    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
+  #XXX FIXME
+  ## special hack for handling repated madgraphMLM samples
+  #if dataset_fromInputList.endswith('_madgraphMLM'):
+  #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_madgraphMLM')]
+  ##XXX FIXME
+  ## special hack for handling repated amcatnloFXFX samples
+  #elif dataset_fromInputList.endswith('_amcatnloFXFX'):
+  #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_amcatnloFXFX')]
+  if dataset_fromInputList.endswith('_pythia8'):
+    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_pythia8')]
+  #if '__' in dataset_fromInputList:
+  #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
+  return dataset_fromInputList
+
+
+def SanitizeDatasetNameFromFullDataset(dataset):
+  #print 'SanitizeDatasetNameFromFullDataset: dataset looks like:'+dataset
+  # this logic is somewhat copied from the submission script for the ntuples:
+  #    https://github.com/CMSLQ/submitJobsWithCrabV2/blob/master/createAndSubmitJobsWithCrab3.py
+  if not 'Run2015' in dataset:
+    outputFileNames = []
+    outputFileNames.append(dataset[1:dataset.find('_Tune')])
+    outputFileNames.append(dataset[1:dataset.find('_13TeV')])
+    outputFileNames.append(dataset.split('/')[1])
+    # use the one with the shortest filename
+    outputFile = sorted(outputFileNames, key=len)[0]
+    if 'ext' in dataset:
+       extN = dataset[dataset.find('_ext')+4]
+       outputFile = outputFile+'_ext'+extN
+    if 'madgraphMLM' in dataset:
+      outputFile+='_madgraphMLM'
+    elif 'amcatnloFXFX' in dataset:
+      outputFile+='_amcatnloFXFX'
+  else:
+    outputFile = dataset[1:].replace('/','__')
+    outputFile = outputFile.split('__')[0]+'__'+outputFile.split('__')[1]
+  return outputFile
+
+
 def GetSamplesToCombineDict(sampleListForMerging):
   dictSamples = {}
   for l,line in enumerate( open( sampleListForMerging ) ):
@@ -17,9 +64,10 @@ def GetSamplesToCombineDict(sampleListForMerging):
     if len(line) <= 0:
       continue
 
-    #print line
+    #print 'line from samplesToCombineFile looks like:"'+line+'"'
     # line looks like: "ZJet_Madgraph_Inc    DYJetsToLL_M-5to50 DYJetsToLL_M-50"
-  
+    # or "LQ_M200   /LQToUE_M-200_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM"
+
     # the rule is that the name of each 'piece' here must match the inputList name and filename 
     for i,piece in enumerate(line.split()):
       #print "i=", i , "  piece= " , piece
@@ -29,6 +77,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
       elif piece in dictSamples:
         dictSamples[key].extend(dictSamples[piece])
       else:
+        piece = SanitizeDatasetNameFromFullDataset(piece)
         dictSamples[key].append(piece)
   return dictSamples
 
@@ -47,25 +96,14 @@ def ParseXSectionFile(xsectionFile):
       continue
 
     try:
-      (dataset , xsection_val) = string.split(line)
+      dataset, xsection_val = string.split(line)
     except ValueError:
       print 'ERROR: could not split line "',line,'"'
       exit(-1)
-    #print dataset + " " + xsection_val
 
-    #dataset_mod_1 = dataset[1:].replace('/','__')
-    # this logic is copied from the submission script for the ntuples:
-    #    https://github.com/CMSLQ/submitJobsWithCrabV2/blob/master/createAndSubmitJobsWithCrab3.py
-    outputFileNames = []
-    outputFileNames.append(dataset[1:dataset.find('_Tune')])
-    outputFileNames.append(dataset[1:dataset.find('_13TeV')])
-    outputFileNames.append(dataset.split('/')[1])
-    # use the one with the shortest filename
-    outputFile = sorted(outputFileNames, key=len)[0]
-    if 'ext' in dataset:
-       extN = dataset[dataset.find('_ext')+4]
-       outputFile = outputFile+'_ext'+extN
+    outputFile = SanitizeDatasetNameFromFullDataset(dataset)
     xsectionDict[outputFile] = xsection_val
+    #print outputFile + " " + xsection_val
   
   return xsectionDict
 
@@ -75,16 +113,19 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
     print
     print 'ERROR: xsectionDict is empty. Cannot lookupXSection for',datasetNameFromInputList
     exit(-1)
-  if datasetNameFromInputList.endswith('_reduced_skim'):
-    datasetNameFromInputList = datasetNameFromInputList[0:datasetNameFromInputList.find('_reduced_skim')]
-  try:
-    return xsectionDict[datasetNameFromInputList]
-  except KeyError:
-    print
-    for key,val in xsectionDict.iteritems():
-      print 'sample=',key,'xsection=',val
-    print 'ERROR: xsectionDict does not have an entry for',datasetNameFromInputList
-    exit(-1)
+  for dataset in xsectionDict.keys():
+    if dataset.startswith(datasetNameFromInputList):
+      return xsectionDict[dataset]
+  print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList
+  exit(-1)
+  #try:
+  #  #return xsectionDict[datasetNameFromInputList]
+  #except KeyError:
+  #  print
+  #  #for key,val in xsectionDict.iteritems():
+  #  #  print 'sample=',key,'xsection=',val
+  #  print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList
+  #  exit(-1)
 
 
 #def lookupXSection(datasetFromAnalysis,xsectionFile):
@@ -165,6 +206,7 @@ def UpdateTable(inputTable, outputTable):
                                  }
     else:
         for j,line in enumerate( inputTable ):
+            #print 'outputTable[int(',j,')][N]=',outputTable[int(j)]['N'],'inputTable[',j,']','[N]=',inputTable[j]['N']
             outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
                                  'min1': inputTable[j]['min1'],
                                  'max1': inputTable[j]['max1'],
