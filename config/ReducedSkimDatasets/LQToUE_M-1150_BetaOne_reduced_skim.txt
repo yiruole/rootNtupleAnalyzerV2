@@ -1,2 +1,0 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-3_SingleEleLoose_AK4CHS_inputListAllCurrent/LQToUE_M-1150_BetaOne/LQSkim/151215_135702/0000/LQToUE_M-1150_BetaOne_reduced_skim_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-4-3_SingleEleLoose_AK4CHS_inputListAllCurrent/LQToUE_M-1150_BetaOne/LQSkim/151215_135702/0000/LQToUE_M-1150_BetaOne_reduced_skim_2.root

@@ -1,2 +1,0 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-3/LQToUE_M-1700_BetaOne_TuneCUETP8M1_13TeV-pythia8/LQ/151208_161243/0000/LQToUE_M-1700_BetaOne_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/RunII/dmorse/v1-4-3/LQToUE_M-1700_BetaOne_TuneCUETP8M1_13TeV-pythia8/LQ/151208_161243/0000/LQToUE_M-1700_BetaOne_2.root
