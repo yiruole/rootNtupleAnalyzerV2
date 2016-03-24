@@ -3,13 +3,14 @@ FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 FLAGS += -DSAVE_ALL_HISTOGRAMS 
 FLAGS += -std=c++11
-# FLAGS += -DCREATE_OPT_CUT_FILE
+FLAGS += -DCREATE_OPT_CUT_FILE
+FLAGS += -g
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
 INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
-LIBS= -L.  ${ROOTLIBS}
+LIBS= -L.  ${ROOTLIBS} -L/usr/lib64 -lboost_iostreams
 SRC= ./src
-SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
+SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o $(SRC)/QCDFakeRate.o
 EXE = main
 
 # ********** TEMPLATE *************
