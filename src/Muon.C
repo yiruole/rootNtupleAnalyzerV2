@@ -19,6 +19,8 @@ double & Muon::Eta                     (){ return m_collection -> GetData() -> M
 double & Muon::Phi                     (){ return m_collection -> GetData() -> MuonPhi                        -> at ( m_raw_index ); } 
 double   Muon::Charge                  (){ return m_collection -> GetData() -> MuonCharge                     -> at ( m_raw_index ); } 
 						   				   
+double & Muon::CocktailPt              (){ return m_collection -> GetData() -> MuonCocktailPt                 -> at ( m_raw_index ); } 
+double & Muon::CocktailPtError         (){ return m_collection -> GetData() -> MuonCocktailPtError            -> at ( m_raw_index ); } 
 // Isolation variables				   				   
 						   				   
 double Muon::TrkIso                    (){ return m_collection -> GetData() -> MuonTrkIso                     -> at ( m_raw_index ); } 

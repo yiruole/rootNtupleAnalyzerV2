@@ -135,8 +135,9 @@ bool   Electron::IsEEFiducial     (){ return bool (( fabs(SCEta()) > 1.560 ) &&
 // Energy resolution scale factors
 
 double Electron::EnergyResScaleFactor (){ 
-  if      ( IsEBFiducial() ) return 1.004;
-  else if ( IsEEFiducial() ) return 1.041;
+  // SIC: changed May 12, 2015 to 10% as per LQ1 2012 CWR comment; see EGM-13-001 and email thread
+  if      ( IsEBFiducial() ) return 1.1;
+  else if ( IsEEFiducial() ) return 1.1;
   else                       return 1.000;
 }
 
@@ -145,8 +146,9 @@ double Electron::EnergyResScaleError  (){
 }
 
 double Electron::EnergyScaleFactor (){ 
-  if      ( IsEBFiducial() ) return 0.006;
-  else if ( IsEEFiducial() ) return 0.015;
+  // SIC: changed May 12, 2015 to 2% as per LQ1 2012 CWR comment; see EGM-13-001 and email thread
+  if      ( IsEBFiducial() ) return 0.02;
+  else if ( IsEEFiducial() ) return 0.02;
   else                       return 0.000;
 }
 

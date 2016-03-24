@@ -24,7 +24,9 @@ bool GenParticle::PassUserID (ID id, bool verbose){
 }
 
 bool GenParticle::PassUserID_GenEleHardScatter(bool verbose){ 
-  if ( Status()      != 3   ) return false;  
+  // pythia 8: outgoing hard electron status is 23 (still intermediate)
+  // technically, this is not the really final status=1 particle
+  if ( !(Status() == 3 || Status() == 23) ) return false;  
   if ( abs(PdgId())  != 11  ) return false;
   return true;
 }

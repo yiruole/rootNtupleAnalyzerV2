@@ -14,39 +14,39 @@ bool Muon::PassUserID (ID id, bool verbose){
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
 bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
 
-  double trkRelIsoR03 = (TrkIsoR03SumPt) / Pt();
-  
-  bool pass_isGlobal      = bool ( IsGlobal()                   == 1   );
-  bool pass_muonHits      = bool ( GlobalTrkValidHits()          > 0   );
-  bool pass_stations      = bool ( StationMatches()              > 1   );
-  // PtErr ?
-  //The pT relative error of the muon best track is less than 30%
-  // recoMu.muonBestTrack()->ptError()/recoMu.muonBestTrack()->pt() < 0.3
-  // - we can use either the inner track or the global track pt error for the moment
-  // use global for now
-  bool pass_ptErr         = bool ( PtError()/Pt()                < 0.3 );
-  bool pass_dxy           = bool ( fabs(BestTrackVtxDistXY())    < 0.2 );
+  // Checked against Dave's definition: Jan. 30 2016
+
+  // All non-global muons have cocktail Pt of -1 in the ntuples
+  bool pass_isGlobalAndPt = bool ( CocktailPt()                    > 35 );
+  bool pass_eta           = bool ( fabs(Eta())                     < 2.1);
+  bool pass_muonHits      = bool ( GlobalTrkValidHits()            >= 1   );
+  bool pass_stations      = bool ( StationMatches()                > 1   );
+  bool pass_dxy           = bool ( fabs(BestTrackVtxDistXY())      < 0.2 );
   // [1] The most accurate way of computing this value is by using IPTools (example).
   // The dB() method of the pat::Muon uses the version in IPTools, so there are tiny differences
   //   between the values returned by dxy(vertex->position()) and dB(). 
-  bool pass_dz            = bool ( fabs(BestTrackVtxDistZ ())    < 0.5 );
-  bool pass_pixelHits     = bool ( TrkPixelHits()                > 0   );
-  bool pass_trkLayers     = bool ( TrackLayersWithMeasurement()  > 5   );
+  bool pass_dz            = bool ( fabs(BestTrackVtxDistZ ())      < 0.5 );
+  bool pass_pixelHits     = bool ( TrkPixelHits()                  > 0   );
+  bool pass_trkLayers     = bool ( TrackLayersWithMeasurement()    > 5   );
+  bool pass_ptErr         = bool ( CocktailPtError()/CocktailPt()  < 0.3 );
+
+  double trkRelIsoR03 = (TrkIsoR03SumPt()) / CocktailPt();
   // tight
   bool pass_trkRelIsoR03_tight = bool ( trkRelIsoR03             < 0.05);
   // loose
   bool pass_trkRelIsoR03_loose = bool ( trkRelIsoR03             < 0.10);
   
   bool decision = (
-      pass_isGlobal  && 
+      pass_isGlobalAndPt  && 
+      pass_eta       &&
       pass_muonHits  && 
       pass_stations  && 
-      pass_ptErr     &&
       pass_dxy       && 
       pass_dz        && 
       pass_pixelHits && 
       pass_trkLayers && 
-      pass_trkRelIsoR03_tight
+      pass_ptErr     &&
+      pass_trkRelIsoR03_loose
       );
   
   return decision;

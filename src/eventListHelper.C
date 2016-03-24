@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 
 EventListHelper::EventListHelper(){}
 EventListHelper::~EventListHelper(){}
@@ -31,11 +33,14 @@ bool EventListHelper::eventInList(int run, int lumi, int event ){
   key.lumi  = lumi;
   key.event = event;
   
-  std::map<EventKey, bool>::iterator it     = m_map.find ( key );
-  std::map<EventKey, bool>::iterator it_end = m_map.end();
+  //std::map<EventKey, bool>::iterator it     = m_map.find ( key );
+  //std::map<EventKey, bool>::iterator it_end = m_map.end();
 
-  if ( it == it_end ) return false;
-  else return it->second;
+
+  //if ( it == it_end ) return false;
+  //else return it->second;
+  if(m_set.count(key)>0) return true;
+  else return false;
   
 }
 
@@ -44,39 +49,72 @@ void EventListHelper::addEventToList ( int run, int lumi, int event  ){
   key.run   = run;
   key.lumi  = lumi;
   key.event = event;
-  m_map[key] = true;
+  //m_map[key] = true;
+  m_set.insert(key);
 }
 
 void EventListHelper::addFileToList  ( const char * file_name ) { 
   
   std::string line;
-  std::ifstream myfile (file_name);
-  if (myfile.is_open()) {
-    
-    while ( myfile.good() ) { 
-      getline (myfile,line);
-      std::vector<std::string> fields = split ( line, std::string(":") );
-      if ( fields.size() != 3 ) continue;
-      addEventToList ( atoi ( fields[0].c_str() ),
-		       atoi ( fields[1].c_str() ),
-		       atoi ( fields[2].c_str() ) );
-      
+  if(std::string(file_name).find(".gz") != std::string::npos) {
+    std::cout << "INFO: Adding gzipped file " << file_name << " to event list...";
+    std::ifstream myfile(file_name, std::ios_base::in | std::ios_base::binary);
+    try {
+      boost::iostreams::filtering_istream in;
+      in.push(boost::iostreams::gzip_decompressor());
+      in.push(myfile);
+      for(std::string str; std::getline(in, str); )
+      {
+        std::vector<std::string> fields = split ( str, std::string(":") );
+        if ( fields.size() != 3 ) continue;
+        addEventToList ( atoi ( fields[0].c_str() ),
+            atoi ( fields[1].c_str() ),
+            atoi ( fields[2].c_str() ) );
+      }
     }
-    myfile.close();
+    catch(const boost::iostreams::gzip_error& e) {
+      std::cout << "ERROR: problem with event list file " << file_name << " Cowardly exiting." << std::endl;
+      std::cout << e.what() << '\n';
+      exit(-1);
+    }
   }
+  else {
+    std::cout << "INFO: Adding txt file " << file_name << " to event list...";
+    std::ifstream myfile (file_name);
+    if (myfile.is_open()) {
 
-  else std::cout << "ERROR: event list file " << file_name << " does not exist.  Code will crash." << std::endl;
+      while ( myfile.good() ) { 
+        getline (myfile,line);
+        std::vector<std::string> fields = split ( line, std::string(":") );
+        if ( fields.size() != 3 ) continue;
+        addEventToList ( atoi ( fields[0].c_str() ),
+            atoi ( fields[1].c_str() ),
+            atoi ( fields[2].c_str() ) );
+
+      }
+      myfile.close();
+    }
+    else {
+      std::cout << "ERROR: event list file " << file_name << " does not exist.  Code will crash. Cowardly exiting." << std::endl;
+      exit(-1);
+    }
+  }
+  std::cout << "added " << m_set.size() << " events." << std::endl;
 
   
 }
   
 void EventListHelper::printEventList(){
-  std::map<EventKey, bool>::iterator it     = m_map.begin();
-  std::map<EventKey, bool>::iterator it_end = m_map.end();
+  //std::map<EventKey, bool>::iterator it     = m_map.begin();
+  //std::map<EventKey, bool>::iterator it_end = m_map.end();
   
   std::cout << "Events in list: " << std::endl;
-  for (; it != it_end; ++it ){
-    if (!it -> second) continue;
-    std::cout << "\t" << it -> first.run << ":" << it -> first.lumi << ":" << it -> first.event << std::endl;
+  //for (; it != it_end; ++it ){
+  //  if (!it -> second) continue;
+  //  std::cout << "\t" << it -> first.run << ":" << it -> first.lumi << ":" << it -> first.event << std::endl;
+  //}
+  for(auto it = m_set.begin(); it != m_set.end(); ++it)
+  {
+    std::cout << "\t" << it->run << ":" << it->lumi << ":" << it->event << std::endl;
   }
 }

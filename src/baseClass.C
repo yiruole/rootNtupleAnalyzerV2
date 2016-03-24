@@ -170,222 +170,222 @@ void baseClass::readCutFile()
 
   ifstream is(cutFile_->c_str());
   if(is.good())
+  {
+    //      STDOUT("Reading file: " << *cutFile_ );
+    int id=0;
+    int optimize_count=0;
+    while( getline(is,s) )
     {
-      //      STDOUT("Reading file: " << *cutFile_ );
-      int id=0;
-      int optimize_count=0;
-      while( getline(is,s) )
+      STDOUT("read line: " << s);
+      if (s[0] == '#' || s.empty()) continue;
+      vector<string> v = split(s);
+      if ( v.size() == 0 ) continue;
+
+      STDOUT("starting JSON code");
+
+      if ( v[0] == "JSON" ){ 
+
+        if ( jsonFileWasUsed_ ){
+          STDOUT("ERROR: Please specify only one JSON file in your cut file!");
+          return;
+        }
+
+        if ( v.size() != 2 ){
+          STDOUT("ERROR: In your cutfile, JSON file line must have the syntax: \"JSON <full json file path>\"");
+        }
+        jsonFileName_ = v[1];
+        STDOUT("Getting JSON file: " << v[1]);
+        jsonParser_.parseJSONFile ( & v[1] ) ;
+        jsonParser_.printGoodLumis();
+        jsonFileWasUsed_ = true;
+        continue;
+      }
+
+      STDOUT ("starting pileup reweighting code 1");
+
+      if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
+        if ( pileupDataFileWasUsed_ ) { 
+          STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
+          return;
+        }
+
+        if ( v.size() != 2 ){
+          STDOUT("ERROR: In your cutfile, PILEUP_DATA_ROOT_FILE line must have the syntax: \"PILEUP_DATA_ROOT_FILE <full pileup data file path>\"");
+        }
+
+        pileupDataFileName_ = v[1];
+        STDOUT("Getting PILEUP_DATA_ROOT_FILE:" << v[1]);
+        pileupReweighter_.readPileupDataFile ( & v[1] ) ;
+        pileupDataFileWasUsed_ = true;
+        continue;
+      }
+
+      STDOUT ("starting pileup reweighting code 2");
+
+      if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
+        if ( pileupMCFileWasUsed_ ) { 
+          STDOUT("ERROR: Please specify only one PILEUP_MC_TXT_FILE in your cut file!");
+          return;
+        }
+
+        if ( v.size() != 2 ){
+          STDOUT("ERROR: In your cutfile, PILEUP_MC_TXT_FILE line must have the syntax: \"PILEUP_MC_TXT_FILE <full pileup MC file path>\"");
+        }
+
+        pileupMCFileName_ = v[1];
+        STDOUT("Getting PILEUP_MC_TXT_FILE:" << v[1]);
+        pileupReweighter_.readPileupMCFile ( & v[1] ) ;
+        pileupMCFileWasUsed_ = true;
+        continue;
+      }
+
+      STDOUT("starting OPT code");
+      if (v[1]=="OPT") // add code for grabbing optimizer objects
+      {
+        if (optimizeName_cut_.size()>=6)
         {
-          STDOUT("read line: " << s);
-          if (s[0] == '#' || s.empty()) continue;
-	  vector<string> v = split(s);
-	  if ( v.size() == 0 ) continue;
+          STDOUT("WARNING:  Optimizer can only accept up to 6 variables.\nVariable "<<v[0]<<" is not being included.");
+          continue;
+        }
+        bool found=false;
+        for (int i=0;i<optimizeName_cut_.size();++i)
+        {
+          if (optimizeName_cut_[i].variableName==v[0])
+          {
+            STDOUT("ERROR:  variableName = "<<v[0]<<" is already being optimized in optimizedName_cut_.  Skipping.");
+            found=true;
+            break;
+          }
+        }
+        if (found) continue;
 
-	  STDOUT("starting JSON code");
-	  
-	  if ( v[0] == "JSON" ){ 
-
-	    if ( jsonFileWasUsed_ ){
-	      STDOUT("ERROR: Please specify only one JSON file in your cut file!");
-	      return;
-	    }
-	    
-	    if ( v.size() != 2 ){
-	      STDOUT("ERROR: In your cutfile, JSON file line must have the syntax: \"JSON <full json file path>\"");
-	    }
-	    jsonFileName_ = v[1];
-	    STDOUT("Getting JSON file: " << v[1]);
-	    jsonParser_.parseJSONFile ( & v[1] ) ;
-	    jsonParser_.printGoodLumis();
-	    jsonFileWasUsed_ = true;
-	    continue;
-	  }
-
-	  STDOUT ("starting pileup reweighting code 1");
-	  
-	  if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
-	    if ( pileupDataFileWasUsed_ ) { 
-	      STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
-	      return;
-	    }
-
-	    if ( v.size() != 2 ){
-	      STDOUT("ERROR: In your cutfile, PILEUP_DATA_ROOT_FILE line must have the syntax: \"PILEUP_DATA_ROOT_FILE <full pileup data file path>\"");
-	    }
-	    
-	    pileupDataFileName_ = v[1];
-	    STDOUT("Getting PILEUP_DATA_ROOT_FILE:" << v[1]);
-	    pileupReweighter_.readPileupDataFile ( & v[1] ) ;
-	    pileupDataFileWasUsed_ = true;
-	    continue;
-	  }
-
-	  STDOUT ("starting pileup reweighting code 2");
-
-	  if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
-	    if ( pileupMCFileWasUsed_ ) { 
-	      STDOUT("ERROR: Please specify only one PILEUP_MC_TXT_FILE in your cut file!");
-	      return;
-	    }
-
-	    if ( v.size() != 2 ){
-	      STDOUT("ERROR: In your cutfile, PILEUP_MC_TXT_FILE line must have the syntax: \"PILEUP_MC_TXT_FILE <full pileup MC file path>\"");
-	    }
-	    
-	    pileupMCFileName_ = v[1];
-	    STDOUT("Getting PILEUP_MC_TXT_FILE:" << v[1]);
-	    pileupReweighter_.readPileupMCFile ( & v[1] ) ;
-	    pileupMCFileWasUsed_ = true;
-	    continue;
-	  }
-
-          STDOUT("starting OPT code");
-	  if (v[1]=="OPT") // add code for grabbing optimizer objects
-	    {
-	      if (optimizeName_cut_.size()>=6)
-		{
-		  STDOUT("WARNING:  Optimizer can only accept up to 6 variables.\nVariable "<<v[0]<<" is not being included.");
-		  continue;
-		}
-	      bool found=false;
-	      for (int i=0;i<optimizeName_cut_.size();++i)
-		{
-		  if (optimizeName_cut_[i].variableName==v[0])
-		    {
-		      STDOUT("ERROR:  variableName = "<<v[0]<<" is already being optimized in optimizedName_cut_.  Skipping.");
-		      found=true;
-		      break;
-		    }
-		}
-	      if (found) continue;
-
-	      int level_int = atoi(v[5].c_str());
-	      bool greaterthan=true;
-	      if (v[2]=="<") greaterthan=false;
-	      double minval=atof(v[3].c_str());
-	      double maxval=atof(v[4].c_str());
-	      Optimize opt(optimize_count,v[0],minval, maxval, greaterthan, level_int, nOptimizerCuts_ );
-	      optimizeName_cut_[optimize_count]=opt; // order cuts by cut #, rather than name, so that optimization histogram is consistently ordered
-	      ++optimize_count;
-	      continue;
-	    }
-
-	  map<string, cut>::iterator cc = cutName_cut_.find(v[0]);
-	  if( cc != cutName_cut_.end() )
-	    {
-	      STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
-	      return;
-	    }
-
-	  int level_int = atoi( v[5].c_str() );
-	  if(level_int == -1)
-	    {
-	      map<string, preCut>::iterator cc = preCutName_cut_.find(v[0]);
-	      if( cc != preCutName_cut_.end() )
-		{
-		  STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
-		  return;
-		}
-	      preCutInfo_ << "### Preliminary cut values: " << s <<endl;
-	      preCut thisPreCut;
-	      thisPreCut.variableName =     v[0];
-	      if ( is_number ( v[1] ) ) thisPreCut.value1  = decodeCutValue( v[1] );
-	      else                      thisPreCut.string1 = v[1];
-	      if ( is_number ( v[2] ) ) thisPreCut.value2  = decodeCutValue( v[2] );
-	      else                      thisPreCut.string2 = v[2];
-	      if ( is_number ( v[3] ) ) thisPreCut.value1  = decodeCutValue( v[3] );
-	      else                      thisPreCut.string3 = v[3];
-	      if ( is_number ( v[4] ) ) thisPreCut.value2  = decodeCutValue( v[4] );
-	      else                      thisPreCut.string4 = v[4];
-	      preCutName_cut_[thisPreCut.variableName]=thisPreCut;
-	      continue;
-	    }
-	  cut thisCut;
-	  thisCut.variableName =     v[0];
-	  string m1=v[1];
-	  string M1=v[2];
-	  string m2=v[3];
-	  string M2=v[4];
-	  if( m1=="-" || M1=="-" )
-	    {
-	      STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning.");
-	      return; // FIXME implement exception
-	    }
-	  if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") )
-	    {
-	      STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
-	      return; // FIXME implement exception
-	    }
-	  if( m2=="-") m2="+inf";
-	  if( M2=="-") M2="-inf";
-	  thisCut.minValue1  = decodeCutValue( m1 );
-	  thisCut.maxValue1  = decodeCutValue( M1 );
-	  thisCut.minValue2  = decodeCutValue( m2 );
-	  thisCut.maxValue2  = decodeCutValue( M2 );
-	  thisCut.level_int  = level_int;
-	  thisCut.level_str  =       v[5];
-	  thisCut.histoNBins = atoi( v[6].c_str() );
-	  thisCut.histoMin   = atof( v[7].c_str() );
-	  thisCut.histoMax   = atof( v[8].c_str() );
-	  thisCut.saveVariableInReducedSkim = ( v.size()==10 && v[9]=="SAVE" ) ? true : false;
-
-	  // Not filled from file
-	  thisCut.id=++id;
-	  string s1;
-	  if(skimWasMade_)
-	    {
-	      s1 = "cutHisto_skim___________________" + thisCut.variableName;
-	    }
-	  else
-	    {
-	      s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
-	    }
-	  string s2 = "cutHisto_allPreviousCuts________" + thisCut.variableName;
-	  string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
-	  string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
-	  string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-	  thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo4 = TH1F (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo5 = TH1F (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-	  thisCut.histo1.Sumw2();
-	  thisCut.histo2.Sumw2();
-	  thisCut.histo3.Sumw2();
-	  thisCut.histo4.Sumw2();
-	  thisCut.histo5.Sumw2();
-	  // Filled event by event
-	  thisCut.filled = false;
-	  thisCut.value = 0;
-	  thisCut.weight = 1;
-	  thisCut.passed = false;
-	  thisCut.nEvtPassedBeforeWeight=0;
-	  thisCut.nEvtPassed=0;
-	  thisCut.nEvtPassedErr2=0;
-	  thisCut.nEvtPassedBeforeWeight_alreadyFilled = false;
-
-	  orderedCutNames_.push_back(thisCut.variableName);
-	  cutName_cut_[thisCut.variableName]=thisCut;
-
-	}
-      if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ) {
-	pileupReweighter_.calculatePileupWeights();
-	pileupReweighter_.printPileupWeights();
+        int level_int = atoi(v[5].c_str());
+        bool greaterthan=true;
+        if (v[2]=="<") greaterthan=false;
+        double minval=atof(v[3].c_str());
+        double maxval=atof(v[4].c_str());
+        Optimize opt(optimize_count,v[0],minval, maxval, greaterthan, level_int, nOptimizerCuts_ );
+        optimizeName_cut_[optimize_count]=opt; // order cuts by cut #, rather than name, so that optimization histogram is consistently ordered
+        ++optimize_count;
+        continue;
       }
-      else if ( (!pileupMCFileWasUsed_) && pileupDataFileWasUsed_  ||
-		pileupMCFileWasUsed_  && (!pileupDataFileWasUsed_) ) { 
-	STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
-	if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
-	if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
-	exit(1);
+
+      map<string, cut>::iterator cc = cutName_cut_.find(v[0]);
+      if( cc != cutName_cut_.end() )
+      {
+        STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
+        return;
       }
-      STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
+
+      int level_int = atoi( v[5].c_str() );
+      if(level_int == -1)
+      {
+        map<string, preCut>::iterator cc = preCutName_cut_.find(v[0]);
+        if( cc != preCutName_cut_.end() )
+        {
+          STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
+          return;
+        }
+        preCutInfo_ << "### Preliminary cut values: " << s <<endl;
+        preCut thisPreCut;
+        thisPreCut.variableName =     v[0];
+        if ( is_number ( v[1] ) ) thisPreCut.value1  = decodeCutValue( v[1] );
+        else                      thisPreCut.string1 = v[1];
+        if ( is_number ( v[2] ) ) thisPreCut.value2  = decodeCutValue( v[2] );
+        else                      thisPreCut.string2 = v[2];
+        if ( is_number ( v[3] ) ) thisPreCut.value1  = decodeCutValue( v[3] );
+        else                      thisPreCut.string3 = v[3];
+        if ( is_number ( v[4] ) ) thisPreCut.value2  = decodeCutValue( v[4] );
+        else                      thisPreCut.string4 = v[4];
+        preCutName_cut_[thisPreCut.variableName]=thisPreCut;
+        continue;
+      }
+      cut thisCut;
+      thisCut.variableName =     v[0];
+      string m1=v[1];
+      string M1=v[2];
+      string m2=v[3];
+      string M2=v[4];
+      if( m1=="-" || M1=="-" )
+      {
+        STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning.");
+        return; // FIXME implement exception
+      }
+      if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") )
+      {
+        STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
+        return; // FIXME implement exception
+      }
+      if( m2=="-") m2="+inf";
+      if( M2=="-") M2="-inf";
+      thisCut.minValue1  = decodeCutValue( m1 );
+      thisCut.maxValue1  = decodeCutValue( M1 );
+      thisCut.minValue2  = decodeCutValue( m2 );
+      thisCut.maxValue2  = decodeCutValue( M2 );
+      thisCut.level_int  = level_int;
+      thisCut.level_str  =       v[5];
+      thisCut.histoNBins = atoi( v[6].c_str() );
+      thisCut.histoMin   = atof( v[7].c_str() );
+      thisCut.histoMax   = atof( v[8].c_str() );
+      thisCut.saveVariableInReducedSkim = ( v.size()==10 && v[9]=="SAVE" ) ? true : false;
+
+      // Not filled from file
+      thisCut.id=++id;
+      string s1;
+      if(skimWasMade_)
+      {
+        s1 = "cutHisto_skim___________________" + thisCut.variableName;
+      }
+      else
+      {
+        s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
+      }
+      string s2 = "cutHisto_allPreviousCuts________" + thisCut.variableName;
+      string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
+      string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
+      string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
+      thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo4 = TH1F (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo5 = TH1F (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo1.Sumw2();
+      thisCut.histo2.Sumw2();
+      thisCut.histo3.Sumw2();
+      thisCut.histo4.Sumw2();
+      thisCut.histo5.Sumw2();
+      // Filled event by event
+      thisCut.filled = false;
+      thisCut.value = 0;
+      thisCut.weight = 1;
+      thisCut.passed = false;
+      thisCut.nEvtPassedBeforeWeight=0;
+      thisCut.nEvtPassed=0;
+      thisCut.nEvtPassedErr2=0;
+      thisCut.nEvtPassedBeforeWeight_alreadyFilled = false;
+
+      orderedCutNames_.push_back(thisCut.variableName);
+      cutName_cut_[thisCut.variableName]=thisCut;
+
     }
+    if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ) {
+      pileupReweighter_.calculatePileupWeights();
+      pileupReweighter_.printPileupWeights();
+    }
+    else if ( (!pileupMCFileWasUsed_) && pileupDataFileWasUsed_  ||
+        pileupMCFileWasUsed_  && (!pileupDataFileWasUsed_) ) { 
+      STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
+      if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
+      if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
+      exit(1);
+    }
+    STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
+  }
   else
-    {
-      STDOUT("ERROR opening cutFile:" << *cutFile_ );
-      exit (1);
-    }
+  {
+    STDOUT("ERROR opening cutFile:" << *cutFile_ );
+    exit (1);
+  }
   // make optimizer histogram
   if (optimizeName_cut_.size()>0)
     {
@@ -539,22 +539,22 @@ void baseClass::runOptimizer()
   // first, check that all cuts (except those to be optimized) have been passed
 
   for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+      it != orderedCutNames_.end(); it++)
+  {
+    bool ignorecut=false;
+    for (unsigned int i=0; i < optimizeName_cut_.size();++i)
     {
-      bool ignorecut=false;
-      for (unsigned int i=0; i < optimizeName_cut_.size();++i)
-	{
-	  const string str = (const string)(*it);
-	  if (optimizeName_cut_[i].variableName.compare(str)==0)
-	    {
-	      ignorecut=true;
-	      break;
-	    }
-	}
-      if (ignorecut) continue;
-      if (passedCut(*it) == false)
-	return;
+      const string str = (const string)(*it);
+      if (optimizeName_cut_[i].variableName.compare(str)==0)
+      {
+        ignorecut=true;
+        break;
+      }
     }
+    if (ignorecut) continue;
+    if (passedCut(*it) == false)
+      return;
+  }
 
   /*
   if (combCutName_passed_["all"] == false)
@@ -572,31 +572,33 @@ void baseClass::runOptimizer()
   // That is, for cut:  ABCDEF
   //  A is the index of cut0, B is cut 1, etc.
   for (int cc=0;cc<thesize;++cc) // loop over all cuts, starting at cut 0
+  {
+    --mysize;
+    for (int i=0;i<nOptimizerCuts_;++i) // loop over 10 cuts for each
     {
-      --mysize;
-      for (int i=0;i<nOptimizerCuts_;++i) // loop over 10 cuts for each
-	{
-	  if (!optimizeName_cut_[cc].Compare(i)) // cut failed; set all values associated with cut to false
-	    {
-	      // loop over  all cut values starting with current cut
-	      for (unsigned int j=(int)(i*pow(nOptimizerCuts_,mysize));j<int(pow(nOptimizerCuts_,thesize));++j)
-		{
-		  // if relevant digit of the cut value matches the current (failed) cut, set this cut to false
-		  if ((j/int(pow(nOptimizerCuts_,mysize)))%nOptimizerCuts_==i)
-		    counterbins[j]=false;
-		  if (j>counterbins.size())
-		    continue; // shouldn't ever happen
-		}
-	    } // if (cut comparison failed)
-	} // for (int i=0;i<10;++i)
-    }
+      if (!optimizeName_cut_[cc].Compare(i)) // cut failed; set all values associated with cut to false
+      {
+        // loop over  all cut values starting with current cut
+        for (unsigned int j=(int)(i*pow(nOptimizerCuts_,mysize));j<int(pow(nOptimizerCuts_,thesize));++j)
+        {
+          // if relevant digit of the cut value matches the current (failed) cut, set this cut to false
+          if ((j/int(pow(nOptimizerCuts_,mysize)))%nOptimizerCuts_==i)
+            counterbins[j]=false;
+          if (j>counterbins.size())
+            continue; // shouldn't ever happen
+        }
+      } // if (cut comparison failed)
+    } // for (int i=0;i<10;++i)
+  }
   // now fill histograms
   for (int i=0;i<counterbins.size();++i)
+  {
+    if (counterbins[i]==true)
     {
-      if (counterbins[i]==true)
-	h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
-
+      h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
     }
+
+  }
 
   return;
 } //runOptimizer
