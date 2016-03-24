@@ -141,6 +141,7 @@ class baseClass : public rootNtupleClass {
 		   std::vector<std::string> * names, 
 		   std::vector<bool>        * decisions,
 		   std::vector<int >        * prescales);
+  const std::string& getInputListName() { return *inputList_;};
     
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);

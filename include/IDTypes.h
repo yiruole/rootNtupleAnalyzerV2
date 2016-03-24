@@ -39,6 +39,8 @@ enum ID {
   EGAMMA_BUILTIN_LOOSE     = 42,
   EGAMMA_BUILTIN_VETO      = 43,
 
+  HIGH_PT_MUON_TRKRELISO01 = 50, // keep for compatibility
+
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h
   TRIGGER_PHOTON           = 81,

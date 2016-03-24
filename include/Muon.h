@@ -14,9 +14,13 @@ class Muon : public Object {
   // Kinematic variables         
 
   double & Pt                      ();
+  double & PtError                 ();
   double & Eta                     ();
   double & Phi                     ();
   double   Charge                  ();
+
+  double & CocktailPt              ();
+  double & CocktailPtError         ();
 
   // IDs 
 
@@ -25,6 +29,7 @@ class Muon : public Object {
   // Isolation variables
 
   double TrkIso                    ();
+  double TrkIsoR03SumPt            ();
   double PFIsoR04ChargedHadron     ();
   double PFIsoR04NeutralHadron     ();
   double PFIsoR04Photon            ();
@@ -44,8 +49,9 @@ class Muon : public Object {
   
  private:
 
-  bool PassUserID_MuonTight_PFIso04 (bool verbose);
-  bool PassUserID_MuonFiducial      (bool verbose);
+  bool PassUserID_MuonHighPt_TrkRelIso03 (bool verbose);
+  bool PassUserID_MuonTight_PFIso04      (bool verbose);
+  bool PassUserID_MuonFiducial           (bool verbose);
 
 };
 

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <ostream> 
+#include <typeinfo>
 #include <TRandom3.h>
 #include <TLorentzVector.h>
 #include "IDTypes.h"
@@ -257,37 +258,40 @@ class Collection {
       Object1 this_collection_constituent = GetConstituent<Object1>(i);
       Object2 matched_object;
       bool matched = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
+      double new_pt = -1.0;
       if ( matched ) { 
-	double old_pt               = this_collection_constituent.Pt();
-	double matched_pt           = matched_object.Pt();
-	
-	double scale_factor         = this_collection_constituent.EnergyResScaleFactor();
-	double scale_error          = this_collection_constituent.EnergyResScaleError ();
-	double smearing             = engine -> Gaus ( 1.0 , scale_error );
-	double smeared_scale_factor = scale_factor * smearing;
+        double old_pt               = this_collection_constituent.Pt();
+        double matched_pt           = matched_object.Pt();
 
-	double delta_pt             = smeared_scale_factor * ( old_pt - matched_pt );
-	double new_pt               = std::max ( double (0.0), matched_pt + delta_pt ) ;
-	
-	v_old.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
-	v_new.SetPtEtaPhiM( new_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
-	v_delta = v_old - v_new;
-	v_delta_met = v_delta_met + v_delta;
+        double scale_factor         = this_collection_constituent.EnergyResScaleFactor();
+        double scale_error          = this_collection_constituent.EnergyResScaleError ();
+        double smearing             = engine -> Gaus ( 1.0 , scale_error );
+        double smeared_scale_factor = scale_factor * smearing;
 
-	this_collection_constituent.Pt() = new_pt;
-	if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
-	
-	/*
-	std::cout << "Matched " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
-	std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
-	std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
-	std::cout << "\t" << "scale factor         = " << scale_factor         << " +/- " << scale_error << std::endl;
-	std::cout << "\t" << "smearing             = " << smearing             << std::endl;
-	std::cout << "\t" << "smeared scale factor = " << smeared_scale_factor << std::endl;
-	std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
-	std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
-	*/
-	
+        double delta_pt             = smeared_scale_factor * ( old_pt - matched_pt );
+        new_pt               = std::max ( double (0.0), matched_pt + delta_pt ) ;
+
+        v_old.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
+        v_new.SetPtEtaPhiM( new_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
+        v_delta = v_old - v_new;
+        v_delta_met = v_delta_met + v_delta;
+
+        this_collection_constituent.Pt() = new_pt;
+        if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
+
+        /*
+           std::cout << "Matched " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
+           std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
+           std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
+           std::cout << "\t" << "scale factor         = " << scale_factor         << " +/- " << scale_error << std::endl;
+           std::cout << "\t" << "smearing             = " << smearing             << std::endl;
+           std::cout << "\t" << "smeared scale factor = " << smeared_scale_factor << std::endl;
+           std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
+           std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
+         */
+
+      }
+      else if(typeid(Object1).name()=="PFJet") {
       }
     }
 

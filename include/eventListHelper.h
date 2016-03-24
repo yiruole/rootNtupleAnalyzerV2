@@ -1,9 +1,10 @@
 #ifndef EVENT_LIST_HELPER
 #define EVENT_LIST_HELPER
 
-#include <map>
+//#include <map>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 class EventListHelper {
   
@@ -31,9 +32,29 @@ class EventListHelper {
       if (lumi > right.lumi) { return false; }
       return event < right.event;
     };
+    bool operator==(const EventKey &other) const
+    {
+      return (run == other.run
+          && lumi == other.lumi
+          && event == other.event);
+    }
+  };
+
+  struct EventKeyHasher
+  {
+    std::size_t operator()(const EventKey& k) const
+    {
+      using std::size_t;
+      using std::hash;
+
+      return ((hash<int>()(k.run)
+            ^ (hash<int>()(k.lumi) << 1)) >> 1)
+            ^ (hash<int>()(k.event) << 1);
+    }
   };
   
-  std::map<EventKey, bool> m_map;
+  //std::map<EventKey, bool> m_map;
+  std::unordered_set<EventKey,EventKeyHasher> m_set;
   
 };
 
