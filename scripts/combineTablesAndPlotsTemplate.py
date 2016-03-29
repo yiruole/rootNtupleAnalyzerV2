@@ -322,9 +322,9 @@ for lin in open( options.inputList ):
               #temporary
               #
               if "TDir" in htemp.__repr__():
-                  print 'Getting optimizer hist!'
+                  #print 'Getting optimizer hist!'
                   htemp = file.Get(histoName + "/optimizer")
-                  print 'entries:',htemp.GetEntries()
+                  #print 'entries:',htemp.GetEntries()
 
               #thanks Riccardo
               # init histo if needed
