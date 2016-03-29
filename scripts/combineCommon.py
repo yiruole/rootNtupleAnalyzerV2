@@ -9,11 +9,11 @@ import math
 def SanitizeDatasetNameFromInputList(dataset_fromInputList):
   # "hack" for data-driven QCD samples: name is created by the createInputList script
   # do this first, since it's at the very end of the filename
-  if dataset_fromInputList.endswith('_forDataDrivenQCD'):
-    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_forDataDrivenQCD')]
   # XXX FIXME special hacks for datasets
-  if dataset_fromInputList.endswith('_reduced_skim'):
-    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
+  #if dataset_fromInputList.contains('_reduced_skim'):
+  #  #dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
+  #  dataset_fromInputList.replace('_reduced_skim','')
+  dataset_fromInputList = dataset_fromInputList.replace('_reduced_skim','')
   #XXX FIXME
   ## special hack for handling repated madgraphMLM samples
   #if dataset_fromInputList.endswith('_madgraphMLM'):
@@ -37,7 +37,12 @@ def SanitizeDatasetNameFromFullDataset(dataset):
     outputFileNames = []
     outputFileNames.append(dataset[1:dataset.find('_Tune')])
     outputFileNames.append(dataset[1:dataset.find('_13TeV')])
-    outputFileNames.append(dataset.split('/')[1])
+    try:
+      outputFileNames.append(dataset.split('/')[1])
+    except IndexError:
+      print "Had an IndexError trying to split('/') dataset:",dataset,'; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile'
+      exit(-1)
+
     # use the one with the shortest filename
     outputFile = sorted(outputFileNames, key=len)[0]
     if 'ext' in dataset:
@@ -77,6 +82,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
       elif piece in dictSamples:
         dictSamples[key].extend(dictSamples[piece])
       else:
+        #print 'GetSamplesToCombineDict: SanitizeDatasetNameFromFullDataset(',piece,')'
         piece = SanitizeDatasetNameFromFullDataset(piece)
         dictSamples[key].append(piece)
   return dictSamples
