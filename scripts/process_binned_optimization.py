@@ -1,7 +1,8 @@
 import os, copy, math, sys, numpy
 from ROOT import *
 
-mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_24jan2016_v1-4-3_optimization/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
+mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_opt_eles50GeV_jets50GeV_sT300GeV_ele27WPLooseWithZPrimeEta2p1TurnOn_26mar2016_v1-5-3/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
+#mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_24jan2016_v1-4-3_optimization/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
 #ttbar_data_filepath = os.environ["LQDATA"] + "eejj_analysis/eejj_qcd_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_QCD_Optimization_plots.root"
 #qcd_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_TTBar_Optimization_plots.root"
 #
@@ -13,7 +14,8 @@ d_background_filepaths = {
     # "ttbar" : [ "DATA"        , ttbar_data_filepath, 0.49 ],
     #"qcd"   : [ "DATA"        , qcd_data_filepath  , 1.0  ],
     "ttbar" : [ "TTbar_Madgraph"      , mc_filepath  , 1.0  ],
-    "qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
+    #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
+    "qcd"   : [ "QCDFakes_DATA"      , mc_filepath  , 1.0  ],
     "wjet"  : [ "WJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "zjet"  : [ "ZJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
@@ -193,7 +195,7 @@ def parse_root_file( d_input ) :
         #hist_name = "histo1D__" + sample_name + "__optimizer"
         
         hist = sample_file.Get(hist_name)
-        print 'getting hist',hist_name,'from:',sample_file.GetName()
+        print 'getting hist',hist_name,'from:',sample_file.GetName(),
         print 'entries:',hist.GetEntries()
         hist.Scale ( sample_scale ) 
 
@@ -213,8 +215,11 @@ def parse_root_file( d_input ) :
     return d_binNumber_nSample
     
 def evaluation ( nS, nB ) :
+  try:
     value = nS / ( math.sqrt ( nS + nB ) )
-    return value
+  except ZeroDivisionError:
+    value = -999
+  return value
 
 def evaluate ( bin_number, d_signal, d_background ) :
     nS = d_signal     [ bin_number ] 
@@ -249,7 +254,12 @@ def bins_to_string ( cut_bins ) :
 
     for i,cut_variable in enumerate(cut_variables):
         cut_bin = cut_bins [i]
-        cut_value = int ( d_cutVariable_cutValues [ cut_variable ][cut_bin] )
+        cut_value_int = int ( d_cutVariable_cutValues [ cut_variable ][cut_bin] )
+        cut_value_float = float ( d_cutVariable_cutValues [ cut_variable ][cut_bin] )
+        if cut_value_int==cut_value_float:
+          cut_value = cut_value_int
+        else:
+          cut_value = cut_value_float
         cut_requirement = cut_requirements [i]
         cut_string = cut_string + cut_variable + " " + cut_requirement + " " + str( cut_value ) + "\t"
         
@@ -261,7 +271,7 @@ def bins_to_string ( cut_bins ) :
 ####################################################################################################
 # Run!
 ####################################################################################################
-print "Parsing txt file...",
+print 'Parsing txt file',txt_file_path,'...',
 parse_txt_file ()
 print "Parsed."
 
@@ -270,6 +280,7 @@ d_binNumber_nD = parse_root_file( d_data_filepaths )
 
 for signal_sample in d_signal_filepaths_list: 
     d_binNumber_nS = parse_root_file( signal_sample ) 
+    print "looking at",signal_sample
 
     max_bin = -999
     max_value = -999
@@ -282,6 +293,8 @@ for signal_sample in d_signal_filepaths_list:
         nS = d_binNumber_nS [ binNumber ] 
         nB = d_binNumber_nB [ binNumber ] 
         nD = d_binNumber_nD [ binNumber ] 
+        #print 'evaluate: nS=',nS,'nB=',nB,'nD=',nD
+        #print 'binNumber=',binNumber
         value = evaluate ( binNumber, d_binNumber_nS, d_binNumber_nB )
         
         if value > max_value : 
@@ -296,6 +309,7 @@ for signal_sample in d_signal_filepaths_list:
 
     max_bins = string_to_bins ( max_string ) 
     test_max_string = bins_to_string ( max_bins ) 
+    print 'max_bins=',max_bins,'test_max_string=',test_max_string
     test_binNumber = d_cutValuesString_binNumber [ test_max_string ]
 
     if test_max_string != max_string:
