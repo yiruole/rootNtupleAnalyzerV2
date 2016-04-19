@@ -216,7 +216,9 @@ def parse_root_file( d_input ) :
     
 def evaluation ( nS, nB ) :
   try:
-    value = nS / ( math.sqrt ( nS + nB ) )
+    #value = nS / ( math.sqrt ( nS + nB ) )
+    # switch to asymptotic formula
+    value = math.sqrt(2*((nS+nB)*math.log(1+nS/nB)-nS))
   except ZeroDivisionError:
     value = -999
   return value
