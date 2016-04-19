@@ -277,14 +277,14 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   if ( fabs(Eta()) < 1.4442 ){
     is_barrel = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.02  );
-    pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.013 );
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
     pass_hoe              = bool ( HoE()                 < 0.15  );
   }
   
   else if ( fabs(Eta()) > 1.566 && fabs(Eta()) < 2.5 ){ 
     is_endcap = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.05  );
-    pass_sigmaIEtaIEta    = bool ( SigmaIEtaIEta()       < 0.034 );
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.034 );
     pass_hoe              = bool ( HoE()                 < 0.10  );
   }
   
@@ -305,7 +305,7 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
 	if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    :\t " << EcalSeed()      << std::endl;
 	if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
 	if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
-	if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << SigmaIEtaIEta() << std::endl;
+	if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << Full5x5SigmaIEtaIEta() << std::endl;
 	if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
       }
       else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
