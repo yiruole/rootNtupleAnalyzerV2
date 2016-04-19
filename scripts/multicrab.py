@@ -239,7 +239,7 @@ def main():
         print '\tcrab status',task
     if len(tasksOther) > 0:
       print 'Tasks with other status:',len(tasksOther),'/',totalTasks
-      for tasks in tasksOther:
+      for task in tasksOther:
         print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
     if len(tasksFailed) > 0:
       print 'Tasks failed:',len(tasksFailed),'/',totalTasks
