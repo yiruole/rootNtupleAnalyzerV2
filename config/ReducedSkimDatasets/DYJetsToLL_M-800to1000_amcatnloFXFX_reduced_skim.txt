@@ -1,2 +1,2 @@
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-5-3_SingleEleLoose_2/DYJetsToLL_M-800to1000_amcatnloFXFX/LQSkim/160227_112633/0000/DYJetsToLL_M-800to1000_amcatnloFXFX_reduced_skim_1.root
-root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-5-3_SingleEleLoose_2/DYJetsToLL_M-800to1000_amcatnloFXFX/LQSkim/160227_112633/0000/DYJetsToLL_M-800to1000_amcatnloFXFX_reduced_skim_2.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-5-3_SingleEleLoose_addToTree/DYJetsToLL_M-800to1000_amcatnloFXFX/LQSkim/160329_142949/0000/DYJetsToLL_M-800to1000_amcatnloFXFX_reduced_skim_1.root
+root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/RootNtuple-v1-5-3_SingleEleLoose_addToTree/DYJetsToLL_M-800to1000_amcatnloFXFX/LQSkim/160329_142949/0000/DYJetsToLL_M-800to1000_amcatnloFXFX_reduced_skim_2.root

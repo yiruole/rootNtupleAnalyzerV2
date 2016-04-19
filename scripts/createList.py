@@ -101,10 +101,10 @@ def process_input_dir(inputDir, match, filelist):
         print 'ERROR: unsupported access protocol'
         exit(-1)
     elif( re.search("^/eos/cms/", inputDir) ):
-        prefix = "root://eoscms/"
+        prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
     elif( re.search("^/store/", inputDir) ):
-        prefix = "root://eoscms/"
+        prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
     else:
         #filenamelist = make_filenamelist_default(inputDir)

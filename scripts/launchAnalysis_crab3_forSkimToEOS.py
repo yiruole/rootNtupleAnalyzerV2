@@ -179,7 +179,7 @@ inputlist_file = file ( options.inputlist,"r" )
 total_jobs = 0
 failedCommands = ''
 
-for line in inputlist_file: 
+for i,line in enumerate(inputlist_file): 
     if line[0] == "#" : continue
     dataset = line.strip().split("/")[-1].split(".txt")[0]
     
@@ -209,6 +209,16 @@ for line in inputlist_file:
       failedCommands+=command
       failedCommands+='\n'
     #time.sleep (  float( options.wait ) ) 
+    ## Delete crab sandboxes every 20 submissions
+    # Don't do this for now--it might screw up submissions...
+    #if i % 20 == 0 and not i==0:
+    #  print '----> Do periodic delete of crab sandboxes'
+    #  try:
+    #    deleteCrabSandboxes.main()
+    #  except deleteCrabSandboxes.Crab3ToolsException:
+    #    print 'WARNING: Something went wrong deleting the existing crab sandboxes; proceeding anyway but we might run out of quota'
+    #  print '----> Done'
+
 
 inputlist_file.close() 
 

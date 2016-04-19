@@ -168,6 +168,9 @@
 /SingleElectron/Run2015C_25ns-05Oct2015-v1/MINIAOD -1
 /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD -1
 /SingleElectron/Run2015D-PromptReco-v4/MINIAOD -1
+# fake datasets needed for QCD data-driven calc
+/SingleElectron/Run2015D-05Oct2015-v1_forDataDrivenQCD/MINIAOD -1
+/SingleElectron/Run2015D-PromptReco-v4_forDataDrivenQCD/MINIAOD -1
 /SingleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD -1
 /SingleMuon/Run2015D-05Oct2015-v1/MINIAOD -1
 /SingleMuon/Run2015D-PromptReco-v4/MINIAOD -1
