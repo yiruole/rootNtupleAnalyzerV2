@@ -30,7 +30,7 @@ def crabSubmit(config,dryRun=False):
         print 'crabSubmit(): doing crab3 dryrun'
         crabCommand('submit','dryrun',config = config)
       else:
-        print "crabSubmit(): calling crabCommand('submit',config=config)"
+        #print "crabSubmit(): calling crabCommand('submit',config=config)"
         crabCommand('submit',config = config)
     except HTTPException, hte:
       print '-----> there was a problem. see below.'
@@ -147,6 +147,9 @@ dataset = string.split(outputPrefix,"___")[-1]
 # workingDir
 workingDir = outputmain[0:outputmain.rstrip('/').rfind('/')]
 workingDir+='/crab/'
+if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
+  print '-->removing already-existing crab project dir:',workingDir+'crab_'+outputPrefix
+  os.system('rm -rf '+workingDir+'crab_'+outputPrefix)
 os.system("mkdir -p "+workingDir)
 #print 'workingDir:',workingDir
 
@@ -324,7 +327,11 @@ else:
   print 'ok, output files will have length about:',len(storagePath),'chars'
 
 config.Site.storageSite = 'T2_CH_CERN'
-config.Site.whitelist = ['T2_CH_CERN']
+# run jobs at other sites
+config.Data.ignoreLocality = True
+# make more expansive whitelist
+config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_AT_*','T2_ES_*','T2_BE_*','T2_PL_*']
+#config.Site.whitelist = ['T2_CH_CERN']
 
 # some tricks
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3AdvancedTutorial#Exercise_4_user_script
