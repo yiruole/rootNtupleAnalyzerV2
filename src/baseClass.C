@@ -12,8 +12,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
-  // nOptimizerCuts_ = 26;
-  nOptimizerCuts_ = 20;
+  nOptimizerCuts_ = 32; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -206,7 +205,7 @@ void baseClass::readCutFile()
       if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
         if ( pileupDataFileWasUsed_ ) { 
           STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
-          return;
+          exit(-1);
         }
 
         if ( v.size() != 2 ){
