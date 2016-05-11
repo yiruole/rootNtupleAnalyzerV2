@@ -72,7 +72,7 @@ bool Electron::PassUserID_HEEP (bool verbose){
     pass_shape1            = bool ( Full5x5E1x5OverE5x5()        > 0.83  );
     pass_shape2            = bool ( Full5x5E2x5OverE5x5()        > 0.94  );
     pass_shape             = bool ( pass_shape1 || pass_shape2    );
-    pass_caloIsolation     = bool ( caloIsolation < ( 2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP() ) ) );
+    pass_caloIsolation     = bool ( caloIsolation < ( 2.0 + ( 0.03 * PtHeep() ) + (0.28 * RhoForHEEP() ) ) );
     pass_dxy               = bool ( fabs(LeadVtxDistXY()) < 0.02  );
   }
   
@@ -85,14 +85,14 @@ bool Electron::PassUserID_HEEP (bool verbose){
     pass_hoe               = bool ( HoE()            < 12.5/SCEnergy() + 0.05 );
     pass_sigmaIEtaIEta     = bool ( Full5x5SigmaIEtaIEta()       < 0.03  );
     pass_shape             = true;
-    if   ( Pt()  < 50 ) {
+    if   ( PtHeep()  < 50 ) {
       pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
 						    ( 0.28 * RhoForHEEP() ) ) );
     }
     else                { 
       pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
 						    ( 0.28 * RhoForHEEP() ) + 
-						    ( 0.03 * (Pt() - 50.0 ) ) ) );
+						    ( 0.03 * (PtHeep() - 50.0 ) ) ) );
     }
     pass_dxy               = bool ( fabs(LeadVtxDistXY()) < 0.05  );
   }
@@ -274,14 +274,14 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   bool is_barrel = false;
   bool is_endcap = false;
 
-  if ( fabs(Eta()) < 1.4442 ){
+  if ( fabs(SCEta()) < 1.4442 ){
     is_barrel = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.02  );
     pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
     pass_hoe              = bool ( HoE()                 < 0.15  );
   }
   
-  else if ( fabs(Eta()) > 1.566 && fabs(Eta()) < 2.5 ){ 
+  else if ( fabs(SCEta()) > 1.566 && fabs(SCEta()) < 2.5 ){ 
     is_endcap = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.05  );
     pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.034 );
