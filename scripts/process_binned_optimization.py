@@ -1,10 +1,9 @@
 import os, copy, math, sys, numpy
 from ROOT import *
 
-mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_opt_eles50GeV_jets50GeV_sT300GeV_ele27WPLooseWithZPrimeEta2p1TurnOn_26mar2016_v1-5-3/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
-#mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_24jan2016_v1-4-3_optimization/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_opt_plots.root"
-#ttbar_data_filepath = os.environ["LQDATA"] + "eejj_analysis/eejj_qcd_opt/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_QCD_Optimization_plots.root"
-#qcd_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_TTBar_Optimization_plots.root"
+mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_analysis_opt_9may2016/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+#ttbar_data_filepath   = os.environ["LQDATA"] + "eejj_analysis/eejj-ttbar-opt-test/output_cutTable_lq_eejj_Optimization/analysisClass_lq_eejj_TTBar_Optimization_plots.root"
+qcd_data_filepath = os.environ["LQDATA"] + "/RunII/eejj_analysis_opt_8may2016_QCD/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
 #
 txt_file_path        = "/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleAnalyzerV2/optimizationCuts.txt"
 
@@ -12,10 +11,10 @@ jitter = 2
 
 d_background_filepaths = { 
     # "ttbar" : [ "DATA"        , ttbar_data_filepath, 0.49 ],
-    #"qcd"   : [ "DATA"        , qcd_data_filepath  , 1.0  ],
+    #"qcd"   : [ "QCDFakes_DATA"  , qcd_data_filepath  , 1.0  ],
     "ttbar" : [ "TTbar_Madgraph"      , mc_filepath  , 1.0  ],
     #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
-    "qcd"   : [ "QCDFakes_DATA"      , mc_filepath  , 1.0  ],
+    #"qcd"   : [ "QCDFakes_DATA"      , mc_filepath  , 1.0  ],
     "wjet"  : [ "WJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "zjet"  : [ "ZJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
@@ -26,29 +25,29 @@ d_background_filepaths = {
 d_signal_filepaths_list = [ 
     #{ "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
     { "300" : ["LQ_M300", mc_filepath, 1.0 ] } ,
-    { "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
-    { "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
-    { "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
-    { "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
-    { "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
-    { "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
-    { "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
-    { "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
-    { "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
-    { "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
-    { "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
-    { "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
-    { "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
-    { "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
-    { "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
-    { "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
-    { "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
-    { "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
-    { "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
-    { "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
-    { "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
-    { "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
-    { "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
+    #{ "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
+    #{ "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
+    #{ "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
+    #{ "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
+    #{ "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
+    #{ "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
+    #{ "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
+    #{ "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
+    #{ "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
+    #{ "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
+    #{ "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
+    #{ "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
+    #{ "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
+    #{ "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
+    #{ "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
+    #{ "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
+    #{ "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
+    #{ "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
+    #{ "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
+    #{ "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
+    #{ "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
+    #{ "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
+    #{ "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
 ]
 
 d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath, 1.0 ] }
@@ -196,7 +195,8 @@ def parse_root_file( d_input ) :
         
         hist = sample_file.Get(hist_name)
         print 'getting hist',hist_name,'from:',sample_file.GetName(),
-        print 'entries:',hist.GetEntries()
+        #print 'entries:',hist.GetEntries()
+        print 'integral:',hist.Integral()
         hist.Scale ( sample_scale ) 
 
         if not made_hist:
@@ -220,6 +220,9 @@ def evaluation ( nS, nB ) :
     # switch to asymptotic formula
     value = math.sqrt(2*((nS+nB)*math.log(1+nS/nB)-nS))
   except ZeroDivisionError:
+    value = -999
+  except ValueError:
+    print 'WARNING: had a domain error calculating the value with nS=',nS,'and nB=',nB
     value = -999
   return value
 
@@ -295,8 +298,8 @@ for signal_sample in d_signal_filepaths_list:
         nS = d_binNumber_nS [ binNumber ] 
         nB = d_binNumber_nB [ binNumber ] 
         nD = d_binNumber_nD [ binNumber ] 
-        #print 'evaluate: nS=',nS,'nB=',nB,'nD=',nD
-        #print 'binNumber=',binNumber
+        print 'binNumber=',binNumber,
+        print 'evaluate: nS=',nS,'nB=',nB
         value = evaluate ( binNumber, d_binNumber_nS, d_binNumber_nB )
         
         if value > max_value : 
@@ -311,7 +314,7 @@ for signal_sample in d_signal_filepaths_list:
 
     max_bins = string_to_bins ( max_string ) 
     test_max_string = bins_to_string ( max_bins ) 
-    print 'max_bins=',max_bins,'test_max_string=',test_max_string
+    #print 'max_bins=',max_bins,'test_max_string=',test_max_string
     test_binNumber = d_cutValuesString_binNumber [ test_max_string ]
 
     if test_max_string != max_string:
@@ -400,26 +403,28 @@ func1 = TF1("func1", "pol1(0)", 250., 850. )
 fit_functions = [ "func1", "func2" ]
 
 
-for cut_variable in cut_variables:
-    for fit_function in fit_functions:
+#for cut_variable in cut_variables:
+#    for fit_function in fit_functions:
+#
+#        canvas = TCanvas()
+#        canvas.cd()
+#    
+#        graph = TGraph( len ( x_array ), numpy.array ( x_array ), numpy.array ( d_cutVariable_yArray[cut_variable ] ) )
+#
+#        
+#        graph.Draw("AP")
+#        
+#        graph.GetXaxis().SetTitle("LQ mass [GeV]")
+#        graph.GetYaxis().SetTitle(cut_variable)
+#        graph.GetXaxis().SetRangeUser(0, 1500)
+#
+#        maximum = graph.GetHistogram().GetMaximum()
+#        graph.GetHistogram().SetMaximum ( maximum * 1.5 ) 
+#        
+#        graph.Fit ( fit_function )
+#        
+#        graph.Draw("AP")
+#        
+#        canvas.SaveAs(cut_variable + "_" + fit_function + ".gif" )
+#        canvas.SaveAs(cut_variable + "_" + fit_function + ".C" )
 
-        canvas = TCanvas()
-        canvas.cd()
-    
-        graph = TGraph( len ( x_array ), numpy.array ( x_array ), numpy.array ( d_cutVariable_yArray[cut_variable ] ) )
-
-        
-        graph.Draw("AP")
-        
-        graph.GetXaxis().SetTitle("LQ mass [GeV]")
-        graph.GetYaxis().SetTitle(cut_variable)
-        graph.GetXaxis().SetRangeUser(0, 1500)
-
-        maximum = graph.GetHistogram().GetMaximum()
-        graph.GetHistogram().SetMaximum ( maximum * 1.5 ) 
-        
-        graph.Fit ( fit_function )
-        
-        graph.Draw("AP")
-        
-        canvas.SaveAs(cut_variable + "_" + fit_function + ".gif" )
