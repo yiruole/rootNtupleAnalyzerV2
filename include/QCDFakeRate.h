@@ -2,7 +2,7 @@
 #define QCD_FAKE_RATE
 
 #include <string>
-#include "TGraphErrors.h"
+#include "TH2F.h"
 #include "TFile.h"
 
 class QCDFakeRate {
@@ -12,17 +12,15 @@ class QCDFakeRate {
   QCDFakeRate(std::string qcdFilename);
   ~QCDFakeRate();
   
-  void addGraphBarrel  ( TGraphErrors* graph ) { qcdGraphBarrel = graph; };
-  void addGraphEndcap1  ( TGraphErrors* graph ) { qcdGraphEndcap1 = graph; };
-  void addGraphEndcap2  ( TGraphErrors* graph ) { qcdGraphEndcap2 = graph; };
-  //TODO add the error here and redo with 2-D histo
+  void addHistoBarrel  ( TH2F* histo ) { histoBarrel = histo; };
+  void addHistoEndcap  ( TH2F* histo ) { histoEndcap = histo; };
   float GetFakeRate(const float& eta, const float& et);
+  float GetFakeRateError(const float& eta, const float& et);
 
  private:
   //TFile* qcdTFile;
-  TGraphErrors* qcdGraphBarrel;
-  TGraphErrors* qcdGraphEndcap1;
-  TGraphErrors* qcdGraphEndcap2;
+  TH2F* histoBarrel;
+  TH2F* histoEndcap;
 
 };
 
