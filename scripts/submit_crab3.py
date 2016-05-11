@@ -28,10 +28,11 @@ def crabSubmit(config,dryRun=False):
     try:
       if dryRun:
         print 'crabSubmit(): doing crab3 dryrun'
-        crabCommand('submit','dryrun',config = config)
-      else:
-        #print "crabSubmit(): calling crabCommand('submit',config=config)"
-        crabCommand('submit',config = config)
+      #  crabCommand('submit',dryrun=dryRun,config = config)
+      #else:
+      #  #print "crabSubmit(): calling crabCommand('submit',config=config)"
+      #  crabCommand('submit',config = config)
+      crabCommand('submit',dryrun=dryRun,config = config)
     except HTTPException, hte:
       print '-----> there was a problem. see below.'
       print hte.headers
@@ -60,19 +61,15 @@ usage = "usage: %prog [options] \nExample: ./scripts/submit_crab3_forSkimToEOS.p
 parser = OptionParser(usage=usage)
 
 parser.add_option("-i", "--inputlist", dest="inputlist",
-                  help="list of all datasets to be used",
                   metavar="LIST")
 
 parser.add_option("-c", "--cutfile", dest="cutfile",
-                  help="name of the cut file",
                   metavar="CUTFILE")
 
 parser.add_option("-o", "--output", dest="output",
-                  help="the directory OUTDIR contains the output of the program",
                   metavar="OUTDIR")
 
 parser.add_option("-t", "--treeName", dest="treeName",
-                  help="name of the root tree; defaults to rootTupleTree/tree",
                   metavar="TREENAME")
 
 # splitting handled by crab3
@@ -81,13 +78,14 @@ parser.add_option("-t", "--treeName", dest="treeName",
 #                  metavar="IJOBMAX")
 
 parser.add_option("-d", "--eosDir", dest="eosDir",
-                  help="eos directory for the output; defaults to /store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/USERNAME/",
                   metavar="EOSDIR")
 
 # FIXME SIC: this doesn't work when using the API?
 parser.add_option("-r", "--dryrun", dest="dryRun",
-                  help="dry run crab instead of full submit",
                   metavar="DRYRUN",default=False,action="store_true")
+
+parser.add_option("-s", "--skim", dest="isSkimTask",
+                  metavar="SKIMTASK",default=False,action="store_true")
 
 (options, args) = parser.parse_args()
 
@@ -129,12 +127,6 @@ if options.eosDir is not None:
 os.system("mkdir -p "+outputmain+"/src/")
 #os.system("mkdir -p "+outputmain+"/output/")
 ##os.system("mkdir -p "+outputmain+"/skim/")
-# don't do this
-#################################################
-## create castor dir
-#################################################
-##os.system("/afs/cern.ch/project/eos/installation/pro/bin/eos.select mkdir -p "+outputeosdir)
-##################################################
 
 # output prefix
 # (something like analysisClass_lq1_skim___TTJets_SemiLeptMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM )
@@ -145,7 +137,9 @@ dataset = string.split(outputPrefix,"___")[-1]
 # at this point we only have one dataset
 #################################################
 # workingDir
+#print 'outputmain=',outputmain
 workingDir = outputmain[0:outputmain.rstrip('/').rfind('/')]
+#print 'workingDir=',workingDir
 workingDir+='/crab/'
 if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
   print '-->removing already-existing crab project dir:',workingDir+'crab_'+outputPrefix
@@ -200,17 +194,29 @@ inputlist = outputmain+'/'+inputListName
 # (something like TTJets_SemiLeptMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM )
 outputFilePref = outputPrefix[outputPrefix.find('___')+3:]
 # make the script (run by CRAB3)
+# for skimming:
+#   for the file splitting: crab will split the jobs and modify the process.source.fileNames list
+#   here we read that out of the trivial cmsRun cfg, and put it into a local inputList.txt which is fed to main
+#   (later we fill up userInputFiles by reading each file from the original inputList, which will allow crab to split them into separate jobs)
+# for analysis:
+#   we feed crab a nonsense input file (just the first on the list) per dataset
+#   then we just run the analysis on the entire dataset here using the inputlist we passed in
+#   this is costly if a single job/dataset fails
 scriptname = outputmain+"/src/submit_"+dataset+".sh"
 scriptfile = open(scriptname,"w")
 scriptfile.write("""#!/bin/bash
 echo "================= Dumping Input files ===================="
 """)
 scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))"\n')
-scriptfile.write('echo "Put into '+inputListName+'"\n')
-scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
-scriptfile.write('echo "cat '+inputListName+':"\n')
-scriptfile.write('cat '+inputListName+'\n')
-scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+if options.isSkimTask:
+  scriptfile.write('echo "Put into '+inputListName+'"\n')
+  scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
+  scriptfile.write('echo "cat '+inputListName+':"\n')
+  scriptfile.write('cat '+inputListName+'\n')
+  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+else:
+  # read the inputlist we pass to crab
+  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 #scriptfile.write("# localoutputdirectory="+workingDir+"\n")
 # define our own exit code for crab; see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Define_your_own_exit_code_and_ex
 scriptfile.write("""
@@ -258,22 +264,30 @@ config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
 # for using event lists
-config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
-config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
-config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
-config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
-config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
-config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
+if options.isSkimTask:
+  config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
+  config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
+  config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
+  config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
+  config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
+  config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
 # end of event lists
+
 # collect the output (root plots, dat, and skim)
-config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat',outputFilePref+'_reduced_skim.root']
+config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat']
+if options.isSkimTask:
+  config.JobType.outputFiles+=outputFilePref+'_reduced_skim.root'
 
 config.Data.outputPrimaryDataset = dataset.split('__')[0]
 
-# read input list, convert to LFN
-config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
-#print 'userInputFiles=',config.Data.userInputFiles
-# check length of input files
+if options.isSkimTask:
+  # read input list, convert to LFN
+  # this appears not to be needed, and it's not been used since we changed to the CERN xrootd redirector
+  config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
+else:
+  # just read the first file in, so crab thinks the dataset just has one file and just makes one job
+  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
+
 maxLengthPath = max(config.Data.userInputFiles, key=len)
 if len(maxLengthPath) <= 255:
   print 'userInputFiles OK, longest path has:',len(maxLengthPath),'chars'
@@ -281,15 +295,23 @@ else:
   print
   print 'ERROR: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist); crab3 cannot handle this; exiting'
   exit(-1)
+
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1 # 1 file per job
 config.Data.totalUnits = -1
 config.Data.publication = False
-config.Data.outputDatasetTag = 'LQSkim'
+if options.isSkimTask:
+  config.Data.outputDatasetTag = 'LQSkim'
+else:
+  config.Data.outputDatasetTag = 'LQAna'
 # notes on how the output will be stored: see https://twiki.cern.ch/twiki/bin/view/CMSPublic/Crab3DataHandling
 #  <lfn-prefix>/<primary-dataset>/<publication-name>/<time-stamp>/<counter>[/log]/<file-name> 
 #   LFNDirBase /                 / requestName      / stuff automatically done   / outputFilePref_999.root
-config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/'
+# defaults
+if options.isSkimTask:
+  config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/'
+else:
+  config.Data.outLFNDirBase = '/store/user/scooper/LQ/Ana/2015/'
 #config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/%s/' % (getUsernameFromSiteDB())
 #config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 if outputLFN is not None:
@@ -318,9 +340,12 @@ if len(storagePath) > 255:
   print 'example output will look like:'
   print storagePath
   print 'which has length:',len(storagePath)
-  print 'proceeding anyway'
-  #print 'cowardly refusing to submit the jobs; exiting'
-  #exit(-2)
+  if options.isSkimTask:
+    # for skims, we might run crab over them, so don't allow this
+    print 'cowardly refusing to submit the jobs; exiting'
+    exit(-2)
+  else:
+    print 'proceeding anyway'
 else:
   print 'example output will look like:'
   print storagePath
@@ -329,9 +354,12 @@ else:
 config.Site.storageSite = 'T2_CH_CERN'
 # run jobs at other sites
 config.Data.ignoreLocality = True
-# make more expansive whitelist
-config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_AT_*','T2_ES_*','T2_BE_*','T2_PL_*']
-#config.Site.whitelist = ['T2_CH_CERN']
+# make more expansive whitelist for skims
+# for analysis, just run at CERN
+if options.isSkimTask:
+  config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_EE_*','T2_PT_*']
+else:
+  config.Site.whitelist = ['T2_CH_CERN']
 
 # some tricks
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3AdvancedTutorial#Exercise_4_user_script

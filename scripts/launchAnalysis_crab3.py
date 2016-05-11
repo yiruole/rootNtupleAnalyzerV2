@@ -53,9 +53,16 @@ parser.add_option("-c", "--cutfile", dest="cutfile",
 #                  metavar="QUEUE")
 
 parser.add_option("-d", "--eosDir", dest="eosDir",
-                  help="the EOS directory where skims are stored",
+                  help="the EOS directory where output root/dat files are stored",
                   metavar="EOSDIR")
 
+parser.add_option("-s", "--skim", dest="isSkimTask",
+                  help="use this option to create skims",
+                  metavar="SKIMTASK",default=False,action="store_true")
+
+parser.add_option("-r", "--dryrun", dest="dryRun",
+                  help="use this option to do a crab dryrun",
+                  metavar="DRYRUN",default=False,action="store_true")
 
 (options, args) = parser.parse_args()
 
@@ -173,6 +180,10 @@ print "... done"
 #--------------------------------------------------------------------------------
 
 print "Launching jobs..."
+if options.isSkimTask:
+  print 'INFO: This is a SKIM task'
+else:
+  print 'INFO: This is an ANA task'
 
 inputlist_file = file ( options.inputlist,"r" )
 
@@ -191,7 +202,7 @@ for i,line in enumerate(inputlist_file):
     
     #total_jobs = total_jobs + jobs_to_submit
 
-    command = "./scripts/submit_crab3_forSkimToEOS.py"
+    command = "./scripts/submit_crab3.py"
     command = command + " -i " + sublist
     command = command + " -c " + options.outputDir+'/'+options.cutfile.split('/')[-1]
     command = command + " -t " + options.treeName 
@@ -199,6 +210,10 @@ for i,line in enumerate(inputlist_file):
     #command = command + " -n " + str(jobs_to_submit)
     #command = command + " -q " + options.queue
     command = command + " -d " + options.eosDir
+    if options.isSkimTask:
+      command+=" -s"
+    if options.dryRun:
+      command+=" -r"
     
     print command
     ret = os.system  ( command ) 
