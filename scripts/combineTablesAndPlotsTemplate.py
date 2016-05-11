@@ -340,7 +340,8 @@ for lin in open( options.inputList ):
                       dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
                       dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
               if toBeUpdated:
-                  dictFinalHisto[sample][h].Add(htemp, plotWeight)
+                  if not dictFinalHisto[sample][h].Add(htemp, plotWeight):
+                    print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHisto[sample][h].GetName()
 
     #---End of the loop over datasets---#
 
