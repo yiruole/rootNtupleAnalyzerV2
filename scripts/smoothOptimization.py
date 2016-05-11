@@ -97,6 +97,8 @@ for key in gDirectory.GetListOfKeys():
           mej_optCuts = list(funcYvalues)
         break
 
+optimizationTFile.Close()
+
 # print tables
 lq_masses = [int(mass) for mass in lq_masses]
 sT_optCuts = [int(st) for st in sT_optCuts]
@@ -110,8 +112,10 @@ columnNames.insert(0,'Var/LQMass')
 sT_optCuts = [st for i, st in enumerate(sT_optCuts) if lq_masses[i] <= maxMassPointToUse]
 mee_optCuts = [mee for i, mee in enumerate(mee_optCuts) if lq_masses[i] <= maxMassPointToUse]
 mej_optCuts = [mej for i, mej in enumerate(mej_optCuts) if lq_masses[i] <= maxMassPointToUse]
-t = PrettyTable(columnNames)
+lq_masses_reduced = [str(mass) for mass in lq_masses if mass <= maxMassPointToUse]
+lq_masses_reduced[-1] = '>='+lq_masses_reduced[-1]
 
+t = PrettyTable(columnNames)
 t.float_format = "4.3"
 #t.align['VarName'] = 'l'
 t.align = 'l'
@@ -128,5 +132,18 @@ mejRow.extend(mej_optCuts)
 t.add_row(mejRow)
 print t
 
-optimizationTFile.Close()
+# latex table
+print
+a = numpy.vstack((lq_masses_reduced,sT_optCuts, mee_optCuts, mej_optCuts))
+#print " \\\\\n".join([" & ".join(map('{0:.3f}'.format, line)) for line in a])
+for i,line in enumerate(a):
+  if i==1:
+    print '$S_T$ [GeV] &',
+  elif i==2:
+    print '$m_{ee}$ [GeV] &',
+  elif i==3:
+    print '$m_{ej}^{min}$ [GeV] &',
+  print " & ".join([str(entry) for entry in line]),'\\\\'
+print
+
 exit(0)
