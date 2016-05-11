@@ -20,12 +20,14 @@ double PileupReweighter::getPileupWeight ( int n_pileup ) {
   
   if ( n_pileup > m_max_n_pileup ) {
     std::cout << "ERROR: System is asking for n(pileup) = " << n_pileup << " but we only have information for pileup up to " << m_max_n_pileup << std::endl;
-    return -1; 
+    //return -1; 
+    exit(-1);
   }
   
   if ( n_pileup == -1 ) {
     std::cout << "ERROR: System is asking for n(pileup) = " << n_pileup << ", which is not a valid index number" << std::endl;
-    return -1; 
+    //return -1; 
+    exit(-1);
   }
 
   return m_pileup_weights[n_pileup];
@@ -36,19 +38,19 @@ void PileupReweighter::readPileupDataFile ( std::string * file_name ) {
   
   m_data_file_name = * file_name ;
   
-  TFile * file = new TFile ( file_name -> c_str() ) ;
+  TFile * file = TFile::Open( file_name -> c_str() ) ;
   
   if ( !file ) { 
-    std::cout << "ERROR: I cannot open the pileup file: " << file_name << std::endl;
-    return;
+    std::cout << "ERROR: I cannot open the pileup file: " << file_name->c_str() << std::endl;
+    exit(-1);
   }
 
   TH1F* pileup_hist = (TH1F*) file -> Get("pileup");
 
   if ( !pileup_hist ) { 
-    std::cout << "ERROR: I can open the pileup file: " << file_name << std::endl;
+    std::cout << "ERROR: I can open the pileup file: " << file_name->c_str() << std::endl;
     std::cout << "       But I cannot open the hist: pileup" << std::endl;
-    return;
+    exit(-1);
   }
   
   int nbins = pileup_hist -> GetNbinsX();
@@ -95,6 +97,11 @@ void PileupReweighter::readPileupMCFile ( std::string * file_name ) {
   m_mc_file_name = * file_name ;
   
   std::ifstream f (file_name -> c_str());
+  if(!f.good())
+  {
+    std::cout << "ERROR: pileupReweighter.C: in readPileupMCFile(), cannot read " << file_name->c_str() << std::endl;
+    exit(-1);
+  }
   std::stringstream buffer;
   buffer << f.rdbuf();
 
