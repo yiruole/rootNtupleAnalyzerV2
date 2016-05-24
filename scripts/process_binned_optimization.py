@@ -24,40 +24,40 @@ d_background_filepaths = {
 d_signal_filepaths_list = [ 
     #{ "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
     { "300" : ["LQ_M300", mc_filepath, 1.0 ] } ,
-    { "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
-    { "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
-    { "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
-    { "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
-    { "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
-    { "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
-    { "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
-    { "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
-    { "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
-    { "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
-    { "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
-    { "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
-    { "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
-    { "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
-    { "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
-    { "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
-    { "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
-    { "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
-    { "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
-    { "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
-    { "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
-    { "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
-    { "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
-    { "1500" : ["LQ_M1500", mc_filepath, 1.0 ] } , 
-    { "1550" : ["LQ_M1550", mc_filepath, 1.0 ] } , 
-    { "1600" : ["LQ_M1600", mc_filepath, 1.0 ] } , 
-    { "1650" : ["LQ_M1650", mc_filepath, 1.0 ] } , 
-    { "1700" : ["LQ_M1700", mc_filepath, 1.0 ] } , 
-    { "1750" : ["LQ_M1750", mc_filepath, 1.0 ] } , 
-    { "1800" : ["LQ_M1800", mc_filepath, 1.0 ] } , 
-    { "1850" : ["LQ_M1850", mc_filepath, 1.0 ] } , 
-    { "1900" : ["LQ_M1900", mc_filepath, 1.0 ] } , 
-    { "1950" : ["LQ_M1950", mc_filepath, 1.0 ] } , 
-    { "2000" : ["LQ_M2000", mc_filepath, 1.0 ] } , 
+    #{ "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
+    #{ "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
+    #{ "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
+    #{ "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
+    #{ "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
+    #{ "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
+    #{ "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
+    #{ "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
+    #{ "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
+    #{ "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
+    #{ "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
+    #{ "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
+    #{ "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
+    #{ "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
+    #{ "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
+    #{ "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
+    #{ "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
+    #{ "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
+    #{ "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
+    #{ "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
+    #{ "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
+    #{ "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
+    #{ "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
+    #{ "1500" : ["LQ_M1500", mc_filepath, 1.0 ] } , 
+    #{ "1550" : ["LQ_M1550", mc_filepath, 1.0 ] } , 
+    #{ "1600" : ["LQ_M1600", mc_filepath, 1.0 ] } , 
+    #{ "1650" : ["LQ_M1650", mc_filepath, 1.0 ] } , 
+    #{ "1700" : ["LQ_M1700", mc_filepath, 1.0 ] } , 
+    #{ "1750" : ["LQ_M1750", mc_filepath, 1.0 ] } , 
+    #{ "1800" : ["LQ_M1800", mc_filepath, 1.0 ] } , 
+    #{ "1850" : ["LQ_M1850", mc_filepath, 1.0 ] } , 
+    #{ "1900" : ["LQ_M1900", mc_filepath, 1.0 ] } , 
+    #{ "1950" : ["LQ_M1950", mc_filepath, 1.0 ] } , 
+    #{ "2000" : ["LQ_M2000", mc_filepath, 1.0 ] } , 
 ]
 
 #XXX FIXME: add hist to the analysis to count total events
@@ -285,8 +285,10 @@ def parse_root_file( d_input ) :
         
         hist = sample_file.Get(hist_name)
         print 'getting hist',hist_name,'from:',sample_file.GetName(),
-        print 'entries:',hist.GetEntries()
+        print 'entries:',hist.GetEntries(),
         hist.Scale ( sample_scale ) 
+        print 'bin0:',hist.GetBinContent(0)
+        print 'bin1:',hist.GetBinContent(1)
 
         if not made_hist:
             sum_hist = copy.deepcopy ( hist ) 
@@ -297,6 +299,8 @@ def parse_root_file( d_input ) :
         sample_file.Close() 
         
     nbins = sum_hist.GetNbinsX() 
+    print 'sum_hist bin 0:',sum_hist.GetBinContent(0)
+    print 'sum_hist bin 1:',sum_hist.GetBinContent(1)
     
     for ibin in range (0, nbins + 1 ) :
         d_binNumber_nSample [ ibin ] = sum_hist.GetBinContent ( ibin )
@@ -386,7 +390,7 @@ d_binNumber_nD = parse_root_file( d_data_filepaths )
 selectedEfficienciesByLQMass = []
 lqMasses = []
 
-verbose = False
+verbose = True
 for signal_sample in d_signal_filepaths_list: 
     d_binNumber_nS = parse_root_file( signal_sample ) 
     print "looking at",signal_sample
