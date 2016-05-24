@@ -10,7 +10,7 @@ optimizationFileName = 'optimization.root'
 optimizationTFile = TFile(optimizationFileName)
 optimizationTFile.cd()
 
-maxMassPointToUse = 1100
+maxMassPointToUse = 1500
 
 sT_optCuts = []
 mee_optCuts = []
@@ -109,9 +109,9 @@ columnNames[-1] = '>='+columnNames[-1]
 columnNames.insert(0,'Var/LQMass')
 #print columnNames
 # reduce sizes
-sT_optCuts = [st for i, st in enumerate(sT_optCuts) if lq_masses[i] <= maxMassPointToUse]
-mee_optCuts = [mee for i, mee in enumerate(mee_optCuts) if lq_masses[i] <= maxMassPointToUse]
-mej_optCuts = [mej for i, mej in enumerate(mej_optCuts) if lq_masses[i] <= maxMassPointToUse]
+sT_optCuts_reduced = [st for i, st in enumerate(sT_optCuts) if lq_masses[i] <= maxMassPointToUse]
+mee_optCuts_reduced = [mee for i, mee in enumerate(mee_optCuts) if lq_masses[i] <= maxMassPointToUse]
+mej_optCuts_reduced = [mej for i, mej in enumerate(mej_optCuts) if lq_masses[i] <= maxMassPointToUse]
 lq_masses_reduced = [str(mass) for mass in lq_masses if mass <= maxMassPointToUse]
 lq_masses_reduced[-1] = '>='+lq_masses_reduced[-1]
 
@@ -120,21 +120,21 @@ t.float_format = "4.3"
 #t.align['VarName'] = 'l'
 t.align = 'l'
 stRow = ['sT']
-stRow.extend(sT_optCuts)
+stRow.extend(sT_optCuts_reduced)
 #print stRow
 #print 'len columnNames:',len(columnNames),'len stRow:',len(stRow)
 t.add_row(stRow)
 meeRow = ['Mee']
-meeRow.extend(mee_optCuts)
+meeRow.extend(mee_optCuts_reduced)
 t.add_row(meeRow)
 mejRow = ['Mej']
-mejRow.extend(mej_optCuts)
+mejRow.extend(mej_optCuts_reduced)
 t.add_row(mejRow)
 print t
 
 # latex table
 print
-a = numpy.vstack((lq_masses_reduced,sT_optCuts, mee_optCuts, mej_optCuts))
+a = numpy.vstack((lq_masses_reduced,sT_optCuts_reduced, mee_optCuts_reduced, mej_optCuts_reduced))
 #print " \\\\\n".join([" & ".join(map('{0:.3f}'.format, line)) for line in a])
 for i,line in enumerate(a):
   if i==1:
@@ -145,5 +145,15 @@ for i,line in enumerate(a):
     print '$m_{ej}^{min}$ [GeV] &',
   print " & ".join([str(entry) for entry in line]),'\\\\'
 print
+
+# for cut file
+for i,mass in enumerate(lq_masses):
+  print '#------------------------------------------------------------------------------------------------'
+  print '# LQ M',mass,'optimization'
+  print '#------------------------------------------------------------------------------------------------'
+  print 'sT_eejj_LQ'+str(mass)+'			'+str(sT_optCuts[i])+'		+inf		-		-	2	200 0 2000'
+  print 'M_e1e2_LQ'+str(mass)+'			'+str(mee_optCuts[i])+'		+inf		-		-	2	200 0 2000'
+  print 'min_M_ej_LQ'+str(mass)+'			'+str(mej_optCuts[i])+'		+inf		-		-	2	200 0 2000'
+
 
 exit(0)
