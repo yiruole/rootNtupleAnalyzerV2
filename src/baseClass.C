@@ -1,6 +1,7 @@
 #define baseClass_cxx
 #include "baseClass.h"
 #include <boost/lexical_cast.hpp>
+#include "TEnv.h"
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
   PileupWeight_ ( 1.0 ),
@@ -12,7 +13,8 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
-  nOptimizerCuts_ = 32; // number of cut points used in optimizer scan over a variable
+  //nOptimizerCuts_ = 50; // number of cut points used in optimizer scan over a variable
+  nOptimizerCuts_ = 1; //XXX SIC TEST
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -51,6 +53,8 @@ baseClass::~baseClass()
 
 void baseClass::init()
 {
+  // set up prefetching
+  //gEnv->SetValue("TFile.AsyncPrefetching", 1);
   //STDOUT("begins");
   tree_ = NULL;
   readInputList();
@@ -59,6 +63,9 @@ void baseClass::init()
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
     exit(-1);
   }
+  // setup ttree caching
+  Int_t cachesize = 10000000; //10 MBytes
+  tree_->SetCacheSize(cachesize);
   Init(tree_);
 
   //char output_root_title[200];
@@ -476,13 +483,13 @@ double baseClass::getVariableValue(const string& s)
 void baseClass::fillOptimizerWithValue(const string& s, const double& d)
 {
   for (int i=0;i<optimizeName_cut_.size();++i)
+  {
+    if (optimizeName_cut_[i].variableName==s)
     {
-      if (optimizeName_cut_[i].variableName==s)
-	{
-	  optimizeName_cut_[i].value=d;
-	  return;
-	}
+      optimizeName_cut_[i].value=d;
+      return;
     }
+  }
   return;
 }
 
@@ -575,6 +582,10 @@ void baseClass::runOptimizer()
     --mysize;
     for (int i=0;i<nOptimizerCuts_;++i) // loop over 10 cuts for each
     {
+      //XXX TEST SIC DEBUG
+      if(i==0)
+        std::cout << "For index 0, testing cut named: " << optimizeName_cut_[cc].variableName << ";" << (optimizeName_cut_[cc].Compare(i) ? " PASSED!" : " FAILED!") << std::endl;
+      //XXX TEST SIC DEBUG
       if (!optimizeName_cut_[cc].Compare(i)) // cut failed; set all values associated with cut to false
       {
         // loop over  all cut values starting with current cut
