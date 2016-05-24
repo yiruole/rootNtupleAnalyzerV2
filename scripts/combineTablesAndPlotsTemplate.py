@@ -150,11 +150,16 @@ for lin in open( options.inputList ):
         print "ERROR: file " + inputRootFile + " not found"
         print "exiting..."
         sys.exit()
+    #else:
+    #  print 'opened file:',inputRootFile
+
 
     if(os.path.isfile(inputDataFile) == False):
         print "ERROR: file " + inputDataFile + " not found"
         print "exiting..."
         sys.exit()
+    #else:
+    #    print 'opened file:',inputDataFile
 
     #---Find xsection correspondent to the current dataset
     #dataset_fromInputList = SanitizeDatasetNameFromInputList(dataset_fromInputList)
@@ -193,8 +198,8 @@ for lin in open( options.inputList ):
         lineCounter = lineCounter+1
 
     # example
-    #Ntot = int(data[0]['N'])
-    #print Ntot
+    Ntot = float(data[0]['N'])
+    #print 'Ntot=',Ntot
 
     #---Calculate weight
     #Ntot = int(data[0]['N'])
@@ -340,6 +345,8 @@ for lin in open( options.inputList ):
                       dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
                       dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
               if toBeUpdated:
+                  if not htemp:
+                    print 'failed to get histo named:',histoName,'from file:',file.GetName()
                   if not dictFinalHisto[sample][h].Add(htemp, plotWeight):
                     print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHisto[sample][h].GetName()
 
