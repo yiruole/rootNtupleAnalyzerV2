@@ -7,13 +7,6 @@ from ROOT import *
 
 from combineCommon import *
 
-#class SignalPoint:
-#   def __init__(self, *args, **kwargs):
-#       self.mass = kwargs.get('mass',-1)
-#       self.beta = kwargs.get('beta','1.0')
-#       self.data = kwargs.get('data','1.0')
-#       self.
-
 def GetXSecTimesIntLumi(sampleNameFromDataset):
     #print 'GetXSecTimesIntLumi(',sampleNameFromDataset+')'
     xsection = float(lookupXSection(sampleNameFromDataset,xsectionDict))
@@ -74,14 +67,15 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
       print 'ERROR: could not find hist','Mej_selected_min_'+selection,' in file:',unscaledRootFile.GetName()
       print 'EXIT'
       exit(-1)
-    unscaledRate = mejUnscaledHist.Integral()
+    unscaledInt = mejUnscaledHist.Integral()
+    unscaledRate = mejUnscaledHist.GetEntries()
     xsecTimesIntLumi = GetXSecTimesIntLumi(sampleName)
     if not isDataOrQCD:
-        rate = unscaledRate*xsecTimesIntLumi/unscaledTotalEvts
-        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledRate,rate)
+        rate = unscaledInt*xsecTimesIntLumi/unscaledTotalEvts
+        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledInt,rate)
     else:
-        rate = unscaledRate
-        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledRate,rate,False)
+        rate = unscaledInt
+        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledInt,rate,False)
     #print 'INFO: hist','Mej_selected_min_'+selection,' in file:',unscaledRootFile.GetName()
     #print 'unscaledRate=',unscaledRate,'unscaled entries=',mejUnscaledHist.GetEntries()
     return rate,rateErr,unscaledRate
@@ -148,6 +142,8 @@ def FillDicts(rootFilename,qcdRootFilename):
                     # preselection
                     #print '------>Call GetRatesAndErrors for sampleName=',bkgSample
                     rate,rateErr,unscaledRate = GetRatesAndErrors(bkgUnscaledRootFile,scaledRootFile,unscaledTotalEvts,bkgSample,selectionName,isQCD)
+                    #if isQCD:
+                    #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
                     sampleRate+=rate
                     sampleUnscaledRate+=unscaledRate
                     sampleRateErr+=(rateErr*rateErr)
