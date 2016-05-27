@@ -204,10 +204,11 @@ def FillDicts(rootFilename,qcdRootFilename):
 ###################################################################################################
 
 #signal_names = [ "LQ_BetaHalf_M", "LQ_M" ] 
-signal_names = [ "LQ_M" ] 
+signal_names = [ "LQ_M_" ] 
 mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
-systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
+#systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
 #FIXME systematics
+systematics = []
 background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
 
 n_background = len ( background_names  )
