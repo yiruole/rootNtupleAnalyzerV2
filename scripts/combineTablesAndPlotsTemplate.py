@@ -10,14 +10,17 @@ import re
 import math
 
 from combineCommon import *
-## for profiling
-#from cProfile import Profile
-#from pstats import Stats
-#prof = Profile()
-#prof.disable()  # i.e. don't time imports
-#import time
-#prof.enable()  # profiling back on
-## for profiling
+
+doProfiling=False
+# for profiling
+if doProfiling:
+  from cProfile import Profile
+  from pstats import Stats
+  prof = Profile()
+  prof.disable()  # i.e. don't time imports
+  import time
+  prof.enable()  # profiling back on
+# for profiling
 
 
 #---Run
@@ -421,10 +424,11 @@ print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_t
 #---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
 ## for profiling
-#prof.disable()  # don't profile the generation of stats
-#prof.dump_stats('mystats.stats')
-#with open('mystats_output.txt', 'wt') as output:
-#  stats = Stats('mystats.stats', stream=output)
-#  stats.sort_stats('cumulative', 'time')
-#  stats.print_stats()
+if doProfiling:
+  prof.disable()  # don't profile the generation of stats
+  prof.dump_stats('mystats.stats')
+  with open('mystats_output.txt', 'wt') as output:
+    stats = Stats('mystats.stats', stream=output)
+    stats.sort_stats('cumulative', 'time')
+    stats.print_stats()
 
