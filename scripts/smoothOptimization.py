@@ -78,6 +78,7 @@ for key in gDirectory.GetListOfKeys():
         gPad.Modified()
         gPad.Update()
         canvas.SaveAs(graph.GetName().replace('graph_','')+'.png')
+        canvas.SaveAs(graph.GetName().replace('graph_','')+'.pdf')
 
         ### wait for input to keep the GUI (which lives on a ROOT event dispatcher) alive
         #if __name__ == '__main__':
@@ -133,17 +134,33 @@ t.add_row(mejRow)
 print t
 
 # latex table
+#print
+#a = numpy.vstack((lq_masses_reduced,sT_optCuts_reduced, mee_optCuts_reduced, mej_optCuts_reduced))
+##print " \\\\\n".join([" & ".join(map('{0:.3f}'.format, line)) for line in a])
+#for i,line in enumerate(a):
+#  if i==1:
+#    print '$S_T$ [GeV] &',
+#  elif i==2:
+#    print '$m_{ee}$ [GeV] &',
+#  elif i==3:
+#    print '$m_{ej}^{min}$ [GeV] &',
+#  print " & ".join([str(entry) for entry in line]),'\\\\'
+#print
+
+# LQM    ST    Mee   Mej
+#300  & 420  & 100 & 190  \\ \hline
 print
-a = numpy.vstack((lq_masses_reduced,sT_optCuts_reduced, mee_optCuts_reduced, mej_optCuts_reduced))
-#print " \\\\\n".join([" & ".join(map('{0:.3f}'.format, line)) for line in a])
-for i,line in enumerate(a):
-  if i==1:
-    print '$S_T$ [GeV] &',
-  elif i==2:
-    print '$m_{ee}$ [GeV] &',
-  elif i==3:
-    print '$m_{ej}^{min}$ [GeV] &',
-  print " & ".join([str(entry) for entry in line]),'\\\\'
+for i,mass in enumerate(lq_masses):
+  line = str(mass)
+  line+=' & '
+  line+=str(sT_optCuts[i])
+  line+=' & '
+  line+=str(mee_optCuts[i])
+  line+=' & '
+  line+=str(mej_optCuts[i])
+  line+=' \\\\ \n'
+  line+='\hline '
+  print line
 print
 
 # for cut file
