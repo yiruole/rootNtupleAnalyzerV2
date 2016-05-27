@@ -3,9 +3,32 @@
 import os, sys, math
 import subprocess as sp
 from optparse import OptionParser
+from prettytable import PrettyTable
 from ROOT import *
 
 from combineCommon import *
+
+def RoundToN(x, n):
+    #if n < 1:
+    #    raise ValueError("can't round to less than 1 sig digit!")
+    ## number of digits given by n
+    #return "%.*e" % (n-1, x)
+    if isinstance(x,float):
+        return round(x,n)
+    else:
+        return x
+
+def GetTableEntryStr(evts,errStat,errSyst=0):
+    if evts=='-':
+      return evts
+    # rounding
+    evts = RoundToN(evts,2)
+    errStat = RoundToN(errStat,2)
+    if errSyst==0:
+      return str(evts)+' +/- '+str(errStat)
+    else:
+      errSyst = RoundToN(errSyst,2)
+      return str(evts)+' +/- '+str(errStat)+' +/- '+str(errSyst)
 
 def GetXSecTimesIntLumi(sampleNameFromDataset):
     #print 'GetXSecTimesIntLumi(',sampleNameFromDataset+')'
@@ -205,6 +228,7 @@ def FillDicts(rootFilename,qcdRootFilename):
 
 #signal_names = [ "LQ_BetaHalf_M", "LQ_M" ] 
 signal_names = [ "LQ_M_" ] 
+#FIXME add 200 GeV point
 mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
 #FIXME systematics
@@ -464,4 +488,71 @@ for i_signal_name, signal_name in enumerate(signal_names):
         card_file.write("\n\n\n")
 
 print 'datacard written to:',card_file_path
+
+# make final selection tables
+columnNames = ['MLQ','signal','Z+jets','ttbar','QCD(data)','Other','Data','Total BG']
+otherBackgrounds = ['PhotonJets_Madgraph','WJet_Madgraph_HT','DIBOSON','SingleTop']
+#background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
+latexRows = []
+t = PrettyTable(columnNames)
+t.float_format = "4.3"
+selectionNames = ['LQ'+mass_point for mass_point in mass_points]
+selectionNames.insert(0,'preselection')
+for i_signal_name, signal_name in enumerate(signal_names):
+    for selectionName in selectionNames:
+        massPoint = selectionName.replace('LQ','')
+        fullSignalName = signal_name + massPoint
+        # signal events
+        thisSigEvts = '-'
+        thisSigEvtsErr = '-'
+        print 'selectionName=',selectionName
+        if selectionName!='preselection':
+            thisSigEvts = d_signal_rates[fullSignalName][selectionName]
+            thisSigEvtsErr = d_signal_rateErrs[fullSignalName][selectionName]
+        backgroundEvts = {}
+        backgroundEvtsErr = {}
+        totalBackground = 0.0
+        totalBackgroundErrStat = 0.0
+        totalBackgroundErrSyst = 0.0 #FIXME TODO
+        otherBackground = 0.0
+        otherBackgroundErrStat = 0.0
+        for i_background_name ,background_name in enumerate(background_names):
+            thisBkgEvts = d_background_rates[background_name][selectionName]
+            thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
+            thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
+            totalBackground+=thisBkgEvts
+            totalBackgroundErrStat+=(thisBkgEvtsErr*thisBkgEvtsErr)
+            if background_name in otherBackgrounds:
+              otherBackground+=thisBkgEvts
+              otherBackgroundErrStat+=(thisBkgEvtsErr*thisBkgEvtsErr)
+            backgroundEvts[background_name] = thisBkgEvts
+            backgroundEvtsErr[background_name] = thisBkgEvtsErr
+        totalBackgroundErrStat = math.sqrt(totalBackgroundErrStat)
+        otherBackgroundErrStat = math.sqrt(otherBackgroundErrStat)
+        row = [selectionName,GetTableEntryStr(thisSigEvts,thisSigEvtsErr),
+            GetTableEntryStr(backgroundEvts['ZJet_Madgraph_HT'],backgroundEvtsErr['ZJet_Madgraph_HT']),
+            GetTableEntryStr(backgroundEvts['TTbar_Madgraph'],backgroundEvtsErr['TTbar_Madgraph']),
+            GetTableEntryStr(backgroundEvts['QCDFakes_DATA'],backgroundEvtsErr['QCDFakes_DATA']),
+            GetTableEntryStr(otherBackground,otherBackgroundErrStat),
+            GetTableEntryStr(-1,-1),
+            GetTableEntryStr(totalBackground,totalBackgroundErrStat,totalBackgroundErrSyst),
+            ]
+        latexRow = ''
+        for i,entry in enumerate(row):
+            latexRow+=entry
+            if i<len(row)-1:
+                latexRow+=' & '
+            else:
+                latexRow+=' \\ '
+        latexRows.append(latexRow)
+        t.add_row(row)
+print t
+
+print
+# latex table
+for line in latexRows:
+  print line
+print
+
 exit(0)
+
