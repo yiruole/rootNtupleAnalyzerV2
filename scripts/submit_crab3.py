@@ -56,7 +56,7 @@ def validateOptions(options):
     exit(-1)
 
 
-usage = "usage: %prog [options] \nExample: ./scripts/submit_crab3_forSkimToEOS.py -i HeepStudies_v1/MinimumBias__Commissioning10-SD_EG-v9__RECO_short.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -o TestFrancesco/Mydataset -d /store/user/eberry/"
+usage = "usage: %prog [options] \nExample: ./scripts/submit_crab3.py -i HeepStudies_v1/MinimumBias__Commissioning10-SD_EG-v9__RECO_short.txt -c HeepStudies_v1/cutFile_HeepElectronStudiesV1.txt -o TestFrancesco/Mydataset -d /store/user/eberry/"
 
 parser = OptionParser(usage=usage)
 
@@ -208,15 +208,15 @@ scriptfile.write("""#!/bin/bash
 echo "================= Dumping Input files ===================="
 """)
 scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))"\n')
-if options.isSkimTask:
-  scriptfile.write('echo "Put into '+inputListName+'"\n')
-  scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
-  scriptfile.write('echo "cat '+inputListName+':"\n')
-  scriptfile.write('cat '+inputListName+'\n')
-  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
-else:
-  # read the inputlist we pass to crab
-  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+#if options.isSkimTask:
+scriptfile.write('echo "Put into '+inputListName+'"\n')
+scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
+scriptfile.write('echo "cat '+inputListName+':"\n')
+scriptfile.write('cat '+inputListName+'\n')
+scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+#else:
+#  # read the inputlist we pass to crab
+#  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 #scriptfile.write("# localoutputdirectory="+workingDir+"\n")
 # define our own exit code for crab; see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Define_your_own_exit_code_and_ex
 scriptfile.write("""
@@ -280,13 +280,14 @@ if options.isSkimTask:
 
 config.Data.outputPrimaryDataset = dataset.split('__')[0]
 
-if options.isSkimTask:
-  # read input list, convert to LFN
-  # this appears not to be needed, and it's not been used since we changed to the CERN xrootd redirector
-  config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
-else:
-  # just read the first file in, so crab thinks the dataset just has one file and just makes one job
-  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
+#if options.isSkimTask:
+#  # read input list, convert to LFN
+#  # this appears not to be needed, and it's not been used since we changed to the CERN xrootd redirector
+#  config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
+#else:
+#  # just read the first file in, so crab thinks the dataset just has one file and just makes one job
+#  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
+config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
 
 maxLengthPath = max(config.Data.userInputFiles, key=len)
 if len(maxLengthPath) <= 255:
@@ -297,7 +298,7 @@ else:
   exit(-1)
 
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 1 # 1 file per job
+config.Data.unitsPerJob = 5 # 5 files per job
 config.Data.totalUnits = -1
 config.Data.publication = False
 if options.isSkimTask:
@@ -355,11 +356,11 @@ config.Site.storageSite = 'T2_CH_CERN'
 # run jobs at other sites
 config.Data.ignoreLocality = True
 # make more expansive whitelist for skims
-# for analysis, just run at CERN
+# for analysis, just run at CERN+few others
 if options.isSkimTask:
   config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_EE_*','T2_PT_*']
 else:
-  config.Site.whitelist = ['T2_CH_CERN']
+  config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*',]
 
 # some tricks
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3AdvancedTutorial#Exercise_4_user_script
