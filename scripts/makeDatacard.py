@@ -8,6 +8,16 @@ from ROOT import *
 
 from combineCommon import *
 
+def GetSystsFromFile(filename):
+    tree = TTree()
+    # format is like:
+    # LQ300  :     0.0152215
+    # selection point, % difference
+    tree = TTree()
+    branchDesc = 'lqMassPoint/C:percentSyst/F'
+    delimiter=':'
+    tree.ReadFile(filename,branchDesc,delimiter)
+    
 def RoundToN(x, n):
     #if n < 1:
     #    raise ValueError("can't round to less than 1 sig digit!")
@@ -36,12 +46,12 @@ def GetXSecTimesIntLumi(sampleNameFromDataset):
     intLumi = float(options.intLumi)
     return xsection*intLumi
 
-def CalculateScaledRateError(sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass, N_scaled_pass, doScaling=True):
-    #print 'CalculateScaledRateError(',sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass, N_scaled_pass,')'
+def CalculateScaledRateError(sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral, doScaling=True):
+    #print 'CalculateScaledRateError(',sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral,')'
     # binomial error
-    p = N_unscaled_pass/N_unscaled_tot
+    p = N_unscaled_pass_entries/N_unscaled_tot
     q = 1-p
-    w = N_scaled_pass/N_unscaled_pass if N_unscaled_pass != 0 else 0.0
+    w = N_unscaled_pass_integral/N_unscaled_pass_entries if N_unscaled_pass_entries != 0 else 0.0
     unscaledRateError = N_unscaled_tot*w*math.sqrt(p*q/N_unscaled_tot)
     if doScaling:
         xsecTimesIntLumi = GetXSecTimesIntLumi(sampleNameFromDataset)
@@ -95,12 +105,13 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
     xsecTimesIntLumi = GetXSecTimesIntLumi(sampleName)
     if not isDataOrQCD:
         rate = unscaledInt*xsecTimesIntLumi/unscaledTotalEvts
-        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledInt,rate)
+        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledRate,unscaledInt)
     else:
         rate = unscaledInt
-        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledInt,rate,False)
+        rateErr = CalculateScaledRateError(sampleName,unscaledTotalEvts,unscaledRate,unscaledInt,False)
     #print 'INFO: hist','Mej_selected_min_'+selection,' in file:',unscaledRootFile.GetName()
     #print 'unscaledRate=',unscaledRate,'unscaled entries=',mejUnscaledHist.GetEntries()
+    #print 'xsecTimesIntLumi=',xsecTimesIntLumi,'unscaledInt=',unscaledInt,'unscaledRate=',unscaledRate,'unscaledTotalEvts=',unscaledTotalEvts,'rate=unscaledInt*xsecTimesIntLumi/unscaledTotalEvts=',rate
     return rate,rateErr,unscaledRate
 
 def GetUnscaledTotalEvents(unscaledRootFile):
@@ -126,6 +137,7 @@ def FillDicts(rootFilename,qcdRootFilename):
         sampleRateErr = 0
         sampleUnscaledRate = 0
         sampleUnscaledTotalEvts = 0
+        #print 'PRESELECTION bkg_bame=',bkg_name
         for bkgSample in sampleList:
             bkgUnscaledRootFilename = FindUnscaledSampleRootFile(bkgSample,isQCD)
             bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
@@ -137,11 +149,13 @@ def FillDicts(rootFilename,qcdRootFilename):
             # preselection
             #print '------>Call GetRatesAndErrors for sampleName=',bkgSample
             rate,rateErr,unscaledRate = GetRatesAndErrors(bkgUnscaledRootFile,scaledRootFile,unscaledTotalEvts,bkgSample,'preselection',isQCD)
+            #print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
             sampleRate+=rate
             sampleUnscaledRate+=unscaledRate
             sampleRateErr+=(rateErr*rateErr)
             bkgUnscaledRootFile.Close()
         sampleRateErr = math.sqrt(sampleRateErr)
+        #print 'sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
         bkgRatesDict = {}
         bkgRatesDict['preselection'] = sampleRate
         bkgRateErrsDict = {}
@@ -157,6 +171,7 @@ def FillDicts(rootFilename,qcdRootFilename):
                 sampleRate = 0
                 sampleRateErr = 0
                 sampleUnscaledRate = 0
+                #print selectionName,'bkg_bame=',bkg_name
                 for bkgSample in sampleList:
                     bkgUnscaledRootFilename = FindUnscaledSampleRootFile(bkgSample,isQCD)
                     bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
@@ -165,6 +180,7 @@ def FillDicts(rootFilename,qcdRootFilename):
                     # preselection
                     #print '------>Call GetRatesAndErrors for sampleName=',bkgSample
                     rate,rateErr,unscaledRate = GetRatesAndErrors(bkgUnscaledRootFile,scaledRootFile,unscaledTotalEvts,bkgSample,selectionName,isQCD)
+                    #print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
                     #if isQCD:
                     #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
                     sampleRate+=rate
@@ -172,6 +188,7 @@ def FillDicts(rootFilename,qcdRootFilename):
                     sampleRateErr+=(rateErr*rateErr)
                     bkgUnscaledRootFile.Close()
                 sampleRateErr = math.sqrt(sampleRateErr)
+                #print 'sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
                 bkgRatesDict[selectionName] = sampleRate
                 bkgRateErrsDict[selectionName] = sampleRateErr
                 bkgUnscaledRatesDict[selectionName] = sampleUnscaledRate
@@ -250,7 +267,7 @@ d_signal_totalEvents = {}
 
 #FIXME TODO SYSTEMATICS                        
 
-filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSels_22may2016/output_cutTable_lq_eejj/'
+filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSelsUnbugged_24may2016/output_cutTable_lq_eejj/'
 dataMC_filepath   = filePath+'analysisClass_lq_eejj_plots.root'
 qcd_data_filepath = filePath+'analysisClass_lq_eejj_QCD_plots.root'
 
@@ -539,7 +556,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             ]
         latexRow = ''
         for i,entry in enumerate(row):
-            latexRow+=entry
+            latexRow+=entry.replace('+/-','$\pm$')
             if i<len(row)-1:
                 latexRow+=' & '
             else:
