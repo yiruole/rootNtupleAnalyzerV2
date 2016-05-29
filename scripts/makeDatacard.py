@@ -246,7 +246,8 @@ def FillDicts(rootFilename,qcdRootFilename):
 #signal_names = [ "LQ_BetaHalf_M", "LQ_M" ] 
 signal_names = [ "LQ_M_" ] 
 #FIXME add 200 GeV point
-mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
+#mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
+mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
 #FIXME systematics
 systematics = []
@@ -345,6 +346,9 @@ if(os.path.isfile(options.xsection) == False):
 print 'Launched like:'
 for arg in sys.argv:
   print '\t'+arg
+print 'Using tables:'
+print '\t Data/MC:',dataMC_filepath
+print '\t QCD(data):',qcd_data_filepath
 
 # get xsections
 xsectionDict = ParseXSectionFile(options.xsection)
@@ -522,7 +526,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         # signal events
         thisSigEvts = '-'
         thisSigEvtsErr = '-'
-        print 'selectionName=',selectionName
+        #print 'selectionName=',selectionName
         if selectionName!='preselection':
             thisSigEvts = d_signal_rates[fullSignalName][selectionName]
             thisSigEvtsErr = d_signal_rateErrs[fullSignalName][selectionName]
@@ -556,12 +560,16 @@ for i_signal_name, signal_name in enumerate(signal_names):
             ]
         latexRow = ''
         for i,entry in enumerate(row):
-            latexRow+=entry.replace('+/-','$\pm$')
+            entry = entry.replace('+/-','$\pm$')
+            entry = entry.replace('LQ','')
+            latexRow+=entry
             if i<len(row)-1:
                 latexRow+=' & '
             else:
-                latexRow+=' \\ '
+                latexRow+=' \\\\ '
         latexRows.append(latexRow)
+        if selectionName=='preselection':
+          latexRows.append('\\hline')
         t.add_row(row)
 print t
 
