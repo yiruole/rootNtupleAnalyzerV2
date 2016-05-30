@@ -8,16 +8,50 @@ from ROOT import *
 
 from combineCommon import *
 
-def GetSystsFromFile(filename):
-    tree = TTree()
+
+def GetSystDictFromFile(filename):
+    # go custom text parsing :`(
     # format is like:
     # LQ300  :     0.0152215
-    # selection point, % difference
-    tree = TTree()
-    branchDesc = 'lqMassPoint/C:percentSyst/F'
-    delimiter=':'
-    tree.ReadFile(filename,branchDesc,delimiter)
-    
+    # selection point, 100*(deltaX/X) [rel. change in %]
+    systDict = {}
+    with open(filename,'r') as thisFile:
+        for line in thisFile:
+            line = line.strip()
+            #print 'line=',line,'; with length=',len(line)
+            if len(line)==0:
+                continue
+            #print 'line.strip()="'+line.strip()+'"'
+            #print 'line.strip().split(":")=',line.strip().split(':')
+            items = line.split(':')
+            #print 'items[0].strip()='+items[0].strip()
+            #print 'items[1].strip()='+items[1].strip()
+            selectionPoint = items[0].strip()
+            if '_' in selectionPoint:
+                bkgName = selectionPoint.split('_')[1]
+                if not bkgName in syst_background_names:
+                    print 'ERROR: unknown background named:',bgkName,'not found in list of systematics background names:',syst_background_names
+                selectionPoint = selectionPoint.split('_')[0]
+                if not bkgName in systDict.keys():
+                    systDict[bkgName] = {}
+                systDict[bkgName][selectionPoint] = float(items[1].strip())/100.0
+            # signal
+            systDict[selectionPoint] = float(items[1].strip())/100.0
+    return systDict
+
+def FillSystDicts(systNames,isBackground=True):
+    systDict = {}
+    for syst in systNames:
+        if isBackground:
+          filePath = systematics_filepath+syst+'_sys.dat'
+        else:
+          filePath = systematics_filepath+'LQ'+syst+'sys.dat'
+        thisSystDict = GetSystDictFromFile(filePath)
+        # this will give the form (for background):
+        #   systDict['Trigger'][bkgname]['LQXXXX'] = value
+        systDict[syst] = thisSystDict
+    return systDict
+
 def RoundToN(x, n):
     #if n < 1:
     #    raise ValueError("can't round to less than 1 sig digit!")
@@ -249,12 +283,18 @@ signal_names = [ "LQ_M_" ]
 #mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
 mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
+systematicsNamesBackground = [ "Trigger", "reco", "PU", "PDF", "lumi", "JER", "JEC", "HEEP", "elscale", "Znormalisation", "DYshape", "TTnormalisation" ]
+systematicsNamesSignal = [ "Trigger", "reco", "PU", "lumi", "JER", "JEC", "HEEP", "elscale" ] #FIXME TODO PDF
 #FIXME systematics
 systematics = []
 background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
+# background names for systs
+syst_background_names = ['GJets', '', 'TTbar', 'WJets', 'DY', 'Diboson', 'Singletop']
+maxLQselectionBkg = 'LQ1100' # max background selection point used
 
 n_background = len ( background_names  )
-n_systematics = len ( systematics ) + n_background + 1
+#n_systematics = len ( systematics ) + n_background + 1
+n_systematics = len ( systematicsNamesBackground ) + n_background + 1
 n_channels = 1
 
 d_background_rates = {}
@@ -266,11 +306,10 @@ d_signal_rateErrs = {}
 d_signal_unscaledRates = {}
 d_signal_totalEvents = {}
 
-#FIXME TODO SYSTEMATICS                        
-
 filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSelsUnbugged_24may2016/output_cutTable_lq_eejj/'
 dataMC_filepath   = filePath+'analysisClass_lq_eejj_plots.root'
 qcd_data_filepath = filePath+'analysisClass_lq_eejj_QCD_plots.root'
+systematics_filepath = '/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/systematics/30_05_2016/'
 
 
 ###################################################################################################
@@ -349,6 +388,7 @@ for arg in sys.argv:
 print 'Using tables:'
 print '\t Data/MC:',dataMC_filepath
 print '\t QCD(data):',qcd_data_filepath
+print 'Using systematics from:',systematics_filepath
 
 # get xsections
 xsectionDict = ParseXSectionFile(options.xsection)
@@ -365,8 +405,20 @@ for lin in open( options.inputList ):
     xsection_val = lookupXSection(SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
 
 
-#
+# rates/etc.
 FillDicts(dataMC_filepath,qcd_data_filepath)
+# systematics
+backgroundSystDict = FillSystDicts(systematicsNamesBackground)
+signalSystDict = FillSystDicts(systematicsNamesSignal,False)
+# print one of them for checking
+#for syst in backgroundSystDict.keys():
+#    print 'Syst is:',syst
+#    print 'selection\t\tvalue'
+#    for selection in sorted(backgroundSystDict[syst].keys()):
+#        print selection+'\t\t'+str(backgroundSystDict[syst][selection])
+#    break
+#print signalSystDict
+#print backgroundSystDict
 
 card_file_path = "tmp_card_file.txt"
 card_file = open ( card_file_path, "w" ) 
@@ -401,7 +453,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             line = line + "1 " 
         card_file.write (line + "\n") 
 
-        line = "process " + signal_name + "_" + mass_point + " "
+        line = "process " + signal_name + mass_point + " "
         for background_name in background_names:
             line = line + background_name + " "
         card_file.write (line + "\n") 
@@ -439,6 +491,45 @@ for i_signal_name, signal_name in enumerate(signal_names):
         #            line = line + str(1.0 + d_systematics_eejj[systematic][background_name][i_mass_point] / 100.) + " "
         #            
         #    card_file.write ( line + "\n")
+
+        # recall the form: signal --> sysDict['Trigger']['LQXXXX'] = value
+        #             backgrounds --> sysDict[bkgName]['Trigger']['LQXXXX'] = value
+        for syst in signalSystDict.keys():
+            line = syst + ' lnN '
+            line += str(1+signalSystDict[syst][selectionName])
+            line += ' '
+            #else:
+            #    print 'ERROR: could not find syst "',syst,'" in signalSystDict.keys():',signalSystDict.keys()
+            for ibkg,background_name in enumerate(syst_background_names):
+                #print 'try to lookup backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
+                #print 'syst="'+syst+'"'
+                if background_name=='':
+                    #print 'empty background_name; use - and continue'
+                    line += ' - '
+                    continue
+                if selectionName not in backgroundSystDict[syst][background_name].keys():
+                    selectionName = maxLQselectionBkg
+                try:
+                  line += str(1+backgroundSystDict[syst][background_name][selectionName])+' '
+                except KeyError:
+                    print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
+            card_file.write(line+'\n')
+
+        # background-only special systs: "Znormalisation", "DYshape", "TTnormalisation"
+        for syst in ["Znormalisation", "DYshape", "TTnormalisation"]:
+            line = syst + ' lnN - '
+            for ibkg,background_name in enumerate(syst_background_names):
+               if background_name=='':
+                   #print 'empty background_name; use - and continue'
+                   line += ' - '
+                   continue
+               if selectionName not in backgroundSystDict[syst][background_name].keys():
+                   selectionName = maxLQselectionBkg
+               try:
+                 line += str(1+backgroundSystDict[syst][background_name][selectionName])+' '
+               except KeyError:
+                   print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
+            card_file.write(line+'\n')
         
         card_file.write("\n")
 
