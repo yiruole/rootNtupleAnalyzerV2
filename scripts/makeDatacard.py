@@ -294,7 +294,9 @@ maxLQselectionBkg = 'LQ1100' # max background selection point used
 
 n_background = len ( background_names  )
 #n_systematics = len ( systematics ) + n_background + 1
-n_systematics = len ( systematicsNamesBackground ) + n_background + 1
+#n_systematics = len ( systematicsNamesBackground ) + n_background + 1
+# XXX FIXME TEST
+n_systematics = 19
 n_channels = 1
 
 d_background_rates = {}
@@ -496,7 +498,11 @@ for i_signal_name, signal_name in enumerate(signal_names):
         #             backgrounds --> sysDict[bkgName]['Trigger']['LQXXXX'] = value
         for syst in signalSystDict.keys():
             line = syst + ' lnN '
-            line += str(1+signalSystDict[syst][selectionName])
+            if selectionName not in signalSystDict[syst].keys():
+                selectionNameSigSyst = maxLQselectionBkg
+            else:
+                selectionNameSigSyst = selectionName
+            line += str(1+signalSystDict[syst][selectionNameSigSyst])
             line += ' '
             #else:
             #    print 'ERROR: could not find syst "',syst,'" in signalSystDict.keys():',signalSystDict.keys()
@@ -508,43 +514,37 @@ for i_signal_name, signal_name in enumerate(signal_names):
                     line += ' - '
                     continue
                 if selectionName not in backgroundSystDict[syst][background_name].keys():
-                    selectionName = maxLQselectionBkg
+                    selectionNameBkgSyst = maxLQselectionBkg
+                else:
+                    selectionNameBkgSyst = selectionName
                 try:
-                  line += str(1+backgroundSystDict[syst][background_name][selectionName])+' '
+                  line += str(1+backgroundSystDict[syst][background_name][selectionNameBkgSyst])+' '
                 except KeyError:
-                    print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
+                    print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionNameBkgSyst+']'
             card_file.write(line+'\n')
 
         # background-only special systs: "Znormalisation", "DYshape", "TTnormalisation"
         for syst in ["Znormalisation", "DYshape", "TTnormalisation"]:
             line = syst + ' lnN - '
             for ibkg,background_name in enumerate(syst_background_names):
-               if background_name=='':
-                   #print 'empty background_name; use - and continue'
-                   line += ' - '
-                   continue
-               if selectionName not in backgroundSystDict[syst][background_name].keys():
-                   selectionName = maxLQselectionBkg
-               try:
-                 line += str(1+backgroundSystDict[syst][background_name][selectionName])+' '
-               except KeyError:
-                   print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
+                if background_name=='':
+                    #print 'empty background_name; use - and continue'
+                    line += ' - '
+                    continue
+                if selectionName not in backgroundSystDict[syst][background_name].keys():
+                    selectionNameBkgSyst = maxLQselectionBkg
+                else:
+                    selectionNameBkgSyst = selectionName
+                try:
+                  line += str(1+backgroundSystDict[syst][background_name][selectionNameBkgSyst])+' '
+                except KeyError:
+                    print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionNameBkgSyst+']'
             card_file.write(line+'\n')
         
         card_file.write("\n")
 
         # background stat error part
         for i_background_name ,background_name in enumerate(background_names):
-
-            #if "BetaHalf" in signal_name: 
-            #    n       = float (enujj_n[background_name][i_mass_point]       )
-            #    e       = float (enujj_e[background_name][i_mass_point]       )
-            #    entries = float (enujj_entries [background_name][i_mass_point])
-            #else:
-            #    n       = float (eejj_n[background_name][i_mass_point]       )
-            #    e       = float (eejj_e[background_name][i_mass_point]       )
-            #    entries = float (eejj_entries [background_name][i_mass_point])
-
             thisBkgEvts = d_background_rates[background_name][selectionName]
             thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
@@ -572,6 +572,12 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 card_file.write (line_ln + "\n")
             else:
                 card_file.write (line_gm + "\n")
+            #if background_name=='TTbar_Madgraph':
+            #    print 'selectionName=',selectionName
+            #    print 'thisBkgEvts=',thisBkgEvts
+            #    print 'thisBkgEvtsErr=',thisBkgEvtsErr
+            #    print 'thisBkgTotalEntries=',thisBkgTotalEntries
+            #    print 'line_gm=',line_gm
             
         # signal stat error part
         # always use lnN error
