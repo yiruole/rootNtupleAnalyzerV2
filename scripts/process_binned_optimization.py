@@ -22,6 +22,7 @@ d_background_filepaths = {
     }
 
 d_signal_filepaths_list = [ 
+    #{ "200" : ["LQ_M200", mc_filepath, 1.0 ] } ,
     #{ "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
     { "300" : ["LQ_M300", mc_filepath, 1.0 ] } ,
     #{ "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
