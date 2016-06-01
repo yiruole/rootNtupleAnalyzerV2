@@ -5,7 +5,7 @@ ZJet_Madgraph_HT600toInf      /DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-ma
 ZJet_Madgraph_HT    ZJet_Madgraph_HT100to200 ZJet_Madgraph_HT200to400 ZJet_Madgraph_HT400to600 ZJet_Madgraph_HT600toInf
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 ZJet_Madgraph_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM 
-ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM
+#ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM
 #ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
 #ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
 #ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
@@ -17,7 +17,7 @@ ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Ru
 #ZJet_amcatnlo_M-1500to2000    DYJetsToLL_M-1500to2000
 #ZJet_amcatnlo_M-2000to3000    DYJetsToLL_M-2000to3000
 
-WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
+#WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 WJet_Madgraph_HT100to200    /WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 WJet_Madgraph_HT200to400    /WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
@@ -33,7 +33,7 @@ TTJets_SingleLeptFromT_ext1       /TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-mad
 TTJets_SingleLeptFromTbar_ext1    /TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2_ext1-v1/MINIAODSIM
 TTbar_Madgraph       	TTJets_DiLept_ext1 TTJets_SingleLeptFromT_ext1 TTJets_SingleLeptFromTbar_ext1
 TTbar_Madgraph_Inc    /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM
-TTbar_amcatnlo_Inc    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
+#TTbar_amcatnlo_Inc    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 
 #TTbar_FromData  SingleMu__Run2012A-recover-06Aug2012-v1 SingleMu__Run2012A-13Jul2012-v1 SingleMu__Run2012B-13Jul2012-v1 SingleMu__Run2012C-24Aug2012-v1 SingleMu__Run2012C-PromptReco-v2 SingleMu__Run2012D-PromptReco-v1
 
@@ -76,10 +76,10 @@ ALLBKG_MG_HT		ZJet_Madgraph_HT TTbar_Madgraph WJet_Madgraph_HT SingleTop PhotonJ
 OTHERBKG_MG_HT	WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
 ALLBKG_MGInc		ZJet_Madgraph_Inc TTbar_Madgraph WJet_Madgraph_Inc SingleTop PhotonJets_Madgraph DIBOSON
 OTHERBKG_MGInc	WJet_Madgraph_Inc SingleTop PhotonJets_Madgraph DIBOSON
-ALLBKG_amcAtNLOInc		ZJet_amcatnlo_Inc TTbar_Madgraph WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
-OTHERBKG_amcAtNLOInc	WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
+#ALLBKG_amcAtNLOInc		ZJet_amcatnlo_Inc TTbar_Madgraph WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
+#OTHERBKG_amcAtNLOInc	WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
 ALLBKG_MGInc_TTBar		ZJet_Madgraph_Inc TTbar_Madgraph_Inc WJet_Madgraph_Inc SingleTop PhotonJets_Madgraph DIBOSON
-ALLBKG_amcAtNLOInc_TTBar		ZJet_amcatnlo_Inc TTbar_amcatnlo_Inc WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
+#ALLBKG_amcAtNLOInc_TTBar		ZJet_amcatnlo_Inc TTbar_amcatnlo_Inc WJet_amcatnlo_Inc SingleTop PhotonJets_Madgraph DIBOSON
 
 SingleElectron_2015D-05Oct2015        /SingleElectron/Run2015D-05Oct2015-v1/MINIAOD
 SingleElectron_2015D-PromptReco-v4    /SingleElectron/Run2015D-PromptReco-v4/MINIAOD
