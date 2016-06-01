@@ -1,0 +1,3 @@
+QCDFakes_SinglePhoton_2015D-05Oct2015        /SinglePhoton/Run2015D-05Oct2015-v1/MINIAOD
+QCDFakes_SinglePhoton_2015D-PromptReco-v4    /SinglePhoton/Run2015D-PromptReco-v4/MINIAOD
+QCDFakes_DATA    QCDFakes_SinglePhoton_2015D-05Oct2015    QCDFakes_SinglePhoton_2015D-PromptReco-v4
