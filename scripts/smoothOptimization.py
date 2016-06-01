@@ -4,6 +4,8 @@ import os, copy, math, sys, numpy
 from prettytable import PrettyTable
 from ROOT import *
 
+from process_binned_optimization import *
+
 gROOT.SetBatch(True)
 
 optimizationFileName = 'optimization.root'
