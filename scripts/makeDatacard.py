@@ -45,7 +45,7 @@ def FillSystDicts(systNames,isBackground=True):
         if isBackground:
           filePath = systematics_filepath+syst+'_sys.dat'
         else:
-          filePath = systematics_filepath+'LQ'+syst+'sys.dat'
+          filePath = systematics_filepath+'LQ'+syst+'_sys.dat'
         thisSystDict = GetSystDictFromFile(filePath)
         # this will give the form (for background):
         #   systDict['Trigger'][bkgname]['LQXXXX'] = value
@@ -283,8 +283,8 @@ signal_names = [ "LQ_M_" ]
 #mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
 mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
-systematicsNamesBackground = [ "Trigger", "reco", "PU", "PDF", "lumi", "JER", "JEC", "HEEP", "elscale", "Znormalisation", "DYshape", "TTnormalisation" ]
-systematicsNamesSignal = [ "Trigger", "reco", "PU", "lumi", "JER", "JEC", "HEEP", "elscale" ] #FIXME TODO PDF
+systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "Znormalisation", "DYshape", "TTnormalisation" ]
+systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale" ]
 #FIXME systematics
 systematics = []
 background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
@@ -294,9 +294,10 @@ maxLQselectionBkg = 'LQ1100' # max background selection point used
 
 n_background = len ( background_names  )
 #n_systematics = len ( systematics ) + n_background + 1
-#n_systematics = len ( systematicsNamesBackground ) + n_background + 1
+# all bkg systematics, plus stat 'systs' for all bkg plus signal
+n_systematics = len ( systematicsNamesBackground ) + n_background + 1
 # XXX FIXME TEST
-n_systematics = 19
+#n_systematics = 19
 n_channels = 1
 
 d_background_rates = {}
@@ -311,7 +312,8 @@ d_signal_totalEvents = {}
 filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSelsUnbugged_24may2016/output_cutTable_lq_eejj/'
 dataMC_filepath   = filePath+'analysisClass_lq_eejj_plots.root'
 qcd_data_filepath = filePath+'analysisClass_lq_eejj_QCD_plots.root'
-systematics_filepath = '/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/systematics/30_05_2016/'
+#systematics_filepath = '/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/systematics/30_05_2016/'
+systematics_filepath = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_30_05_2016/'
 
 
 ###################################################################################################
@@ -478,21 +480,6 @@ for i_signal_name, signal_name in enumerate(signal_names):
 
         #print signal_name, mass_point, total_signal, total_bkg, total_data
         print signal_name, mass_point, total_signal, total_bkg
-
-        #FIXME systs
-        #for systematic in systematics :
-        #    
-        #    line = systematic + " lnN "
-        #    if "BetaHalf" in signal_name: 
-        #        line = line + str(1.0 + d_systematics_enujj[systematic]["LQ"][i_mass_point] / 100.) + " "
-        #        for background_name in background_names:
-        #            line = line + str(1.0 + d_systematics_enujj[systematic][background_name][i_mass_point] / 100.) + " "
-        #    else:
-        #        line = line + str(1.0 + d_systematics_eejj[systematic]["LQ"][i_mass_point] / 100.) + " "
-        #        for background_name in background_names:
-        #            line = line + str(1.0 + d_systematics_eejj[systematic][background_name][i_mass_point] / 100.) + " "
-        #            
-        #    card_file.write ( line + "\n")
 
         # recall the form: signal --> sysDict['Trigger']['LQXXXX'] = value
         #             backgrounds --> sysDict[bkgName]['Trigger']['LQXXXX'] = value
