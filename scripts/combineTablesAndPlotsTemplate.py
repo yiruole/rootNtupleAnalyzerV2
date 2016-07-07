@@ -26,6 +26,7 @@ if doProfiling:
 #---Run
 # Turn off warning messages
 gROOT.ProcessLine("gErrorIgnoreLevel=2001;")
+
 #---Option Parser
 #--- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
 usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
@@ -62,6 +63,10 @@ parser.add_option("-s", "--sampleListForMerging", dest="sampleListForMerging",
 
 parser.add_option("-t", "--tablesOnly", action="store_true",dest="tablesOnly",default=False,
                   help="only combine tables, do not do plots",
+                  metavar="TABLESONLY")
+
+parser.add_option("-b", "--ttbarBkg", action="store_true",dest="ttbarBkg",default=False,
+                  help="do the ttbar background prediction from data; don't write out any other plots",
                   metavar="TABLESONLY")
 
 (options, args) = parser.parse_args()
@@ -385,39 +390,88 @@ for S,sample in enumerate( dictSamples ):
     #--- Write tables
     WriteTable(dictFinalTables[sample], sample, outputTableFile)
 
+if options.ttbarBkg:
+    # special actions for TTBarFromData
+    # subtract nonTTbarBkgMC from TTbarRaw
+    # FIXME: we hardcode the sample names for now
+    ttbarDataRawSampleName = 'TTBarUnscaledRawFromDATA'
+    ttbarDataPredictionTable = dictFinalTables[ttbarDataRawSampleName]
+    nonTTbarMCBkgSampleName = 'NONTTBARBKG_MG_HT'
+    nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
+    ttBarPredName = 'TTBarFromDATA'
+    Rfactor = 0.442 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.002
+    #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
+    #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
+    # remove the x1000 from the nonTTbarBkgMC
+    ScaleTable(nonTTbarMCBkgTable,1.0/1000.0,0.0)
+    #print '1) WHAT DOES THE SCALED MC TABLE LOOK LIKE?'
+    #WriteTable(nonTTbarMCBkgTable, nonTTbarMCBkgSampleName, outputTableFile)
+    # subtract the nonTTBarBkgMC from the ttbarRawData, NOT zeroing entries where we run out of data
+    SubtractTables(nonTTbarMCBkgTable,ttbarDataPredictionTable)
+    #print '2) WHAT DOES THE SUBTRACTEDTABLE LOOK LIKE?'
+    #WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
+    # scale by Ree,emu
+    ScaleTable(ttbarDataPredictionTable,Rfactor,errRfactor)
+    #print '3) WHAT DOES THE RfactroCorrectedTABLE LOOK LIKE?'
+    #WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
+    SquareTableErrorsForEfficiencyCalc(ttbarDataPredictionTable)
+    CalculateEfficiency(ttbarDataPredictionTable)
+    #print '4) WHAT DOES THE SCALEDTABLE AFTER EFF CALCULATION LOOK LIKE?'
+    WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
+
 outputTableFile.close
+
 
 # write histos
 if not options.tablesOnly:
-  outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
-  
-  # get total hists
-  nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-  maxSteps = 50
-  if nHistos < maxSteps:
-    steps = nHistos
-  else:
-    steps = maxSteps
-  
-  print 'Writing histos:'
-  progressString = '0% ['+' '*steps+'] 100%'
-  print progressString,
-  print '\b'*(len(progressString)-3),
-  sys.stdout.flush()
-  
-  nForProgress = 0
-  for sample in dictFinalHisto:
-      for n, histo in enumerate ( dictFinalHisto[sample] ):
-          if (nForProgress % (nHistos/steps))==0:
-              print '\b.',
-              sys.stdout.flush()
-          dictFinalHisto[sample][histo].Write()
-          nForProgress+=1
-  
-  print '\b] 100%'
-  
-  outputTfile.Close()
-  print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
+    outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
+    
+    if not options.ttbarBkg:
+        # get total hists
+        nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
+        maxSteps = 50
+        if nHistos < maxSteps:
+          steps = nHistos
+        else:
+          steps = maxSteps
+        
+        print 'Writing histos:'
+        progressString = '0% ['+' '*steps+'] 100%'
+        print progressString,
+        print '\b'*(len(progressString)-3),
+        sys.stdout.flush()
+        
+        nForProgress = 0
+        for sample in dictFinalHisto:
+            for n, histo in enumerate ( dictFinalHisto[sample] ):
+                if (nForProgress % (nHistos/steps))==0:
+                    print '\b.',
+                    sys.stdout.flush()
+                dictFinalHisto[sample][histo].Write()
+                nForProgress+=1
+        
+        print '\b] 100%'
+
+    else:
+        # special actions for TTBarFromData
+        # subtract nonTTbarBkgMC from TTbarRaw
+        ttbarDataPredictionHistos = dictFinalHisto[ttbarDataRawSampleName]
+        #print 'ttbarDataPredictionHistos:',ttbarDataPredictionHistos
+        for n, histo in ttbarDataPredictionHistos.iteritems():
+            # subtract the nonTTBarBkgMC from the ttbarRawData
+            # find nonTTbarMCBkg histo; I assume they are in the same order here
+            histoToSub = dictFinalHisto[nonTTbarMCBkgSampleName][n]
+            #print 'n=',n,'histo=',histo
+            histoTTbarPred = histo.Clone()
+            histoTTbarPred.Add(histoToSub,-1)
+            # scale by Rfactor
+            histoTTbarPred.Scale(Rfactor)
+            histoTTbarPred.SetName(re.sub('__.*?__','__'+ttBarPredName+'__',histoTTbarPred.GetName(), flags=re.DOTALL))
+            histoTTbarPred.Write()
+
+    outputTfile.Close()
+    print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
 
 print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat"
 

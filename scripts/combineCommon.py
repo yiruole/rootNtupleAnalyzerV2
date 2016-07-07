@@ -230,7 +230,97 @@ def UpdateTable(inputTable, outputTable):
     return
             
 
+def SubtractTables(inputTable, outputTable, zeroNegatives = False):
+    # subtract the inputTable from the outputTable
+    if not outputTable:
+        print 'ERROR: no outputTable found! cannot subtract input from nothing; FATAL'
+        exit(-1)
+    else:
+        for j,line in enumerate( inputTable ):
+            #print 'outputTable[int(',j,')][N]=',outputTable[int(j)]['N'],'inputTable[',j,']','[N]=',inputTable[j]['N']
+            newN = float(outputTable[int(j)]['N']) - float(inputTable[j]['N'])
+            newNpass = float(outputTable[int(j)]['Npass']) - float(inputTable[j]['Npass'])
+            if newN < 0.0 and zeroNegatives:
+                newN = 0.0
+            if newNpass < 0.0 and zeroNegatives:
+                newNpass = 0.0
+            outputTable[int(j)]={'variableName': inputTable[j]['variableName'],
+                                 'min1': inputTable[j]['min1'],
+                                 'max1': inputTable[j]['max1'],
+                                 'min2': inputTable[j]['min2'],
+                                 'max2': inputTable[j]['max2'],
+                                 'N':       newN,
+                                 'errN':    math.sqrt(pow(float(outputTable[int(j)]['errN']),2) + pow( float(inputTable[j]['errN']), 2 )),
+                                 'Npass':       newNpass,
+                                 'errNpass':    math.sqrt(pow(float(outputTable[int(j)]['errNpass']),2) + pow( float(inputTable[j]['errNpass']), 2 )),
+                                 'EffRel':      float(0),
+                                 'errEffRel':   float(0),
+                                 'EffAbs':      float(0),
+                                 'errEffAbs':   float(0),
+                                 }
+    return
+            
+
+def ScaleTable(inputTable, scaleFactor, errScaleFactor):
+    if not inputTable:
+        print 'ERROR: no inputTable found! cannot scale nothing; FATAL'
+        exit(-1)
+    else:
+        for j,line in enumerate( inputTable ):
+            nOrig = float(inputTable[int(j)]['N'])
+            errNorig = float(inputTable[int(j)]['errN'])
+            nNew =  nOrig * scaleFactor
+            if nOrig > 0.0:
+              errNnew = nNew*math.sqrt(pow(errNorig/nOrig,2)+pow(errScaleFactor/scaleFactor,2))
+            else:
+              errNnew = nNew*math.sqrt(pow(errNorig/nOrig,2)+pow(errScaleFactor/scaleFactor,2))
+            nPassOrig = float(inputTable[int(j)]['Npass'])
+            errNPassOrig = float(inputTable[j]['errNpass'])
+            nPassNew =  nPassOrig * scaleFactor
+            errNpassNew = nPassNew*math.sqrt(pow(errNPassOrig/nPassOrig,2)+pow(errScaleFactor/scaleFactor,2))
+            
+            inputTable[int(j)]={'variableName': inputTable[j]['variableName'],
+                                 'min1': inputTable[j]['min1'],
+                                 'max1': inputTable[j]['max1'],
+                                 'min2': inputTable[j]['min2'],
+                                 'max2': inputTable[j]['max2'],
+                                 'N':           nNew,
+                                 'errN':        errNnew,
+                                 'Npass':       nPassNew,
+                                 'errNpass':    errNpassNew,
+                                 'EffRel':      float(0),
+                                 'errEffRel':   float(0),
+                                 'EffAbs':      float(0),
+                                 'errEffAbs':   float(0),
+                                 }
+    return
+            
+
+def SquareTableErrorsForEfficiencyCalc(table):
+    if not table:
+        print 'ERROR: no inputTable found! cannot convert nothing; FATAL'
+        exit(-1)
+    else:
+        for j,line in enumerate( table ):
+            table[int(j)]={'variableName': table[j]['variableName'],
+                                 'min1': table[j]['min1'],
+                                 'max1': table[j]['max1'],
+                                 'min2': table[j]['min2'],
+                                 'max2': table[j]['max2'],
+                                 'N':          float(table[j]['N']) ,
+                                 'errN':       pow(float(table[j]['errN']),2) , 
+                                 'Npass':      float(table[j]['Npass']) ,
+                                 'errNpass':   pow(float(table[j]['errNpass']),2) , 
+                                 'EffRel':      float(0),
+                                 'errEffRel':   float(0),
+                                 'EffAbs':      float(0),
+                                 'errEffAbs':   float(0),
+                                 }
+    return
+            
+
 def CalculateEfficiency(table):
+    # this also (sneakily) converts 'errors' in the tables (which are really errSqr) to sqrt(errors)
     for j,line in enumerate( table ):
         if( j == 0):
             table[int(j)] = {'variableName':       table[int(j)]['variableName'],
