@@ -73,7 +73,13 @@ void baseClass::init()
   //output_root_ = new TFile(&output_root_title[0],"RECREATE");
 
   //directly from string
-  output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
+  if(*outputFileName_ != NULL)
+    output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
+  else
+  {
+    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
+    exit(-1);
+  }
 
   // Skim stuff
   produceSkim_ = false;
