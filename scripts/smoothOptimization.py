@@ -8,8 +8,8 @@ from process_binned_optimization import *
 
 gROOT.SetBatch(True)
 
-optimizationFileName = 'optimization.root'
-optimizationTFile = TFile(optimizationFileName)
+optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/1jun_ttbarRescale/optimization.root'
+optimizationTFile = TFile.Open(optimizationFileName)
 optimizationTFile.cd()
 
 maxMassPointToUse = 1500
@@ -58,12 +58,12 @@ for key in gDirectory.GetListOfKeys():
         mg.GetXaxis().SetTitleSize(0.04)
         mg.GetXaxis().SetTitleOffset(1.1)
         mg.GetXaxis().SetNdivisions(220)
-        mg.GetXaxis().SetRangeUser(250,2050)
+        mg.GetXaxis().SetRangeUser(150,2050)
         mg.GetXaxis().SetLabelSize(0.03)
         mg.GetYaxis().SetLabelSize(0.03)
         if 'sT' in graph.GetName():
           mg.GetYaxis().SetTitle('Opt. S_{T} cut [GeV]')
-        elif 'e1e1' in graph.GetName():
+        elif 'e1e2' in graph.GetName():
           mg.GetYaxis().SetTitle('Opt. M(ee) cut [GeV]')
         elif 'ej' in graph.GetName():
           mg.GetYaxis().SetTitle('Opt. M_{min}(ej) cut [GeV]')

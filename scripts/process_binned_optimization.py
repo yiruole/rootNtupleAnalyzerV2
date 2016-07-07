@@ -1,10 +1,14 @@
 import os, copy, math, sys, numpy
 from ROOT import *
 
+# these apparently have ttbar rescale applied
 mc_filepath         = os.environ["LQDATA"] + "/RunII/eejj_analysis_opt_16may2016/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
 qcd_data_filepath = os.environ["LQDATA"] + "/RunII/eejj_analysis_opt_16may2016/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
 #
 txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/20may_veryFineOptimization/optimizationCuts.txt"
+
+# if false, uses asymptotic significance formula
+usePunzi = True
 
 jitter = 2
 
@@ -13,7 +17,6 @@ d_background_filepaths = {
     "qcd"   : [ "QCDFakes_DATA"  , qcd_data_filepath  , 1.0  ],
     "ttbar" : [ "TTbar_Madgraph"      , mc_filepath  , 1.0  ],
     #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
-    #"qcd"   : [ "QCDFakes_DATA"      , mc_filepath  , 1.0  ],
     "wjet"  : [ "WJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "zjet"  : [ "ZJet_Madgraph_HT"    , mc_filepath  , 1.0  ],
     "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
@@ -22,47 +25,49 @@ d_background_filepaths = {
     }
 
 d_signal_filepaths_list = [ 
-    #{ "200" : ["LQ_M200", mc_filepath, 1.0 ] } ,
-    #{ "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
+    { "200" : ["LQ_M200", mc_filepath, 1.0 ] } ,
+    { "250" : ["LQ_M250", mc_filepath, 1.0 ] } ,
     { "300" : ["LQ_M300", mc_filepath, 1.0 ] } ,
-    #{ "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
-    #{ "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
-    #{ "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
-    #{ "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
-    #{ "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
-    #{ "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
-    #{ "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
-    #{ "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
-    #{ "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
-    #{ "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
-    #{ "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
-    #{ "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
-    #{ "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
-    #{ "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
-    #{ "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
-    #{ "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
-    #{ "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
-    #{ "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
-    #{ "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
-    #{ "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
-    #{ "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
-    #{ "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
-    #{ "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
-    #{ "1500" : ["LQ_M1500", mc_filepath, 1.0 ] } , 
-    #{ "1550" : ["LQ_M1550", mc_filepath, 1.0 ] } , 
-    #{ "1600" : ["LQ_M1600", mc_filepath, 1.0 ] } , 
-    #{ "1650" : ["LQ_M1650", mc_filepath, 1.0 ] } , 
-    #{ "1700" : ["LQ_M1700", mc_filepath, 1.0 ] } , 
-    #{ "1750" : ["LQ_M1750", mc_filepath, 1.0 ] } , 
-    #{ "1800" : ["LQ_M1800", mc_filepath, 1.0 ] } , 
-    #{ "1850" : ["LQ_M1850", mc_filepath, 1.0 ] } , 
-    #{ "1900" : ["LQ_M1900", mc_filepath, 1.0 ] } , 
-    #{ "1950" : ["LQ_M1950", mc_filepath, 1.0 ] } , 
-    #{ "2000" : ["LQ_M2000", mc_filepath, 1.0 ] } , 
+    { "350" : ["LQ_M350", mc_filepath, 1.0 ] } ,
+    { "400" : ["LQ_M400", mc_filepath, 1.0 ] } ,
+    { "450" : ["LQ_M450", mc_filepath, 1.0 ] } ,
+    { "500" : ["LQ_M500", mc_filepath, 1.0 ] } ,
+    { "550" : ["LQ_M550", mc_filepath, 1.0 ] } ,
+    { "600" : ["LQ_M600", mc_filepath, 1.0 ] } ,
+    { "650" : ["LQ_M650", mc_filepath, 1.0 ] } ,
+    { "700" : ["LQ_M700", mc_filepath, 1.0 ] } ,
+    { "750" : ["LQ_M750", mc_filepath, 1.0 ] } ,
+    { "800" : ["LQ_M800", mc_filepath, 1.0 ] } ,
+    { "850" : ["LQ_M850", mc_filepath, 1.0 ] } ,  
+    { "900" : ["LQ_M900", mc_filepath, 1.0 ] } , 
+    { "950" : ["LQ_M950", mc_filepath, 1.0 ] } , 
+    { "1000" : ["LQ_M1000", mc_filepath, 1.0 ] } , 
+    { "1050" : ["LQ_M1050", mc_filepath, 1.0 ] } , 
+    { "1100" : ["LQ_M1100", mc_filepath, 1.0 ] } , 
+    { "1150" : ["LQ_M1150", mc_filepath, 1.0 ] } , 
+    { "1200" : ["LQ_M1200", mc_filepath, 1.0 ] } , 
+    { "1250" : ["LQ_M1250", mc_filepath, 1.0 ] } , 
+    { "1300" : ["LQ_M1300", mc_filepath, 1.0 ] } , 
+    { "1350" : ["LQ_M1350", mc_filepath, 1.0 ] } , 
+    { "1400" : ["LQ_M1400", mc_filepath, 1.0 ] } , 
+    { "1450" : ["LQ_M1450", mc_filepath, 1.0 ] } , 
+    { "1500" : ["LQ_M1500", mc_filepath, 1.0 ] } , 
+    { "1550" : ["LQ_M1550", mc_filepath, 1.0 ] } , 
+    { "1600" : ["LQ_M1600", mc_filepath, 1.0 ] } , 
+    { "1650" : ["LQ_M1650", mc_filepath, 1.0 ] } , 
+    { "1700" : ["LQ_M1700", mc_filepath, 1.0 ] } , 
+    { "1750" : ["LQ_M1750", mc_filepath, 1.0 ] } , 
+    { "1800" : ["LQ_M1800", mc_filepath, 1.0 ] } , 
+    { "1850" : ["LQ_M1850", mc_filepath, 1.0 ] } , 
+    { "1900" : ["LQ_M1900", mc_filepath, 1.0 ] } , 
+    { "1950" : ["LQ_M1950", mc_filepath, 1.0 ] } , 
+    { "2000" : ["LQ_M2000", mc_filepath, 1.0 ] } , 
 ]
 
 #XXX FIXME: add hist to the analysis to count total events
 d_signal_totalEvents = {
+    "LQ_M200" : 50000,
+    "LQ_M250" : 50000,
     "LQ_M300" : 50000,
     "LQ_M350" : 50000,
     "LQ_M400" : 50000,
@@ -315,12 +320,15 @@ def calculateEfficiency(nS, signal_sample):
     
 def evaluation ( nS, nB, efficiency ) :
   try:
+    # s/sqrt(s+b)
     #value = nS / ( math.sqrt ( nS + nB ) )
     # switch to asymptotic formula
-    #value = math.sqrt(2*((nS+nB)*math.log(1+nS/nB)-nS))
-    # punzi
-    nSigmas = 5
-    value = efficiency/(nSigmas/2.0+math.sqrt(nB))
+    if not usePunzi:
+      value = math.sqrt(2*((nS+nB)*math.log(1+nS/nB)-nS))
+    else:
+      # punzi
+      nSigmas = 5
+      value = efficiency/(nSigmas/2.0+math.sqrt(nB))
   except ZeroDivisionError:
     value = -999
   except ValueError:
@@ -391,7 +399,7 @@ d_binNumber_nD = parse_root_file( d_data_filepaths )
 selectedEfficienciesByLQMass = []
 lqMasses = []
 
-verbose = True
+verbose = False
 for signal_sample in d_signal_filepaths_list: 
     d_binNumber_nS = parse_root_file( signal_sample ) 
     print "looking at",signal_sample
@@ -518,8 +526,8 @@ for cut_variable in cut_variables:
 
 print "\n\n"
 
-func2 = TF1("func2", "pol2(0)", 250., 1500. )
-func1 = TF1("func1", "pol1(0)", 250., 1500. )
+func2 = TF1("func2", "pol2(0)", 150., 1500. )
+func1 = TF1("func1", "pol1(0)", 150., 1500. )
 
 fit_functions = [ "func1", "func2" ]
 
