@@ -77,8 +77,8 @@ def GetTableEntryStr(evts,errStat,errSyst=0):
 def GetXSecTimesIntLumi(sampleNameFromDataset):
     #print 'GetXSecTimesIntLumi(',sampleNameFromDataset+')'
     xsection = float(lookupXSection(sampleNameFromDataset,xsectionDict))
-    intLumi = float(options.intLumi)
-    return xsection*intLumi
+    intLumiF = float(intLumi)
+    return xsection*intLumiF
 
 def CalculateScaledRateError(sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral, doScaling=True):
     #print 'CalculateScaledRateError(',sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral,')'
@@ -271,7 +271,7 @@ def FillDicts(rootFilename,qcdRootFilename):
 
     qcdTFile.Close()
     tfile.Close()
-                
+  
 
 ###################################################################################################
 # CONFIGURABLES
@@ -281,23 +281,38 @@ def FillDicts(rootFilename,qcdRootFilename):
 signal_names = [ "LQ_M_" ] 
 #FIXME add 200 GeV point
 #mass_points = [str(i) for i in range(300,2050,50)] # go from 300-2000 in 50 GeV steps
-mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
+#mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
+mass_points = [str(i) for i in range(200,1550,50)] # go from 300-1500 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
-systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "Znormalisation", "DYshape", "TTnormalisation" ]
+systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "DYShape", "TTShape" ]
 systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale" ]
 #FIXME systematics
 systematics = []
 background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
 # background names for systs
-syst_background_names = ['GJets', '', 'TTbar', 'WJets', 'DY', 'Diboson', 'Singletop']
-maxLQselectionBkg = 'LQ1100' # max background selection point used
+syst_background_names = ['GJets', 'QCDFakes_DATA', 'TTbar', 'WJets', 'DY', 'Diboson', 'Singletop']
+# XXX FIXME TEST
+maxLQselectionBkg = 'LQ1500' # max background selection point used
+
+# add DYnorm and TTnorm by hand
+# for z+jets, we have 0.026 stat error on the scale factor of 1
+# we need to add 10% additional
+# deltaX/X = (1+0.026+0.1*1)/1 - 1
+extraZJetNormSyst = 0.1
+zJetNormDeltaXOverX = (1+0.026+extraZJetNormSyst*1)/1 - 1
+# for ttbar, we have 0.037 stat error on the scale factor of 0.815
+# we need to add 10% additional
+# deltaX/X = (0.815+0.037+0.1*0.815)/0.815 - 1
+#extraTTbarNormSyst = 0.1
+extraTTbarNormSyst = 0.1
+ttBarNormDeltaXOverX = (0.815+0.037+extraTTbarNormSyst*0.815)/0.815 - 1
+# QCDNorm is 0.40
+qcdNormDeltaXOverX = 0.40
 
 n_background = len ( background_names  )
 #n_systematics = len ( systematics ) + n_background + 1
-# all bkg systematics, plus stat 'systs' for all bkg plus signal
-n_systematics = len ( systematicsNamesBackground ) + n_background + 1
-# XXX FIXME TEST
-#n_systematics = 19
+# all bkg systematics, plus stat 'systs' for all bkg plus signal plus 3 backNormSysts
+n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 3
 n_channels = 1
 
 d_background_rates = {}
@@ -309,80 +324,41 @@ d_signal_rateErrs = {}
 d_signal_unscaledRates = {}
 d_signal_totalEvents = {}
 
-filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSelsUnbugged_24may2016/output_cutTable_lq_eejj/'
+inputList = os.environ["LQANA"]+'/config/TestCombinationMay4/inputListAllCurrent.txt'
+sampleListForMerging = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_eejj.txt'
+sampleListForMergingQCD = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_eejj_QCD.txt'
+xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/1jun_ttbarRescale/xsection_13TeV_2015_TTbarRescale.txt'
+intLumi = 2570
+
+#filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_finalSelsUnbugged_24may2016/output_cutTable_lq_eejj/'
+# nominal
+filePath = os.environ["LQDATA"] + '/RunII//eejj_analysis_ttbarRescaleFinalSels_2jun2016/output_cutTable_lq_eejj/'
+#filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_ttbarRescaleFinalSels__asymptoticOpt_19jun2016/output_cutTable_lq_eejj_asymptoticOpt/'
+#filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_ttbarRescaleFinalSels_zStBiasCorrDYJ_28jun2016/output_cutTable_lq_eejj/'
 dataMC_filepath   = filePath+'analysisClass_lq_eejj_plots.root'
 qcd_data_filepath = filePath+'analysisClass_lq_eejj_QCD_plots.root'
-#systematics_filepath = '/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/systematics/30_05_2016/'
-systematics_filepath = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_30_05_2016/'
+systematics_filepath = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_07_06_2016/'
 
 
 ###################################################################################################
 # RUN
 ###################################################################################################
-usage = "usage: %prog [options] \nExample: \n./makeDatacard.py -i config/inputListAllCurrent.txt -l 100 -x config/xsection_pb_default.txt -s config/sampleListForMerging.txt"
-parser = OptionParser(usage=usage)
-
-parser.add_option("-i", "--inputList", dest="inputList",
-                  help="list of all datasets to be used (full path required)",
-                  metavar="LIST")
-#
-#parser.add_option("-c", "--code", dest="analysisCode",
-#                  help="name of the CODE.C code used to generate the rootfiles (which is the beginning of the root file names before ___)",
-#                  metavar="CODE")
-#
-#parser.add_option("-d", "--inputDir", dest="inputDir",
-#                  help="the directory INDIR contains the rootfiles with the histograms to be combined (full path required)",
-#                  metavar="INDIR")
-#
-parser.add_option("-l", "--intLumi", dest="intLumi",
-                  help="results are rescaled to the integrated luminosity INTLUMI (in pb-1)",
-                  metavar="INTLUMI")
-
-parser.add_option("-x", "--xsection", dest="xsection",
-                  help="the file XSEC contains the cross sections (in pb) for all the datasets (full path required). Use -1 as cross section value for no-rescaling",
-                  metavar="XSEC")
-
-#parser.add_option("-o", "--outputDir", dest="outputDir",
-#                  help="the directory OUTDIR contains the output of the program (full path required)",
-#                  metavar="OUTDIR")
-#
-parser.add_option("-s", "--sampleListForMerging", dest="sampleListForMerging",
-                  help="put in the file SAMPLELIST the name of the sample with the associated strings which should  match with the dataset name (full path required)",
-                  metavar="SAMPLELIST")
-
-parser.add_option("-q", "--sampleListForMergingQCD", dest="sampleListForMergingQCD",
-                  help="put in the file SAMPLELIST the name of the sample with the associated strings which should  match with the dataset name (full path required)",
-                  metavar="SAMPLELISTQCD")
-
-#parser.add_option("-t", "--tablesOnly", action="store_true",dest="tablesOnly",default=False,
-#                  help="only combine tables, do not do plots",
-#                  metavar="TABLESONLY")
-
-(options, args) = parser.parse_args()
-
-#if len(sys.argv)<14:
-#    print usage
-#    sys.exit()
-if not options.sampleListForMerging or not options.xsection or not options.intLumi or not options.inputList:
-  print 'Missing a needed option....exiting'
-  print usage
-  exit(-1)
 
 #---Check if sampleListForMerging file exist
-if(os.path.isfile(options.sampleListForMerging) == False):
-    print "ERROR: file " + options.sampleListForMerging + " not found"
+if(os.path.isfile(sampleListForMerging) == False):
+    print "ERROR: file " + sampleListForMerging + " not found"
     print "exiting..."
     sys.exit()
 
 #---Check if sampleListForMergingQCD file exist
-if(os.path.isfile(options.sampleListForMergingQCD) == False):
-    print "ERROR: file " + options.sampleListForMergingQCD + " not found"
+if(os.path.isfile(sampleListForMergingQCD) == False):
+    print "ERROR: file " + sampleListForMergingQCD + " not found"
     print "exiting..."
     sys.exit()
 
 #---Check if xsection file exist
-if(os.path.isfile(options.xsection) == False):
-    print "ERROR: file " + options.xsection + " not found"
+if(os.path.isfile(xsection) == False):
+    print "ERROR: file " + xsection + " not found"
     print "exiting..."
     sys.exit()
 
@@ -395,13 +371,13 @@ print '\t QCD(data):',qcd_data_filepath
 print 'Using systematics from:',systematics_filepath
 
 # get xsections
-xsectionDict = ParseXSectionFile(options.xsection)
-dictSamples = GetSamplesToCombineDict(options.sampleListForMerging)
-dictSamplesQCD  = GetSamplesToCombineDict(options.sampleListForMergingQCD)
+xsectionDict = ParseXSectionFile(xsection)
+dictSamples = GetSamplesToCombineDict(sampleListForMerging)
+dictSamplesQCD  = GetSamplesToCombineDict(sampleListForMergingQCD)
 dictSamples.update(dictSamplesQCD)
 
 # check to make sure we have xsections for all samples
-for lin in open( options.inputList ):
+for lin in open( inputList ):
     lin = string.strip(lin,"\n")
     if lin.startswith('#'):
       continue
@@ -482,7 +458,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         print signal_name, mass_point, total_signal, total_bkg
 
         # recall the form: signal --> sysDict['Trigger']['LQXXXX'] = value
-        #             backgrounds --> sysDict[bkgName]['Trigger']['LQXXXX'] = value
+        #             backgrounds --> sysDict['Trigger'][bkgName]['LQXXXX'] = value
         for syst in signalSystDict.keys():
             line = syst + ' lnN '
             if selectionName not in signalSystDict[syst].keys():
@@ -496,7 +472,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             for ibkg,background_name in enumerate(syst_background_names):
                 #print 'try to lookup backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
                 #print 'syst="'+syst+'"'
-                if background_name=='':
+                if background_name=='' or 'QCD' in background_name:
                     #print 'empty background_name; use - and continue'
                     line += ' - '
                     continue
@@ -510,11 +486,11 @@ for i_signal_name, signal_name in enumerate(signal_names):
                     print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionNameBkgSyst+']'
             card_file.write(line+'\n')
 
-        # background-only special systs: "Znormalisation", "DYshape", "TTnormalisation"
-        for syst in ["Znormalisation", "DYshape", "TTnormalisation"]:
+        # background-only special systs: "DYShape", "TTShape"
+        for syst in ["DYShape","TTShape"]:
             line = syst + ' lnN - '
             for ibkg,background_name in enumerate(syst_background_names):
-                if background_name=='':
+                if syst=='DYShape' and not 'DY' in background_name or syst=='TTShape' and not 'TT' in background_name:
                     #print 'empty background_name; use - and continue'
                     line += ' - '
                     continue
@@ -528,6 +504,37 @@ for i_signal_name, signal_name in enumerate(signal_names):
                     print 'Got a KeyError with: backgroundSystDict['+syst+']['+background_name+']['+selectionNameBkgSyst+']'
             card_file.write(line+'\n')
         
+        # background norm systs
+        foundTTBar = False
+        foundZJet = False
+        foundQCD = False
+        for ibkg,background_name in enumerate(syst_background_names):
+            # XXX WARNING: hardcoded background name (ick); some checking is done at least
+            if 'TTbar' in background_name and not foundTTBar:
+                line = 'norm_ttbar lnN - '
+                line += ' - '*(ibkg)
+                line += str(1+ttBarNormDeltaXOverX)+' '
+                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
+                card_file.write(line)
+                foundTTBar = True
+            elif 'DY' in background_name and not foundZJet:
+                line = 'norm_zjet lnN - '
+                line += ' - '*(ibkg)
+                line += str(1+zJetNormDeltaXOverX)+' '
+                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
+                card_file.write(line)
+                foundZJet = True
+            elif 'QCD' in background_name and not foundQCD:
+                line = 'norm_QCD lnN - '
+                line += ' - '*(ibkg)
+                line += str(1+qcdNormDeltaXOverX)+' '
+                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
+                card_file.write(line)
+                foundQCD = True
+        if not foundTTBar or not foundZJet or not foundQCD:
+            print 'ERROR: could not find one or more of [ttbar,zjet,QCD] background names for normalization syst; check background names'
+            exit(-1)
+
         card_file.write("\n")
 
         # background stat error part
