@@ -28,6 +28,7 @@ parser.add_option ("--output_dir", "-o" , dest = "output_dir", type=str, help="D
 parser.add_option ("--tree_name" , "-n" , dest = "tree_name" , type=str, help="Name of TTree in .root files to be analyzed")
 parser.add_option ("--cut_file"  , "-c" , dest = "cut_file"  , type=str, help="Text file containing cut values" ) 
 parser.add_option ("--ncores"    , "-p" , dest = "ncores"    , type=int, help="Number of processor cores to be used to run the job" )
+parser.add_option ("--exe"       , "-e" , dest = "execut"    , type=str, help="name of exec" )
 
 (options, args) = parser.parse_args()
 
@@ -39,6 +40,10 @@ if not options.cut_file   : parser.print_help(); sys.exit()
 ncores = multiprocessing.cpu_count()
 if options.ncores :
     ncores = options.ncores
+
+executable = "main"
+if options.execut:
+  executable = options.execut
 
 #----------------------------------------------------------------
 # Bail if the cut file doesn't exist:
@@ -124,7 +129,8 @@ for line in input_list:
       continue
     dataset = line.strip().split("/")[-1][:-4]
     output_file_name = options.output_dir + "/" + code_name + "___" + dataset    
-    command = "./main " + line.strip() + " " + options.cut_file + " " + options.tree_name + " " + output_file_name + " " + output_file_name
+    command = "./" + executable
+    command += " " + line.strip() + " " + options.cut_file + " " + options.tree_name + " " + output_file_name + " " + output_file_name
     command_list.append ( command ) 
 
 #----------------------------------------------------------------
