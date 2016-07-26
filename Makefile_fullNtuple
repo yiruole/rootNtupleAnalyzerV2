@@ -6,7 +6,7 @@ FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++11
 # FLAGS += -DCREATE_OPT_CUT_FILE
  FLAGS += -DUSE_FULL_NTUPLE
-ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
+ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
 INC= -I.. -I. -I./include  -I${CLHEP}/include
 ROOTINC= -I${ROOTSYS}/include
 LIBS= -L.  ${ROOTLIBS} -L${CLHEP}/lib -L${CLHEP}/lib -L/usr/lib64 -lboost_iostreams

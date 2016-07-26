@@ -5,7 +5,7 @@ FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++11
 FLAGS += -DCREATE_OPT_CUT_FILE
 FLAGS += -g
-ROOTLIBS = `root-config --glibs --cflags` -lMinuit 
+ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
 INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
 LIBS= -L.  ${ROOTLIBS} -L/usr/lib64 -lboost_iostreams
@@ -21,6 +21,9 @@ EXE = main
 all: ${EXE}
 
 main: $(SRC)/main.o $(SELECTIONLIB) 
+	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
+
+main2: $(SRC)/main2.o $(SELECTIONLIB) 
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
 clean:
