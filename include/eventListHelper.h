@@ -13,6 +13,7 @@ class EventListHelper {
   ~EventListHelper();
   
   void addFileToList  ( const char * file_name );
+  void addFileToList  ( const char * file_name, const char * tree_name );
   void addEventToList ( int run, int lumi, int event );
   bool eventInList(int run, int lumi, int event );
   void printEventList();

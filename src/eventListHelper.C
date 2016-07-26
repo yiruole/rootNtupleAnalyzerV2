@@ -5,6 +5,10 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
+#include "TFile.h"
+#include "TTreeReader.h"
+#include "TTreeReaderValue.h"
+
 EventListHelper::EventListHelper(){}
 EventListHelper::~EventListHelper(){}
 
@@ -54,7 +58,6 @@ void EventListHelper::addEventToList ( int run, int lumi, int event  ){
 }
 
 void EventListHelper::addFileToList  ( const char * file_name ) { 
-  
   std::string line;
   if(std::string(file_name).find(".gz") != std::string::npos) {
     std::cout << "INFO: Adding gzipped file " << file_name << " to event list...";
@@ -78,7 +81,7 @@ void EventListHelper::addFileToList  ( const char * file_name ) {
       exit(-1);
     }
   }
-  else {
+  else if(std::string(file_name).find(".txt") != std::string::npos) {
     std::cout << "INFO: Adding txt file " << file_name << " to event list...";
     std::ifstream myfile (file_name);
     if (myfile.is_open()) {
@@ -95,15 +98,52 @@ void EventListHelper::addFileToList  ( const char * file_name ) {
       myfile.close();
     }
     else {
-      std::cout << "ERROR: event list file " << file_name << " does not exist.  Code will crash. Cowardly exiting." << std::endl;
+      std::cout << "ERROR: could not open event list file " << file_name << " Cowardly exiting." << std::endl;
       exit(-1);
     }
   }
-  std::cout << "added " << m_set.size() << " events." << std::endl;
-
-  
+  else {
+    std::cout << "ERROR: event list file " << file_name << " does not end with .gz or .txt. We don't know how to handle this.  Cowardly exiting." << std::endl;
+    exit(-1);
+  }
+  if(m_set.size() < 1) {
+    std::cout << "ERROR: event list has size < 1.  Did something go wrong when reading it?  Cowardly exiting." << std::endl;
+    exit(-1);
+  }
+  std::cout << "INFO: added " << m_set.size() << " events." << std::endl;
 }
   
+void EventListHelper::addFileToList  ( const char * file_name, const char * tree_name ) { 
+  if(std::string(file_name).find(".root") != std::string::npos) {
+    std::cout << "INFO: Adding root file " << file_name << " containing tree named " << tree_name << " to event list...";
+
+    TFile* file = TFile::Open(file_name);
+    if(file->IsOpen()) {
+      TTreeReader reader(tree_name,file);
+      TTreeReaderValue<UInt_t> run(reader,"run"); // aka unsigned int
+      TTreeReaderValue<UInt_t> lumi(reader,"lumi"); // aka unsigned int
+      TTreeReaderValue<ULong64_t> event(reader,"event"); // aka unsigned long long
+      while(reader.Next()) {
+        addEventToList (*run, *lumi, *event);
+      }
+      file->Close();
+    }
+    else {
+      std::cout << "ERROR: could not open event list file " << file_name << " Cowardly exiting." << std::endl;
+      exit(-1);
+    }
+  }
+  else {
+    std::cout << "ERROR: event list file " << file_name << " does not end with .root. We don't know how to handle this.  Cowardly exiting." << std::endl;
+    exit(-1);
+  }
+  if(m_set.size() < 1) {
+    std::cout << "ERROR: event list has size < 1.  Did something go wrong when reading it?  Cowardly exiting." << std::endl;
+    exit(-1);
+  }
+  std::cout << "INFO: added " << m_set.size() << " events." << std::endl;
+}
+
 void EventListHelper::printEventList(){
   //std::map<EventKey, bool>::iterator it     = m_map.begin();
   //std::map<EventKey, bool>::iterator it_end = m_map.end();
