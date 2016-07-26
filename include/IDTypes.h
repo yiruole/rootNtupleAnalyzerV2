@@ -31,6 +31,8 @@ enum ID {
   GEN_ELE_FROM_W  	       = 23,
   GEN_ELE_FROM_DY  	       = 24,
   GEN_LQ  	               = 25,
+  GEN_TOP  	               = 26,
+  GEN_STATUS62             = 27,
 
   FAKE_RATE_HEEP_LOOSE     = 30,
 
