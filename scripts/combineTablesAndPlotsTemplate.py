@@ -67,7 +67,11 @@ parser.add_option("-t", "--tablesOnly", action="store_true",dest="tablesOnly",de
 
 parser.add_option("-b", "--ttbarBkg", action="store_true",dest="ttbarBkg",default=False,
                   help="do the ttbar background prediction from data; don't write out any other plots",
-                  metavar="TABLESONLY")
+                  metavar="TTBARBKG")
+
+parser.add_option("-r", "--reweight", action="store_true",dest="extraReweight",default=False,
+                  help="apply extra reweight factor (e.g., for top Pt reweighting) when normalizing to int. lumi.",
+                  metavar="EXTRAREWEIGHT")
 
 (options, args) = parser.parse_args()
 
@@ -219,10 +223,6 @@ for lin in open( options.inputList ):
         xsection_X_intLumi = Ntot
     else:
         xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
-        if( Ntot == 0 ):
-            weight = float(0)
-        else:
-            weight = xsection_X_intLumi / Ntot 
         #XXX HACKs for AMC@NLO
         if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
           if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
@@ -231,6 +231,36 @@ for lin in open( options.inputList ):
             weight*=1.46
           elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
             weight*=3.02
+        if options.extraReweight:
+          # these are the preselection average weights for the TopPtReweighting
+          if re.search('TTJets_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.810806e-01
+          elif re.search('TTJets_SingleLeptFromTbar_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=9.046766e-01
+          elif re.search('TTJets_SingleLeptFromT_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=9.034948e-01
+          elif re.search('TTJets_DiLept_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.804381e-01
+          elif re.search('TTJets_amcatnloFXFX',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.766042e-01
+          elif re.search('TTJets_SingleLeptFromTbar_ext1_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.908552e-01
+          elif re.search('TTJets_SingleLeptFromT_ext1_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.982681e-01
+          elif re.search('TTJets_DiLept_ext1_madgraphMLM',dataset_fromInputList):
+            print 'applying extra average weight to',dataset_fromInputList
+            xsection_X_intLumi/=8.804035e-01
+        if( Ntot == 0 ):
+            weight = float(0)
+        else:
+            weight = xsection_X_intLumi / Ntot 
         plotWeight = weight/1000.0
     print "xsection: " + xsection_val,
     print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
@@ -302,7 +332,8 @@ for lin in open( options.inputList ):
     
     # loop over samples defined in sampleListForMerging
     for sample,pieceList in dictSamples.iteritems():
-        #print "look at sample named:",sample
+        #if 'ALLBKG_MG_HT' in sample:
+        #    print "look at sample named:",sample
 
         # init if needed
         if not sample in dictFinalTables:
@@ -324,6 +355,10 @@ for lin in open( options.inputList ):
         if toBeUpdated:
             UpdateTable(newtable,dictFinalTables[sample])
             dictSamplesPiecesAdded[sample].append(matchingPiece)
+            #if 'ALLBKG_MG_HT' in sample:
+            #  print 'update table with',matchingPiece
+            #  with open("tmpTable.txt",'a') as tmpTableFile:
+            #    WriteTable(dictFinalTables[sample], 'ALLBKG_MG_HT_updated_with_'+matchingPiece, tmpTableFile)
 
         if not options.tablesOnly:
           # loop over histograms in rootfile
