@@ -142,6 +142,7 @@ class baseClass : public rootNtupleClass {
 		   std::vector<bool>        * decisions,
 		   std::vector<int >        * prescales);
   const std::string& getInputListName() { return *inputList_;};
+  const std::string getCurrentFileName() { return tree_->GetCurrentFile()->GetName();};
     
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);

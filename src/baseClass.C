@@ -673,23 +673,23 @@ bool baseClass::passedAllOtherCuts(const string& s)
 
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
-      return false;
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    return false;
+  }
 
   for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
+  {
+    cut * c = & (cc->second);
+    if( c->variableName == s )
     {
-      cut * c = & (cc->second);
-      if( c->variableName == s )
-	{
-	  continue;
-	}
-      else
-	{
-	  if( ! (c->filled && c->passed) ) return false;
-	}
+      continue;
     }
+    else
+    {
+      if( ! (c->filled && c->passed) ) return false;
+    }
+  }
   return ret;
 }
 
@@ -956,23 +956,23 @@ bool baseClass::fillCutHistos()
 {
   bool ret = true;
   for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+      it != orderedCutNames_.end(); it++)
+  {
+    cut * c = & (cutName_cut_.find(*it)->second);
+    if( c->filled )
     {
-      cut * c = & (cutName_cut_.find(*it)->second);
-      if( c->filled )
-	{
-	  if ( fillSkim_ ) 
-	    c->histo1.Fill( c->value, c->weight );
-	  if ( fillAllPreviousCuts_ ) 
-	    if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
-	  if( fillAllSameLevelAndLowerLevelCuts_) 
-	    if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value, c->weight );
-	  if( fillAllOtherCuts_ ) 
-	    if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
-	  if( fillAllCuts_ ) 
-	    if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
-	}
+      if ( fillSkim_ ) 
+        c->histo1.Fill( c->value, c->weight );
+      if ( fillAllPreviousCuts_ ) 
+        if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
+      if( fillAllSameLevelAndLowerLevelCuts_) 
+        if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( c->value, c->weight );
+      if( fillAllOtherCuts_ ) 
+        if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
+      if( fillAllCuts_ ) 
+        if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
     }
+  }
   return ret;
 }
 
