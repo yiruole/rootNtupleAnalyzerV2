@@ -18,13 +18,16 @@ double & GenParticle::Mass     (){ return m_collection -> GetData() -> GenPartic
 
 // ID variables		                                                       
 
-int    GenParticle::PdgId      (){ return m_collection -> GetData() -> GenParticlePdgId      -> at ( m_raw_index ); }
-int    GenParticle::MotherIndex(){ return m_collection -> GetData() -> GenParticleMotherIndex-> at ( m_raw_index ); }
-int    GenParticle::Status     (){ return m_collection -> GetData() -> GenParticleStatus     -> at ( m_raw_index ); }
+int    GenParticle::PdgId       (){ return m_collection -> GetData() -> GenParticlePdgId      -> at ( m_raw_index ); }
+int    GenParticle::MotherIndex (){ return m_collection -> GetData() -> GenParticleMotherIndex-> at ( m_raw_index ); }
+int    GenParticle::Status      (){ return m_collection -> GetData() -> GenParticleStatus     -> at ( m_raw_index ); }
+int    GenParticle::NumDaughters(){ return m_collection -> GetData() -> GenParticleNumDaught  -> at ( m_raw_index ); }
 
 std::ostream& operator<<(std::ostream& stream, GenParticle& object) {
   stream << object.Name() << " " << ": "
 	 << "PDG = "    << object.PdgId () << ", "
+	 << "MotherIndex = "    << object.MotherIndex () << ", "
+	 << "Num. daughters = " << object.NumDaughters () << ", "
 	 << "Status = " << object.Status () << ", "
 	 << "Pt = "     << object.Pt ()    << ", "
 	 << "Eta = "    << object.Eta()    << ", "

@@ -20,6 +20,10 @@ bool GenParticle::PassUserID (ID id, bool verbose){
   else if ( id == GEN_ELE_FIDUCIAL        ) { return PassUserID_ECALFiducial        (verbose); } 
 
   else if ( id == GEN_LQ                  ) { return PassUserID_GenLQ               (verbose); } 
+  else if ( id == GEN_TOP                 ) { return PassUserID_GenTop              (verbose); }
+
+  else if ( id == GEN_STATUS62            ) { return PassUserID_Status62            (verbose); }
+
   else return false;
 }
 
@@ -138,5 +142,17 @@ bool GenParticle::PassUserID_MuonFiducial(bool verbose){
 bool GenParticle::PassUserID_GenLQ(bool verbose)
 {
   if ( abs(PdgId())  != 42         ) return false;
+  return true;
+}
+
+bool GenParticle::PassUserID_GenTop(bool verbose)
+{
+  if ( abs(PdgId())  != 6         ) return false;
+  return true;
+}
+
+bool GenParticle::PassUserID_Status62(bool verbose)
+{
+  if ( Status()  != 62         ) return false;
   return true;
 }

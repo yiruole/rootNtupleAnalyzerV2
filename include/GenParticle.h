@@ -25,9 +25,10 @@ class GenParticle : public Object {
   
   // ID variables  
 
-  int PdgId      ();
-  int MotherIndex();
-  int Status     ();
+  int PdgId       ();
+  int MotherIndex ();
+  int Status      ();
+  int NumDaughters();
   
  private:
   
@@ -48,6 +49,8 @@ class GenParticle : public Object {
   bool PassUserID_GenEleFromDY        (bool verbose);
 
   bool PassUserID_GenLQ               (bool verbose);
+  bool PassUserID_GenTop              (bool verbose);
+  bool PassUserID_Status62            (bool verbose);
 
 
 };
