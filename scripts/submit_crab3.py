@@ -81,11 +81,18 @@ parser.add_option("-d", "--eosDir", dest="eosDir",
                   metavar="EOSDIR")
 
 # FIXME SIC: this doesn't work when using the API?
-parser.add_option("-r", "--dryrun", dest="dryRun",
+parser.add_option("-z", "--dryRun", dest="dryRun",
                   metavar="DRYRUN",default=False,action="store_true")
 
 parser.add_option("-s", "--skim", dest="isSkimTask",
                   metavar="SKIMTASK",default=False,action="store_true")
+
+parser.add_option("-r", "--reducedSkim", dest="isReducedSkimTask",
+                  metavar="REDUCEDSKIMTASK",default=False,action="store_true")
+
+parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
+                  metavar="OVERRIDEOUTPUTLENGTH",default=False,action="store_true")
+
 
 (options, args) = parser.parse_args()
 
@@ -117,6 +124,10 @@ if options.eosDir is not None:
     outputLFN = outputeosdir.split('/eos/cms')[-1]
   else:
     outputLFN = outputeosdir
+if outputLFN == None:
+  print 'You must specify an output EOS directory; quitting'
+  exit(-1)
+
 
 #################################################
 ## make dirs on local disk
@@ -263,20 +274,23 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
-# for using event lists
-if options.isSkimTask:
-  config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
-  config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
-  config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
-  config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
-  config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
-  config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
-# end of event lists
+# we now read these from trees stored on eos
+## for using event lists
+#if options.isReducedSkimTask:
+#  config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
+#  config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
+#  config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
+#  config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
+#  config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
+#  config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
+## end of event lists
 
 # collect the output (root plots, dat, and skim)
 config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat']
-if options.isSkimTask:
-  config.JobType.outputFiles+=outputFilePref+'_reduced_skim.root'
+if options.isReducedSkimTask:
+  config.JobType.outputFiles.append(outputFilePref+'_reduced_skim.root')
+elif options.isSkimTask:
+  config.JobType.outputFiles.append(outputFilePref+'_skim.root')
 
 config.Data.outputPrimaryDataset = dataset.split('__')[0]
 
@@ -289,50 +303,62 @@ config.Data.outputPrimaryDataset = dataset.split('__')[0]
 #  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
 config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
 
+submitCERNT2only = False
 maxLengthPath = max(config.Data.userInputFiles, key=len)
 if len(maxLengthPath) <= 255:
   print 'userInputFiles OK, longest path has:',len(maxLengthPath),'chars'
 else:
   print
-  print 'ERROR: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist); crab3 cannot handle this; exiting'
-  exit(-1)
+  print 'WARNING: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist); will try to reduce length and submit to CERN T2 only'
+  config.Data.userInputFiles = [xrdPath.replace('cms-xrd-global.cern.ch//eos/cms','eoscms/') for xrdPath in config.Data.userInputFiles]
+  submitCERNT2only = True
+  # now check length again
+  maxLengthPath = max(config.Data.userInputFiles, key=len)
+  if len(maxLengthPath) > 255:
+    print 'ERROR: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist) after trying to shorten it; crab3 cannot handle this; exiting'
+    exit(-1)
 
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 5 # 5 files per job
 config.Data.totalUnits = -1
 config.Data.publication = False
-if options.isSkimTask:
-  config.Data.outputDatasetTag = 'LQSkim'
+if options.isSkimTask or options.isReducedSkimTask:
+  config.Data.outputDatasetTag = 'Skim'
 else:
-  config.Data.outputDatasetTag = 'LQAna'
+  config.Data.outputDatasetTag = 'Ana'
 # notes on how the output will be stored: see https://twiki.cern.ch/twiki/bin/view/CMSPublic/Crab3DataHandling
 #  <lfn-prefix>/<primary-dataset>/<publication-name>/<time-stamp>/<counter>[/log]/<file-name> 
 #   LFNDirBase /                 / requestName      / stuff automatically done   / outputFilePref_999.root
 # defaults
-if options.isSkimTask:
-  config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/'
-else:
-  config.Data.outLFNDirBase = '/store/user/scooper/LQ/Ana/2015/'
+#if options.isSkimTask or options.isReducedSkimTask:
+#  config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/'
+#else:
+#  config.Data.outLFNDirBase = '/store/user/scooper/LQ/Ana/2015/'
 #config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/%s/' % (getUsernameFromSiteDB())
 #config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
-if outputLFN is not None:
-  if not outputLFN.startswith('/store'):
-    print
-    print 'ERROR: eosDir must start with /store and you specified:',outputLFN
-    print 'quit'
-    exit(-1)
-  # add username if not already -- don't do this for now
-  #if not getUsernameFromSiteDB() in outputLFN:
-  #  outputLFN.rstrip('/')
-  #  config.Data.outLFNDirBase = outputLFN+'/%s/' % (getUsernameFromSiteDB())
-  #else:
-  #  config.Data.outLFNDirBase = outputLFN
-  config.Data.outLFNDirBase = outputLFN
+if not outputLFN.startswith('/store'):
+  print
+  print 'ERROR: eosDir must start with /store and you specified:',outputLFN
+  print 'quit'
+  exit(-1)
+# add username if not already -- don't do this for now
+#if not getUsernameFromSiteDB() in outputLFN:
+#  outputLFN.rstrip('/')
+#  config.Data.outLFNDirBase = outputLFN+'/%s/' % (getUsernameFromSiteDB())
+#else:
+#  config.Data.outLFNDirBase = outputLFN
+config.Data.outLFNDirBase = outputLFN
 if not config.Data.outLFNDirBase[-1]=='/':
   config.Data.outLFNDirBase+='/'
 print 'Using outLFNDirBase:',config.Data.outLFNDirBase
 
-storagePath=config.Data.outLFNDirBase+config.Data.outputPrimaryDataset+'/'+config.Data.outputDatasetTag+'/'+'YYMMDD_hhmmss/0000/'+outputFilePref+'_reduced_skim_999.root'
+storagePath=config.Data.outLFNDirBase+config.Data.outputPrimaryDataset+'/'+config.Data.outputDatasetTag+'/'+'YYMMDD_hhmmss/0000/'+outputFilePref
+if options.isReducedSkimTask:
+  storagePath+='_reduced_skim_999.root'
+elif options.isSkimTask:
+  storagePath+='_skim_999.root'
+else:
+  storagePath+='_999.root'
 #print 'will store (example):',storagePath
 #print '\twhich has length:',len(storagePath)
 if len(storagePath) > 255:
@@ -341,7 +367,7 @@ if len(storagePath) > 255:
   print 'example output will look like:'
   print storagePath
   print 'which has length:',len(storagePath)
-  if options.isSkimTask:
+  if options.isReducedSkimTask and not options.overrideOutputLength:
     # for skims, we might run crab over them, so don't allow this
     print 'cowardly refusing to submit the jobs; exiting'
     exit(-2)
@@ -357,10 +383,13 @@ config.Site.storageSite = 'T2_CH_CERN'
 config.Data.ignoreLocality = True
 # make more expansive whitelist for skims
 # for analysis, just run at CERN+few others
-if options.isSkimTask:
-  config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_EE_*','T2_PT_*']
+if submitCERNT2only:
+  config.Site.whitelist = ['T2_CH_CERN']
 else:
-  config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*',]
+  if options.isSkimTask or options.isReducedSkimTask:
+    config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_EE_*','T2_PT_*']
+  else:
+    config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*',]
 
 # some tricks
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3AdvancedTutorial#Exercise_4_user_script

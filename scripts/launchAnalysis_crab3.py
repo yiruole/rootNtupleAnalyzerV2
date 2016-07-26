@@ -52,17 +52,23 @@ parser.add_option("-c", "--cutfile", dest="cutfile",
 #                  help="name of the queue (choose among cmst3 8nm 1nh 8nh 1nd 1nw)",
 #                  metavar="QUEUE")
 
-parser.add_option("-d", "--eosDir", dest="eosDir",
-                  help="the EOS directory where output root/dat files are stored",
-                  metavar="EOSDIR")
+# FIXME SIC: this doesn't work when using the API?
+parser.add_option("-z", "--dryRun", dest="dryRun",
+                  metavar="DRYRUN",default=False,action="store_true")
+
+parser.add_option("-r", "--reducedSkim", dest="isReducedSkimTask",
+                  metavar="REDUCEDSKIMTASK",default=False,action="store_true")
 
 parser.add_option("-s", "--skim", dest="isSkimTask",
                   help="use this option to create skims",
                   metavar="SKIMTASK",default=False,action="store_true")
 
-parser.add_option("-r", "--dryrun", dest="dryRun",
-                  help="use this option to do a crab dryrun",
-                  metavar="DRYRUN",default=False,action="store_true")
+parser.add_option("-d", "--eosDir", dest="eosDir",
+                  help="the EOS directory where output root/dat files are stored",
+                  metavar="EOSDIR")
+
+parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
+                  metavar="OVERRIDEOUTPUTLENGTH",default=False,action="store_true")
 
 (options, args) = parser.parse_args()
 
@@ -180,7 +186,7 @@ print "... done"
 #--------------------------------------------------------------------------------
 
 print "Launching jobs..."
-if options.isSkimTask:
+if options.isSkimTask or options.isReducedSkimTask:
   print 'INFO: This is a SKIM task'
 else:
   print 'INFO: This is an ANA task'
@@ -212,8 +218,12 @@ for i,line in enumerate(inputlist_file):
     command = command + " -d " + options.eosDir
     if options.isSkimTask:
       command+=" -s"
-    if options.dryRun:
+    elif options.isReducedSkimTask:
       command+=" -r"
+    if options.dryRun:
+      command+=" -z"
+    if options.overrideOutputLength:
+      command+=" -l"
     
     print command
     ret = os.system  ( command ) 
