@@ -111,13 +111,14 @@ def GetSystDictFromFile(filename):
             systDict[selectionPoint] = float(items[1].strip())/100.0
     return systDict
 
+
 def FillSystDicts(systNames,isBackground=True):
     systDict = {}
     for syst in systNames:
         if isBackground:
-          filePath = systematics_filepath+syst+'_sys.dat'
+          filePath = systematics_filepaths[syst]+syst+'_sys.dat'
         else:
-          filePath = systematics_filepath+'LQ'+syst+'_sys.dat'
+          filePath = systematics_filepaths[syst]+'LQ'+syst+'_sys.dat'
         thisSystDict = GetSystDictFromFile(filePath)
         # this will give the form (for background):
         #   systDict['Trigger'][bkgname]['LQXXXX'] = value
@@ -548,8 +549,8 @@ signal_names = [ "LQ_M_" ]
 #mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
 mass_points = [str(i) for i in range(200,1550,50)] # go from 200-1500 in 50 GeV steps
 #systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
-systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "DYShape", "TTShape" ]
-systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale" ]
+systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "DYShape", "TTShape" ]
+systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER" ]
 #FIXME systematics
 systematics = []
 background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
@@ -614,7 +615,10 @@ filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_zJetsStCorrectionFinalSe
 #filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_ttbarRescaleFinalSels_zStBiasCorrDYJ_28jun2016/output_cutTable_lq_eejj/'
 dataMC_filepath   = filePath+'analysisClass_lq_eejj_plots.root'
 qcd_data_filepath = filePath+'analysisClass_lq_eejj_QCD_plots.root'
-systematics_filepath = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_20_07_2016/'
+systematics_filepaths = {}
+for systName in systematicsNamesBackground:
+  systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_20_07_2016/'
+systematics_filepaths['EER'] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_textfiles_28_07_2016/'
 
 
 ###################################################################################################
@@ -645,7 +649,7 @@ for arg in sys.argv:
 print 'Using tables:'
 print '\t Data/MC:',dataMC_filepath
 print '\t QCD(data):',qcd_data_filepath
-print 'Using systematics from:',systematics_filepath
+print 'Using systematics files:',systematics_filepaths
 
 # get xsections
 xsectionDict = ParseXSectionFile(xsection)
