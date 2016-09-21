@@ -45,6 +45,12 @@ def getOptions():
     parser.add_option("-i", "--ignoreCache", dest="ignoreMulticrabCache",
          help=("don't use cache file to skip checking status of jobs already done"),
          metavar="ignoreCache",default=False,action="store_true")
+    parser.add_option("-r", "--noAutoResubmit", dest="noAutoResubmit",
+         help=("don't automatically run the resub commands"),
+         metavar="noAutoResub",default=False,action="store_true")
+    parser.add_option("-p", "--doCrabPurge", dest="doCrabPurge",
+         help=("run crab purge for completed tasks"),
+         metavar="doCrabPurge",default=False,action="store_true")
 
     (options, args) = parser.parse_args()
 
@@ -135,8 +141,9 @@ def main():
     totalTasks = len(tasksStatusDict)
     tasksCompleted = [task for task in tasksStatusDict if tasksStatusDict[task]=='COMPLETED']
     tasksSubmitted = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITTED']
+    tasksSubmitFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITFAILED']
     tasksFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='FAILED']
-    tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed]
+    tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed and task not in tasksSubmitFailed]
 
     ourCacheFile = open(os.path.abspath('./multicrab.cache'),'a')
     exceptionTasks = []
@@ -169,8 +176,9 @@ def main():
         outputFilesNotMoved = [fname for fname in outputFilesToMove if not os.path.isfile(taskName+'/'+fname.split('/')[-1])]
         print 'outputFilesToMove length=',len(outputFilesToMove)
         print 'outputFilesNotMoved length=',len(outputFilesNotMoved)
-        if len(outputFilesNotMoved) == 0:
-          continue
+        # why check this? sometimes we move files but don't write to cache for some reason
+        #if len(outputFilesNotMoved) == 0:
+        #  continue
         #print 'outputFilesNotMoved[0]:',outputFilesNotMoved[0]
         #print 'os.path.isfile('+taskName+'/'+outputFilesNotMoved[0].split('/')[-1]+')',os.path.isfile(taskName+'/'+outputFilesNotMoved[0].split('/')[-1])
         #exit(-1)
@@ -201,29 +209,29 @@ def main():
 
     # crab purge
     purgeExceptionTasks = []
-    # TODO add option to not purge
-    for taskName in tasksCompleted:
-      try:
-        res = crabCommand('purge',taskName)
-      except HTTPException, hte:
-        print '-----> there was a problem running crab purge %s see below.'%taskName
+    if options.doCrabPurge:
+      for taskName in tasksCompleted:
         try:
-          print hte.headers
-        except AttributeError:
+          res = crabCommand('purge',taskName)
+        except HTTPException, hte:
+          print '-----> there was a problem running crab purge %s see below.'%taskName
+          try:
+            print hte.headers
+          except AttributeError:
+            continue
+          purgeExceptionTasks.append(taskName)
           continue
-        purgeExceptionTasks.append(taskName)
-        continue
-      except ConfigurationException:
-        print '-----> there was a problem running crab purge %s see below.'%taskName
-        print hte.headers
-        purgeExceptionTasks.append(taskName)
-        continue
+        except ConfigurationException:
+          print '-----> there was a problem running crab purge %s see below.'%taskName
+          print hte.headers
+          purgeExceptionTasks.append(taskName)
+          continue
 
-    if len(purgeExceptionTasks) > 0:
-      print 'The following tasks had exceptions on crab purge:'
-      for taskn in purgeExceptionTasks:
-        print taskn
-      print
+      if len(purgeExceptionTasks) > 0:
+        print 'The following tasks had exceptions on crab purge:'
+        for taskn in purgeExceptionTasks:
+          print taskn
+        print
 
     # copy files even if purge failed
 
@@ -242,19 +250,27 @@ def main():
       for task in tasksOther:
         print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
     if len(tasksFailed) > 0:
-      print 'Tasks failed:',len(tasksFailed),'/',totalTasks
+      #print 'Tasks failed:',len(tasksFailed),'/',totalTasks
+      #for task in tasksFailed:
+      #  try:
+      #    res = crabCommand('status',task)
+      #  except HTTPException, hte:
+      #    print '-----> there was a problem running crab status %s; see below.'%taskName
+      #    print hte.headers
+      print 'commands to resubmit failed tasks (or tasks with failed jobs):'
       for task in tasksFailed:
-        try:
-          res = crabCommand('status',task)
-        except HTTPException, hte:
-          print '-----> there was a problem running crab getoutput --dump %s see below.'%taskName
-          print hte.headers
-      for task in tasksFailed:
+        resubmitCmd = 'crab resubmit '+task  
         print
-        print 'commands to resubmit failed tasks (or tasks with failed jobs):'
-        print '\tcrab resubmit',task
+        print '\t'+resubmitCmd
+        if not options.noAutoResubmit:
+          print 'Automatically resubmitting...'
+          subprocess.call(resubmitCmd.split())
     if len(tasksCompleted) > 0 or len(completedTasksFromCache) > 0:
       print 'Tasks completed:',len(tasksCompleted)+len(completedTasksFromCache),'/',totalTasks
+    if len(tasksSubmitFailed) > 0:
+      print 'WARNING: submission failed for:'
+      for task in tasksSubmitFailed:
+        print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
 
 if __name__ == '__main__':
     main()
