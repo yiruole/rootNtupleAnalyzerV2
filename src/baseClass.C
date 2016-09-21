@@ -188,12 +188,9 @@ void baseClass::readCutFile()
     int optimize_count=0;
     while( getline(is,s) )
     {
-      STDOUT("read line: " << s);
       if (s[0] == '#' || s.empty()) continue;
       vector<string> v = split(s);
       if ( v.size() == 0 ) continue;
-
-      STDOUT("starting JSON code");
 
       if ( v[0] == "JSON" ){ 
 
@@ -213,8 +210,6 @@ void baseClass::readCutFile()
         continue;
       }
 
-      STDOUT ("starting pileup reweighting code 1");
-
       if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
         if ( pileupDataFileWasUsed_ ) { 
           STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
@@ -231,8 +226,6 @@ void baseClass::readCutFile()
         pileupDataFileWasUsed_ = true;
         continue;
       }
-
-      STDOUT ("starting pileup reweighting code 2");
 
       if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
         if ( pileupMCFileWasUsed_ ) { 
@@ -251,7 +244,6 @@ void baseClass::readCutFile()
         continue;
       }
 
-      STDOUT("starting OPT code");
       if (v[1]=="OPT") // add code for grabbing optimizer objects
       {
         if (optimizeName_cut_.size()>=6)
