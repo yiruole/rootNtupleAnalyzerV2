@@ -32,6 +32,7 @@ class PFJet : public Object {
   
   double NeutralHadronEnergyFraction ();
   double NeutralEmEnergyFraction     ();
+  int    NeutralHadronMultiplicity   ();
   int    NConstituents               ();
   double ChargedHadronEnergyFraction ();
   int    ChargedMultiplicity         ();
