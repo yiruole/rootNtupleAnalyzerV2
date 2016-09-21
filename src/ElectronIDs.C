@@ -5,7 +5,8 @@
 #include "IDTypes.h"
 
 bool Electron::PassUserID (ID id, bool verbose){ 
-  if      ( id == HEEP60                ) return PassUserID_BuiltIn_HEEPv6p0  ();
+  if      ( id == HEEP61                ) return PassUserID_HEEPv6p1          (verbose);
+  else if ( id == HEEP60                ) return PassUserID_BuiltIn_HEEPv6p0  ();
   else if ( id == HEEP51                ) return PassUserID_HEEP              (verbose);
   else if ( id == EGAMMA_BUILTIN_TIGHT  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
   else if ( id == EGAMMA_BUILTIN_MEDIUM ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
@@ -30,6 +31,106 @@ bool Electron::PassUserID_BuiltIn_HEEPv6p0 (){
   return PassHEEPID();
 }
 
+bool Electron::PassUserID_HEEPv6p1 (bool verbose){
+  // See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
+  // apply cuts manually based on variables here
+  // this is version 6.1
+
+  //----------------------------------------------------------------------
+  //  Bools that are the same whether barrel or endcap
+  //----------------------------------------------------------------------
+  
+  bool pass_et            = bool ( PtHeep()              >  35.0 );
+  bool pass_ecalDriven    = bool ( EcalSeed()        == 1    );
+  bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
+  bool pass_missingHits   = bool ( MissingHits()     <= 1    );
+
+  //----------------------------------------------------------------------
+  // Bools that depend on barrel vs. endcap
+  //----------------------------------------------------------------------
+  
+  bool pass_deltaEtaSeed  = false;
+  bool pass_sigmaIEtaIEta = false;
+  bool pass_shape         = false;
+  bool pass_shape1        = false;
+  bool pass_shape2        = false;
+  bool pass_caloIsolation = false;
+  bool pass_dxy           = false;
+  bool pass_hoe           = false;
+  bool pass_trkIsolation  = false;
+  
+  double caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
+  
+  //----------------------------------------------------------------------
+  // Barrel electrons
+  //----------------------------------------------------------------------
+  
+  if ( fabs(SCEta()) < 1.4442 ){
+    pass_deltaEtaSeed      = bool ( fabs(DeltaEtaSeed() )     < 0.004 );
+    pass_hoe               = bool ( HoE()            < 1/SCEnergy() + 0.05 );
+    pass_sigmaIEtaIEta     = true;
+    pass_shape1            = bool ( Full5x5E1x5OverE5x5()        > 0.83  );
+    pass_shape2            = bool ( Full5x5E2x5OverE5x5()        > 0.94  );
+    pass_shape             = bool ( pass_shape1 || pass_shape2    );
+    pass_caloIsolation     = bool ( caloIsolation < ( 2.0 + ( 0.03 * PtHeep() ) + (0.28 * RhoForHEEP() ) ) );
+    pass_dxy               = bool ( fabs(LeadVtxDistXY()) < 0.02  );
+    pass_trkIsolation      = bool ( PtHeep() < 95 ? TrkIsoDR03() < 5 : TrkIsoDR03() < 5+1.5*RhoForHEEP());
+  }
+  
+  //----------------------------------------------------------------------
+  // Endcap electrons
+  //----------------------------------------------------------------------
+  
+  else if ( fabs(SCEta()) > 1.566 && fabs(SCEta()) < 2.5 ){ 
+    pass_deltaEtaSeed      = bool ( fabs (DeltaEtaSeed())     < 0.006 );
+    pass_hoe               = bool ( HoE()            < 5/SCEnergy() + 0.05 );
+    pass_sigmaIEtaIEta     = bool ( Full5x5SigmaIEtaIEta()       < 0.03  );
+    pass_shape             = true;
+    if   ( PtHeep()  < 50 ) {
+      pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+						    ( 0.28 * RhoForHEEP() ) ) );
+    }
+    else                { 
+      pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+						    ( 0.28 * RhoForHEEP() ) + 
+						    ( 0.03 * (PtHeep() - 50.0 ) ) ) );
+    }
+    pass_dxy               = bool ( fabs(LeadVtxDistXY()) < 0.05  );
+    pass_trkIsolation      = bool ( PtHeep() < 100 ? TrkIsoDR03() < 5 : TrkIsoDR03() < 5+0.5*RhoForHEEP());
+  }
+
+  bool decision = (pass_et            && 
+		   pass_ecalDriven    && 
+		   pass_deltaEtaSeed  && 
+		   pass_deltaPhi      && 
+		   pass_hoe           && 
+		   pass_sigmaIEtaIEta && 
+		   pass_shape         && 
+		   pass_dxy           && 
+		   pass_missingHits   && 
+		   pass_trkIsolation  && 
+		   pass_caloIsolation ); 
+
+  if ( verbose ) {
+    if ( decision ) std::cout << "Electron #" << m_raw_index << " PASS HEEPID" << std::endl;
+    else { 
+      std::cout << "Electron #" << m_raw_index << " FAIL HEEPID" << std::endl;
+      if ( !pass_et            ) std::cout << "\tfail et            " << std::endl;
+      if ( !pass_ecalDriven    ) std::cout << "\tfail ecalDriven    " << std::endl;
+      if ( !pass_deltaEtaSeed  ) std::cout << "\tfail deltaEtaSeed  " << std::endl;
+      if ( !pass_deltaPhi      ) std::cout << "\tfail deltaPhi      " << std::endl;
+      if ( !pass_hoe           ) std::cout << "\tfail hoe           " << std::endl;
+      if ( !pass_sigmaIEtaIEta ) std::cout << "\tfail sigmaIEtaIEta " << std::endl;
+      if ( !pass_shape         ) std::cout << "\tfail shape         " << std::endl;
+      if ( !pass_dxy           ) std::cout << "\tfail dxy           " << std::endl;
+      if ( !pass_missingHits   ) std::cout << "\tfail missingHits   " << std::endl;
+      if ( !pass_trkIsolation  ) std::cout << "\tfail trkIsolation  " << std::endl;
+      if ( !pass_caloIsolation ) std::cout << "\tfail caloIsolation " << std::endl;
+    }
+  }
+  
+  return decision;
+}
 
 bool Electron::PassUserID_HEEP (bool verbose){
   // See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
