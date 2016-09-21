@@ -31,7 +31,7 @@ std::vector<std::string> JSONParser::split(const std::string& s, const std::stri
 }
 
 std::string JSONParser::getFileContent ( const char * file_name ) {
-  typedef std::auto_ptr<char> char_ptr;
+  typedef std::unique_ptr<char> char_ptr;
   
   char_ptr buffer;
   std::string line;
