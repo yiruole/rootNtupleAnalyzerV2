@@ -93,6 +93,9 @@ parser.add_option("-r", "--reducedSkim", dest="isReducedSkimTask",
 parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
                   metavar="OVERRIDEOUTPUTLENGTH",default=False,action="store_true")
 
+parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
+                  metavar="submitCERNT2only",default=False,action="store_true")
+
 
 (options, args) = parser.parse_args()
 
@@ -303,7 +306,7 @@ config.Data.outputPrimaryDataset = dataset.split('__')[0]
 #  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
 config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
 
-submitCERNT2only = False
+submitCERNT2only = options.submitCERNT2only
 maxLengthPath = max(config.Data.userInputFiles, key=len)
 if len(maxLengthPath) <= 255:
   print 'userInputFiles OK, longest path has:',len(maxLengthPath),'chars'
@@ -387,11 +390,11 @@ if submitCERNT2only:
   config.Site.whitelist = ['T2_CH_CERN']
 else:
   if options.isSkimTask or options.isReducedSkimTask:
-    config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_EE_*','T2_PT_*']
+    config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_PT_*']
   else:
     config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*',]
 # default crab server blacklist
-config.Site.blacklist = ['T2_CH_CSCS', 'T2_UK_SGrid_RALPP', 'T2_FR_GRIF_LLR', 'T2_BE_UCL', 'T2_FR_IPHC', 'T2_DE_DESY', 'T2_IT_Legnaro', 'T2_CH_CERN_AI', 'T2_UK_London_Brunel', 'T2_CH_CSCS_HPC', 'T2_IT_Pisa', 'T2_GR_Ioannina', 'T2_CH_CERN_HLT', 'T2_FR_GRIF_IRFU', 'T2_IT_Bari', 'T2_IT_Rome', 'T2_FR_CCIN2P3', 'T2_ES_CIEMAT', 'T2_PL_Warsaw', 'T2_HU_Budapest', 'T2_DE_RWTH', 'T2_CH_CERN', 'T2_PT_NCG_Lisbon', 'T2_PL_Swierk']
+config.Site.blacklist = ['T2_CH_CSCS', 'T2_UK_SGrid_RALPP', 'T2_FR_GRIF_LLR', 'T2_BE_UCL', 'T2_FR_IPHC', 'T2_DE_DESY', 'T2_IT_Legnaro', 'T2_CH_CERN_AI', 'T2_UK_London_Brunel', 'T2_CH_CSCS_HPC', 'T2_IT_Pisa', 'T2_GR_Ioannina', 'T2_CH_CERN_HLT', 'T2_FR_GRIF_IRFU', 'T2_IT_Bari', 'T2_IT_Rome', 'T2_FR_CCIN2P3', 'T2_ES_CIEMAT', 'T2_PL_Warsaw', 'T2_HU_Budapest', 'T2_DE_RWTH', 'T2_PT_NCG_Lisbon', 'T2_PL_Swierk']
 # my own additions based on failing jobs
 config.Site.blacklist.extend(['T2_ES_IFCA', 'T2_EE_Estonia'])
 

@@ -70,6 +70,9 @@ parser.add_option("-d", "--eosDir", dest="eosDir",
 parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
                   metavar="OVERRIDEOUTPUTLENGTH",default=False,action="store_true")
 
+parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
+                  metavar="submitCERNT2only",default=False,action="store_true")
+
 (options, args) = parser.parse_args()
 
 if ( not options.inputlist 
@@ -224,6 +227,8 @@ for i,line in enumerate(inputlist_file):
       command+=" -z"
     if options.overrideOutputLength:
       command+=" -l"
+    if options.submitCERNT2only:
+      command+=" -f"
     
     print command
     ret = os.system  ( command ) 
