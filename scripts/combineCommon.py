@@ -97,6 +97,7 @@ def ParseXSectionFile(xsectionFile):
     if line.startswith('#'):
       continue
     line = string.strip(line,"\n")
+    line = line.split("#")[0] # strip off anything after any '#' if present
     # ignore empty lines
     if len(line) <= 0:
       continue
