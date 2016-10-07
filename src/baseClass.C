@@ -46,6 +46,9 @@ baseClass::~baseClass()
     {
       STDOUT("ERROR: writeReducedSkimTree did not complete successfully.");
     }
+  output_root_->cd();
+  h_weightSums_->SetBinContent(1,sumAMCNLOWeights_);
+  h_weightSums_->Write();
   output_root_->Close();
   if(produceSkim_) skim_file_->Close();
   if(produceReducedSkim_) reduced_skim_file_->Close();
@@ -121,6 +124,12 @@ void baseClass::init()
   //  for (vector<string>::iterator it = orderedCutNames_.begin();
   //       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
   //STDOUT("ends");
+
+  // setup sum of weights hist
+  gDirectory->cd();
+  h_weightSums_ = new TH1F("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
+  h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
+  h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
 }
 
 void baseClass::readInputList()
@@ -404,13 +413,14 @@ void baseClass::readCutFile()
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
     }
 
+  is.close();
+
   // Create a histogram that will show events passing cuts
   int cutsize=orderedCutNames_.size()+1;
   if (skimWasMade_) ++cutsize;
   gDirectory->cd();
   eventcuts_=new TH1F("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
 
-  is.close();
 
 }
 
