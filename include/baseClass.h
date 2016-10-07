@@ -237,7 +237,9 @@ class baseClass : public rootNtupleClass {
   double decodeCutValue(const string& s);
   bool skimWasMade_;
   int getGlobalInfoNstart(const char* );
+  float getSumAMCNLOWeights(const char* );
   int NBeforeSkim_;
+  float sumAMCNLOWeights_;
   double PileupWeight_;
 
   // JSON file stuff

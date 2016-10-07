@@ -90,9 +90,10 @@ void baseClass::init()
     
     skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
     skim_tree_ = fChain->CloneTree(0);
-    hCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
+    hCount_ = new TH1I("EventCounter","Event Counter",3,-0.5,2.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
+    hCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
   }
 
   // Reduced Skim stuff
@@ -104,9 +105,10 @@ void baseClass::init()
 
     reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
-    hReducedCount_ = new TH1I("EventCounter","Event Counter",2,-0.5,1.5);
+    hReducedCount_ = new TH1I("EventCounter","Event Counter",3,-0.5,2.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
+    hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
     for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
       {
 	cut * c = & (cc->second);
@@ -132,6 +134,8 @@ void baseClass::readInputList()
   pileupDataFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
+  sumAMCNLOWeights_ = 0;
+  float tmpSumAMCNLOWeights = 0;
 
   STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
 
@@ -152,7 +156,10 @@ void baseClass::readInputList()
       chain->Add(name.c_str());
       NBeforeSkim = getGlobalInfoNstart(name.c_str());
       NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
-      STDOUT("Initial number of events: NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
+      STDOUT("Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
+      tmpSumAMCNLOWeights = getSumAMCNLOWeights(name.c_str());
+      sumAMCNLOWeights_ += tmpSumAMCNLOWeights;
+      STDOUT("amc@NLO weight sum (current,total): = "<<tmpSumAMCNLOWeights<<", "<<sumAMCNLOWeights_);
     }
     tree_ = chain;
     STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
@@ -205,7 +212,7 @@ void baseClass::readCutFile()
         jsonFileName_ = v[1];
         STDOUT("Getting JSON file: " << v[1]);
         jsonParser_.parseJSONFile ( & v[1] ) ;
-        jsonParser_.printGoodLumis();
+        //jsonParser_.printGoodLumis();
         jsonFileWasUsed_ = true;
         continue;
       }
@@ -1317,6 +1324,29 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   return NBeforeSkim;
 }
 
+float baseClass::getSumAMCNLOWeights(const char *pName)
+{
+  float sumAMCNLOWeights = 0.0;
+  TFile *f = TFile::Open(pName);
+  string s1 = "LJFilter/EventCount/EventCounter";
+  string s2 = "LJFilterPAT/EventCount/EventCounter";
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  if( !hCount1 && !hCount2 )
+    {
+      STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
+      skimWasMade_ = false;
+      return sumAMCNLOWeights;
+    }
+
+  if (hCount1) sumAMCNLOWeights = (float)hCount1->GetBinContent(3);
+  else sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
+
+  f->Close();
+
+  return sumAMCNLOWeights;
+}
+
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
   map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
@@ -1533,6 +1563,7 @@ bool baseClass::writeSkimTree()
   int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
+  hCount_->SetBinContent(3,sumAMCNLOWeights_);
   hCount_->Write();
 
   if ( fChain -> GetEntries() == 0 ){
@@ -1572,6 +1603,7 @@ bool baseClass::writeReducedSkimTree()
   int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
+  hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
   hReducedCount_->Write();
 
   // Any failure mode to implement?
