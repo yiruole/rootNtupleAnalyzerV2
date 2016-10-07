@@ -43,22 +43,22 @@ class Object {
   
   template <class AnotherObject>
     bool MatchByDR ( CollectionPtr c, AnotherObject & best_match, double max_dr ) { 
-    short size = c -> GetSize();
-    double min_dr = 9999.;
-    bool match = false;
-    for (short i = 0; i < size ; ++i){
-      AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
-      double dr = DeltaR ( & constituent );
-      if ( dr < max_dr ) { 
-	if ( dr < min_dr ) { 
-	  match = true;
-	  min_dr = dr;
-	  best_match = constituent;
-	}
+      short size = c -> GetSize();
+      double min_dr = 9999.;
+      bool match = false;
+      for (short i = 0; i < size ; ++i){
+        AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
+        double dr = DeltaR ( & constituent );
+        if ( dr < max_dr ) { 
+          if ( dr < min_dr ) { 
+            match = true;
+            min_dr = dr;
+            best_match = constituent;
+          }
+        }
       }
+      return match;
     }
-    return match;
-  }
   
 
 

@@ -258,6 +258,8 @@ class Collection {
       Object1 this_collection_constituent = GetConstituent<Object1>(i);
       Object2 matched_object;
       bool matched = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
+      //bool matchedDR = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
+      // TODO bool matchedDP = 
       double new_pt = -1.0;
       if ( matched ) { 
         double old_pt               = this_collection_constituent.Pt();
@@ -292,6 +294,7 @@ class Collection {
 
       }
       else if(typeid(Object1).name()=="PFJet") {
+        //TODO: smearing using gaussian of width sqrt(SF**2-1) * sigma_MC_Pt
       }
     }
 
