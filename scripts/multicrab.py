@@ -173,6 +173,9 @@ def main():
           print "can't move files; continue"
           continue
         outputFilesToMove = [name for name in outputFileLFNs if not 'reduced_skim' in name]
+        if len(outputFilesToMove) == 0:
+          # if all files have "reduced_skim" in them, assume this is a skim of a reduced skim
+          outputFilesToMove = [name for name in outputFileLFNs if not 'reduced_skim_skim' in name]
         outputFilesNotMoved = [fname for fname in outputFilesToMove if not os.path.isfile(taskName+'/'+fname.split('/')[-1])]
         print 'outputFilesToMove length=',len(outputFilesToMove)
         print 'outputFilesNotMoved length=',len(outputFilesNotMoved)
