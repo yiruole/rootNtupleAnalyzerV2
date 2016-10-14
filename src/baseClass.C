@@ -297,6 +297,11 @@ void baseClass::readCutFile()
         return;
       }
 
+      if(v.size() < 6)
+      {
+        STDOUT("ERROR: This line [" << s << "] is too short! Quitting.");
+        exit(-1);
+      }
       int level_int = atoi( v[5].c_str() );
       if(level_int == -1)
       {
