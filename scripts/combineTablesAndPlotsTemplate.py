@@ -214,25 +214,29 @@ for lin in open( options.inputList ):
     #print 'Ntot=',Ntot
 
     #---Calculate weight
-    #Ntot = int(data[0]['N'])
     Ntot = float(data[0]['N'])
-    #XXX FIXME for amc@NLO need to multiple by sum of weights
     if( xsection_val == "-1" ):
         weight = 1.0
         plotWeight = 1.0
         xsection_X_intLumi = Ntot
     else:
         xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
-        #XXX HACKs for AMC@NLO
+        # for amc@NLO need to multiply by sum of weights
+        tfile = TFile(inputRootFile)
+        sumOfWeightsHist = tfile.Get('SumOfWeights')
+        sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
+        tfile.Close()
+        # if 'amcatnlo' (ignoring case) is in the dataset name, it's an amc@NLO sample
         if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
           if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
-            weight*=1.49
+            weight*=sumAMCatNLOweights
           elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
-            weight*=1.46
+            weight*=sumAMCatNLOweights
           elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
-            weight*=3.02
+            weight*=sumAMCatNLOweights
         if options.extraReweight:
           # these are the preselection average weights for the TopPtReweighting
+          #XXX TODO extract from sumOfWeightsHistogram as well
           if re.search('TTJets_madgraphMLM',dataset_fromInputList):
             print 'applying extra average weight to',dataset_fromInputList
             xsection_X_intLumi/=8.810806e-01
@@ -390,6 +394,8 @@ for lin in open( options.inputList ):
               if toBeUpdated:
                   if not htemp:
                     print 'failed to get histo named:',histoName,'from file:',file.GetName()
+                  #if 'SumOfWeights' in histoName:
+                  #  continue # do not sum up the individual SumOfWeights histos
                   if not dictFinalHisto[sample][h].Add(htemp, plotWeight):
                     print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHisto[sample][h].GetName()
 
@@ -478,12 +484,12 @@ if not options.tablesOnly:
         sys.stdout.flush()
         
         nForProgress = 0
-        for sample in dictFinalHisto:
-            for n, histo in enumerate ( dictFinalHisto[sample] ):
+        for histDict in dictFinalHisto.itervalues(): # for each sample's dict
+            for histo in histDict.itervalues(): # for each hist contained in the sample's dict
                 if (nForProgress % (nHistos/steps))==0:
                     print '\b.',
                     sys.stdout.flush()
-                dictFinalHisto[sample][histo].Write()
+                histo.Write()
                 nForProgress+=1
         
         print '\b] 100%'
