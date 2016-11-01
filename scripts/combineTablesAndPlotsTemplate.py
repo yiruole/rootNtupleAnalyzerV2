@@ -95,8 +95,10 @@ if(os.path.isfile(options.xsection) == False):
     sys.exit()
 
 print 'Launched like:'
+print 'python ',
 for arg in sys.argv:
-  print '\t'+arg
+  print ' '+arg,
+print
 
 xsectionDict = ParseXSectionFile(options.xsection)
 #print 'Dataset      XSec'
@@ -226,14 +228,6 @@ for lin in open( options.inputList ):
         sumOfWeightsHist = tfile.Get('SumOfWeights')
         sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
         tfile.Close()
-        # if 'amcatnlo' (ignoring case) is in the dataset name, it's an amc@NLO sample
-        if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
-          if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
-            weight*=sumAMCatNLOweights
-          elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
-            weight*=sumAMCatNLOweights
-          elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
-            weight*=sumAMCatNLOweights
         if options.extraReweight:
           # these are the preselection average weights for the TopPtReweighting
           #XXX TODO extract from sumOfWeightsHistogram as well
@@ -261,8 +255,21 @@ for lin in open( options.inputList ):
           elif re.search('TTJets_DiLept_ext1_madgraphMLM',dataset_fromInputList):
             print 'applying extra average weight to',dataset_fromInputList
             xsection_X_intLumi/=8.804035e-01
+        # now calculate the actual weight
+        weight = 1.0
         if( Ntot == 0 ):
             weight = float(0)
+        # if 'amcatnlo' (ignoring case) is in the dataset name, it's an amc@NLO sample
+        elif re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
+          if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
+            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+            weight = xsection_X_intLumi / sumAMCatNLOweights
+          elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
+            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+            weight = xsection_X_intLumi / sumAMCatNLOweights
+          elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
+            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+            weight = xsection_X_intLumi / sumAMCatNLOweights
         else:
             weight = xsection_X_intLumi / Ntot 
         plotWeight = weight/1000.0
