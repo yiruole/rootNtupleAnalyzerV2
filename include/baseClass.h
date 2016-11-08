@@ -132,6 +132,7 @@ class baseClass : public rootNtupleClass {
   int passJSON(int run, int ls, bool isData);
   double getPileupWeight ( int npileup, bool this_is_data );
   void setPileupWeight ( double weight ) { PileupWeight_ = weight; } 
+  bool triggerExists   ( const char* name);
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
   void fillTriggerVariable ( const char * hlt_path, const char* variable_name ) ;
