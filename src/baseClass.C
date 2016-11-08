@@ -1319,6 +1319,16 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   int NBeforeSkim = 0;
   STDOUT(pName<<"  "<< NBeforeSkim)
   TFile *f = TFile::Open(pName);
+  if(!f)
+  {
+    STDOUT("File pointer was null. Quitting");
+    exit(-1);
+  }
+  if(!f->IsOpen())
+  {
+    STDOUT("File didn't open! Quitting");
+    exit(-1);
+  }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
@@ -1343,6 +1353,16 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
 {
   float sumAMCNLOWeights = 0.0;
   TFile *f = TFile::Open(pName);
+  if(!f)
+  {
+    STDOUT("File pointer was null. Quitting");
+    exit(-1);
+  }
+  if(!f->IsOpen())
+  {
+    STDOUT("File didn't open! Quitting");
+    exit(-1);
+  }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
@@ -1682,6 +1702,26 @@ void baseClass::printFiredTriggers()
   {
     if(i->second)
       STDOUT("\t\"" << i -> first << "\"" );
+  }
+}
+
+bool baseClass::triggerExists ( const char* name ) {
+  std::map<std::string, bool>::iterator i = triggerDecisionMap_.find ( name ) ;
+  if ( i == triggerDecisionMap_.end())
+  {
+    // try to look by prefix of given path name
+    auto itr = triggerDecisionMap_.lower_bound( name );
+    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    {
+      //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
+      return true;
+      ++itr;
+    }
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }
 
