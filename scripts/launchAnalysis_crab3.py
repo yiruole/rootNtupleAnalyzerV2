@@ -90,18 +90,18 @@ if not options.treeName:
 #--------------------------------------------------------------------------------
 # Delete crab sandboxes
 #--------------------------------------------------------------------------------
-print 'First, delete existing crab sandboxes'
+print 'First, delete existing crab sandboxes...',
 try:
   deleteCrabSandboxes.main()
 except deleteCrabSandboxes.Crab3ToolsException:
   print 'WARNING: Something went wrong deleting the existing crab sandboxes; proceeding anyway but we might run out of quota'
-print 'Done'
+print '... done '
 
 #--------------------------------------------------------------------------------
 # Make the output directory
 #--------------------------------------------------------------------------------
 
-print "Making the local output directory..."
+print "Making the local output directory...",
 
 if not os.path.isdir ( options.outputDir ) : 
     os.system ( "mkdir -p " + options.outputDir )
@@ -116,7 +116,7 @@ print "... done "
 # Look for the cut file.  If it exists, move it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the cutfile to the local output directory..."
+print "Moving the cutfile to the local output directory...",
 
 if not os.path.isfile ( options.cutfile ) : 
     print "Error: No cut file here: " + options.cutfile 
@@ -130,7 +130,7 @@ print "... done "
 # Look for the inputList file
 #--------------------------------------------------------------------------------
 
-print "Moving the inputlist to the local output directory..."
+print "Moving the inputlist to the local output directory...",
 
 if not os.path.isfile ( options.inputlist ) : 
     print "Error: No input list here: " + options.inputlist 
@@ -146,9 +146,13 @@ print "... done "
 
 print "Moving the JSON file to the local output directory..."
 
-cutfile = open ( options.cutfile , "r" )
+with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'r') as cutfile:
+  cutfileLines = cutfile.readlines()
+
 found_json = False 
-for line in cutfile:
+json_file=''
+lineIdx=0
+for index,line in enumerate(cutfileLines):
     if line.strip() == "" : continue
     if line.split()[0] == "#" : continue
     if line.strip()[:4] == "JSON":
@@ -168,6 +172,14 @@ for line in cutfile:
         else :
             os.system ( "cp " + json_file + " " + options.outputDir )
             found_json = True
+            lineIdx = index
+
+print 'INFO: changing JSON line in cutfile from "'+cutfileLines[lineIdx]+'"'
+cutfileLines[lineIdx] = 'JSON '+json_file.split('/')[-1]+'\n'
+print '\tto "'+cutfileLines[lineIdx]+'"'
+
+with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'w') as myfile:
+  myfile.writelines(cutfileLines)
 
 print "... done "
                    
@@ -175,7 +187,7 @@ print "... done "
 # Check if path is a link
 #--------------------------------------------------------------------------------
 
-print "Checking the link to analysisClass.C..."
+print "Checking the link to analysisClass.C...",
 
 if not os.path.islink ( "src/analysisClass.C" ) :
     print "Error: src/analysisClass.C is not a symbolic link"
@@ -229,6 +241,8 @@ for i,line in enumerate(inputlist_file):
       command+=" -l"
     if options.submitCERNT2only:
       command+=" -f"
+    if found_json:
+      command+=" -j "+options.outputDir+'/'+json_file.split('/')[-1]
     
     print command
     ret = os.system  ( command ) 

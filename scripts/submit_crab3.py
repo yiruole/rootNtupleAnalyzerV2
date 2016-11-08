@@ -96,6 +96,10 @@ parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
 parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
                   metavar="submitCERNT2only",default=False,action="store_true")
 
+parser.add_option("-j", "--jsonFile", dest="jsonFile",
+                  metavar="jsonFile")
+
+
 
 (options, args) = parser.parse_args()
 
@@ -189,7 +193,6 @@ os.system("mkdir -p "+workingDir)
 # get just the file names, to be read from local pwd sandbox on grid node
 cutfileName = cutfile.split('/')[-1]
 inputListName = inputlist.split('/')[-1]
-#TODO JSON 
 
 # make a copy of the input list for this dataset
 if not os.path.isfile(outputmain+'/'+inputListName):
@@ -277,6 +280,10 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
+# if we gave a json, feed it into the sandbox as well
+# note that is read by the cutfile, which was modified in the 'launch' script to read a json in the working dir
+if options.jsonFile!=None:
+  config.JobType.inputFiles.append(options.jsonFile)
 # we now read these from trees stored on eos
 ## for using event lists
 #if options.isReducedSkimTask:
