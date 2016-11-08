@@ -65,7 +65,8 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromDY(bool verbose){
-  if ( Status() != 3 ) return false;  
+  if ( Status() != 3 && Status() != 1) return false;  
+  if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
   int mother_pdg_id = m_collection -> GetData() -> GenParticlePdgId -> at ( MotherIndex() );
   if ( abs(mother_pdg_id) != 22 && 
        abs(mother_pdg_id) != 23 ) return false;
@@ -73,7 +74,19 @@ bool GenParticle::PassUserID_FromDY(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromW(bool verbose){
-  if ( Status() != 3 ) return false;  
+  if ( Status() != 3 && Status() != 1) return false;  
+  if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
+  if(verbose) {
+    std::cout << "GenParticle::PassUserID_FromW" << Name() << " " << ": "
+      << "PDG = "    << PdgId () << ", "
+      << "Status = " << Status () << ", "
+      << "Pt = "     << Pt ()    << ", "
+      << "Eta = "    << Eta()    << ", "
+      << "Phi = "    << Phi();// << std::endl;
+    std::cout << ", mother index = " << MotherIndex() << std::endl;
+    cout << "GenParticle::PassUserID_FromW() MotherIndex=" << MotherIndex() << endl;
+    cout << "GenParticle::PassUserID_FromW() m_collection -> GetData() -> GenParticlePdgId ->size=" << m_collection -> GetData() -> GenParticlePdgId ->size() << endl;
+  }
   int mother_pdg_id = m_collection -> GetData() -> GenParticlePdgId -> at ( MotherIndex() );
   if ( abs(mother_pdg_id) != 24 ) return false;
   return true;
@@ -98,7 +111,7 @@ bool GenParticle::PassUserID_GenTauFromLQ (bool verbose){
 }
 
 bool GenParticle::PassUserID_GenZGammaHardScatter(bool verbose){
-  if ( Status() != 3 ) return false;  
+  if ( Status() != 3 && Status() != 23) return false;  
   if ( abs(PdgId()) != 22 && 
        abs(PdgId()) != 23 ) return false;
   return true;
@@ -106,7 +119,7 @@ bool GenParticle::PassUserID_GenZGammaHardScatter(bool verbose){
 
  
 bool GenParticle::PassUserID_GenWHardScatter     (bool verbose){
-  if ( Status() != 3 ) return false;  
+  if ( Status() != 3 && Status() != 62) return false;  
   if ( abs(PdgId()) != 24 ) return false;
   return true;
 } 
