@@ -49,6 +49,7 @@ std::string JSONParser::getFileContent ( const char * file_name ) {
   
   else { 
     std::cout << "ERROR: JSON file " << file_name << " does not exist.  Code will crash." << std::endl;
+    exit(-1);
   }
 
   return retval;
