@@ -111,16 +111,36 @@ bool GenParticle::PassUserID_GenTauFromLQ (bool verbose){
 }
 
 bool GenParticle::PassUserID_GenZGammaHardScatter(bool verbose){
-  if ( Status() != 3 && Status() != 23) return false;  
   if ( abs(PdgId()) != 22 && 
        abs(PdgId()) != 23 ) return false;
+  if(verbose) {
+    std::cout << "GenParticle::PassUserID_GenZGammaHardScatter" << Name() << " " << ": "
+      << "PDG = "    << PdgId () << ", "
+      << "Status = " << Status () << ", "
+      << "Pt = "     << Pt ()    << ", "
+      << "Eta = "    << Eta()    << ", "
+      << "Phi = "    << Phi() << std::endl;
+  }
+  if (Status() == 3) return true;
+  if ( Status()>20 && Status()<30) return true; //pythia8
+  //if (Status() == 62) return true;  
   return true;
 }
 
  
 bool GenParticle::PassUserID_GenWHardScatter     (bool verbose){
-  if ( Status() != 3 && Status() != 62) return false;  
   if ( abs(PdgId()) != 24 ) return false;
+  if(verbose) {
+    std::cout << "GenParticle::PassUserID_GenWHardScatter" << Name() << " " << ": "
+      << "PDG = "    << PdgId () << ", "
+      << "Status = " << Status () << ", "
+      << "Pt = "     << Pt ()    << ", "
+      << "Eta = "    << Eta()    << ", "
+      << "Phi = "    << Phi() << std::endl;
+  }
+  // now that we have a W
+  if ( Status() == 3) return true; // pythia6
+  if ( Status()>20 && Status()<30) return true; //pythia8
   return true;
 } 
 
