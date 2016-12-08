@@ -90,7 +90,7 @@ def make_filenamelist_default(inputDir):
     return filenamelist
 
 
-def process_input_dir(inputDir, match, filelist):
+def process_input_dir(inputDir, match, filelist, useCERNEOS):
     inputDir = inputDir.rstrip('/')+'/'
     prefix = ''
     filenamelist = []
@@ -101,12 +101,16 @@ def process_input_dir(inputDir, match, filelist):
         print 'ERROR: unsupported access protocol'
         exit(-1)
     elif( re.search("^/eos/cms/", inputDir) ):
-        prefix = "root://cms-xrd-global.cern.ch/"
-        #prefix = "root://eoscms/"
+        if useCERNEOS:
+          prefix = "root://eoscms/"
+        else:
+          prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
     elif( re.search("^/store/", inputDir) ):
-        prefix = "root://cms-xrd-global.cern.ch/"
-        #prefix = "root://eoscms/"
+        if useCERNEOS:
+          prefix = "root://eoscms/"
+        else:
+          prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
     else:
         #filenamelist = make_filenamelist_default(inputDir)
@@ -181,12 +185,14 @@ def write_inputlists(filelist, outputDir):
 
 def main():
     parser = optparse.OptionParser(
-        usage='Usage: %prog [-m MATCH] -i INPUTDIR(S) -o OUTPUTDIR',
+        usage='Usage: %prog [-m MATCH] -i INPUTDIR(S) -o OUTPUTDIR [-f]',
         description='Example: createList.py -i /castor/cern.ch/user/f/ferencek/LQ/RootNtuple/RootNtuple-V00-00-08-MC-LQ-eejj_20100518_231412 -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config'
     )
     parser.add_option( '-m', '--match', metavar='MATCH', action='store', help='Only files containing the MATCH string in their names will be considered',default='' )
     parser.add_option( '-i', '--inputDirs', metavar='INPUTDIR(S)', action="callback", callback=cb, dest="inputDirs", help='Specifies the input directory (or directories separated by space) containing .root files. Please use the full path. Castor directories are also supported' )
     parser.add_option( '-o', '--outputDir', metavar='OUTPUTDIR', action='store', help='Specifies the output directory where the .txt list files will be stored. Please use the full path' )
+    parser.add_option( '-f', '--cernEOS', dest='useCERNEOS',metavar='useCERNEOS',default=False,action='store_true', help='Write root file URLs with local CERN eoscms, not global xrootd redirector')
+
 
     (options, args) = parser.parse_args(args=None)
 
@@ -200,7 +206,7 @@ def main():
     inputDirs = unique(options.inputDirs)
 
     for inputDir in inputDirs:
-        process_input_dir(inputDir, options.match, filelist)
+        process_input_dir(inputDir, options.match, filelist, options.useCERNEOS)
 
     write_inputlists(filelist, options.outputDir)
 
