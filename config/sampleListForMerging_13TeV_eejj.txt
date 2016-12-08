@@ -8,7 +8,7 @@ ZJet_Madgraph_HT2500toInf     /DYJetsToLL_M-50_HT-2500toInf_TuneCUETP8M1_13TeV-m
 ZJet_Madgraph_HT    ZJet_Madgraph_HT100to200 ZJet_Madgraph_HT200to400 ZJet_Madgraph_HT400to600 ZJet_Madgraph_HT600to800 ZJet_Madgraph_HT800to1200 ZJet_Madgraph_HT1200to2500 ZJet_Madgraph_HT2500toInf
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 #ZJet_Madgraph_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
-#ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
 #ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
 #ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
@@ -23,9 +23,10 @@ ZJet_amcatnlo_pt100to250    /DYJetsToLL_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloF
 ZJet_amcatnlo_pt250to400    /DYJetsToLL_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM
 ZJet_amcatnlo_pt400to650    /DYJetsToLL_Pt-400To650_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM
 ZJet_amcatnlo_pt650toInf    /DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/MINIAODSIM
-ZJet_amcatnlo_ptBinned    ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
+ZJet_amcatnlo_ptBinned    ZJet_amcatnlo_Inc  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
+ZJet_amcatnlo_ptBinned_noIncZ    ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 
-#WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
+WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 #WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 WJet_Madgraph_HT100to200    /WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
 WJet_Madgraph_HT200to400    /WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
@@ -39,7 +40,8 @@ WJet_amcatnlo_pt100to250    /WJetsToLNu_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloF
 WJet_amcatnlo_pt250to400    /WJetsToLNu_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt400to600    /WJetsToLNu_Pt-400To600_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt600toInf    /WJetsToLNu_Pt-600ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-WJet_amcatnlo_ptBinned    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+WJet_amcatnlo_ptBinned    WJet_amcatnlo_Inc  WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+WJet_amcatnlo_ptBinned_noIncW    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
 
 TTJets_DiLept_ext1                /TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 TTJets_SingleLeptFromT_ext1       /TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
@@ -98,12 +100,17 @@ OTHERBKG_MG_HT	WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
 #OTHERBKG_amcAtNLOIncZJet_WJetPt	WJet_amcatnlo_ptBinned SingleTop PhotonJets_Madgraph DIBOSON
 #ALLBKG_MGIncZJetTTBar		ZJet_Madgraph_Inc TTbar_Madgraph WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
 #OTHERBKG_MGIncZJetTTBar	WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
+
 ALLBKG_MG_ZJetPt		ZJet_amcatnlo_ptBinned TTbar_Madgraph WJet_Madgraph_HT SingleTop DIBOSON
 OTHERBKG_MG_ZJetPt	WJet_Madgraph_HT SingleTop DIBOSON
+ALLBKG_MG_ZJetNoIncZPt		ZJet_amcatnlo_ptBinned_noIncZ TTbar_Madgraph WJet_Madgraph_HT SingleTop DIBOSON
+OTHERBKG_MG_ZJetNoInZPt	WJet_Madgraph_HT SingleTop DIBOSON
 ALLBKG_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_Madgraph WJet_amcatnlo_ptBinned SingleTop DIBOSON
 OTHERBKG_ZJetWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON
 OTHERBKG_amcAtNLOIncTTBar_ZJetWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
+ALLBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt		ZJet_amcatnlo_ptBinned_noIncZ TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON
+OTHERBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 
 SingleElectron_2016B    /SingleElectron/Run2016B-PromptReco-v2/MINIAOD
 SingleElectron_2016C    /SingleElectron/Run2016C-PromptReco-v2/MINIAOD
