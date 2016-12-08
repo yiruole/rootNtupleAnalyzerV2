@@ -148,7 +148,12 @@ os.system("mkdir -p "+outputmain+"/src/")
 
 # output prefix
 # (something like analysisClass_lq1_skim___TTJets_SemiLeptMGDecays_8TeV-madgraph__Summer12_DR53X-PU_S10_START53_V7A-v1__AODSIM )
-outputPrefix = string.split(outputmain,"/")[-1]
+outputPrefix = string.split(outputmain,"/")[-1].split('___')[-1]
+outputPrefix = 'analysisClass___'+outputPrefix
+if len(outputPrefix) > 100:
+  print 'crab cannot handle requestName of more than 100 characters; ours has:',len(outputPrefix)
+  print 'requestName was:',outputPrefix
+  exit(-1)
 #################################################
 # dataset
 dataset = string.split(outputPrefix,"___")[-1]
