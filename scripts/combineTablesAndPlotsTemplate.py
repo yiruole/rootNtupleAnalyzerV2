@@ -73,6 +73,11 @@ parser.add_option("-r", "--reweight", action="store_true",dest="extraReweight",d
                   help="apply extra reweight factor (e.g., for top Pt reweighting) when normalizing to int. lumi.",
                   metavar="EXTRAREWEIGHT")
 
+parser.add_option("-f", "--logFile", dest="logFile", default='',
+                  help="log file from the analysis (used to look for errors)",
+                  metavar="LOGFILE")
+
+
 (options, args) = parser.parse_args()
 
 if len(sys.argv)<14:
@@ -81,14 +86,13 @@ if len(sys.argv)<14:
 
 #print options.analysisCode
 
-
-#---Check if sampleListForMerging file exist
+#---Check if sampleListForMerging file exists
 if(os.path.isfile(options.sampleListForMerging) == False):
     print "ERROR: file " + options.sampleListForMerging + " not found"
     print "exiting..."
     sys.exit()
 
-#---Check if xsection file exist
+#---Check if xsection file exists
 if(os.path.isfile(options.xsection) == False):
     print "ERROR: file " + options.xsection + " not found"
     print "exiting..."
@@ -99,6 +103,21 @@ print 'python ',
 for arg in sys.argv:
   print ' '+arg,
 print
+
+# check logfile for errors if given
+if(os.path.isfile(options.logFile)):
+    foundError = False
+    with open(options.logFile, 'r') as logFile:
+        for line in logFile:
+            if 'error' in line or 'ERROR' in line:
+                print 'Found error line in logfile:',line
+                foundError = True
+    if foundError:
+        print 'WARNING: FOUND ERRORS IN THE LOGFILE! but proceeding anyway...be careful'
+    else:
+        print 'Great! Logfile was checked and was completely clean!'
+else:
+    print "WARNING: did not attempt to check logfile:'"+options.logFile+"' "
 
 xsectionDict = ParseXSectionFile(options.xsection)
 #print 'Dataset      XSec'
@@ -274,7 +293,8 @@ for lin in open( options.inputList ):
             weight = xsection_X_intLumi / Ntot 
         plotWeight = weight/1000.0
     print "xsection: " + xsection_val,
-    print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/" + str(Ntot)
+    print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/",
+    print str(sumAMCatNLOweights) if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE) else str(Ntot)
     
     #---Create new table using weight
     newtable={}
