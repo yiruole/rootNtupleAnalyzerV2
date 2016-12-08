@@ -21,14 +21,22 @@
 #/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger4_id3_effiStudy.txt
 #/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger4_id4_effiStudy.txt
 #/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger4_id5_effiStudy.txt"
-files="/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id2_effiStudy.txt
-/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id3_effiStudy.txt
-/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id4_effiStudy.txt
-/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id5_effiStudy.txt"
+#files="/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id2_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id3_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id4_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_enujj_trigger5_id5_effiStudy.txt"
+#files="/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger4_id1_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger5_id1_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger4_id0_effiStudy.txt
+#/afs/cern.ch/user/s/scooper/work/private/cmssw/LQRootTuples7414/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger5_id0_effiStudy.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger6_id0_effiStudy.txt
+/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Studies/SignalEffiTriggerStudy/cutTable_lq1_eejj_trigger7_id0_effiStudy.txt"
+
 
 #------------
-OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=RunII/enujj_trigEff_10Dec2015_AK5_reHLT/
+OUTDIRPATH=$LQDATA/2016analysis/  # a subdir will be created for each cut file 
+SUBDIR=trigEffStudies_2016sep19
+#SUBDIR=RunII/enujj_trigEff_10Dec2015_AK5_reHLT/
 #SUBDIR=RunII/enujj_trigEff_9Dec2015_AK5/
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
@@ -39,8 +47,9 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 #the actual name of the code used to process the ntuples (without the suffix ".C") 
 CODENAME=analysisClass_lq1_effiStudy
 #------------
+INPUTLIST=config/FullNTuple_PrivateSignalSamples/inputListAllCurrent.txt
 #INPUTLIST=config/FullNTupleDatasets/inputListAllCurrent_enujjSignals.txt
-INPUTLIST=config/FullNTupleDatasets_ReRunHLTSignals/inputListAllCurrent.txt
+#INPUTLIST=config/FullNTupleDatasets_ReRunHLTSignals/inputListAllCurrent.txt
 #INPUTLIST=config/ReducedSkimDatasets_AK4CHS_test/inputListAllCurrent.txt
 #INPUTLIST=config/ReducedSkimDatasets/inputListAllCurrent.txt
 #------------
@@ -57,7 +66,7 @@ NCORES=8 #Number of processor cores to be used to run the job
 
 #### END OF INPUTS ####
 
-COMMANDFILE=commandsToRunOnMoreCutFiles_enujj_trigEff_reHLT_AK5_local_`hostname -s`.txt
+COMMANDFILE=commandsToRunOnMoreCutFiles_trigEff_privSigSamples_local_`hostname -s`.txt
 echo "" > $COMMANDFILE
 
 for file in $files
@@ -75,7 +84,7 @@ time python scripts/launchAnalysis.py \
     -c $file \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix  \
     -p $NCORES \
-    >& launch_${suffix}_`hostname -s`.log
+    >& launch_${suffix}_`hostname -s`.log &
 
 mv launch_${suffix}_`hostname -s`.log $OUTDIRPATH/$SUBDIR/output_$suffix/
 
