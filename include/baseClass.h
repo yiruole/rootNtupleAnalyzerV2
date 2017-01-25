@@ -135,7 +135,7 @@ class baseClass : public rootNtupleClass {
   bool triggerExists   ( const char* name);
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
-  void fillTriggerVariable ( const char * hlt_path, const char* variable_name ) ;
+  void fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale=1 ) ;
   void printTriggers();
   void printFiredTriggers();
   void getTriggers(std::string * HLTKey ,   
@@ -239,8 +239,10 @@ class baseClass : public rootNtupleClass {
   bool skimWasMade_;
   int getGlobalInfoNstart(const char* );
   float getSumAMCNLOWeights(const char* );
+  float getSumTopPtWeights(const char* );
   int NBeforeSkim_;
   float sumAMCNLOWeights_;
+  float sumTopPtWeights_;
   double PileupWeight_;
 
   // JSON file stuff
@@ -273,7 +275,7 @@ class baseClass : public rootNtupleClass {
   double getSkimPreCutValue(const string& s);
   TFile *skim_file_;
   TTree *skim_tree_;
-  TH1I* hCount_;
+  TH1F* hCount_;
   bool writeSkimTree();
 
   //Reduced Skim stuff
@@ -282,7 +284,7 @@ class baseClass : public rootNtupleClass {
   double getReducedSkimPreCutValue(const string& s);
   TFile *reduced_skim_file_;
   TTree *reduced_skim_tree_;
-  TH1I* hReducedCount_;
+  TH1F* hReducedCount_;
   bool writeReducedSkimTree();
 
   // Optimization stuff

@@ -13,8 +13,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
-  //nOptimizerCuts_ = 50; // number of cut points used in optimizer scan over a variable
-  nOptimizerCuts_ = 1; //XXX SIC TEST
+  nOptimizerCuts_ = 50; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -48,6 +47,7 @@ baseClass::~baseClass()
     }
   output_root_->cd();
   h_weightSums_->SetBinContent(1,sumAMCNLOWeights_);
+  h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
   output_root_->Close();
   if(produceSkim_) skim_file_->Close();
@@ -93,10 +93,11 @@ void baseClass::init()
     
     skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
     skim_tree_ = fChain->CloneTree(0);
-    hCount_ = new TH1I("EventCounter","Event Counter",3,-0.5,2.5);
+    hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
     hCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
+    hCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
   }
 
   // Reduced Skim stuff
@@ -108,10 +109,11 @@ void baseClass::init()
 
     reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
-    hReducedCount_ = new TH1I("EventCounter","Event Counter",3,-0.5,2.5);
+    hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
+    hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
     for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
       {
 	cut * c = & (cc->second);
@@ -144,7 +146,9 @@ void baseClass::readInputList()
   NBeforeSkim_ = 0;
   int NBeforeSkim;
   sumAMCNLOWeights_ = 0;
+  sumTopPtWeights_ = 0;
   float tmpSumAMCNLOWeights = 0;
+  float tmpSumTopPtWeights = 0;
 
   STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
 
@@ -169,6 +173,9 @@ void baseClass::readInputList()
       tmpSumAMCNLOWeights = getSumAMCNLOWeights(name.c_str());
       sumAMCNLOWeights_ += tmpSumAMCNLOWeights;
       STDOUT("amc@NLO weight sum (current,total): = "<<tmpSumAMCNLOWeights<<", "<<sumAMCNLOWeights_);
+      tmpSumTopPtWeights = getSumTopPtWeights(name.c_str());
+      sumTopPtWeights_ += tmpSumTopPtWeights;
+      STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
     }
     tree_ = chain;
     STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
@@ -1331,8 +1338,8 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
-  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
-  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
+  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
   if( !hCount1 && !hCount2 )
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
@@ -1365,8 +1372,8 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
-  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
-  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
+  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
   if( !hCount1 && !hCount2 )
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
@@ -1380,6 +1387,39 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   f->Close();
 
   return sumAMCNLOWeights;
+}
+
+float baseClass::getSumTopPtWeights(const char *pName)
+{
+  float sumTopPtWeights = 0.0;
+  TFile *f = TFile::Open(pName);
+  if(!f)
+  {
+    STDOUT("File pointer was null. Quitting");
+    exit(-1);
+  }
+  if(!f->IsOpen())
+  {
+    STDOUT("File didn't open! Quitting");
+    exit(-1);
+  }
+  string s1 = "LJFilter/EventCount/EventCounter";
+  string s2 = "LJFilterPAT/EventCount/EventCounter";
+  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
+  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
+  if( !hCount1 && !hCount2 )
+    {
+      STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
+      skimWasMade_ = false;
+      return sumTopPtWeights;
+    }
+
+  if (hCount1) sumTopPtWeights = (float)hCount1->GetBinContent(4);
+  else sumTopPtWeights = (float)hCount2->GetBinContent(4);
+
+  f->Close();
+
+  return sumTopPtWeights;
 }
 
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
@@ -1599,6 +1639,7 @@ bool baseClass::writeSkimTree()
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumAMCNLOWeights_);
+  hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
 
   if ( fChain -> GetEntries() == 0 ){
@@ -1639,6 +1680,7 @@ bool baseClass::writeReducedSkimTree()
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
+  hReducedCount_->SetBinContent(4,sumTopPtWeights_);
   hReducedCount_->Write();
 
   // Any failure mode to implement?
@@ -1770,8 +1812,9 @@ int baseClass::triggerPrescale ( const char* name ) {
   }
 }
 
-void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name ) { 
+void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale ) { 
   int prescale = triggerPrescale(hlt_path);
+  prescale*=extraPrescale;
   if ( triggerFired (hlt_path) ) {
     //STDOUT("INFO: triggerFired! fillVariableWithValue("<<variable_name<<","<<prescale<<") for hlt_path="<<hlt_path);
     fillVariableWithValue(variable_name, prescale      ) ; 
