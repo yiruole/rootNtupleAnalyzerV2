@@ -33,12 +33,9 @@ double   Electron::SCEnergy           (){ return m_collection -> GetData() -> El
 								      
 // EGamma bits													      
 														      
-int    Electron::PassEGammaIDEoP      (){ return m_collection -> GetData() -> ElectronPassEGammaIDEoP          -> at ( m_raw_index ); } 
 int    Electron::PassEGammaIDLoose    (){ return m_collection -> GetData() -> ElectronPassEGammaIDLoose        -> at ( m_raw_index ); } 
 int    Electron::PassEGammaIDMedium   (){ return m_collection -> GetData() -> ElectronPassEGammaIDMedium       -> at ( m_raw_index ); } 
 int    Electron::PassEGammaIDTight    (){ return m_collection -> GetData() -> ElectronPassEGammaIDTight        -> at ( m_raw_index ); } 
-int    Electron::PassEGammaIDTrigTight(){ return m_collection -> GetData() -> ElectronPassEGammaIDTrigTight    -> at ( m_raw_index ); }  
-int    Electron::PassEGammaIDTrigWP70 (){ return m_collection -> GetData() -> ElectronPassEGammaIDTrigWP70     -> at ( m_raw_index ); }  
 int    Electron::PassEGammaIDVeto     (){ return m_collection -> GetData() -> ElectronPassEGammaIDVeto         -> at ( m_raw_index ); } 
 int    Electron::PassHEEPID           (){ return m_collection -> GetData() -> ElectronPassHEEPID               -> at ( m_raw_index ); } 
 														      
@@ -124,6 +121,7 @@ double Electron::HLTSingleEleWP85MatchPhi(){ return m_collection -> GetData() ->
 
 double Electron::HEEPCaloIsolation(){ return (EcalIsoDR03() + HcalIsoD1DR03()); }
 double Electron::HEEPCorrIsolation(){ return ( HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
+double Electron::HEEP70TrackIsolation(){ return m_collection -> GetData() -> ElectronHeep70TrkIso -> at(m_raw_index); }
 double Electron::TrackPt          (){ return m_collection -> GetData() -> ElectronTrackPt -> at ( m_raw_index ); }
 
 // Fiduciality

@@ -133,6 +133,7 @@ class Electron : public Object {
 
   double HEEPCaloIsolation    ();
   double HEEPCorrIsolation    ();
+  double HEEP70TrackIsolation ();
   double TrackPt              ();
   double RawEnergy            ();
 
@@ -140,7 +141,7 @@ class Electron : public Object {
 
   double m_rawSuperClusterPt;
 
-  bool   PassUserID_BuiltIn_HEEPv6p0   ();
+  bool   PassUserID_BuiltIn_HEEPv7p0   (bool verbose);
   bool   PassUserID_HEEPv6p1           (bool verbose);
   bool   PassUserID_HEEP               (bool verbose);
   bool   PassUserID_BuiltIn_EGamma     ( ID id);
