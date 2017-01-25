@@ -36,7 +36,7 @@ def crabSubmit(config,dryRun=False):
     except HTTPException, hte:
       print '-----> there was a problem. see below.'
       print hte.headers
-      print 'quit here'
+      print 'Quitting here'
       exit(-1)
     
 def validateOptions(options):
@@ -96,8 +96,8 @@ parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
 parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
                   metavar="submitCERNT2only",default=False,action="store_true")
 
-parser.add_option("-j", "--jsonFile", dest="jsonFile",
-                  metavar="jsonFile")
+parser.add_option("-j", "--inputFiles", dest="inputFiles",
+                  metavar="inputFiles")
 
 
 
@@ -285,10 +285,14 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,'main']
-# if we gave a json, feed it into the sandbox as well
-# note that is read by the cutfile, which was modified in the 'launch' script to read a json in the working dir
-if options.jsonFile!=None:
-  config.JobType.inputFiles.append(options.jsonFile)
+# if we gave additional input files, feed them into the sandbox as well
+# note that is read by the cutfile, which was modified in the 'launch' script to copy and then read from the input file in the working dir
+additionalInputFiles = []
+if len(options.inputFiles) > 0:
+  additionalInputFiles = options.inputFiles.split(',')
+  for f in additionalInputFiles:
+    config.JobType.inputFiles.append(f)
+
 # we now read these from trees stored on eos
 ## for using event lists
 #if options.isReducedSkimTask:

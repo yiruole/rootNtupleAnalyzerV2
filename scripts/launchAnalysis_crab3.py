@@ -3,6 +3,7 @@
 from optparse import OptionParser
 import os,sys, errno, time
 import subprocess as sp
+import re
 try:
   from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 except ImportError:
@@ -17,6 +18,39 @@ import deleteCrabSandboxes
 # Notes
 # Use this script first, which then calls the submit_crab3 script to actually submit the jobs for each dataset
 #-------------------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Function to copy any files on afs specified in the cutfile to the local directory, and feed them into the crab sandbox
+#-----------------------------------------------------------------------------------------------------------------------
+# NB: If you put a '#' comment in the middle of the line, this may not handle it properly
+def localizeCutFile(cutfileLines):
+  global options
+  extraInputFiles=[]
+  replacementLine=''
+  lineIdx=0
+  for index,line in enumerate(cutfileLines):
+      if line.strip() == "" : continue
+      if line.startswith('#') : continue
+      #if line.strip()[:4] == "JSON":
+      lineSp = re.split(r'(\s+)', line)
+      for itemIndex,item in enumerate(lineSp):
+        if '/afs' in item:
+          if not os.path.isfile( item ) : 
+              print "Error: No file here: " + item
+              sys.exit(-1)
+          else :
+              os.system ( "cp " + item + " " + options.outputDir )
+              lineIdx = index
+              itemIdx = itemIndex
+              lineSp[itemIndex] = item.split('/')[-1]
+              extraInputFiles.append(lineSp[itemIndex])
+              replacementLine = ''.join(lineSp)
+              print 'INFO: changing cutfile line with afs file specified from "'+cutfileLines[lineIdx].rstrip('\n')+'"'
+              cutfileLines[lineIdx] = replacementLine
+              print '\tto "'+cutfileLines[lineIdx].rstrip('\n')+'"'
+              with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'w') as myfile:
+                myfile.writelines(cutfileLines)
+  return extraInputFiles
 
 
 #--------------------------------------------------------------------------------
@@ -141,45 +175,16 @@ else :
 print "... done "
 
 #--------------------------------------------------------------------------------
-# Get JSON file from cut file and copy it to the output directory
+# Get any /afs/... files from cut file and copy them to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the JSON file to the local output directory..."
+print "Moving any /afs/... files specified in the cutfile to the local output directory..."
 
 with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'r') as cutfile:
   cutfileLines = cutfile.readlines()
 
-found_json = False 
-json_file=''
-lineIdx=0
-for index,line in enumerate(cutfileLines):
-    if line.strip() == "" : continue
-    if line.split()[0] == "#" : continue
-    if line.strip()[:4] == "JSON":
-        if found_json == True:
-            print "Error: You are only allowed to have one JSON file per cut file."
-            print "cut file = " + options.cutfile 
-            sys.exit()
-        if len (line.split()) != 2 : 
-            print "Error: this line in your cut file does not make sense:"
-            print line
-            print "cut file = " + options.cutfile 
-            sys.exit()
-        json_file = line.split()[1]
-        if not os.path.isfile( json_file ) : 
-            print "Error: No JSON file here: " + json_file 
-            sys.exit()
-        else :
-            os.system ( "cp " + json_file + " " + options.outputDir )
-            found_json = True
-            lineIdx = index
-
-print 'INFO: changing JSON line in cutfile from "'+cutfileLines[lineIdx]+'"'
-cutfileLines[lineIdx] = 'JSON '+json_file.split('/')[-1]+'\n'
-print '\tto "'+cutfileLines[lineIdx]+'"'
-
-with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'w') as myfile:
-  myfile.writelines(cutfileLines)
+additionalInputFiles = localizeCutFile(cutfileLines)
+print 'INFO: Found additional input files:',additionalInputFiles
 
 print "... done "
                    
@@ -241,8 +246,11 @@ for i,line in enumerate(inputlist_file):
       command+=" -l"
     if options.submitCERNT2only:
       command+=" -f"
-    if found_json:
-      command+=" -j "+options.outputDir+'/'+json_file.split('/')[-1]
+    if len(additionalInputFiles) > 0:
+      command+=' -j '
+      for item in additionalInputFiles:
+        command+=options.outputDir+'/'+item+','
+      command = command.rstrip(',')
     
     print command
     ret = os.system  ( command ) 
