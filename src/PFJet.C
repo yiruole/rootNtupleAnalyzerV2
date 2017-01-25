@@ -20,6 +20,7 @@ double PFJet::JECUnc		         () { return m_collection -> GetData() -> PFJetJEC
 double PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData() -> PFJetNeutralHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
 double PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData() -> PFJetNeutralEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
 int    PFJet::NeutralHadronMultiplicity  () { return m_collection -> GetData() -> PFJetNeutralHadronMultiplicityAK4CHS    -> at ( m_raw_index ); }
+int    PFJet::NeutralMultiplicity        () { return m_collection -> GetData() -> PFJetNeutralMultiplicityAK4CHS          -> at ( m_raw_index ); }
 int    PFJet::NConstituents              () { return m_collection -> GetData() -> PFJetNConstituentsAK4CHS                -> at ( m_raw_index ); } 
 double PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData() -> PFJetChargedHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
 int    PFJet::ChargedMultiplicity        () { return m_collection -> GetData() -> PFJetChargedMultiplicityAK4CHS          -> at ( m_raw_index ); } 
@@ -31,37 +32,37 @@ double PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 double PFJet::EnergyResScaleFactor (){ 
   double fabs_eta = fabs ( Eta () );
-  if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 1.122;
-  else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 1.167;
-  else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 1.168;
-  else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 1.029;
-  else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 1.115;
-  else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 1.041;
-  else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 1.167;
-  else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 1.094;
-  else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 1.168;
-  else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 1.266;
-  else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 1.595;
-  else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 0.998;
-  else                                          return 1.226;
+  if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 1.109;
+  else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 1.138;
+  else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 1.114;
+  else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 1.123;
+  else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 1.084;
+  else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 1.082;
+  else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 1.140;
+  else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 1.067;
+  else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 1.177;
+  else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 1.364;
+  else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 1.857;
+  else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 1.328;
+  else                                          return 1.16;
 }
 
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 double PFJet::EnergyResScaleError  (){ 
   double fabs_eta = fabs ( Eta () );
-  if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 0.026;
-  else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 0.048;
-  else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 0.046;
-  else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 0.066;
-  else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 0.03;
-  else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 0.062;
-  else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 0.086;
-  else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 0.093;
-  else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 0.120;
-  else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 0.132;
-  else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 0.175;
-  else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 0.066;
-  else                                          return 0.145;
+  if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 0.008;
+  else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 0.013;
+  else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 0.013;
+  else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 0.024;
+  else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 0.011;
+  else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 0.035;
+  else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 0.047;
+  else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 0.053;
+  else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 0.041;
+  else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 0.039;
+  else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 0.071;
+  else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 0.022;
+  else                                          return 0.029;
 }
 
 // JES uncertainties already in the ntuple
