@@ -9,7 +9,7 @@ from ROOT import *
 import re
 import math
 
-from combineCommon import *
+import combineCommon
 
 doProfiling=False
 # for profiling
@@ -113,18 +113,19 @@ if(os.path.isfile(options.logFile)):
                 print 'Found error line in logfile:',line
                 foundError = True
     if foundError:
-        print 'WARNING: FOUND ERRORS IN THE LOGFILE! but proceeding anyway...be careful'
+        print 'WARNING: FOUND ERRORS IN THE LOGFILE! bailing out...'
+        sys.exit(-2)
     else:
         print 'Great! Logfile was checked and was completely clean!'
 else:
     print "WARNING: did not attempt to check logfile:'"+options.logFile+"' "
 
-xsectionDict = ParseXSectionFile(options.xsection)
+xsectionDict = combineCommon.ParseXSectionFile(options.xsection)
 #print 'Dataset      XSec'
 #for key,value in xsectionDict.iteritems():
 #  print key,'  ',value
 
-dictSamples = GetSamplesToCombineDict(options.sampleListForMerging)
+dictSamples = combineCommon.GetSamplesToCombineDict(options.sampleListForMerging)
 dictSamplesPiecesAdded = {}
 for key in dictSamples.iterkeys():
   dictSamplesPiecesAdded[key] = []
@@ -156,8 +157,8 @@ for lin in open( options.inputList ):
     ##if '__' in dataset_fromInputList:
     ##  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
 
-    #xsection_val = lookupXSection(dataset_fromInputList,xsectionDict)
-    xsection_val = lookupXSection(SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+    #xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
+    xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
 
 #---Loop over datasets in the inputlist
 print
@@ -171,8 +172,8 @@ for lin in open( options.inputList ):
     dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
     # strip off the slashes and the .txt at the end
     # so this will look like 'TTJets_DiLept_reduced_skim'
-    print SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
-    #print SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
+    print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
+    #print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
     sys.stdout.flush()
 
     inputRootFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".root"
@@ -195,9 +196,9 @@ for lin in open( options.inputList ):
     #    print 'opened file:',inputDataFile
 
     #---Find xsection correspondent to the current dataset
-    #dataset_fromInputList = SanitizeDatasetNameFromInputList(dataset_fromInputList)
-    xsection_val = lookupXSection(SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
-    #xsection_val = lookupXSection(dataset_fromInputList,xsectionDict)
+    #dataset_fromInputList = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
+    xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+    #xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
     #this is the current cross section
     #print dataset_fromInputList,xsection_val
 
@@ -374,7 +375,7 @@ for lin in open( options.inputList ):
 
         toBeUpdated = False
         #matchingPiece = dataset_fromInputList
-        matchingPiece = SanitizeDatasetNameFromInputList(dataset_fromInputList)
+        matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
         if matchingPiece in pieceList:
             toBeUpdated = True
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
@@ -384,7 +385,7 @@ for lin in open( options.inputList ):
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoRSK
         if toBeUpdated:
-            UpdateTable(newtable,dictFinalTables[sample])
+            combineCommon.UpdateTable(newtable,dictFinalTables[sample])
             dictSamplesPiecesAdded[sample].append(matchingPiece)
             #if 'ALLBKG_MG_HT' in sample:
             #  print 'update table with',matchingPiece
@@ -454,9 +455,9 @@ for S,sample in enumerate( dictSamples ):
     #print dictFinalTables[sample]
 
     #---Create final tables 
-    CalculateEfficiency(dictFinalTables[sample])
+    combineCommon.CalculateEfficiency(dictFinalTables[sample])
     #--- Write tables
-    WriteTable(dictFinalTables[sample], sample, outputTableFile)
+    combineCommon.WriteTable(dictFinalTables[sample], sample, outputTableFile)
 
 if options.ttbarBkg:
     # special actions for TTBarFromData
@@ -464,31 +465,31 @@ if options.ttbarBkg:
     # FIXME: we hardcode the sample names for now
     ttbarDataRawSampleName = 'TTBarUnscaledRawFromDATA'
     ttbarDataPredictionTable = dictFinalTables[ttbarDataRawSampleName]
-    nonTTbarMCBkgSampleName = 'NONTTBARBKG_MG_HT'
+    nonTTbarMCBkgSampleName = 'NONTTBARBKG_amcatnlo'
     nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
-    Rfactor = 0.442 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.002
+    Rfactor = 0.426 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.001
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
-    ScaleTable(nonTTbarMCBkgTable,1.0/1000.0,0.0)
+    combineCommon.ScaleTable(nonTTbarMCBkgTable,1.0/1000.0,0.0)
     #print '1) WHAT DOES THE SCALED MC TABLE LOOK LIKE?'
     #WriteTable(nonTTbarMCBkgTable, nonTTbarMCBkgSampleName, outputTableFile)
     # subtract the nonTTBarBkgMC from the ttbarRawData, NOT zeroing entries where we run out of data
-    SubtractTables(nonTTbarMCBkgTable,ttbarDataPredictionTable)
+    combineCommon.SubtractTables(nonTTbarMCBkgTable,ttbarDataPredictionTable)
     #print '2) WHAT DOES THE SUBTRACTEDTABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
     # scale by Ree,emu
-    ScaleTable(ttbarDataPredictionTable,Rfactor,errRfactor)
+    combineCommon.ScaleTable(ttbarDataPredictionTable,Rfactor,errRfactor)
     #print '3) WHAT DOES THE RfactroCorrectedTABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
-    SquareTableErrorsForEfficiencyCalc(ttbarDataPredictionTable)
-    CalculateEfficiency(ttbarDataPredictionTable)
+    combineCommon.SquareTableErrorsForEfficiencyCalc(ttbarDataPredictionTable)
+    combineCommon.CalculateEfficiency(ttbarDataPredictionTable)
     #print '4) WHAT DOES THE SCALEDTABLE AFTER EFF CALCULATION LOOK LIKE?'
-    WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
+    combineCommon.WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
 
-outputTableFile.close
+outputTableFile.close()
 
 
 # write histos
@@ -498,28 +499,29 @@ if not options.tablesOnly:
     if not options.ttbarBkg:
         # get total hists
         nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-        maxSteps = 50
-        if nHistos < maxSteps:
-          steps = nHistos
-        else:
-          steps = maxSteps
-        
-        print 'Writing histos:'
-        progressString = '0% ['+' '*steps+'] 100%'
-        print progressString,
-        print '\b'*(len(progressString)-3),
-        sys.stdout.flush()
-        
+        # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
+        #maxSteps = 50
+        #if nHistos < maxSteps:
+        #  steps = nHistos
+        #else:
+        #  steps = maxSteps
+
+        #print 'Writing histos:'
+        #progressString = '0% ['+' '*steps+'] 100%'
+        #print progressString,
+        #print '\b'*(len(progressString)-3),
+        #sys.stdout.flush()
+
         nForProgress = 0
         for histDict in dictFinalHisto.itervalues(): # for each sample's dict
             for histo in histDict.itervalues(): # for each hist contained in the sample's dict
-                if (nForProgress % (nHistos/steps))==0:
-                    print '\b.',
-                    sys.stdout.flush()
+                #if (nForProgress % (nHistos/steps))==0:
+                #    print '\b.',
+                #    sys.stdout.flush()
                 histo.Write()
                 nForProgress+=1
         
-        print '\b] 100%'
+        #print '\b] 100%'
 
     else:
         # special actions for TTBarFromData
