@@ -216,12 +216,21 @@
 /SingleElectron/Run2016G-PromptReco-v1/MINIAOD   -1
 /SingleElectron/Run2016H-PromptReco-v1/MINIAOD   -1
 /SingleElectron/Run2016H-PromptReco-v2/MINIAOD   -1
-# fake datasets needed for QCD data-driven calc
-/SingleElectron/Run2015D-05Oct2015-v1_forDataDrivenQCD/MINIAOD -1
-/SingleElectron/Run2015D-PromptReco-v4_forDataDrivenQCD/MINIAOD -1
-/SingleMuon/Run2015C_25ns-05Oct2015-v1/MINIAOD -1
-/SingleMuon/Run2015D-05Oct2015-v1/MINIAOD -1
-/SingleMuon/Run2015D-PromptReco-v4/MINIAOD -1
-/SinglePhoton/Run2015C_25ns-05Oct2015-v1/MINIAOD -1
-/SinglePhoton/Run2015D-05Oct2015-v1/MINIAOD -1
-/SinglePhoton/Run2015D-PromptReco-v4/MINIAOD -1
+/SingleElectron/Run2016H-PromptReco-v3/MINIAOD   -1
+/SinglePhoton/Run2016H-PromptReco-v1/MINIAOD   -1
+/SinglePhoton/Run2016H-PromptReco-v2/MINIAOD   -1
+/SinglePhoton/Run2016H-PromptReco-v3/MINIAOD   -1
+# Sep23 rereco data
+/SingleElectron_Run2016G-23Sep2016-v1/MINIAOD    -1
+/SingleElectron_Run2016F-23Sep2016-v1/MINIAOD    -1
+/SingleElectron_Run2016E-23Sep2016-v1/MINIAOD    -1
+/SingleElectron_Run2016D-23Sep2016-v1/MINIAOD    -1
+/SingleElectron_Run2016C-23Sep2016-v1/MINIAOD    -1
+/SingleElectron_Run2016B-23Sep2016-v3/MINIAOD    -1
+# datasets needed for QCD data-driven calc
+/SinglePhoton_Run2016G-23Sep2016-v1/MINIAOD    -1
+/SinglePhoton_Run2016F-23Sep2016-v1/MINIAOD    -1
+/SinglePhoton_Run2016E-23Sep2016-v1/MINIAOD    -1
+/SinglePhoton_Run2016D-23Sep2016-v1/MINIAOD    -1
+/SinglePhoton_Run2016C-23Sep2016-v1/MINIAOD    -1
+/SinglePhoton_Run2016B-23Sep2016-v3/MINIAOD    -1
