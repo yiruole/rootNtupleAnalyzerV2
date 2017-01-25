@@ -12,10 +12,10 @@ class EGPrescales2016 {
       EG18prescales = createEG18PSLookup();
       EG26prescales = createEG26PSLookup();
     }
-    int LookupPrescale(std::string seed, int prescaleCol)
+    int LookupPrescale(std::string seed, int run, int prescaleCol)
     {
-      if(seed=="SingleEG26") return EG26prescales.at(prescaleCol);
-      else if(seed=="SingleEG18") return EG18prescales.at(prescaleCol);
+      if(seed=="SingleEG26") return EG26prescales.at(run).at(prescaleCol);
+      else if(seed=="SingleEG18") return EG18prescales.at(run).at(prescaleCol);
       else
       {
         std::cout << "ERROR: cannot lookup prescale for L1 seed named: " << seed << endl;
