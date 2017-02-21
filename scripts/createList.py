@@ -120,6 +120,7 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS):
     for fullfilepath in filenamelist:
         path = prefix+os.path.split(fullfilepath)[0]+'/'
         filename = os.path.split(fullfilepath)[1]
+        # hardcoded skip of any muon-related LQ signal or QCD
         if 'LQToCMu' in path or 'MuEnriched' in path:
             continue
         #print re.search('.root$',filename)
@@ -151,6 +152,7 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS):
         if dataset not in filelist.keys():
             filelist[dataset] = []
             filelist[dataset].append(prefix+fullfilepath)
+            print 'adding new file for dataset:',dataset
         else:
             filelist[dataset].append(prefix+fullfilepath)
 
@@ -183,6 +185,41 @@ def write_inputlists(filelist, outputDir):
     return
 
 
+# combine datasets that are the same except for extN in the name (where N is a single digit)
+def combineExtDatasets(filelist):
+  datasetsToRemove = []
+  for index,dataset1 in enumerate(sorted(filelist.iterkeys())):
+    if dataset1 in datasetsToRemove:
+      continue
+    if 'ext' in dataset1:
+      dataset1mod = dataset1[0:dataset1.find('ext')]+dataset1[dataset1.find('ext')+len('ext')+2:]
+    else:
+      dataset1mod = dataset1
+    #print 'Considering dataset:',dataset1,'; renamed to:',dataset1mod
+    for i in range(index+1,len(filelist.keys())):
+      #print 'consider index:',i,'out of total entries:',len(filelist.keys())
+      dataset2 = sorted(filelist.iterkeys())[i]
+      if 'ext' in dataset2:
+        dataset2mod = dataset2[0:dataset2.find('ext')]+dataset2[dataset2.find('ext')+len('ext')+2:]
+      else:
+        dataset2mod = dataset2
+      #print '\tcompare to dataset:',dataset2,'; renamed to:',dataset2mod
+      if dataset2mod==dataset1mod:
+        #print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
+        filelist[dataset1].extend(filelist[dataset2])
+        datasetsToRemove.append(dataset2)
+  # remove
+  for d in datasetsToRemove:
+    del filelist[d]
+  # rename
+  for dataset in filelist.iterkeys():
+    if 'ext' in dataset:
+      datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+      filelist[datasetmod] = filelist.pop(dataset)
+
+  return
+
+
 def main():
     parser = optparse.OptionParser(
         usage='Usage: %prog [-m MATCH] -i INPUTDIR(S) -o OUTPUTDIR [-f]',
@@ -192,6 +229,7 @@ def main():
     parser.add_option( '-i', '--inputDirs', metavar='INPUTDIR(S)', action="callback", callback=cb, dest="inputDirs", help='Specifies the input directory (or directories separated by space) containing .root files. Please use the full path. Castor directories are also supported' )
     parser.add_option( '-o', '--outputDir', metavar='OUTPUTDIR', action='store', help='Specifies the output directory where the .txt list files will be stored. Please use the full path' )
     parser.add_option( '-f', '--cernEOS', dest='useCERNEOS',metavar='useCERNEOS',default=False,action='store_true', help='Write root file URLs with local CERN eoscms, not global xrootd redirector')
+    parser.add_option( '-c', '--combineLikeDatasets', dest='combineLikeDatasets',metavar='combineLikeDatasets',default=False,action='store_true', help='Combine "like" datasets (those that only differ by extN) into one dataset')
 
 
     (options, args) = parser.parse_args(args=None)
@@ -207,6 +245,9 @@ def main():
 
     for inputDir in inputDirs:
         process_input_dir(inputDir, options.match, filelist, options.useCERNEOS)
+
+    if options.combineLikeDatasets:
+      combineExtDatasets(filelist)
 
     write_inputlists(filelist, options.outputDir)
 
