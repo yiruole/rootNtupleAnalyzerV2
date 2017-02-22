@@ -152,7 +152,7 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS):
         if dataset not in filelist.keys():
             filelist[dataset] = []
             filelist[dataset].append(prefix+fullfilepath)
-            print 'adding new file for dataset:',dataset
+            #print 'adding new file for dataset:',dataset
         else:
             filelist[dataset].append(prefix+fullfilepath)
 
@@ -205,7 +205,7 @@ def combineExtDatasets(filelist):
         dataset2mod = dataset2
       #print '\tcompare to dataset:',dataset2,'; renamed to:',dataset2mod
       if dataset2mod==dataset1mod:
-        #print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
+        print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
         filelist[dataset1].extend(filelist[dataset2])
         datasetsToRemove.append(dataset2)
   # remove
