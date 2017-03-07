@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TH3F.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -147,7 +148,7 @@ class baseClass : public rootNtupleClass {
     
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
-  void evaluateCuts();
+  void evaluateCuts(bool verbose = false);
   
   void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
   void fillAllPreviousCuts                ( bool b ) { fillAllPreviousCuts_               = b; } 
@@ -200,6 +201,10 @@ class baseClass : public rootNtupleClass {
   void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
   void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
   void FillUserTH2DLower(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void CreateAndFillUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
+  void CreateUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
+  void CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
+  void FillUserTH3D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
@@ -225,6 +230,7 @@ class baseClass : public rootNtupleClass {
   vector<string> orderedCutNames_;
   map<std::string , TH1D*> userTH1Ds_;
   map<std::string , TH2D*> userTH2Ds_;
+  map<std::string , TH3D*> userTH3Ds_;
   void init();
   void readInputList();
   void readCutFile();

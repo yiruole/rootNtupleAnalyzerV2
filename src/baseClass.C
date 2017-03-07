@@ -13,7 +13,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
-  nOptimizerCuts_ = 50; // number of cut points used in optimizer scan over a variable
+  nOptimizerCuts_ = 30; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -520,7 +520,7 @@ void baseClass::fillOptimizerWithValue(const string& s, const double& d)
   return;
 }
 
-void baseClass::evaluateCuts()
+void baseClass::evaluateCuts(bool verbose)
 {
   //  resetCuts();
   combCutName_passed_.clear();
@@ -533,6 +533,7 @@ void baseClass::evaluateCuts()
           c->passed = false;
           combCutName_passed_[c->level_str.c_str()] = false;
           combCutName_passed_["all"] = false;
+          if(verbose) std::cout << "FAILED cut: " << c->variableName << "; value is: " << c->value << std::endl;
 	}
       else
 	{
@@ -541,6 +542,7 @@ void baseClass::evaluateCuts()
 	  combCutName_passed_[c->level_str.c_str()] = (cp==combCutName_passed_.end()?true:cp->second);
 	  map<string,bool>::iterator ap = combCutName_passed_.find( "all" );
 	  combCutName_passed_["all"] = (ap==combCutName_passed_.end()?true:ap->second);
+    if(verbose) std::cout << "PASSED cut: " << c->variableName << "; value is: " << c->value << std::endl;
 	}
     }
 
@@ -598,8 +600,10 @@ void baseClass::runOptimizer()
   int counter=0;
   int thesize=optimizeName_cut_.size();
   int mysize=thesize;
-  std::vector<bool> counterbins;
-  for (int i=0;i<pow(nOptimizerCuts_,thesize);++i) counterbins.push_back(true); // assume true
+  //std::vector<bool> counterbins;
+  //counterbins.reserve(pow(nOptimizerCuts_,thesize));
+  //for (int i=0;i<pow(nOptimizerCuts_,thesize);++i) counterbins.push_back(true); // assume true
+  std::vector<bool> counterbins(pow(nOptimizerCuts_,thesize),true);
 
   // lowest-numbered cut appears first in cut ordering
   // That is, for cut:  ABCDEF
@@ -607,22 +611,16 @@ void baseClass::runOptimizer()
   for (int cc=0;cc<thesize;++cc) // loop over all cuts, starting at cut 0
   {
     --mysize;
-    for (int i=0;i<nOptimizerCuts_;++i) // loop over 10 cuts for each
+    for (int i=0;i<nOptimizerCuts_;++i) // loop over cuts for each
     {
-      //XXX TEST SIC DEBUG
-      if(i==0)
-        std::cout << "For index 0, testing cut named: " << optimizeName_cut_[cc].variableName << ";" << (optimizeName_cut_[cc].Compare(i) ? " PASSED!" : " FAILED!") << std::endl;
-      //XXX TEST SIC DEBUG
       if (!optimizeName_cut_[cc].Compare(i)) // cut failed; set all values associated with cut to false
       {
-        // loop over  all cut values starting with current cut
-        for (unsigned int j=(int)(i*pow(nOptimizerCuts_,mysize));j<int(pow(nOptimizerCuts_,thesize));++j)
+        int power = pow(nOptimizerCuts_,mysize);
+        int power1 = pow(nOptimizerCuts_,mysize+1);
+        for(int x=0; x<pow(nOptimizerCuts_,thesize-1);++x)
         {
-          // if relevant digit of the cut value matches the current (failed) cut, set this cut to false
-          if ((j/int(pow(nOptimizerCuts_,mysize)))%nOptimizerCuts_==i)
-            counterbins[j]=false;
-          if (j>counterbins.size())
-            continue; // shouldn't ever happen
+          int idx = (x/power)*power1+(x%power)+i*power;
+          counterbins[idx]=false;
         }
       } // if (cut comparison failed)
     } // for (int i=0;i<10;++i)
@@ -632,6 +630,7 @@ void baseClass::runOptimizer()
   {
     if (counterbins[i]==true)
     {
+      //std::cout << "\tSIC DEBUG FIll opt hist bin " << i << " with " << cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight <<std::endl;
       h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
     }
 
@@ -1571,6 +1570,71 @@ void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  D
 }
 
 
+void baseClass::CreateAndFillUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup,  Double_t value_x,  Double_t value_y, Double_t z, Double_t weight)
+{
+  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
+  TH3D * h;
+  if( nh_h == userTH3Ds_.end() )
+    {
+      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
+      h->Sumw2();
+      userTH3Ds_[std::string(nameAndTitle)] = h;
+      h->Fill(value_x, value_y, weight);
+    }
+  else
+    {
+      nh_h->second->Fill(value_x, value_y, weight);
+    }
+}
+
+void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
+{
+  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
+  TH3D * h;
+  if( nh_h == userTH3Ds_.end() )
+    {
+      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
+      h->Sumw2();
+      userTH3Ds_[std::string(nameAndTitle)] = h;
+    }
+  else
+    {
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+    }
+}
+
+
+void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z)
+{
+  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
+  TH3D * h;
+  if( nh_h == userTH3Ds_.end() )
+    {
+      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y, nbinsz, z );
+      h->Sumw2();
+      userTH3Ds_[std::string(nameAndTitle)] = h;
+    }
+  else
+    {
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+    }
+}
+
+void baseClass::FillUserTH3D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight)
+{
+  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
+  TH3D * h;
+  if( nh_h == userTH3Ds_.end() )
+    {
+      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+    }
+  else
+    {
+      nh_h->second->Fill(value_x, value_y, value_z, weight);
+    }
+}
+
+
 bool baseClass::writeUserHistos()
 {
 
@@ -1585,6 +1649,11 @@ bool baseClass::writeUserHistos()
   for (map<std::string, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
+      output_root_->cd();
+      uh_h->second->Write();
+    }
+  for (map<std::string, TH3D*>::iterator uh_h = userTH3Ds_.begin(); uh_h != userTH3Ds_.end(); uh_h++)
+    {
       output_root_->cd();
       uh_h->second->Write();
     }
