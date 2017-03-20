@@ -3,8 +3,8 @@ FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 FLAGS += -DSAVE_ALL_HISTOGRAMS 
 FLAGS += -std=c++11
-FLAGS += -DCREATE_OPT_CUT_FILE
-FLAGS += -g
+#FLAGS += -g
+FLAGS += -O2
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
 INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
@@ -18,12 +18,12 @@ EXE = main
 #	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(ROOTLIBS) -o $@  $(SELECTIONLIB) $@.o
 # *********************************
 
-all: ${EXE}
+all: ${EXE} makeOptCutFile
 
 main: $(SRC)/main.o $(SELECTIONLIB) 
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
-main2: $(SRC)/main2.o $(SELECTIONLIB) 
+makeOptCutFile: $(SRC)/makeOptCutFile.o $(SELECTIONLIB) 
 	$(COMP) $(INC) $(ROOTINC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(SRC)/$@.o
 
 clean:
