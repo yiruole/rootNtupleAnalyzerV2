@@ -41,6 +41,7 @@ enum ID {
   EGAMMA_BUILTIN_MEDIUM    = 41,
   EGAMMA_BUILTIN_LOOSE     = 42,
   EGAMMA_BUILTIN_VETO      = 43,
+  HEEP70_MANUAL            = 44,
 
   HIGH_PT_MUON_TRKRELISO01 = 50, // keep for compatibility
 
