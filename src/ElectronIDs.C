@@ -7,7 +7,8 @@
 bool Electron::PassUserID (ID id, bool verbose){ 
   if      ( id == HEEP61                ) return PassUserID_HEEPv6p1          (verbose);
   else if ( id == HEEP70                ) return PassUserID_BuiltIn_HEEPv7p0  (verbose);
-  else if ( id == HEEP51                ) return PassUserID_HEEP              (verbose);
+  else if ( id == HEEP70_MANUAL         ) return PassUserID_HEEP              (verbose);
+  else if ( id == HEEP51                ) return PassUserID_HEEPv5p1          (verbose);
   else if ( id == EGAMMA_BUILTIN_TIGHT  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
   else if ( id == EGAMMA_BUILTIN_MEDIUM ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
   else if ( id == EGAMMA_BUILTIN_LOOSE  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
@@ -27,9 +28,11 @@ bool Electron::PassUserID_ECALFiducial (bool verbose){
   else return false;
 }
 
-bool Electron::PassUserID_BuiltIn_HEEPv7p0 (bool verbose){
-  //return PassHEEPID();
-  //FIXME TODO: make this into a separate function; this should just contain the line above
+bool Electron::PassUserID_BuiltIn_HEEPv7p0(bool verbose) {
+  return PassHEEPID();
+}
+
+bool Electron::PassUserID_HEEP (bool verbose){
 
   // See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
   // apply cuts manually based on variables here
@@ -40,7 +43,7 @@ bool Electron::PassUserID_BuiltIn_HEEPv7p0 (bool verbose){
   //----------------------------------------------------------------------
   
   bool pass_et            = bool ( PtHeep()              >  35.0 );
-  bool pass_ecalDriven    = bool ( EcalSeed()        == 1    );
+  bool pass_ecalDriven    = bool ( EcalDriven()        == 1    );
   bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
   bool pass_missingHits   = bool ( MissingHits()     <= 1    );
   bool pass_trkIsolation  = bool ( HEEP70TrackIsolation() < 5.0 );
@@ -112,17 +115,17 @@ bool Electron::PassUserID_BuiltIn_HEEPv7p0 (bool verbose){
     if ( decision ) std::cout << "Electron #" << m_raw_index << " PASS HEEPID" << std::endl;
     else { 
       std::cout << "Electron #" << m_raw_index << " FAIL HEEPID" << std::endl;
-      if ( !pass_et            ) std::cout << "\tfail et            " << std::endl;
-      if ( !pass_ecalDriven    ) std::cout << "\tfail ecalDriven    " << std::endl;
-      if ( !pass_deltaEtaSeed  ) std::cout << "\tfail deltaEtaSeed  " << std::endl;
-      if ( !pass_deltaPhi      ) std::cout << "\tfail deltaPhi      " << std::endl;
-      if ( !pass_hoe           ) std::cout << "\tfail hoe           " << std::endl;
-      if ( !pass_sigmaIEtaIEta ) std::cout << "\tfail sigmaIEtaIEta " << std::endl;
-      if ( !pass_shape         ) std::cout << "\tfail shape         " << std::endl;
-      if ( !pass_dxy           ) std::cout << "\tfail dxy           " << std::endl;
-      if ( !pass_missingHits   ) std::cout << "\tfail missingHits   " << std::endl;
-      if ( !pass_trkIsolation  ) std::cout << "\tfail trkIsolation  " << std::endl;
-      if ( !pass_caloIsolation ) std::cout << "\tfail caloIsolation " << std::endl;
+      if ( !pass_et            ) std::cout << "\tfail et            :" << PtHeep() << std::endl;
+      if ( !pass_ecalDriven    ) std::cout << "\tfail ecalDriven    :" << EcalDriven() << std::endl;
+      if ( !pass_deltaEtaSeed  ) std::cout << "\tfail deltaEtaSeed  :" << DeltaEtaSeed() << std::endl;
+      if ( !pass_deltaPhi      ) std::cout << "\tfail deltaPhi      :" << DeltaPhi() << std::endl;
+      if ( !pass_hoe           ) std::cout << "\tfail hoe           :" << HoE() << std::endl;
+      if ( !pass_sigmaIEtaIEta ) std::cout << "\tfail sigmaIEtaIEta :" << Full5x5SigmaIEtaIEta() << std::endl;
+      if ( !pass_shape         ) std::cout << "\tfail shape         : E1x5/E5x5" << Full5x5E1x5OverE5x5() << ",E2x5/E5x5=" << Full5x5E2x5OverE5x5() << std::endl;
+      if ( !pass_dxy           ) std::cout << "\tfail dxy           :" << LeadVtxDistXY() << std::endl;
+      if ( !pass_missingHits   ) std::cout << "\tfail missingHits   :" << MissingHits() << std::endl;
+      if ( !pass_trkIsolation  ) std::cout << "\tfail trkIsolation  :" << HEEP70TrackIsolation() << std::endl;
+      if ( !pass_caloIsolation ) std::cout << "\tfail caloIsolation :" << caloIsolation << std::endl;
     }
   }
   
@@ -139,7 +142,7 @@ bool Electron::PassUserID_HEEPv6p1 (bool verbose){
   //----------------------------------------------------------------------
   
   bool pass_et            = bool ( PtHeep()              >  35.0 );
-  bool pass_ecalDriven    = bool ( EcalSeed()        == 1    );
+  bool pass_ecalDriven    = bool ( EcalDriven()        == 1    );
   bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
   bool pass_missingHits   = bool ( MissingHits()     <= 1    );
 
@@ -230,7 +233,7 @@ bool Electron::PassUserID_HEEPv6p1 (bool verbose){
   return decision;
 }
 
-bool Electron::PassUserID_HEEP (bool verbose){
+bool Electron::PassUserID_HEEPv5p1 (bool verbose){
   // See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
   // apply cuts manually based on variables here
   // this is version 5.1
@@ -240,7 +243,7 @@ bool Electron::PassUserID_HEEP (bool verbose){
   //----------------------------------------------------------------------
   
   bool pass_et            = bool ( PtHeep()              >  35.0 );
-  bool pass_ecalDriven    = bool ( EcalSeed()        == 1    );
+  bool pass_ecalDriven    = bool ( EcalDriven()        == 1    );
   bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
   bool pass_trkIsolation  = bool ( TrkIsoDR03()      <  5.0  );
   bool pass_missingHits   = bool ( MissingHits()     <= 1    );
@@ -465,7 +468,7 @@ bool Electron::PassUserID_MVA (bool verbose){
 }
 
 bool Electron::PassUserID_FakeRateLooseID(bool verbose){
-  bool pass_ecalDriven    = bool ( EcalSeed()    == 1    );
+  bool pass_ecalDriven    = bool ( EcalDriven()    == 1    );
   bool pass_missingHits   = bool ( MissingHits() <= 1    );
   bool pass_dxy           = false;
   bool pass_sigmaIEtaIEta = false;
@@ -501,11 +504,11 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
       else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) FAIL FakeRateLooseID" << std::endl; 
       else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) FAIL FakeRateLooseID" << std::endl; 
       if ( is_barrel || is_endcap ) { 
-	if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    :\t " << EcalSeed()      << std::endl;
-	if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
-	if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
-	if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << Full5x5SigmaIEtaIEta() << std::endl;
-	if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+        if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    :\t " << EcalDriven()      << std::endl;
+        if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
+        if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
+        if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << Full5x5SigmaIEtaIEta() << std::endl;
+        if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
       }
       else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
     }
