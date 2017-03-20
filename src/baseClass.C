@@ -1215,43 +1215,12 @@ bool baseClass::writeCutEfficFile()
   // Write optimization histograms
   if (optimizeName_cut_.size())
     {
-#ifdef CREATE_OPT_CUT_FILE
-      //std::string optFileName = *outputFileName_+"_optimization.txt";
-      std::string optFileName = "optimizationCuts.txt";
-      std::ofstream optFile( optFileName.c_str() );
-      if ( !optFile.good() )
-	{
-	  STDOUT("ERROR: cannot open file "<< optFileName.c_str() ) ;
-	}
+      // now, you call this function explicitly, as in the makeOptCutFile main cc
+//#ifdef CREATE_OPT_CUT_FILE
+//      STDOUT("write opt cut file");
+//      createOptCutFile();
+//#endif // CREATE_OPT_CUT_FILE
 
-      // Add code for printing histogram output
-      int Nbins=h_optimizer_->GetNbinsX();
-      for (int i=0;i<Nbins;++i)
-	{
-	  std::vector<int> cutindex;
-	  // cutindex will store histogram bin as a series of integers
-	  // 12345 = {1,2,3,4,5}, etc.
-
-	  optFile <<"Bin = "<<i;
-	  for (int j=Nbins/nOptimizerCuts_;j>=1;j/=nOptimizerCuts_)
-	    {
-	      cutindex.push_back((i/j)%nOptimizerCuts_);
-	    }  // for (int j=(int)log10(Nbins);...)
-
-	  for (unsigned int j=0;j<cutindex.size();++j)
-	    {
-	      optFile <<"\t"<< optimizeName_cut_[j].variableName <<" ";
-	      if (optimizeName_cut_[j].testgreater==true)
-		optFile <<"> "<<optimizeName_cut_[j].minvalue+optimizeName_cut_[j].increment*cutindex[j];
-	      //I'm not sure this is how I implemented the < cut; need to check.
-	      else
-		optFile <<"< "<<optimizeName_cut_[j].maxvalue-optimizeName_cut_[j].increment*cutindex[j];
-	    } //for (unsigned int j=0;...)
-	  optFile <<endl;
-	  //optFile <<"\t Entries = "<<h_optimizer_->GetBinContent(i+1)<<endl;
-
-	} // for (int i=0;...)
-#endif // CREATE_OPT_CUT_FILE
 
       gDirectory->mkdir("Optimizer");
       gDirectory->cd("Optimizer");
@@ -1892,5 +1861,44 @@ void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variabl
     //STDOUT("INFO: fillVariableWithValue("<<variable_name<<","<<-1*prescale<<") for hlt_path="<<hlt_path);
     fillVariableWithValue(variable_name, prescale * -1 ) ;
   }
+}
+
+void baseClass::createOptCutFile() {
+  STDOUT("creating optimization cut file");
+  //std::string optFileName = *outputFileName_+"_optimization.txt";
+  std::string optFileName = "optimizationCuts.txt";
+  std::ofstream optFile( optFileName.c_str() );
+  if ( !optFile.good() )
+  {
+    STDOUT("ERROR: cannot open file "<< optFileName.c_str() ) ;
+  }
+
+  // Add code for printing histogram output
+  int Nbins=h_optimizer_->GetNbinsX();
+  for (int i=0;i<Nbins;++i)
+  {
+    std::vector<int> cutindex;
+    // cutindex will store histogram bin as a series of integers
+    // 12345 = {1,2,3,4,5}, etc.
+
+    optFile <<"Bin = "<<i;
+    for (int j=Nbins/nOptimizerCuts_;j>=1;j/=nOptimizerCuts_)
+    {
+      cutindex.push_back((i/j)%nOptimizerCuts_);
+    }  // for (int j=(int)log10(Nbins);...)
+
+    for (unsigned int j=0;j<cutindex.size();++j)
+    {
+      optFile <<"\t"<< optimizeName_cut_[j].variableName <<" ";
+      if (optimizeName_cut_[j].testgreater==true)
+        optFile <<"> "<<optimizeName_cut_[j].minvalue+optimizeName_cut_[j].increment*cutindex[j];
+      //I'm not sure this is how I implemented the < cut; need to check.
+      else
+        optFile <<"< "<<optimizeName_cut_[j].maxvalue-optimizeName_cut_[j].increment*cutindex[j];
+    } //for (unsigned int j=0;...)
+    optFile <<endl;
+    //optFile <<"\t Entries = "<<h_optimizer_->GetBinContent(i+1)<<endl;
+
+  } // for (int i=0;...)
 }
 

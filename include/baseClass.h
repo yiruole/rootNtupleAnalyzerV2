@@ -209,6 +209,8 @@ class baseClass : public rootNtupleClass {
   void fillSkimTree();
   void fillReducedSkimTree();
 
+  void createOptCutFile();
+
   PileupReweighter pileupReweighter_;
 
   TFile * output_root_;
