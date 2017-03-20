@@ -202,7 +202,7 @@ inputListName = inputlist.split('/')[-1]
 # make a copy of the input list for this dataset
 if not os.path.isfile(outputmain+'/'+inputListName):
   if os.path.isfile(os.path.abspath(inputlist)):
-    shutil.copy2(os.path.abspath(inputlist),outputmain+'/'+inputListName)
+    shutil.copy(os.path.abspath(inputlist),outputmain+'/'+inputListName)
   else:
     print 'could not find file:',os.path.abspath(inputlist)
     exit(-1)
@@ -230,15 +230,15 @@ scriptfile.write("""#!/bin/bash
 echo "================= Dumping Input files ===================="
 """)
 scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))"\n')
-#if options.isSkimTask:
-scriptfile.write('echo "Put into '+inputListName+'"\n')
-scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
-scriptfile.write('echo "cat '+inputListName+':"\n')
-scriptfile.write('cat '+inputListName+'\n')
-scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
-#else:
-#  # read the inputlist we pass to crab
-#  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+if options.isSkimTask or options.isReducedSkimTask:
+  scriptfile.write('echo "Put into '+inputListName+'"\n')
+  scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
+  scriptfile.write('echo "cat '+inputListName+':"\n')
+  scriptfile.write('cat '+inputListName+'\n')
+  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+else:
+  # read the inputlist we pass to crab
+  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 #scriptfile.write("# localoutputdirectory="+workingDir+"\n")
 # define our own exit code for crab; see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Define_your_own_exit_code_and_ex
 scriptfile.write("""
@@ -293,17 +293,6 @@ if len(options.inputFiles) > 0:
   for f in additionalInputFiles:
     config.JobType.inputFiles.append(f)
 
-# we now read these from trees stored on eos
-## for using event lists
-#if options.isReducedSkimTask:
-#  config.JobType.inputFiles += ['eventlist_hbher2l.txt.gz']
-#  config.JobType.inputFiles += ['eventlist_hbheiso.txt.gz']
-#  config.JobType.inputFiles += ['csc2015_Dec01.txt.gz']
-#  config.JobType.inputFiles += ['ecalscn1043093_Dec01.txt']
-#  config.JobType.inputFiles += ['badResolutionTrack_Jan13.txt']
-#  config.JobType.inputFiles += ['muonBadTrack_Jan13.txt']
-## end of event lists
-
 # collect the output (root plots, dat, and skim)
 config.JobType.outputFiles = [outputFilePref+'.root',outputFilePref+'.dat']
 if options.isReducedSkimTask:
@@ -313,14 +302,15 @@ elif options.isSkimTask:
 
 config.Data.outputPrimaryDataset = dataset.split('__')[0]
 
-#if options.isSkimTask:
-#  # read input list, convert to LFN
-#  # this appears not to be needed, and it's not been used since we changed to the CERN xrootd redirector
-#  config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
-#else:
-#  # just read the first file in, so crab thinks the dataset just has one file and just makes one job
-#  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
-config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
+if options.isSkimTask or options.isReducedSkimTask:
+  # read input list, convert to LFN
+  config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
+else:
+  # just read the first file in, so crab thinks the dataset just has one file and just makes one job
+  # but of course, main will run over all the root files
+  # at some point, the analysis should be changed to support combining multiple jobs
+  config.Data.userInputFiles = [open(inputlist).readline().rstrip()]
+#config.Data.userInputFiles = [line.split('root://eoscms//eos/cms')[-1].rstrip() for line in open(inputlist)]
 
 submitCERNT2only = options.submitCERNT2only
 maxLengthPath = max(config.Data.userInputFiles, key=len)
