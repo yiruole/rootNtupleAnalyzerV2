@@ -13,11 +13,11 @@ class HighPtMuon : public Object {
   
   // Kinematic variables         
 
-  double & Pt                      ();
-  double & Eta                     ();
-  double & Phi                     ();
-  double   PtError                 ();
-  double   Charge                  ();
+  float & Pt                      ();
+  float & Eta                     ();
+  float & Phi                     ();
+  float   PtError                 ();
+  float   Charge                  ();
 
   // IDs 
 
@@ -25,21 +25,21 @@ class HighPtMuon : public Object {
          
   // Isolation variables
 
-  double TrkIso                    ();
-  double PFIsoR04ChargedHadron     ();
-  double PFIsoR04NeutralHadron     ();
-  double PFIsoR04Photon            ();
-  double PFIsoR04PU                ();
+  float TrkIso                    ();
+  float PFIsoR04ChargedHadron     ();
+  float PFIsoR04NeutralHadron     ();
+  float PFIsoR04Photon            ();
+  float PFIsoR04PU                ();
          
   // ID variables      
          
   int    IsGlobal                  ();
   int    IsPFMuon                  ();
-  double GlobalChi2                ();
+  float GlobalChi2                ();
   int    GlobalTrkValidHits        (); 
   int    StationMatches            ();
-  double BestTrackVtxDistXY        ();
-  double BestTrackVtxDistZ         ();
+  float BestTrackVtxDistXY        ();
+  float BestTrackVtxDistZ         ();
   int    TrkPixelHits              ();
   int    TrackLayersWithMeasurement();
   

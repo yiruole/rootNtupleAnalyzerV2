@@ -14,10 +14,10 @@ class GenParticle : public Object {
   
   // Kinematic variables
 
-  double & Pt() ;
-  double & Eta();
-  double & Phi();
-  double & Mass();
+  float & Pt() ;
+  float & Eta();
+  float & Phi();
+  float & Mass();
 
   // IDs 
 

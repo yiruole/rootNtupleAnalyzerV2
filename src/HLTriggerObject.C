@@ -8,20 +8,20 @@ HLTriggerObject::HLTriggerObject ():
 
 HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j):
   Object        ( c,i,j, "HLTriggerObject" ),
-  m_double_pt   ( m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) ),
-  m_double_eta  ( m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) ),
-  m_double_phi  ( m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) )
+  m_float_pt   ( m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) ),
+  m_float_eta  ( m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) ),
+  m_float_phi  ( m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) )
 {}
 
 //void HLTriggerObject::WritePtEtaPhi() {
-//  m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) = float ( m_double_pt  );
-//  m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) = float ( m_double_eta );
-//  m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) = float ( m_double_phi );
+//  m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) = float ( m_float_pt  );
+//  m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) = float ( m_float_eta );
+//  m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) = float ( m_float_phi );
 //}
 
-double & HLTriggerObject::Pt                 () { return m_double_pt ; }
-double & HLTriggerObject::Eta                () { return m_double_eta; }
-double & HLTriggerObject::Phi                () { return m_double_phi; }
+float & HLTriggerObject::Pt                 () { return m_float_pt ; }
+float & HLTriggerObject::Eta                () { return m_float_eta; }
+float & HLTriggerObject::Phi                () { return m_float_phi; }
 std::vector<int>& HLTriggerObject::ObjectIDs () { return m_collection -> GetData() -> HLTriggerObjTypeIds  -> at ( m_raw_index ) ; }
 
 // HLT

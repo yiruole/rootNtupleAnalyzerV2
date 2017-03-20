@@ -18,9 +18,9 @@ class HLTriggerObject : public Object {
 
   // Kinematic variables
   
-  double & Pt  () ;
-  double & Eta () ; 
-  double & Phi () ; 
+  float & Pt  () ;
+  float & Eta () ; 
+  float & Phi () ; 
 
   // HLT info
   std::vector<std::string>& GetFilterNames();
@@ -36,9 +36,9 @@ class HLTriggerObject : public Object {
   std::vector<int>& ObjectIDs ();
   
  private:
-  double m_double_pt;
-  double m_double_eta;
-  double m_double_phi;
+  float m_float_pt;
+  float m_float_eta;
+  float m_float_phi;
 
 };
 

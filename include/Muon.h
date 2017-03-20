@@ -13,14 +13,14 @@ class Muon : public Object {
   
   // Kinematic variables         
 
-  double & Pt                      ();
-  double & PtError                 ();
-  double & Eta                     ();
-  double & Phi                     ();
-  double   Charge                  ();
+  float & Pt                      ();
+  float & PtError                 ();
+  float & Eta                     ();
+  float & Phi                     ();
+  float   Charge                  ();
 
-  double & CocktailPt              ();
-  double & CocktailPtError         ();
+  float & CocktailPt              ();
+  float & CocktailPtError         ();
 
   // IDs 
 
@@ -28,22 +28,22 @@ class Muon : public Object {
          
   // Isolation variables
 
-  double TrkIso                    ();
-  double TrkIsoR03SumPt            ();
-  double PFIsoR04ChargedHadron     ();
-  double PFIsoR04NeutralHadron     ();
-  double PFIsoR04Photon            ();
-  double PFIsoR04PU                ();
+  float TrkIso                    ();
+  float TrkIsoR03SumPt            ();
+  float PFIsoR04ChargedHadron     ();
+  float PFIsoR04NeutralHadron     ();
+  float PFIsoR04Photon            ();
+  float PFIsoR04PU                ();
          
   // ID variables      
          
   int    IsGlobal                  ();
   int    IsPFMuon                  ();
-  double GlobalChi2                ();
+  float GlobalChi2                ();
   int    GlobalTrkValidHits        (); 
   int    StationMatches            ();
-  double BestTrackVtxDistXY        ();
-  double BestTrackVtxDistZ         ();
+  float BestTrackVtxDistXY        ();
+  float BestTrackVtxDistZ         ();
   int    TrkPixelHits              ();
   int    TrackLayersWithMeasurement();
   

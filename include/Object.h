@@ -20,19 +20,19 @@ class Object {
   const char* Name() const { return m_name; }
   virtual short GetRawIndex() { return m_raw_index; }
   
-  virtual double & Pt()  = 0;
-  virtual double & Phi() = 0;
-  virtual double & Eta() = 0;
+  virtual float & Pt()  = 0;
+  virtual float & Phi() = 0;
+  virtual float & Eta() = 0;
 
-  virtual double EnergyResScaleFactor() { return 1.0; }
-  virtual double EnergyScaleFactor   () { return 1.0; } 
-  virtual double EnergyResScaleError () { return 0.0; }
+  virtual float EnergyResScaleFactor() { return 1.0; }
+  virtual float EnergyScaleFactor   () { return 1.0; } 
+  virtual float EnergyResScaleError () { return 0.0; }
   
   virtual bool   PassUserID ( ID id, bool verbose ) = 0;
     
-  double DeltaR     ( Object * other_object );
-  double DeltaPhi   ( Object * other_object );
-  double Phi_mpi_pi ( double x ); 
+  float DeltaR     ( Object * other_object );
+  float DeltaPhi   ( Object * other_object );
+  float Phi_mpi_pi ( float x ); 
 
   bool IsGenEBFiducial() ;
   bool IsGenEEFiducial() ;
@@ -42,13 +42,13 @@ class Object {
   bool IsNULL() ;
   
   template <class AnotherObject>
-    bool MatchByDR ( CollectionPtr c, AnotherObject & best_match, double max_dr ) { 
+    bool MatchByDR ( CollectionPtr c, AnotherObject & best_match, float max_dr ) { 
       short size = c -> GetSize();
-      double min_dr = 9999.;
+      float min_dr = 9999.;
       bool match = false;
       for (short i = 0; i < size ; ++i){
         AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
-        double dr = DeltaR ( & constituent );
+        float dr = DeltaR ( & constituent );
         if ( dr < max_dr ) { 
           if ( dr < min_dr ) { 
             match = true;

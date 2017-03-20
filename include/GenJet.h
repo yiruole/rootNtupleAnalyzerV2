@@ -14,9 +14,9 @@ class GenJet : public Object {
   
   // Kinematic variables
 
-  double & Pt()  ;
-  double & Eta() ;
-  double & Phi() ;
+  float & Pt()  ;
+  float & Eta() ;
+  float & Phi() ;
 
   // IDs 
 

@@ -11,10 +11,10 @@ GenParticle::GenParticle(Collection& c, unsigned short i, short j ):
 
 // Kinematic variables
 
-double & GenParticle::Pt       (){ return m_collection -> GetData() -> GenParticlePt         -> at ( m_raw_index ); }
-double & GenParticle::Eta      (){ return m_collection -> GetData() -> GenParticleEta        -> at ( m_raw_index ); } 
-double & GenParticle::Phi      (){ return m_collection -> GetData() -> GenParticlePhi        -> at ( m_raw_index ); } 
-double & GenParticle::Mass     (){ return m_collection -> GetData() -> GenParticleMass       -> at ( m_raw_index ); } 
+float & GenParticle::Pt       (){ return m_collection -> GetData() -> GenParticlePt         -> at ( m_raw_index ); }
+float & GenParticle::Eta      (){ return m_collection -> GetData() -> GenParticleEta        -> at ( m_raw_index ); } 
+float & GenParticle::Phi      (){ return m_collection -> GetData() -> GenParticlePhi        -> at ( m_raw_index ); } 
+float & GenParticle::Mass     (){ return m_collection -> GetData() -> GenParticleMass       -> at ( m_raw_index ); } 
 
 // ID variables		                                                       
 

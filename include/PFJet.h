@@ -12,17 +12,17 @@ class PFJet : public Object {
 
   // Kinematic variables
   
-  double & Pt    ();
-  double & Eta   (); 
-  double & Phi   (); 
-  double Energy  ();
-  double JECUnc  ();
+  float & Pt    ();
+  float & Eta   (); 
+  float & Phi   (); 
+  float Energy  ();
+  float JECUnc  ();
   
   // Energy resolution scale factors
 
-  double EnergyResScaleFactor ();
-  double EnergyResScaleError  ();
-  double EnergyScaleFactor    ();
+  float EnergyResScaleFactor ();
+  float EnergyResScaleError  ();
+  float EnergyScaleFactor    ();
   
   // IDs 
   
@@ -30,18 +30,18 @@ class PFJet : public Object {
   
   // ID variables
   
-  double NeutralHadronEnergyFraction ();
-  double NeutralEmEnergyFraction     ();
+  float NeutralHadronEnergyFraction ();
+  float NeutralEmEnergyFraction     ();
   int    NeutralHadronMultiplicity   ();
   int    NeutralMultiplicity         ();
   int    NConstituents               ();
-  double ChargedHadronEnergyFraction ();
+  float ChargedHadronEnergyFraction ();
   int    ChargedMultiplicity         ();
-  double ChargedEmEnergyFraction     ();
+  float ChargedEmEnergyFraction     ();
   
   // BTag variables
   
-  double CombinedSecondaryVertexBTag ();
+  float CombinedSecondaryVertexBTag ();
   
  private:
   bool PassUserID_PFJetLoose (bool verbose);
