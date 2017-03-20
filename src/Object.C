@@ -45,20 +45,20 @@ Object::Object(Collection & collection, short raw_index, short trigObj_index, co
   m_trigObj_index (trigObj_index)
 {}
 
-double Object::DeltaR( Object * other_object ) { 
-  double deta = Eta() - other_object -> Eta();
-  double dphi = DeltaPhi ( other_object );
-  double dr = sqrt ( deta * deta + dphi * dphi );
+float Object::DeltaR( Object * other_object ) { 
+  float deta = Eta() - other_object -> Eta();
+  float dphi = DeltaPhi ( other_object );
+  float dr = sqrt ( deta * deta + dphi * dphi );
   return dr;
 }
 
-double Object::DeltaPhi( Object * other_object ) { 
-  double dphi = Phi_mpi_pi ( Phi() - other_object -> Phi() );
+float Object::DeltaPhi( Object * other_object ) { 
+  float dphi = Phi_mpi_pi ( Phi() - other_object -> Phi() );
   return dphi;
 }
 
-double Object::Phi_mpi_pi ( double x ) {
-  double PI = 3.14159265359;
+float Object::Phi_mpi_pi ( float x ) {
+  float PI = 3.14159265359;
   while ( x >=  PI ) x -= ( 2*PI );
   while ( x <  -PI ) x += ( 2*PI );
   return x;
