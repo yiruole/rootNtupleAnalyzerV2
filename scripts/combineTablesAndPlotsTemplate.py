@@ -251,30 +251,33 @@ for lin in open( options.inputList ):
         if options.extraReweight:
           # these are the preselection average weights for the TopPtReweighting
           #XXX TODO extract from sumOfWeightsHistogram as well
-          if re.search('TTJets_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.810806e-01
-          elif re.search('TTJets_SingleLeptFromTbar_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=9.046766e-01
-          elif re.search('TTJets_SingleLeptFromT_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=9.034948e-01
-          elif re.search('TTJets_DiLept_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.804381e-01
-          elif re.search('TTJets_amcatnloFXFX',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.766042e-01
-          elif re.search('TTJets_SingleLeptFromTbar_ext1_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.908552e-01
-          elif re.search('TTJets_SingleLeptFromT_ext1_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.982681e-01
-          elif re.search('TTJets_DiLept_ext1_madgraphMLM',dataset_fromInputList):
-            print 'applying extra average weight to',dataset_fromInputList
-            xsection_X_intLumi/=8.804035e-01
+          # still not working in v2-3-5
+          # but the numbers below are not correct either
+          #if re.search('TTJets_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.810806e-01
+          #elif re.search('TTJets_SingleLeptFromTbar_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=9.046766e-01
+          #elif re.search('TTJets_SingleLeptFromT_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=9.034948e-01
+          #elif re.search('TTJets_DiLept_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.804381e-01
+          #elif re.search('TTJets_amcatnloFXFX',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.766042e-01
+          #elif re.search('TTJets_SingleLeptFromTbar_ext1_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.908552e-01
+          #elif re.search('TTJets_SingleLeptFromT_ext1_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.982681e-01
+          #elif re.search('TTJets_DiLept_ext1_madgraphMLM',dataset_fromInputList):
+          #  print 'applying extra average weight to',dataset_fromInputList
+          #  xsection_X_intLumi/=8.804035e-01
+          pass
         # now calculate the actual weight
         weight = 1.0
         if( Ntot == 0 ):
@@ -376,6 +379,8 @@ for lin in open( options.inputList ):
         toBeUpdated = False
         #matchingPiece = dataset_fromInputList
         matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
+        #print 'matchingPiece=',matchingPiece
+        #print 'pieceList=',pieceList
         if matchingPiece in pieceList:
             toBeUpdated = True
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
@@ -468,7 +473,7 @@ if options.ttbarBkg:
     nonTTbarMCBkgSampleName = 'NONTTBARBKG_amcatnlo'
     nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
-    Rfactor = 0.426 # Ree,emu = Nee/Nemu[TTbarMC]
+    Rfactor = 0.418 # Ree,emu = Nee/Nemu[TTbarMC]
     errRfactor = 0.001
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)

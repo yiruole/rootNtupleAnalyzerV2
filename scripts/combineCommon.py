@@ -56,7 +56,17 @@ def SanitizeDatasetNameFromFullDataset(dataset):
     #outputFile = dataset[1:].replace('/','__')
     #outputFile = outputFile.split('__')[0]+'__'+outputFile.split('__')[1]
     outputFile = dataset[1:].replace('/','_')
-    outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]
+    #if(len(outputFile.split('_')) == 3):
+    #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]
+    #elif(len(outputFile.split('_')) == 4):
+    #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]+'_'+outputFile.split('_')[2]
+    outputFileSplit = outputFile.split('_')
+    outputFile = ''
+    for i in xrange(0,len(outputFileSplit)-1):
+      outputFile+=outputFileSplit[i]+'_'
+    outputFile=outputFile[:-1]
+    #print '2 outputFile=',outputFile
+    #print 'outputFile.split("_")=',outputFile.split('_')
   return outputFile
 
 
@@ -125,10 +135,10 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
   for dataset in xsectionDict.keys():
     if dataset.startswith(datasetNameFromInputList):
       return xsectionDict[dataset]
-  #print
-  #print 'ERROR'
-  #for key,val in xsectionDict.iteritems():
-  #  print 'sample=',key,'xsection=',val
+  print
+  print 'ERROR'
+  for key in sorted(xsectionDict.iterkeys()):
+    print 'sample=',key,'xsection=',xsectionDict[key]
   print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList,'; i.e., no dataset in xsectionDict starts with this.'
   exit(-1)
 

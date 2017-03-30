@@ -188,14 +188,16 @@ def write_inputlists(filelist, outputDir):
 # combine datasets that are the same except for extN in the name (where N is a single digit)
 def combineExtDatasets(filelist):
   datasetsToRemove = []
+  wasCombined = {}
   for index,dataset1 in enumerate(sorted(filelist.iterkeys())):
+    wasCombined[dataset1] = False
     if dataset1 in datasetsToRemove:
       continue
     if 'ext' in dataset1:
       dataset1mod = dataset1[0:dataset1.find('ext')]+dataset1[dataset1.find('ext')+len('ext')+2:]
     else:
       dataset1mod = dataset1
-    #print 'Considering dataset:',dataset1,'; renamed to:',dataset1mod
+    print 'Considering dataset:',dataset1,'; renamed to:',dataset1mod
     for i in range(index+1,len(filelist.keys())):
       #print 'consider index:',i,'out of total entries:',len(filelist.keys())
       dataset2 = sorted(filelist.iterkeys())[i]
@@ -208,15 +210,16 @@ def combineExtDatasets(filelist):
         print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
         filelist[dataset1].extend(filelist[dataset2])
         datasetsToRemove.append(dataset2)
+        wasCombined[dataset1] = True
   # remove
   for d in datasetsToRemove:
     del filelist[d]
   # rename
   for dataset in filelist.iterkeys():
-    if 'ext' in dataset:
+    if 'ext' in dataset and wasCombined[dataset]:
       datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+      #print 'rename this dataset from:',dataset,'to:',datasetmod
       filelist[datasetmod] = filelist.pop(dataset)
-
   return
 
 
