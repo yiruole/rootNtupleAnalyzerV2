@@ -59,10 +59,19 @@ namespace trigEle27{
     std::vector<std::pair<ValRangeAbsF,DiTurnOnFunc>> turnOnData_;
   public:
     TurnOn(){
-      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({0.0,1.5},
-  {{0.241,30.0,1.68},{0.687,18.5,16.1}}));
-      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({1.5,2.5},
-  {{0.784,24.3,5.29},{0.095,25.2,25}}));
+      // this is 2015 WPLoose (no eta restriction)
+//      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({0.0,1.5},
+//  {{0.241,30.0,1.68},{0.687,18.5,16.1}}));
+//      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({1.5,2.5},
+//  {{0.784,24.3,5.29},{0.095,25.2,25}}));
+      // this is for 2016 (ichep) WPLoose eta2.1
+      //turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({0.0,1.5},  {{0.76,23.5,11.5},{0.189,5.24e-7,53.8}}));
+      //turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({1.5,2.1},   {{0.673,27.4,2.45},{0.174,35.8,7.95}}));
+      //turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({2.1,2.5},   {{0.,35.4,1.03},{0.,37.6,2.09}}));
+      // this is WPTight_eta2p1 on re-reco, from (slide 4, far right): https://indico.cern.ch/event/591192/contributions/2385819/attachments/1379390/2096232/2016-11-29Xuyang_rereco.pdf
+      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({0.0,1.5},  {{0.702,22.65,11.149},{0.223,37.622,37.619}}));
+      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({1.5,2.1},   {{-6.245,-373.183,-1453.482},{3.155,7.617,15.789}}));
+      turnOnData_.push_back(std::make_pair<ValRangeAbsF,DiTurnOnFunc>({2.1,2.5},   {{0,0,0},{0,0,0}}));
     }
     float operator()(float et,float eta)const{
       for(const auto& data : turnOnData_){
