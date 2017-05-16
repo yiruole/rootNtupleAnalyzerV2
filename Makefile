@@ -3,14 +3,14 @@ FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 FLAGS += -DSAVE_ALL_HISTOGRAMS 
 FLAGS += -std=c++11
-#FLAGS += -g
 FLAGS += -O2
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
 INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
-LIBS= -L.  ${ROOTLIBS} -L/usr/lib64 -lboost_iostreams
+CMSSWLIBS = ${CMSSW_RELEASE_BASE}/external/${SCRAM_ARCH}/lib/
+LIBS= -L.  ${ROOTLIBS} -L${CMSSWLIBS} -lboost_iostreams
 SRC= ./src
-SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o $(SRC)/QCDFakeRate.o
+SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o $(SRC)/QCDFakeRate.o $(SRC)/TriggerEfficiency2016.o
 EXE = main
 
 # ********** TEMPLATE *************
