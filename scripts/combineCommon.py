@@ -94,8 +94,9 @@ def GetSamplesToCombineDict(sampleListForMerging):
       elif piece in dictSamples:
         dictSamples[key].extend(dictSamples[piece])
       else:
-        #print 'GetSamplesToCombineDict: SanitizeDatasetNameFromFullDataset(',piece,')'
+        #print 'GetSamplesToCombineDict: SanitizeDatasetNameFromFullDataset(',piece,')=',
         piece = SanitizeDatasetNameFromFullDataset(piece)
+        #print piece
         dictSamples[key].append(piece)
   return dictSamples
 
@@ -223,11 +224,14 @@ def ScaleTable(inputTable, scaleFactor, errScaleFactor):
             if nOrig > 0.0:
               errNnew = nNew*math.sqrt(pow(errNorig/nOrig,2)+pow(errScaleFactor/scaleFactor,2))
             else:
-              errNnew = nNew*math.sqrt(pow(errNorig/nOrig,2)+pow(errScaleFactor/scaleFactor,2))
+              errNnew = nNew*errScaleFactor/scaleFactor
             nPassOrig = float(inputTable[int(j)]['Npass'])
             errNPassOrig = float(inputTable[j]['errNpass'])
             nPassNew =  nPassOrig * scaleFactor
-            errNpassNew = nPassNew*math.sqrt(pow(errNPassOrig/nPassOrig,2)+pow(errScaleFactor/scaleFactor,2))
+            if nPassOrig > 0.0:
+              errNpassNew = nPassNew*math.sqrt(pow(errNPassOrig/nPassOrig,2)+pow(errScaleFactor/scaleFactor,2))
+            else:
+              errNpassNew = nPassNew*errScaleFactor/scaleFactor
             
             inputTable[int(j)]={'variableName': inputTable[j]['variableName'],
                                  'min1': inputTable[j]['min1'],
