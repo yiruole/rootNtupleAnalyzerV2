@@ -13,7 +13,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   //STDOUT("begins");
-  nOptimizerCuts_ = 30; // number of cut points used in optimizer scan over a variable
+  nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -423,6 +423,8 @@ void baseClass::readCutFile()
     {
       h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
+      h_optimizer_entries_ =new TH1F("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
     }
 
   is.close();
@@ -525,26 +527,26 @@ void baseClass::evaluateCuts(bool verbose)
   //  resetCuts();
   combCutName_passed_.clear();
   for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+      it != orderedCutNames_.end(); it++)
+  {
+    cut * c = & (cutName_cut_.find(*it)->second);
+    if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2 ) ) )
     {
-      cut * c = & (cutName_cut_.find(*it)->second);
-      if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2 ) ) )
-	{
-          c->passed = false;
-          combCutName_passed_[c->level_str.c_str()] = false;
-          combCutName_passed_["all"] = false;
-          if(verbose) std::cout << "FAILED cut: " << c->variableName << "; value is: " << c->value << std::endl;
-	}
-      else
-	{
-	  c->passed = true;
-	  map<string,bool>::iterator cp = combCutName_passed_.find( c->level_str.c_str() );
-	  combCutName_passed_[c->level_str.c_str()] = (cp==combCutName_passed_.end()?true:cp->second);
-	  map<string,bool>::iterator ap = combCutName_passed_.find( "all" );
-	  combCutName_passed_["all"] = (ap==combCutName_passed_.end()?true:ap->second);
-    if(verbose) std::cout << "PASSED cut: " << c->variableName << "; value is: " << c->value << std::endl;
-	}
+      c->passed = false;
+      combCutName_passed_[c->level_str.c_str()] = false;
+      combCutName_passed_["all"] = false;
+      if(verbose) std::cout << "FAILED cut: " << c->variableName << "; value is: " << c->value << std::endl;
     }
+    else
+    {
+      c->passed = true;
+      map<string,bool>::iterator cp = combCutName_passed_.find( c->level_str.c_str() );
+      combCutName_passed_[c->level_str.c_str()] = (cp==combCutName_passed_.end()?true:cp->second);
+      map<string,bool>::iterator ap = combCutName_passed_.find( "all" );
+      combCutName_passed_["all"] = (ap==combCutName_passed_.end()?true:ap->second);
+      if(verbose) std::cout << "PASSED cut: " << c->variableName << "; value is: " << c->value << std::endl;
+    }
+  }
 
   // reset optimization cut values
   //for (int i=0;i<optimizeName_cut_.size();++i)
@@ -552,14 +554,14 @@ void baseClass::evaluateCuts(bool verbose)
   runOptimizer();
 
   if( !fillCutHistos() )
-    {
-      STDOUT("ERROR: fillCutHistos did not complete successfully.");
-    }
+  {
+    STDOUT("ERROR: fillCutHistos did not complete successfully.");
+  }
 
   if( !updateCutEffic() )
-    {
-      STDOUT("ERROR: updateCutEffic did not complete successfully.");
-    }
+  {
+    STDOUT("ERROR: updateCutEffic did not complete successfully.");
+  }
 
   return ;
 }
@@ -572,7 +574,6 @@ void baseClass::runOptimizer()
     return;
 
   // first, check that all cuts (except those to be optimized) have been passed
-
   for (vector<string>::iterator it = orderedCutNames_.begin();
       it != orderedCutNames_.end(); it++)
   {
@@ -587,8 +588,10 @@ void baseClass::runOptimizer()
       }
     }
     if (ignorecut) continue;
-    if (passedCut(*it) == false)
+    if (passedCut(*it) == false) {
+      //std::cout << "SIC DEBUG: examining cut: " << *it << "; passed? " << passedCut(*it) << "; don't run optimizer" << std::endl;
       return;
+    }
   }
 
   /*
@@ -600,9 +603,6 @@ void baseClass::runOptimizer()
   int counter=0;
   int thesize=optimizeName_cut_.size();
   int mysize=thesize;
-  //std::vector<bool> counterbins;
-  //counterbins.reserve(pow(nOptimizerCuts_,thesize));
-  //for (int i=0;i<pow(nOptimizerCuts_,thesize);++i) counterbins.push_back(true); // assume true
   std::vector<bool> counterbins(pow(nOptimizerCuts_,thesize),true);
 
   // lowest-numbered cut appears first in cut ordering
@@ -630,8 +630,10 @@ void baseClass::runOptimizer()
   {
     if (counterbins[i]==true)
     {
-      //std::cout << "\tSIC DEBUG FIll opt hist bin " << i << " with " << cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight <<std::endl;
+      //if(i==0)
+      //  std::cout << "\tSIC DEBUG FIll opt hist bin " << i+1 << " with " << cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight <<std::endl;
       h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
+      h_optimizer_entries_->Fill(i);
     }
 
   }
@@ -1122,7 +1124,10 @@ bool baseClass::writeCutEfficFile()
 
   eventcuts_->SetBinContent(bincounter,nEntTot);
   if (optimizeName_cut_.size())
+  {
     h_optimizer_->SetBinContent(0, nEntTot);
+    h_optimizer_entries_->SetBinContent(0, nEntTot);
+  }
 
   double nEvtPassedBeforeWeight_previousCut = nEntTot;
   double nEvtPassed_previousCut = nEntTot;
@@ -1225,6 +1230,7 @@ bool baseClass::writeCutEfficFile()
       gDirectory->mkdir("Optimizer");
       gDirectory->cd("Optimizer");
       h_optimizer_->Write();
+      h_optimizer_entries_->Write();
       for (int i=0;i<optimizeName_cut_.size();++i)
 	{
 	  stringstream x;

@@ -299,6 +299,7 @@ class baseClass : public rootNtupleClass {
   map<int, Optimize> optimizeName_cut_;
   TH1F* eventcuts_; // number of events passing each cut
   TH1F* h_optimizer_; // optimization histogram
+  TH1F* h_optimizer_entries_;
   TH1F* h_weightSums_; // sums of various weights over all events
 
 };
