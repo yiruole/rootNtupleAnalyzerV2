@@ -185,7 +185,7 @@ def write_inputlists(filelist, outputDir):
     return
 
 
-# combine datasets that are the same except for extN in the name (where N is a single digit)
+# combine datasets that are the same except for 'extN' (where N is a single digit) or 'backup' in the name 
 def combineExtDatasets(filelist):
   datasetsToRemove = []
   wasCombined = {}
@@ -195,14 +195,18 @@ def combineExtDatasets(filelist):
       continue
     if 'ext' in dataset1:
       dataset1mod = dataset1[0:dataset1.find('ext')]+dataset1[dataset1.find('ext')+len('ext')+2:]
+    elif 'backup' in dataset1:
+      dataset1mod = dataset1[0:dataset1.find('backup')]+dataset1[dataset1.find('backup')+len('backup')+1:]
     else:
       dataset1mod = dataset1
-    print 'Considering dataset:',dataset1,'; renamed to:',dataset1mod
+    #print 'Considering dataset:',dataset1,'; renamed to:',dataset1mod
     for i in range(index+1,len(filelist.keys())):
       #print 'consider index:',i,'out of total entries:',len(filelist.keys())
       dataset2 = sorted(filelist.iterkeys())[i]
       if 'ext' in dataset2:
         dataset2mod = dataset2[0:dataset2.find('ext')]+dataset2[dataset2.find('ext')+len('ext')+2:]
+      elif 'backup' in dataset1:
+        dataset2mod = dataset2[0:dataset2.find('backup')]+dataset2[dataset2.find('backup')+len('backup')+1:]
       else:
         dataset2mod = dataset2
       #print '\tcompare to dataset:',dataset2,'; renamed to:',dataset2mod
@@ -216,8 +220,13 @@ def combineExtDatasets(filelist):
     del filelist[d]
   # rename
   for dataset in filelist.iterkeys():
-    if 'ext' in dataset and wasCombined[dataset]:
-      datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+    if wasCombined[dataset]:
+      if 'ext' in dataset:
+        datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+      elif 'backup' in dataset:
+        datasetmod = dataset[0:dataset.find('backup')]+dataset[dataset.find('backup')+len('backup')+1:]
+      else:
+        continue
       #print 'rename this dataset from:',dataset,'to:',datasetmod
       filelist[datasetmod] = filelist.pop(dataset)
   return
