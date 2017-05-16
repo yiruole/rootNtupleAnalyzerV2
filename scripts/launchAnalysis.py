@@ -29,6 +29,7 @@ parser.add_option ("--tree_name" , "-n" , dest = "tree_name" , type=str, help="N
 parser.add_option ("--cut_file"  , "-c" , dest = "cut_file"  , type=str, help="Text file containing cut values" ) 
 parser.add_option ("--ncores"    , "-p" , dest = "ncores"    , type=int, help="Number of processor cores to be used to run the job" )
 parser.add_option ("--exe"       , "-e" , dest = "execut"    , type=str, help="name of exec" )
+parser.add_option ("--code_name" , "-k" , dest = "code_name" , type=str, help="code name" )
 
 (options, args) = parser.parse_args()
 
@@ -36,6 +37,7 @@ if not options.input_list : parser.print_help(); sys.exit()
 if not options.output_dir : parser.print_help(); sys.exit()
 if not options.tree_name  : parser.print_help(); sys.exit()
 if not options.cut_file   : parser.print_help(); sys.exit()
+if not options.code_name  : parser.print_help(); sys.exit()
 
 ncores = multiprocessing.cpu_count()
 if options.ncores :
@@ -109,13 +111,13 @@ cut_file.close()
 # Is the analysisClass.C file a symbolic link?
 # If it is, what is the name of the real .C file?
 #----------------------------------------------------------------
-
-code_name = ""
-if not os.path.islink ("src/analysisClass.C" ) :
-    print "ERROR.  src/analysisClass.C is not a symbolic link!" 
-    sys.exit() 
-else : 
-    code_name = os.path.realpath ( "src/analysisClass.C" ).split("/")[-1][:-2]
+#
+#code_name = ""
+#if not os.path.islink ("src/analysisClass.C" ) :
+#    print "ERROR.  src/analysisClass.C is not a symbolic link!" 
+#    sys.exit() 
+#else : 
+#    code_name = os.path.realpath ( "src/analysisClass.C" ).split("/")[-1][:-2]
 
 #----------------------------------------------------------------
 # Loop over the input list and get a command for each file
@@ -128,7 +130,7 @@ for line in input_list:
     if line.startswith('#'):
       continue
     dataset = line.strip().split("/")[-1][:-4]
-    output_file_name = options.output_dir + "/" + code_name + "___" + dataset    
+    output_file_name = options.output_dir + "/" + options.code_name + "___" + dataset    
     command = "./" + executable
     command += " " + line.strip() + " " + options.cut_file + " " + options.tree_name + " " + output_file_name + " " + output_file_name
     command_list.append ( command ) 
