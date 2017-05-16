@@ -9,7 +9,7 @@
 
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 #ZJet_Madgraph_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
-ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM
 #ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
 #ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
 #ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
@@ -20,13 +20,14 @@ ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Ru
 #ZJet_amcatnlo_M-1000to1500    DYJetsToLL_M-1000to1500
 #ZJet_amcatnlo_M-1500to2000    DYJetsToLL_M-1500to2000
 #ZJet_amcatnlo_M-2000to3000    DYJetsToLL_M-2000to3000
+ZJet_amcatnlo_pt0to50       /DYJetsToLL_Zpt-0To50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 ZJet_amcatnlo_pt50to100     /DYJetsToLL_Pt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 ZJet_amcatnlo_pt100to250    /DYJetsToLL_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM
 ZJet_amcatnlo_pt250to400    /DYJetsToLL_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM
 ZJet_amcatnlo_pt400to650    /DYJetsToLL_Pt-400To650_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM
 ZJet_amcatnlo_pt650toInf    /DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/MINIAODSIM
-ZJet_amcatnlo_ptBinned    ZJet_amcatnlo_Inc  ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
-ZJet_amcatnlo_ptBinned_noIncZ    ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
+ZJet_amcatnlo_ptBinned    ZJet_amcatnlo_pt0to50  ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
+#ZJet_amcatnlo_ptBinned_noIncZ    ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 
 WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
@@ -38,12 +39,14 @@ WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISp
 #WJet_Madgraph_HT1200to2500  /WJetsToLNu_HT-1200To2500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 #WJet_Madgraph_HT2500toInf   /WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 #WJet_Madgraph_HT    WJet_Madgraph_HT100to200 WJet_Madgraph_HT200to400 WJet_Madgraph_HT400to600 WJet_Madgraph_HT600to800 WJet_Madgraph_HT800to1200 WJet_Madgraph_HT1200to2500 WJet_Madgraph_HT2500toInf 
+WJet_amcatnlo_pt0to50       /WJetsToLNu_Wpt-0To50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+WJet_amcatnlo_pt50to100     /WJetsToLNu_Wpt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WJet_amcatnlo_pt100to250    /WJetsToLNu_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt250to400    /WJetsToLNu_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt400to600    /WJetsToLNu_Pt-400To600_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt600toInf    /WJetsToLNu_Pt-600ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-WJet_amcatnlo_ptBinned    WJet_amcatnlo_Inc  WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
-WJet_amcatnlo_ptBinned_noIncW    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+WJet_amcatnlo_ptBinned    WJet_amcatnlo_pt0to50  WJet_amcatnlo_pt50to100  WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+#WJet_amcatnlo_ptBinned_noIncW    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
 
 #TTJets_DiLept                /TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #TTJets_SingleLeptFromT       /TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
@@ -92,6 +95,9 @@ WZ    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun
 ZZ    /ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 DIBOSON		WW WZ ZZ
 
+ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
+OTHERBKG_amcAtNLOIncTTBar_ZJetWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
+
 # Removed QCD Fakes from here
 #ALLBKG_MG_HT		ZJet_Madgraph_HT TTbar_Madgraph WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
 #OTHERBKG_MG_HT	WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
@@ -114,8 +120,6 @@ DIBOSON		WW WZ ZZ
 #OTHERBKG_MG_ZJetNoInZPt	WJet_Madgraph_HT SingleTop DIBOSON
 #ALLBKG_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_Madgraph WJet_amcatnlo_ptBinned SingleTop DIBOSON
 #OTHERBKG_ZJetWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
-ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON
-OTHERBKG_amcAtNLOIncTTBar_ZJetWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 #ALLBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt		ZJet_amcatnlo_ptBinned_noIncZ TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON
 #OTHERBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 
@@ -153,7 +157,7 @@ LQ_M1200	/LQToUE_M-1200_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asy
 LQ_M1250	/LQToUE_M-1250_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 LQ_M1300	/LQToUE_M-1300_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 LQ_M1350	/LQToUE_M-1350_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
-#LQ_M1400	/LQToUE_M-1400_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
+LQ_M1400	/LQToUE_M-1400_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 LQ_M1450	/LQToUE_M-1450_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 LQ_M1500	/LQToUE_M-1500_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 LQ_M1550	/LQToUE_M-1550_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
