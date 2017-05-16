@@ -30,6 +30,8 @@ class GenParticle : public Object {
   int Status      ();
   int NumDaughters();
   
+  bool IsHardProcess();
+  bool IsFromHardProcessFinalState();
  private:
   
   bool PassUserID_FromLQ              (bool verbose);
@@ -41,6 +43,7 @@ class GenParticle : public Object {
   bool PassUserID_MuonFiducial        (bool verbose);
   bool PassUserID_ECALFiducial        (bool verbose);
   bool PassUserID_GenEleHardScatter   (bool verbose);
+  bool PassUserID_GenNuHardScatter    (bool verbose);
 
   bool PassUserID_GenZGammaHardScatter(bool verbose);
   bool PassUserID_GenWHardScatter     (bool verbose);

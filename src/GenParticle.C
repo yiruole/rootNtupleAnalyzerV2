@@ -23,12 +23,17 @@ int    GenParticle::MotherIndex (){ return m_collection -> GetData() -> GenParti
 int    GenParticle::Status      (){ return m_collection -> GetData() -> GenParticleStatus     -> at ( m_raw_index ); }
 int    GenParticle::NumDaughters(){ return m_collection -> GetData() -> GenParticleNumDaught  -> at ( m_raw_index ); }
 
+bool GenParticle::IsHardProcess(){ return m_collection -> GetData() -> GenParticleIsHardProcess -> at ( m_raw_index ); }
+bool GenParticle::IsFromHardProcessFinalState(){ return m_collection -> GetData() -> GenParticleFromHardProcessFinalState -> at ( m_raw_index ); }
+
 std::ostream& operator<<(std::ostream& stream, GenParticle& object) {
   stream << object.Name() << " " << ": "
 	 << "PDG = "    << object.PdgId () << ", "
 	 << "MotherIndex = "    << object.MotherIndex () << ", "
 	 << "Num. daughters = " << object.NumDaughters () << ", "
 	 << "Status = " << object.Status () << ", "
+   << "IsHardProcess = " << object.IsHardProcess() << ", "
+   << "IsFromHardProcessFinalState = " << object.IsFromHardProcessFinalState() << ", "
 	 << "Pt = "     << object.Pt ()    << ", "
 	 << "Eta = "    << object.Eta()    << ", "
 	 << "Phi = "    << object.Phi()    << ", "
