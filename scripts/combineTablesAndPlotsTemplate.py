@@ -5,11 +5,57 @@ import sys
 import string
 from optparse import OptionParser
 import os.path
-from ROOT import *
+from ROOT import TFile,TH1F,TH2F,gROOT
+import ROOT
 import re
 import math
 
 import combineCommon
+
+
+def updateSample(dictFinalHistoAtSample,htemp,h,toBeUpdated,plotWeight):
+  histoName = htemp.GetName()
+  #thanks Riccardo
+  # init histo if needed
+  if not h in dictFinalHistoAtSample:
+      if "TH2" in htemp.__repr__():
+          dictFinalHistoAtSample[h] = TH2F()
+          dictFinalHistoAtSample[h].SetName("histo2D__" + sample + "__" + histoName )
+          dictFinalHistoAtSample[h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
+          #continue
+      elif 'TH1' in htemp.ClassName():
+          dictFinalHistoAtSample[h] = TH1F()
+          dictFinalHistoAtSample[h].SetName("histo1D__" + sample + "__" + histoName )
+          dictFinalHistoAtSample[h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
+      else:
+          #print 'not combining classtype of',htemp.ClassName()
+          return
+  if toBeUpdated:
+      #XXX DEBUG
+      binToExamine = 33
+      if 'OptBinLQ60' in histoName:
+        print
+        if htemp.GetBinContent(binToExamine)!=0:
+          print 'Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',htemp.GetBinContent(binToExamine),' error=',htemp.GetBinError(binToExamine),'relErr=',htemp.GetBinError(binToExamine)/htemp.GetBinContent(binToExamine)
+        if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
+          print 'BEFORE',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relErr=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
+      #if 'SumOfWeights' in histoName:
+      #  continue # do not sum up the individual SumOfWeights histos
+      #if 'optimizerentries' in histoName.lower():
+      #XXX DEBUG TEST
+      if 'optimizerentries' in histoName.lower() or 'noweight' in histoName.lower():
+          returnVal = dictFinalHistoAtSample[h].Add(htemp)
+      else:
+          returnVal = dictFinalHistoAtSample[h].Add(htemp, plotWeight)
+      #XXX DEBUG
+      if 'OptBinLQ60' in histoName:
+        if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
+          print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
+          print
+      if not returnVal:
+          print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHistoAtSample[h].GetName()
+          exit(-1)
+
 
 doProfiling=False
 # for profiling
@@ -68,10 +114,6 @@ parser.add_option("-t", "--tablesOnly", action="store_true",dest="tablesOnly",de
 parser.add_option("-b", "--ttbarBkg", action="store_true",dest="ttbarBkg",default=False,
                   help="do the ttbar background prediction from data; don't write out any other plots",
                   metavar="TTBARBKG")
-
-parser.add_option("-r", "--reweight", action="store_true",dest="extraReweight",default=False,
-                  help="apply extra reweight factor (e.g., for top Pt reweighting) when normalizing to int. lumi.",
-                  metavar="EXTRAREWEIGHT")
 
 parser.add_option("-f", "--logFile", dest="logFile", default='',
                   help="log file from the analysis (used to look for errors)",
@@ -247,37 +289,13 @@ for lin in open( options.inputList ):
         tfile = TFile(inputRootFile)
         sumOfWeightsHist = tfile.Get('SumOfWeights')
         sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
+        sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
+        avgTopPtWeight = sumTopPtWeights/Ntot
         tfile.Close()
-        if options.extraReweight:
-          # these are the preselection average weights for the TopPtReweighting
-          #XXX TODO extract from sumOfWeightsHistogram as well
-          # still not working in v2-3-5
-          # but the numbers below are not correct either
-          #if re.search('TTJets_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.810806e-01
-          #elif re.search('TTJets_SingleLeptFromTbar_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=9.046766e-01
-          #elif re.search('TTJets_SingleLeptFromT_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=9.034948e-01
-          #elif re.search('TTJets_DiLept_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.804381e-01
-          #elif re.search('TTJets_amcatnloFXFX',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.766042e-01
-          #elif re.search('TTJets_SingleLeptFromTbar_ext1_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.908552e-01
-          #elif re.search('TTJets_SingleLeptFromT_ext1_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.982681e-01
-          #elif re.search('TTJets_DiLept_ext1_madgraphMLM',dataset_fromInputList):
-          #  print 'applying extra average weight to',dataset_fromInputList
-          #  xsection_X_intLumi/=8.804035e-01
-          pass
+
+        if re.search('TT',dataset_fromInputList):
+          print 'applying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
+          xsection_X_intLumi/=avgTopPtWeight
         # now calculate the actual weight
         weight = 1.0
         if( Ntot == 0 ):
@@ -295,6 +313,7 @@ for lin in open( options.inputList ):
             weight = xsection_X_intLumi / sumAMCatNLOweights
         else:
             weight = xsection_X_intLumi / Ntot 
+
         plotWeight = weight/1000.0
     print "xsection: " + xsection_val,
     print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/",
@@ -358,7 +377,7 @@ for lin in open( options.inputList ):
     if not options.tablesOnly:
       #---Combine histograms using PYROOT
       file = TFile(inputRootFile)
-      nHistos = int( file.GetListOfKeys().GetEntries() )
+      #nHistos = int( file.GetListOfKeys().GetEntries() )
       #print "nHistos: " , nHistos, "\n"
       #print 'list of keys in this rootfile:',file.GetListOfKeys()
 
@@ -399,38 +418,43 @@ for lin in open( options.inputList ):
 
         if not options.tablesOnly:
           # loop over histograms in rootfile
-          for h in range(0, nHistos):
-              histoName = file.GetListOfKeys()[h].GetName()
-              htemp = file.Get(histoName)
+          #for h in range(0, nHistos):
+          h=0
+          for key in file.GetListOfKeys():
+              #histoName = file.GetListOfKeys()[h].GetName()
+              #htemp = file.Get(histoName)
+              histoName = key.GetName()
+              htemp = key.ReadObj()
+              if not htemp:
+                print 'ERROR: failed to get histo named:',histoName,'from file:',file.GetName()
+                exit(-1)
+              ROOT.SetOwnership(htemp, True)
 
               #
               #temporary
               #
-              if "TDir" in htemp.__repr__():
-                  #print 'Getting optimizer hist!'
-                  htemp = file.Get(histoName + "/optimizer")
-                  #print 'entries:',htemp.GetEntries()
+              #if "TDir" in htemp.__repr__():
+                  ##print 'Getting optimizer hist!'
+                  #htemp = file.Get(histoName + "/optimizer")
+                  ##print 'entries:',htemp.GetEntries()
+              # only go 1 subdir deep
+              if 'TDir' in htemp.ClassName():
+                  dirKeys = htemp.GetListOfKeys()
+                  for dirKey in dirKeys:
+                    hname = dirKey.GetName()
+                    htmp = dirKey.ReadObj()
+                    if not htmp:
+                      print 'ERROR: failed to get histo named:',hname,'from file:',file.GetName()
+                      exit(-1)
+                    #else:
+                    #  print 'INFO: found key in subdir named:',hname,'hist name:',htmp.GetName()
+                    ROOT.SetOwnership(htmp, True)
+                    updateSample(dictFinalHisto[sample],htmp,h,toBeUpdated,plotWeight)
+                    h+=1
+              else:
+                updateSample(dictFinalHisto[sample],htemp,h,toBeUpdated,plotWeight)
+                h+=1
 
-              #thanks Riccardo
-              # init histo if needed
-              if not h in dictFinalHisto[sample]:
-                  if "TH2" in htemp.__repr__():
-                      dictFinalHisto[sample][h] = TH2F()
-                      dictFinalHisto[sample][h].SetName("histo2D__" + sample + "__" + histoName )
-                      dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()))
-                      #continue
-
-                  else:
-                      dictFinalHisto[sample][h] = TH1F()
-                      dictFinalHisto[sample][h].SetName("histo1D__" + sample + "__" + histoName )
-                      dictFinalHisto[sample][h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
-              if toBeUpdated:
-                  if not htemp:
-                    print 'failed to get histo named:',histoName,'from file:',file.GetName()
-                  #if 'SumOfWeights' in histoName:
-                  #  continue # do not sum up the individual SumOfWeights histos
-                  if not dictFinalHisto[sample][h].Add(htemp, plotWeight):
-                    print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHisto[sample][h].GetName()
 
     #---End of the loop over datasets---#
 
@@ -473,8 +497,9 @@ if options.ttbarBkg:
     nonTTbarMCBkgSampleName = 'NONTTBARBKG_amcatnlo'
     nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
-    Rfactor = 0.418 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.001
+    # from Apr11 Ele27OREle115
+    Rfactor = 0.43465 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.00119
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
