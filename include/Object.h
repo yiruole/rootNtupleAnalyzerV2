@@ -25,6 +25,7 @@ class Object {
   virtual float & Eta() = 0;
 
   virtual float EnergyResScaleFactor() { return 1.0; }
+  virtual float EnergyRes           () { return -1.0; }
   virtual float EnergyScaleFactor   () { return 1.0; } 
   virtual float EnergyResScaleError () { return 0.0; }
   
@@ -32,6 +33,7 @@ class Object {
     
   float DeltaR     ( Object * other_object );
   float DeltaPhi   ( Object * other_object );
+  float DeltaPt    ( Object * other_object );
   float Phi_mpi_pi ( float x ); 
 
   bool IsGenEBFiducial() ;
@@ -40,7 +42,7 @@ class Object {
   bool IsMuonFiducial() ;
 
   bool IsNULL() ;
-  
+
   template <class AnotherObject>
     bool MatchByDR ( CollectionPtr c, AnotherObject & best_match, float max_dr ) { 
       short size = c -> GetSize();
@@ -59,8 +61,31 @@ class Object {
       }
       return match;
     }
-  
 
+  template<class AnotherObject>
+    bool MatchByDRAndDPt ( CollectionPtr c, AnotherObject & best_match, float max_dr, float max_dpt ) { 
+      short size = c -> GetSize();
+      double min_dR = 9999.;
+      bool match = false;
+      for (short i = 0; i < size ; ++i){
+        AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
+        float dr = DeltaR ( & constituent );
+
+        if (dr < max_dr) {
+          if (dr < min_dR) {
+            double dPt = fabs(DeltaPt( & constituent ));
+            if (dPt > max_dpt)
+              continue;
+
+            match = true;
+            min_dR = dr;
+            best_match = constituent;
+          }
+        }
+      }
+
+      return match;
+    }
 
  protected:
 

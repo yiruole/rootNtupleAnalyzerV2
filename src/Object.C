@@ -57,6 +57,10 @@ float Object::DeltaPhi( Object * other_object ) {
   return dphi;
 }
 
+float Object::DeltaPt( Object * other_object ) {
+  return Pt() - other_object -> Pt();
+}
+
 float Object::Phi_mpi_pi ( float x ) {
   float PI = 3.14159265359;
   while ( x >=  PI ) x -= ( 2*PI );
