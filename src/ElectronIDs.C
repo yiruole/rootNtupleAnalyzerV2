@@ -112,21 +112,43 @@ bool Electron::PassUserID_HEEP (bool verbose){
 		   pass_caloIsolation ); 
 
   if ( verbose ) {
-    if ( decision ) std::cout << "Electron #" << m_raw_index << " PASS HEEPID" << std::endl;
-    else { 
+    if ( decision )
+      std::cout << "Electron #" << m_raw_index << " PASS HEEPID" << std::endl;
+    else
       std::cout << "Electron #" << m_raw_index << " FAIL HEEPID" << std::endl;
-      if ( !pass_et            ) std::cout << "\tfail et            :" << PtHeep() << std::endl;
-      if ( !pass_ecalDriven    ) std::cout << "\tfail ecalDriven    :" << EcalDriven() << std::endl;
-      if ( !pass_deltaEtaSeed  ) std::cout << "\tfail deltaEtaSeed  :" << DeltaEtaSeed() << std::endl;
-      if ( !pass_deltaPhi      ) std::cout << "\tfail deltaPhi      :" << DeltaPhi() << std::endl;
-      if ( !pass_hoe           ) std::cout << "\tfail hoe           :" << HoE() << std::endl;
-      if ( !pass_sigmaIEtaIEta ) std::cout << "\tfail sigmaIEtaIEta :" << Full5x5SigmaIEtaIEta() << std::endl;
-      if ( !pass_shape         ) std::cout << "\tfail shape         : E1x5/E5x5" << Full5x5E1x5OverE5x5() << ",E2x5/E5x5=" << Full5x5E2x5OverE5x5() << std::endl;
-      if ( !pass_dxy           ) std::cout << "\tfail dxy           :" << LeadVtxDistXY() << std::endl;
-      if ( !pass_missingHits   ) std::cout << "\tfail missingHits   :" << MissingHits() << std::endl;
-      if ( !pass_trkIsolation  ) std::cout << "\tfail trkIsolation  :" << HEEP70TrackIsolation() << std::endl;
-      if ( !pass_caloIsolation ) std::cout << "\tfail caloIsolation :" << caloIsolation << std::endl;
-    }
+    if ( !pass_et            ) std::cout << "\tFAIL et            :";
+    else                       std::cout << "\tpass et            :";
+    std::cout<< PtHeep() << std::endl;
+    if ( !pass_ecalDriven    ) std::cout << "\tFAIL ecalDriven    :";
+    else                       std::cout << "\tpass ecalDriven    :";
+    std::cout << EcalDriven() << std::endl;
+    if ( !pass_deltaEtaSeed  ) std::cout << "\tFAIL deltaEtaSeed  :";
+    else                       std::cout << "\tpass deltaEtaSeed  :";
+    std::cout << DeltaEtaSeed() << std::endl;
+    if ( !pass_deltaPhi      ) std::cout << "\tFAIL deltaPhi      :";
+    else                       std::cout << "\tpass deltaPhi      :";
+    std::cout << DeltaPhi() << std::endl;
+    if ( !pass_hoe           ) std::cout << "\tFAIL hoe           :";
+    else                       std::cout << "\tpass hoe           :";
+      std::cout << HoE() << std::endl;
+    if ( !pass_sigmaIEtaIEta ) std::cout << "\tFAIL sigmaIEtaIEta :";
+    else                       std::cout << "\tpass sigmaIEtaIEta :";
+    std::cout << Full5x5SigmaIEtaIEta() << std::endl;
+    if ( !pass_shape         ) std::cout << "\tFAIL shape         :"; 
+    else                       std::cout << "\tpass shape         :"; 
+    std::cout  << "E1x5/E5x5" << Full5x5E1x5OverE5x5() << ",E2x5/E5x5=" << Full5x5E2x5OverE5x5() << std::endl;
+    if ( !pass_dxy           ) std::cout << "\tFAIL dxy           :"; 
+    else                       std::cout << "\tpass dxy           :"; 
+    std::cout << LeadVtxDistXY() << std::endl;
+    if ( !pass_missingHits   ) std::cout << "\tFAIL missingHits   :"; 
+    else                       std::cout << "\tpass missingHits   :"; 
+    std::cout << MissingHits() << std::endl;
+    if ( !pass_trkIsolation  ) std::cout << "\tFAIL trkIsolation  :"; 
+    else                       std::cout << "\tpass trkIsolation  :"; 
+    std::cout << HEEP70TrackIsolation() << std::endl;
+    if ( !pass_caloIsolation ) std::cout << "\tFAIL caloIsolation :"; 
+    else                       std::cout << "\tpass caloIsolation :"; 
+    std::cout << caloIsolation << std::endl;
   }
   
   return decision;
