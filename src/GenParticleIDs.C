@@ -10,6 +10,7 @@ bool GenParticle::PassUserID (ID id, bool verbose){
   else if ( id == GEN_MUON_FROM_LQ        ) { return PassUserID_GenMuonFromLQ    (verbose); }
   else if ( id == GEN_TAU_FROM_LQ         ) { return PassUserID_GenTauFromLQ     (verbose); }
   else if ( id == GEN_ELE_HARD_SCATTER    ) { return PassUserID_GenEleHardScatter(verbose); }
+  else if ( id == GEN_NU_HARD_SCATTER     ) { return PassUserID_GenNuHardScatter (verbose); }
 
   else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
   else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
@@ -30,14 +31,20 @@ bool GenParticle::PassUserID (ID id, bool verbose){
 bool GenParticle::PassUserID_GenEleHardScatter(bool verbose){ 
   // pythia 8: outgoing hard electron status is 23 (still intermediate)
   // technically, this is not the really final status=1 particle
-  if ( !(Status() == 3 || Status() == 23) ) return false;  
-  if ( abs(PdgId())  != 11  ) return false;
-  return true;
+  //if ( !(Status() == 3 || Status() == 23) ) return false;  
+  if ( IsHardProcess() && abs(PdgId()) == 11 ) return true;
+  return false;
+}
+
+bool GenParticle::PassUserID_GenNuHardScatter(bool verbose){ 
+  if ( IsHardProcess() && abs(PdgId()) == 12 ) return true;
+  return false;
 }
 
 bool GenParticle::PassUserID_FromLQ(bool verbose){
   // pythia 8: outgoing hard electron status is 23 (still intermediate)
   // technically, this is not the really final status=1 particle
+  //XXX replace with IsHardProcess() ? testing needed
   if ( !(Status() == 3 || Status() == 23) ) return false;  
   //
   //std::cout << Name() << " " << ": "
@@ -65,7 +72,7 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromDY(bool verbose){
-  if ( Status() != 3 && Status() != 1) return false;  
+  if ( !IsHardProcess() && !Status()==3 ) return false;
   if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
   int mother_pdg_id = m_collection -> GetData() -> GenParticlePdgId -> at ( MotherIndex() );
   if ( abs(mother_pdg_id) != 22 && 
@@ -74,7 +81,7 @@ bool GenParticle::PassUserID_FromDY(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromW(bool verbose){
-  if ( Status() != 3 && Status() != 1) return false;  
+  if ( !IsHardProcess() && !Status()==3 ) return false;
   if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
   if(verbose) {
     std::cout << "GenParticle::PassUserID_FromW" << Name() << " " << ": "
@@ -121,10 +128,11 @@ bool GenParticle::PassUserID_GenZGammaHardScatter(bool verbose){
       << "Eta = "    << Eta()    << ", "
       << "Phi = "    << Phi() << std::endl;
   }
-  if (Status() == 3) return true;
-  if ( Status()>20 && Status()<30) return true; //pythia8
+  if ( IsHardProcess() || Status() == 3) return true;
+  
+  //if ( Status()>20 && Status()<30) return true; //pythia8
   //if (Status() == 62) return true;  
-  return true;
+  return false;
 }
 
  
@@ -139,9 +147,8 @@ bool GenParticle::PassUserID_GenWHardScatter     (bool verbose){
       << "Phi = "    << Phi() << std::endl;
   }
   // now that we have a W
-  if ( Status() == 3) return true; // pythia6
-  if ( Status()>20 && Status()<30) return true; //pythia8
-  return true;
+  if ( IsHardProcess() || Status() == 3) return true;
+  return false;
 } 
 
 bool GenParticle::PassUserID_GenNuFromW          (bool verbose){

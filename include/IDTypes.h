@@ -34,6 +34,7 @@ enum ID {
   GEN_LQ  	               = 26,
   GEN_TOP  	               = 27,
   GEN_STATUS62             = 28,
+  GEN_NU_HARD_SCATTER      = 29,
 
   FAKE_RATE_HEEP_LOOSE     = 30,
 
