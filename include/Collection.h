@@ -253,49 +253,81 @@ class Collection {
     void MatchAndSmearEnergy ( const CollectionPtr matching_collection, double max_dr, TRandom3 * engine, TLorentzVector & v_delta_met ){
     unsigned short this_collection_size = GetSize();
     TLorentzVector v_old, v_new, v_delta;
+    double smearFactor = 1;
     std::vector<short> indices_of_zero_pt_constituents;
     for (unsigned short i = 0; i < this_collection_size ; ++i) {    
       Object1 this_collection_constituent = GetConstituent<Object1>(i);
       Object2 matched_object;
-      bool matched = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
-      //bool matchedDR = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
-      // TODO bool matchedDP = 
+      double jet_resolution = this_collection_constituent.EnergyRes();
+      double scale_factor   = this_collection_constituent.EnergyResScaleFactor();
+      double old_pt = this_collection_constituent.Pt();
+      bool matched = false;
+      if(std::string(this_collection_constituent.Name())=="PFJet")
+        matched = this_collection_constituent.template MatchByDRAndDPt < Object2 > ( matching_collection, matched_object, max_dr, 3*jet_resolution*old_pt );
+      else
+        matched = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
       double new_pt = -1.0;
       if ( matched ) { 
-        double old_pt               = this_collection_constituent.Pt();
         double matched_pt           = matched_object.Pt();
 
-        double scale_factor         = this_collection_constituent.EnergyResScaleFactor();
-        double scale_error          = this_collection_constituent.EnergyResScaleError ();
-        double smearing             = engine -> Gaus ( 1.0 , scale_error );
-        double smeared_scale_factor = scale_factor * smearing;
-
-        double delta_pt             = smeared_scale_factor * ( old_pt - matched_pt );
-        new_pt               = std::max ( double (0.0), matched_pt + delta_pt ) ;
-
-        v_old.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
-        v_new.SetPtEtaPhiM( new_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
-        v_delta = v_old - v_new;
-        v_delta_met = v_delta_met + v_delta;
-
-        this_collection_constituent.Pt() = new_pt;
-        if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
-
-        /*
-           std::cout << "Matched " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
-           std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
-           std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
-           std::cout << "\t" << "scale factor         = " << scale_factor         << " +/- " << scale_error << std::endl;
-           std::cout << "\t" << "smearing             = " << smearing             << std::endl;
-           std::cout << "\t" << "smeared scale factor = " << smeared_scale_factor << std::endl;
-           std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
-           std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
-         */
-
+        //double scale_error          = this_collection_constituent.EnergyResScaleError ();
+        //double smearing             = engine -> Gaus ( 1.0 , scale_error );
+        //double smeared_scale_factor = scale_factor * smearing;
+        //double delta_pt             = smeared_scale_factor * ( old_pt - matched_pt );
+        //new_pt               = std::max ( double (0.0), matched_pt + delta_pt ) ;
+        double delta_pt = old_pt - matched_pt;
+        smearFactor = 1 + (scale_factor - 1.) * delta_pt / old_pt;
+        
+        //if(std::string(this_collection_constituent.Name())=="PFJet") {
+        //  std::cout << "Matched Jet " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
+        //  std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
+        //  std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
+        //  std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
+        //  //std::cout << "\t" << "smearing             = " << smearing             << std::endl;
+        //  std::cout << "\t" << "smeared scale factor = " << smearFactor << std::endl;
+        //  std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
+        //  //std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
+        //}
+        
       }
-      else if(typeid(Object1).name()=="PFJet") {
-        //TODO: smearing using gaussian of width sqrt(SF**2-1) * sigma_MC_Pt
+      else if(std::string(this_collection_constituent.Name())=="PFJet") {
+        // not well-matched to GenJet
+        double scale_factor = this_collection_constituent.EnergyResScaleFactor();
+        double sigma = jet_resolution * std::sqrt(scale_factor * scale_factor - 1);
+        smearFactor = 1. + engine->Gaus(0.0, sigma);
+        //std::cout << "Not well-matched jet" << std::endl;
+        //std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
+        //std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
+        //std::cout << "\t" << "sigma                = " << sigma             << std::endl;
+        //std::cout << "\t" << "smeared scale factor = " << smearFactor << std::endl;
+        //v_new.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
+        //v_new*=smearFactor;
+        ////std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
+        //std::cout << "\t" << "new RECO pt          = " << v_new.Pt()               << std::endl;
       }
+
+      if( smearFactor < 0) smearFactor = 0;
+      v_old.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
+      v_new.SetPtEtaPhiM( old_pt, this_collection_constituent.Eta(), this_collection_constituent.Phi(), 0.0 );
+      v_new*=smearFactor;
+      new_pt = v_new.Pt();
+      v_delta = v_old - v_new;
+      v_delta_met = v_delta_met + v_delta;
+        //if(std::string(this_collection_constituent.Name())=="PFJet") {
+        //  //std::cout << "Matched Jet " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
+        //  std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
+        //  //std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
+        //  //std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
+        //  //std::cout << "\t" << "smearing             = " << smearing             << std::endl;
+        //  std::cout << "\t" << "smeared scale factor = " << smearFactor << std::endl;
+        //  std::cout << "\t" << "delta pt             = " << v_delta.Pt()             << std::endl;
+        //  std::cout << "\t" << "new RECO pt          = " << v_new.Pt()               << std::endl;
+        //}
+
+      this_collection_constituent.Pt() = v_new.Pt();
+      this_collection_constituent.Eta() = v_new.Eta();
+      this_collection_constituent.Phi() = v_new.Phi();
+      if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
     }
 
     int n_constituents_to_remove = indices_of_zero_pt_constituents.size();
@@ -305,6 +337,7 @@ class Collection {
 				      m_raw_indices.end  (),
 				      index_to_remove       ));
     }
+
     return;
   }
 
