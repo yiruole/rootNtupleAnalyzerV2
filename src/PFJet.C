@@ -15,7 +15,7 @@ float & PFJet::Pt                       () { return m_collection -> GetData() ->
 float & PFJet::Eta                      () { return m_collection -> GetData() -> PFJetEtaAK4CHS                          -> at ( m_raw_index ); } 
 float & PFJet::Phi                      () { return m_collection -> GetData() -> PFJetPhiAK4CHS                          -> at ( m_raw_index ); } 
 float PFJet::Energy                     () { return m_collection -> GetData() -> PFJetEnergyAK4CHS                       -> at ( m_raw_index ); }
-float PFJet::JECUnc		         () { return m_collection -> GetData() -> PFJetJECUncAK4CHS                       -> at ( m_raw_index ); }
+float PFJet::JECUnc		                  () { return m_collection -> GetData() -> PFJetJECUncAK4CHS                       -> at ( m_raw_index ); }
                                      
 float PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData() -> PFJetNeutralHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
 float PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData() -> PFJetNeutralEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
@@ -31,20 +31,21 @@ float PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() ->
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 float PFJet::EnergyResScaleFactor (){ 
-  float fabs_eta = fabs ( Eta () );
-  if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 1.109;
-  else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 1.138;
-  else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 1.114;
-  else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 1.123;
-  else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 1.084;
-  else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 1.082;
-  else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 1.140;
-  else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 1.067;
-  else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 1.177;
-  else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 1.364;
-  else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 1.857;
-  else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 1.328;
-  else                                          return 1.16;
+  return m_collection -> GetData() -> PFJetJERResSFAK4CHS -> at ( m_raw_index );
+  //float fabs_eta = fabs ( Eta () );
+  //if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 1.109;
+  //else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 1.138;
+  //else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 1.114;
+  //else if ( fabs_eta > 1.1 && fabs_eta <= 1.3 ) return 1.123;
+  //else if ( fabs_eta > 1.3 && fabs_eta <= 1.7 ) return 1.084;
+  //else if ( fabs_eta > 1.7 && fabs_eta <= 1.9 ) return 1.082;
+  //else if ( fabs_eta > 1.9 && fabs_eta <= 2.1 ) return 1.140;
+  //else if ( fabs_eta > 2.1 && fabs_eta <= 2.3 ) return 1.067;
+  //else if ( fabs_eta > 2.3 && fabs_eta <= 2.5 ) return 1.177;
+  //else if ( fabs_eta > 2.5 && fabs_eta <= 2.8 ) return 1.364;
+  //else if ( fabs_eta > 2.8 && fabs_eta <= 3.0 ) return 1.857;
+  //else if ( fabs_eta > 3.0 && fabs_eta <= 3.2 ) return 1.328;
+  //else                                          return 1.16;
 }
 
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
@@ -68,6 +69,10 @@ float PFJet::EnergyResScaleError  (){
 // JES uncertainties already in the ntuple
 float PFJet::EnergyScaleFactor (){ 
   return JECUnc();
+}
+
+float PFJet::EnergyRes(){
+  return m_collection -> GetData() -> PFJetJERResAK4CHS -> at ( m_raw_index );
 }
 
 std::ostream& operator<<(std::ostream& stream, PFJet& object) {

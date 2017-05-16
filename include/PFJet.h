@@ -20,6 +20,7 @@ class PFJet : public Object {
   
   // Energy resolution scale factors
 
+  float EnergyRes            ();
   float EnergyResScaleFactor ();
   float EnergyResScaleError  ();
   float EnergyScaleFactor    ();
