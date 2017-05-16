@@ -4,11 +4,9 @@ import os, copy, math, sys, numpy
 from prettytable import PrettyTable
 from ROOT import *
 
-from process_binned_optimization import *
-
 gROOT.SetBatch(True)
 
-optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/1jun_ttbarRescale/optimization.root'
+optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/mar30/opt/optimization.root'
 optimizationTFile = TFile.Open(optimizationFileName)
 optimizationTFile.cd()
 
