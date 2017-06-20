@@ -51,8 +51,6 @@ def getOptions():
     parser.add_option("-p", "--doCrabPurge", dest="doCrabPurge",
          help=("run crab purge for completed tasks"),
          metavar="doCrabPurge",default=False,action="store_true")
-    parser.add_option("-t", "--tasksToCopy", dest="tasksToCopy",
-         help="The completed tasks to copy files from (in format \"['taskName',task2,...]\")", metavar="TASKS")
 
     (options, args) = parser.parse_args()
 
@@ -101,96 +99,51 @@ def main():
           completedTasksFromCache.append(line.strip())
         ourCacheFile.close()
 
-    if options.crabCmd != 'copyTaskFiles':
-      tasksStatusDict = {}
-      # Execute the command with its arguments for each task.
-      tasksSkipped = []
-      for task in os.listdir(options.projDir):
-          task = os.path.join(options.projDir, task)
-          if not os.path.isdir(task):
+    tasksStatusDict = {}
+    # Execute the command with its arguments for each task.
+    for task in os.listdir(options.projDir):
+        task = os.path.join(options.projDir, task)
+        if not os.path.isdir(task):
             continue
-          # ignore non-crab dirs
-          if 'workdir' in task or 'cfgfiles' in task or 'output' in task:
-            continue
-          if task in completedTasksFromCache:
-            tasksSkipped.append(task)
-            continue
-          print
-          print ("Executing (the equivalent of): crab %s %s %s" %
-                (options.crabCmd, task, options.crabCmdOptions))
-          try:
-            res = crabCommand(options.crabCmd, task, *options.crabCmdOptions.split())
-          except HTTPException, hte:
-            print '-----> there was a problem. see below.'
-            print hte.headers
-            tasksStatusDict[task] = 'httpException'
-            continue
-          except CachefileNotFoundException:
-            print 'task:',task,'has no .requestcache file; something wrong (or deleted dir?) continue'
-            tasksStatusDict[task] = 'noCacheFile'
-            continue
-          except ConfigurationException:
-            print 'Got a ConfigurationException; continue to next task anyway.'
-            continue
+        # ignore non-crab dirs
+        if 'workdir' in task or 'cfgfiles' in task or 'output' in task:
+          continue
+        if task in completedTasksFromCache:
+          print "Don't check status of task, was already completed:",task
+          continue
+        print
+        print ("Executing (the equivalent of): crab %s %s %s" %
+              (options.crabCmd, task, options.crabCmdOptions))
+        try:
+          res = crabCommand(options.crabCmd, task, *options.crabCmdOptions.split())
+        except HTTPException, hte:
+          print '-----> there was a problem. see below.'
+          print hte.headers
+          tasksStatusDict[task] = 'httpException'
+          continue
+        except CachefileNotFoundException:
+          print 'task:',task,'has no .requestcache file; something wrong (or deleted dir?) continue'
+          tasksStatusDict[task] = 'noCacheFile'
+          continue
+        except ConfigurationException:
+          print 'Got a ConfigurationException; continue to next task anyway.'
+          continue
 
-          if options.crabCmd != 'status':
-            continue
-          tasksStatusDict[task] = 'COMPLETED'
-          #print res
-          #for jobStatus in res[1]['jobList']:
-          for jobStatus in res['shortResult']['jobList']:
-            if 'failed' in jobStatus:
-              tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
-              break
-            if 'running' in jobStatus:
-              tasksStatusDict[task] = 'SUBMITTED'
-              break
-            if 'idle' in jobStatus:
-              tasksStatusDict[task] = 'SUBMITTED'
-              break
-            if 'transferring' in jobStatus:
-              tasksStatusDict[task] = 'SUBMITTED'
-              break
+        if options.crabCmd != 'status':
+          continue
+        if 'failed' in res['jobsPerStatus'].keys():
+          tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
+        else:
+          tasksStatusDict[task] = res['status']
 
-      print 'skipped tasks:',tasksSkipped
-      if options.crabCmd != 'status':
-        exit(0)
-      totalTasks = len(tasksStatusDict)
-      tasksCompleted = [task for task in tasksStatusDict if tasksStatusDict[task]=='COMPLETED']
-      tasksSubmitted = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITTED']
-      tasksSubmitFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITFAILED']
-      tasksFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='FAILED']
-      tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed and task not in tasksSubmitFailed]
-      print 'tasks completed',tasksCompleted
-      #print 'getting files'
-    else:
-      tasksCompleted = [task.replace("'","").strip() for task in options.tasksToCopy.strip('[]').split(',')]
-      #print tasksCompleted
-      tasksCompletedFiltered = []
-      for task in tasksCompleted:
-        if task not in completedTasksFromCache:
-          tasksCompletedFiltered.append(task)
-      tasksCompleted = tasksCompletedFiltered
-      tasksFailed = []
-      totalTasks = -1
-      tasksSubmitted = []
-      tasksSubmitFailed = []
-      tasksOther = []
-
-    # resubmit failed tasks first
-    if len(tasksFailed) > 0:
-      #print 'Tasks failed:',len(tasksFailed),'/',totalTasks
-      #for task in tasksFailed:
-      #  try:
-      #    res = crabCommand('status',task)
-      #  except HTTPException, hte:
-      #    print '-----> there was a problem running crab status %s; see below.'%taskName
-      #    print hte.headers
-      for task in tasksFailed:
-        resubmitCmd = 'crab resubmit '+task  
-        if not options.noAutoResubmit:
-          print 'Automatically resubmitting '+task
-          subprocess.call(resubmitCmd.split())
+    if options.crabCmd != 'status':
+      exit(0)
+    totalTasks = len(tasksStatusDict)
+    tasksCompleted = [task for task in tasksStatusDict if tasksStatusDict[task]=='COMPLETED']
+    tasksSubmitted = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITTED']
+    tasksSubmitFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='SUBMITFAILED']
+    tasksFailed = [task for task in tasksStatusDict if tasksStatusDict[task]=='FAILED']
+    tasksOther = [task for task in tasksStatusDict if task not in tasksCompleted and task not in tasksSubmitted and task not in tasksFailed and task not in tasksSubmitFailed]
 
     ourCacheFile = open(os.path.abspath('./multicrab.cache'),'a')
     exceptionTasks = []
@@ -200,8 +153,7 @@ def main():
         options.projDir+='/'
       for taskName in tasksCompleted:
         # redirect the dump output so it doesn't fill up the screen
-        #print 'getting output file list for task:',taskName
-        print 'run crab getoutput',taskName,'--dump'
+        print 'getting output file list for task:',taskName
         sys.stdout = open(os.devnull,'w')
         try:
           res = crabCommand('getoutput',taskName,'--dump')
@@ -212,6 +164,7 @@ def main():
           exceptionTasks.append(taskName)
           continue
         sys.stdout = sys.__stdout__
+        #print res
         try:
           outputFileLFNs = res['lfn']
         except KeyError:
@@ -255,6 +208,8 @@ def main():
     # redefine completed tasks
     tasksCompleted = [task for task in tasksCompleted if not task in exceptionTasks]
 
+
+
     # crab purge
     purgeExceptionTasks = []
     if options.doCrabPurge:
@@ -297,16 +252,28 @@ def main():
       print 'Tasks with other status:',len(tasksOther),'/',totalTasks
       for task in tasksOther:
         print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
+    if len(tasksFailed) > 0:
+      #print 'Tasks failed:',len(tasksFailed),'/',totalTasks
+      #for task in tasksFailed:
+      #  try:
+      #    res = crabCommand('status',task)
+      #  except HTTPException, hte:
+      #    print '-----> there was a problem running crab status %s; see below.'%taskName
+      #    print hte.headers
+      print 'commands to resubmit failed tasks (or tasks with failed jobs):'
+      for task in tasksFailed:
+        resubmitCmd = 'crab resubmit '+task  
+        print
+        print '\t'+resubmitCmd
+        if not options.noAutoResubmit:
+          print 'Automatically resubmitting...'
+          subprocess.call(resubmitCmd.split())
     if len(tasksCompleted) > 0 or len(completedTasksFromCache) > 0:
       print 'Tasks completed:',len(tasksCompleted)+len(completedTasksFromCache),'/',totalTasks
     if len(tasksSubmitFailed) > 0:
       print 'WARNING: submission failed for:'
       for task in tasksSubmitFailed:
         print '\tTask:',task,'\tStatus:',tasksStatusDict[task]
-    if len(tasksFailed) > 0 and options.noAutoResubmit:
-      print 'commands to resubmit failed tasks (or tasks with failed jobs):'
-      print
-      print '\t'+resubmitCmd
 
 if __name__ == '__main__':
     main()

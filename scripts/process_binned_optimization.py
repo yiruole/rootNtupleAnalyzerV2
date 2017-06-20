@@ -1,6 +1,8 @@
 import os, copy, math, sys, numpy
-from ROOT import TFile,TH1F,TF1,TGraph,TCanvas
+from ROOT import TFile,TH1F,TF1,TGraph,TCanvas,gROOT
 from prettytable import PrettyTable
+
+gROOT.SetBatch(True)
 
 def parse_txt_file (verbose=False):
     
@@ -274,13 +276,26 @@ intLumi=35867.0 # in pb
 # these have rescaling applied
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_apr11_ele27OrEle115/analysisClass_lq_eejj_plots.root"
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/enujj_crab_psk_apr6_topPtWeight_recoHeepSF_reminiAOD_sele27wptightEta2p1CurveMC/analysisClass_lq_enujj_MT_plots.root"
-#qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_apr13_ele27wptightOrEle115/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
-qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_enujj_apr11/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
+#mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may23_ele27OrEle115/analysisClass_lq_eejj_plots.root"
+mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.root"
+mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
+
+#k_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.rootejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.rootqcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_apr13_ele27wptightOrEle115/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
+#qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_enujj_apr11/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
+#qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjQCD_psk_crab_may22/analysisClass_lq_eejj_QCD_plots.root"
+qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_may29_ele27wptightOrEle115OrPhoton175/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
+qcd_data_filepath_enujj = os.environ["LQDATA"] + "/2016opt/qcd_enujj_psk_jun1_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
+
 # for eejj
-ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjTTBar_crab_psk_apr11_ele27OrEle115/analysisClass_lq_ttbarEst_plots.root"
+#ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjTTBar_crab_psk_apr11_ele27OrEle115/analysisClass_lq_ttbarEst_plots.root"
+#ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may22_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
+ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may30_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
 #
-txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/apr11_ele27OrEle115/optimization/optimizationCuts.txt"
+#txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/apr11_ele27OrEle115/optimization/optimizationCuts.txt"
+#txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may23/opt/optimizationCuts.txt"
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/apr11_testOpt/optimizationCuts.txt"
+txt_file_path_eejj   = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may30/opt/optimizationCuts.txt"
+txt_file_path_enujj  = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/jun2/opt/optimizationCuts.txt"
 #
 doEEJJ = True
 # if false, uses asymptotic significance formula
@@ -301,15 +316,15 @@ d_eejj_background_filepaths = {
 }
 
 d_enujj_background_filepaths = { 
-     "ttbar" : [ "TTbar_amcatnlo_Inc"  , mc_filepath, 1.0 ],
-    "qcd"   : [ "QCDFakes_DATA"  , qcd_data_filepath  , 1.0  ],
-    #"ttbar" : [ "TTbar_Madgraph"      , mc_filepath  , 1.0  ],
-    #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath  , 1.0  ],
-    "wjet"  : [ "WJet_amcatnlo_ptBinned"    , mc_filepath  , 1.0  ],
-    "zjet"  : [ "ZJet_amcatnlo_ptBinned"    , mc_filepath  , 1.0  ],
-    "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
-    "vv"    : [ "DIBOSON"             , mc_filepath  , 1.0  ],
-    "gjet"  : [ "PhotonJets_Madgraph" , mc_filepath  , 1.0  ] 
+     "ttbar" : [ "TTbar_amcatnlo_Inc"  , mc_filepath_enujj, 1.0 ],
+    "qcd"   : [ "QCDFakes_DATA"  , qcd_data_filepath_enujj  , 1.0  ],
+    #"ttbar" : [ "TTbar_Madgraph"      , mc_filepath_enujj  , 1.0  ],
+    #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath_enujj  , 1.0  ],
+    "wjet"  : [ "WJet_amcatnlo_ptBinned"    , mc_filepath_enujj  , 1.0  ],
+    "zjet"  : [ "ZJet_amcatnlo_ptBinned"    , mc_filepath_enujj  , 1.0  ],
+    "stop"  : [ "SingleTop"           , mc_filepath_enujj  , 1.0  ],
+    "vv"    : [ "DIBOSON"             , mc_filepath_enujj  , 1.0  ],
+    "gjet"  : [ "PhotonJets_Madgraph" , mc_filepath_enujj  , 1.0  ] 
 }
 
 d_eejj_signal_filepaths_list = [ 
@@ -351,7 +366,45 @@ d_eejj_signal_filepaths_list = [
     { "1950" : ["LQ_M1950", mc_filepath, 1.0 ] } , 
     { "2000" : ["LQ_M2000", mc_filepath, 1.0 ] } , 
 ]
-d_enujj_signal_filepaths_list = d_eejj_signal_filepaths_list
+d_enujj_signal_filepaths_list = [ 
+    { "200" : ["LQ_M200", mc_filepath_enujj, 1.0 ] } ,
+    { "250" : ["LQ_M250", mc_filepath_enujj, 1.0 ] } ,
+    { "300" : ["LQ_M300", mc_filepath_enujj, 1.0 ] } ,
+    { "350" : ["LQ_M350", mc_filepath_enujj, 1.0 ] } ,
+    { "400" : ["LQ_M400", mc_filepath_enujj, 1.0 ] } ,
+    { "450" : ["LQ_M450", mc_filepath_enujj, 1.0 ] } ,
+    { "500" : ["LQ_M500", mc_filepath_enujj, 1.0 ] } ,
+    { "550" : ["LQ_M550", mc_filepath_enujj, 1.0 ] } ,
+    { "600" : ["LQ_M600", mc_filepath_enujj, 1.0 ] } ,
+    { "650" : ["LQ_M650", mc_filepath_enujj, 1.0 ] } ,
+    { "700" : ["LQ_M700", mc_filepath_enujj, 1.0 ] } ,
+    { "750" : ["LQ_M750", mc_filepath_enujj, 1.0 ] } ,
+    { "800" : ["LQ_M800", mc_filepath_enujj, 1.0 ] } ,
+    { "850" : ["LQ_M850", mc_filepath_enujj, 1.0 ] } ,  
+    { "900" : ["LQ_M900", mc_filepath_enujj, 1.0 ] } , 
+    { "950" : ["LQ_M950", mc_filepath_enujj, 1.0 ] } , 
+    { "1000" : ["LQ_M1000", mc_filepath_enujj, 1.0 ] } , 
+    { "1050" : ["LQ_M1050", mc_filepath_enujj, 1.0 ] } , 
+    { "1100" : ["LQ_M1100", mc_filepath_enujj, 1.0 ] } , 
+    { "1150" : ["LQ_M1150", mc_filepath_enujj, 1.0 ] } , 
+    { "1200" : ["LQ_M1200", mc_filepath_enujj, 1.0 ] } , 
+    { "1250" : ["LQ_M1250", mc_filepath_enujj, 1.0 ] } , 
+    { "1300" : ["LQ_M1300", mc_filepath_enujj, 1.0 ] } , 
+    { "1350" : ["LQ_M1350", mc_filepath_enujj, 1.0 ] } , 
+    { "1400" : ["LQ_M1400", mc_filepath_enujj, 1.0 ] } , 
+    { "1450" : ["LQ_M1450", mc_filepath_enujj, 1.0 ] } , 
+    { "1500" : ["LQ_M1500", mc_filepath_enujj, 1.0 ] } , 
+    { "1550" : ["LQ_M1550", mc_filepath_enujj, 1.0 ] } , 
+    { "1600" : ["LQ_M1600", mc_filepath_enujj, 1.0 ] } , 
+    { "1650" : ["LQ_M1650", mc_filepath_enujj, 1.0 ] } , 
+    { "1700" : ["LQ_M1700", mc_filepath_enujj, 1.0 ] } , 
+    { "1750" : ["LQ_M1750", mc_filepath_enujj, 1.0 ] } , 
+    { "1800" : ["LQ_M1800", mc_filepath_enujj, 1.0 ] } , 
+    { "1850" : ["LQ_M1850", mc_filepath_enujj, 1.0 ] } , 
+    { "1900" : ["LQ_M1900", mc_filepath_enujj, 1.0 ] } , 
+    { "1950" : ["LQ_M1950", mc_filepath_enujj, 1.0 ] } , 
+    { "2000" : ["LQ_M2000", mc_filepath_enujj, 1.0 ] } , 
+]
 
 #XXX FIXME: add hist to the analysis to count total events
 d_eejj_signal_totalEvents = {
@@ -518,14 +571,15 @@ if doEEJJ:
   d_signal_filepaths_list = d_eejj_signal_filepaths_list
   d_signal_crossSections = d_eejj_signal_crossSections
   d_background_filepaths = d_eejj_background_filepaths
+  d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath, 1.0 ] }
+  txt_file_path = txt_file_path_eejj
 else:
   d_signal_totalEvents = d_enujj_signal_totalEvents
   d_signal_filepaths_list = d_enujj_signal_filepaths_list
   d_signal_crossSections = d_enujj_signal_crossSections
   d_background_filepaths = d_enujj_background_filepaths
-
-
-d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath, 1.0 ] }
+  d_data_filepaths =  {"DATA" : [ "DATA", mc_filepath_enujj, 1.0 ] }
+  txt_file_path = txt_file_path_enujj
 
 cut_variables = []
 cut_requirements = []
@@ -548,12 +602,14 @@ sys.stdout.flush()
 parse_txt_file ()
 print "Parsed."
 
-verbose = True
+verbose = False
 d_binNumber_nB,d_binNumber_nBMCEnts = parse_root_file( d_background_filepaths,verbose )
-print 'd_binNumber_nBMCEnts[5836]=',d_binNumber_nBMCEnts[5836]
+#print 'd_binNumber_nBMCEnts[5836]=',d_binNumber_nBMCEnts[5836]
 d_binNumber_nD,d_binNumber_nDEnts = parse_root_file( d_data_filepaths )
 
 selectedEfficienciesByLQMass = []
+selectedNsByLQMass = []
+selectedNbByLQMass = []
 lqMasses = []
 
 #print 'Checking for signal histograms'
@@ -586,18 +642,21 @@ for signal_sample in d_signal_filepaths_list:
         ##XXX ignore any set of cuts with nB<0.001
         #if nB < 0.001:
         #  continue
-        #XXX ignore any cuts with less than 5 background events
-        if nBMCEnts < 5:
-          continue
+        ##XXX ignore any cuts with less than 5 background events
+        #if nBMCEnts < 5:
+        #  continue
         ##XXX ignore any set of cuts with nB < 0
         if nB < 0:
           continue
-        #if verbose:
-        #  print 'binNumber=',binNumber,
-        #  print 'evaluated to: nS=',nS,'nB=',nB,';',
+        if verbose:
+          print 'binNumber=',binNumber,
+          print 'evaluated to: nS=',nS,'nB=',nB,';',
         value = evaluate ( binNumber, d_binNumber_nS, d_binNumber_nB, signal_sample.values()[0][0],d_signal_totalEvents )
-        #if verbose:
-        #  print 'final evaluation: nS=',nS,'nB=',nB,'value=',value
+        if verbose:
+          #print 'final evaluation: nS=',nS,'nB=',nB,'value=',value,
+          print 'value=',value,
+          print 'eff=',calculateEfficiency(nS, signal_sample.values()[0][0],d_signal_totalEvents)
+          print d_binNumber_cutValuesString [ binNumber ]
         #mejHisto.SetBinContent(binNumber,value)
         
         if value > max_value : 
@@ -618,6 +677,8 @@ for signal_sample in d_signal_filepaths_list:
     signalSampleMass = int(signalSampleName[signalSampleName.find('_M')+2:])
     print 'LQ mass:',signalSampleMass,'had efficiency at maxOptPoint:',max_eff
     selectedEfficienciesByLQMass.append(max_eff)
+    selectedNsByLQMass.append(max_nS)
+    selectedNbByLQMass.append(max_nB)
     lqMasses.append(signalSampleMass)
 
     max_bins = string_to_bins ( max_string ) 
@@ -745,6 +806,32 @@ maximum = graph.GetHistogram().GetMaximum()
 graph.GetHistogram().SetMaximum( maximum * 1.5 ) 
 graph.Draw("AP")
 graph.SetName('efficiencyTimesAcceptance')
+graph.Write()
+
+canvas = TCanvas()
+canvas.cd()
+graph = TGraph(len(lqMasses),numpy.array(lqMasses).astype('float'),numpy.array(selectedNsByLQMass))
+graph.Draw("AP")
+graph.GetXaxis().SetTitle("LQ mass [GeV]")
+graph.GetYaxis().SetTitle('nS')
+graph.GetXaxis().SetRangeUser(0, 2000)
+maximum = graph.GetHistogram().GetMaximum()
+graph.GetHistogram().SetMaximum( maximum * 1.5 ) 
+graph.Draw("AP")
+graph.SetName('nS')
+graph.Write()
+
+canvas = TCanvas()
+canvas.cd()
+graph = TGraph(len(lqMasses),numpy.array(lqMasses).astype('float'),numpy.array(selectedNbByLQMass))
+graph.Draw("AP")
+graph.GetXaxis().SetTitle("LQ mass [GeV]")
+graph.GetYaxis().SetTitle('nB')
+graph.GetXaxis().SetRangeUser(0, 2000)
+maximum = graph.GetHistogram().GetMaximum()
+graph.GetHistogram().SetMaximum( maximum * 1.5 ) 
+graph.Draw("AP")
+graph.SetName('nB')
 graph.Write()
 
 for cut_variable in cut_variables:
