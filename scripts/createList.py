@@ -205,7 +205,7 @@ def combineExtDatasets(filelist):
       dataset2 = sorted(filelist.iterkeys())[i]
       if 'ext' in dataset2:
         dataset2mod = dataset2[0:dataset2.find('ext')]+dataset2[dataset2.find('ext')+len('ext')+2:]
-      elif 'backup' in dataset1:
+      elif 'backup' in dataset2:
         dataset2mod = dataset2[0:dataset2.find('backup')]+dataset2[dataset2.find('backup')+len('backup')+1:]
       else:
         dataset2mod = dataset2
