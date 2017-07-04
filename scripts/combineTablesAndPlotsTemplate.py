@@ -5,7 +5,7 @@ import sys
 import string
 from optparse import OptionParser
 import os.path
-from ROOT import TFile,TH1F,TH2F,gROOT
+from ROOT import TFile,TH1F,TH2F,TH3F,gROOT
 import ROOT
 import re
 import math
@@ -27,18 +27,22 @@ def updateSample(dictFinalHistoAtSample,htemp,h,toBeUpdated,plotWeight):
           dictFinalHistoAtSample[h] = TH1F()
           dictFinalHistoAtSample[h].SetName("histo1D__" + sample + "__" + histoName )
           dictFinalHistoAtSample[h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),)
+      elif 'TH3' in htemp.ClassName():
+          dictFinalHistoAtSample[h] = TH3F()
+          dictFinalHistoAtSample[h].SetName("histo3D__" + sample + "__" + histoName )
+          dictFinalHistoAtSample[h].SetBins(htemp.GetNbinsX(), htemp.GetXaxis().GetXmin(), htemp.GetXaxis().GetXmax(),htemp.GetNbinsY(),htemp.GetYaxis().GetBinLowEdge(1),htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()),htemp.GetNbinsZ(),htemp.GetZaxis().GetBinLowEdge(1),htemp.GetZaxis().GetBinUpEdge(htemp.GetNbinsZ()))
       else:
           #print 'not combining classtype of',htemp.ClassName()
           return
   if toBeUpdated:
-      #XXX DEBUG
-      binToExamine = 33
-      if 'OptBinLQ60' in histoName:
-        print
-        if htemp.GetBinContent(binToExamine)!=0:
-          print 'Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',htemp.GetBinContent(binToExamine),' error=',htemp.GetBinError(binToExamine),'relErr=',htemp.GetBinError(binToExamine)/htemp.GetBinContent(binToExamine)
-        if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
-          print 'BEFORE',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relErr=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
+      ##XXX DEBUG
+      #binToExamine = 33
+      #if 'OptBinLQ60' in histoName:
+      #  print
+      #  if htemp.GetBinContent(binToExamine)!=0:
+      #    print 'Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',htemp.GetBinContent(binToExamine),' error=',htemp.GetBinError(binToExamine),'relErr=',htemp.GetBinError(binToExamine)/htemp.GetBinContent(binToExamine)
+      #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
+      #    print 'BEFORE',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relErr=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
       #if 'SumOfWeights' in histoName:
       #  continue # do not sum up the individual SumOfWeights histos
       #if 'optimizerentries' in histoName.lower():
@@ -47,11 +51,11 @@ def updateSample(dictFinalHistoAtSample,htemp,h,toBeUpdated,plotWeight):
           returnVal = dictFinalHistoAtSample[h].Add(htemp)
       else:
           returnVal = dictFinalHistoAtSample[h].Add(htemp, plotWeight)
-      #XXX DEBUG
-      if 'OptBinLQ60' in histoName:
-        if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
-          print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
-          print
+      ##XXX DEBUG
+      #if 'OptBinLQ60' in histoName:
+      #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
+      #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
+      #    print
       if not returnVal:
           print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHistoAtSample[h].GetName()
           exit(-1)
@@ -293,7 +297,7 @@ for lin in open( options.inputList ):
         avgTopPtWeight = sumTopPtWeights/Ntot
         tfile.Close()
 
-        if re.search('TT',dataset_fromInputList):
+        if re.search('TT_',dataset_fromInputList):
           print 'applying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
           xsection_X_intLumi/=avgTopPtWeight
         # now calculate the actual weight
@@ -497,9 +501,9 @@ if options.ttbarBkg:
     nonTTbarMCBkgSampleName = 'NONTTBARBKG_amcatnlo'
     nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
-    # from Apr11 Ele27OREle115
-    Rfactor = 0.43465 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.00119
+    # from May29 Ele27OREle115ORPhoton175
+    Rfactor = 0.440998 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.00121
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
@@ -526,34 +530,35 @@ outputTableFile.close()
 if not options.tablesOnly:
     outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
     
-    if not options.ttbarBkg:
-        # get total hists
-        nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-        # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
-        #maxSteps = 50
-        #if nHistos < maxSteps:
-        #  steps = nHistos
-        #else:
-        #  steps = maxSteps
+    #if not options.ttbarBkg:
+    # get total hists
+    nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
+    # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
+    #maxSteps = 50
+    #if nHistos < maxSteps:
+    #  steps = nHistos
+    #else:
+    #  steps = maxSteps
 
-        #print 'Writing histos:'
-        #progressString = '0% ['+' '*steps+'] 100%'
-        #print progressString,
-        #print '\b'*(len(progressString)-3),
-        #sys.stdout.flush()
+    #print 'Writing histos:'
+    #progressString = '0% ['+' '*steps+'] 100%'
+    #print progressString,
+    #print '\b'*(len(progressString)-3),
+    #sys.stdout.flush()
 
-        nForProgress = 0
-        for histDict in dictFinalHisto.itervalues(): # for each sample's dict
-            for histo in histDict.itervalues(): # for each hist contained in the sample's dict
-                #if (nForProgress % (nHistos/steps))==0:
-                #    print '\b.',
-                #    sys.stdout.flush()
-                histo.Write()
-                nForProgress+=1
-        
-        #print '\b] 100%'
+    nForProgress = 0
+    for histDict in dictFinalHisto.itervalues(): # for each sample's dict
+        for histo in histDict.itervalues(): # for each hist contained in the sample's dict
+            #if (nForProgress % (nHistos/steps))==0:
+            #    print '\b.',
+            #    sys.stdout.flush()
+            histo.Write()
+            nForProgress+=1
+    
+    #print '\b] 100%'
 
-    else:
+    #else:
+    if options.ttbarBkg:
         # special actions for TTBarFromData
         # subtract nonTTbarBkgMC from TTbarRaw
         ttbarDataPredictionHistos = dictFinalHisto[ttbarDataRawSampleName]
@@ -562,6 +567,8 @@ if not options.tablesOnly:
             # subtract the nonTTBarBkgMC from the ttbarRawData
             # find nonTTbarMCBkg histo; I assume they are in the same order here
             histoToSub = dictFinalHisto[nonTTbarMCBkgSampleName][n]
+            ## also write histos that are subtracted
+            #histToSub.Write()
             #print 'n=',n,'histo=',histo
             histoTTbarPred = histo.Clone()
             histoTTbarPred.Add(histoToSub,-1)
