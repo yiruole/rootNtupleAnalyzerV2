@@ -20,7 +20,7 @@ from CRABClient.ClientExceptions import CachefileNotFoundException
 from CRABClient.ClientExceptions import ConfigurationException
 from httplib import HTTPException
 
-eos = '/afs/cern.ch/project/eos/installation/pro/bin/eos.select'
+eos = '/usr/bin/eos'
 
 def getOptions():
     """
@@ -41,7 +41,7 @@ def getOptions():
                "tasklistFile"), metavar="OPT", default="")
     parser.add_option("-m", "--moveFiles", dest="moveFiles",
          help=("move non-skim files from EOS to local outputdir"),
-         metavar="moveFiles",default=True,action="store_true")
+         metavar="moveFiles",default=True,action="store_false")
     parser.add_option("-i", "--ignoreCache", dest="ignoreMulticrabCache",
          help=("don't use cache file to skip checking status of jobs already done"),
          metavar="ignoreCache",default=False,action="store_true")
@@ -65,22 +65,31 @@ def getOptions():
 
     return options
 
-
+#FIXME rewrite to use regular cp and '*'
 def MoveFiles(outputFilesNotMoved,taskName):
   global eos
   for fn in outputFilesNotMoved:
     #print '\t',fn
-    cmd = eos+' cp /eos/cms'+fn+' '+taskName+'/'
+    #cmd = eos+' cp /eos/cms'+fn+' '+taskName+'/'
+    # on lxplus, eos is mounted
+    cmd = 'cp /eos/cms'+fn+' '+taskName+'/'
     ret = subprocess.call(cmd.split())
     #print cmd
     if ret != 0:
+      print 'did not manage to copy: /eos/cms'+fn,' to',taskName+'/','; cp had return code of',ret
       continue
-    cmd = eos+' rm /eos/cms'+fn
+    #cmd = eos+' rm /eos/cms'+fn
+    # on lxplus, eos is mounted
+    cmd = 'rm /eos/cms'+fn
     subprocess.call(cmd.split())
     #print cmd
     if ret == 0:
       outputFilesNotMoved.remove(fn)
   return outputFilesNotMoved
+
+
+def MoveFilesCp(taskName):
+  return
 
 
 def main():
@@ -131,10 +140,28 @@ def main():
 
         if options.crabCmd != 'status':
           continue
-        if 'failed' in res['jobsPerStatus'].keys():
-          tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
-        else:
-          tasksStatusDict[task] = res['status']
+        #print 'res=',res
+        #print 'res[jobPerStatus]=',res['jobsPerStatus']
+        #print 'res[status]=',res['status']
+        #exit(0)
+        tasksStatusDict[task] = 'COMPLETED'
+        #print res
+        #for jobStatus in res[1]['jobList']:
+        #print 'res[jobsPerStatus].keys()=',res['jobsPerStatus'].keys()
+        for jobStatus in res['jobsPerStatus'].keys():
+          if 'failed' in jobStatus:
+            tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
+            break
+          elif 'running' in jobStatus:
+            tasksStatusDict[task] = 'SUBMITTED'
+          elif 'idle' in jobStatus:
+            tasksStatusDict[task] = 'SUBMITTED'
+          elif 'transferring' in jobStatus:
+            tasksStatusDict[task] = 'SUBMITTED'
+        print 'taskStatus=',tasksStatusDict[task]
+        #if 'failed' in res['jobsPerStatus'].keys():
+        #  tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
+        #else:
 
     if options.crabCmd != 'status':
       exit(0)
@@ -163,6 +190,10 @@ def main():
           print hte.headers
           exceptionTasks.append(taskName)
           continue
+        except:
+          print '-----> there was a problem running crab getoutput --dump %s see below.'%taskName
+          exceptionTasks.append(taskName)
+          continue
         sys.stdout = sys.__stdout__
         #print res
         try:
@@ -189,9 +220,11 @@ def main():
         print '      moving',len(outputFilesNotMoved),'files to',taskName
         #print outputFilesNotMoved
         #exit(-1)
-        while len(outputFilesNotMoved) >= 1:
+        tries = 0
+        while len(outputFilesNotMoved) >= 1 and tries < 5:
           outputFilesNotMoved = MoveFiles(outputFilesNotMoved,taskName)
           print 'taskName:',taskName,'still has',len(outputFilesNotMoved),'output files to move; try again'
+          tries+=1
         print '      Successfully moved all files; write to cache.'
         # check again, shouldn't be necessary
         # if we moved the files, call it OK even if purge fails later
