@@ -301,7 +301,8 @@ void baseClass::readCutFile()
       if( cc != cutName_cut_.end() )
       {
         STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
-        return;
+        exit(-1);
+        //return;
       }
 
       if(v.size() < 6)
@@ -316,7 +317,8 @@ void baseClass::readCutFile()
         if( cc != preCutName_cut_.end() )
         {
           STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
-          return;
+          exit(-1);
+          //return;
         }
         preCutInfo_ << "### Preliminary cut values: " << s <<endl;
         preCut thisPreCut;
@@ -341,12 +343,14 @@ void baseClass::readCutFile()
       if( m1=="-" || M1=="-" )
       {
         STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning.");
-        return; // FIXME implement exception
+        exit(-2);
+        //return; // FIXME implement exception
       }
       if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") )
       {
         STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
-        return; // FIXME implement exception
+        exit(-2);
+        //return; // FIXME implement exception
       }
       if( m2=="-") m2="+inf";
       if( M2=="-") M2="-inf";
@@ -409,14 +413,14 @@ void baseClass::readCutFile()
       STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
       if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
       if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
-      exit(1);
+      exit(-3);
     }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
   }
   else
   {
     STDOUT("ERROR opening cutFile:" << *cutFile_ );
-    exit (1);
+    exit (-3);
   }
   // make optimizer histogram
   if (optimizeName_cut_.size()>0)
@@ -1302,7 +1306,7 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   TFile *f = TFile::Open(pName);
   if(!f)
   {
-    STDOUT("File pointer was null. Quitting");
+    STDOUT("File pointer for "<< pName << " came back null. Quitting");
     exit(-1);
   }
   if(!f->IsOpen())
@@ -1336,7 +1340,7 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   TFile *f = TFile::Open(pName);
   if(!f)
   {
-    STDOUT("File pointer was null. Quitting");
+    STDOUT("File pointer for "<< pName << " came back null. Quitting");
     exit(-1);
   }
   if(!f->IsOpen())
@@ -1369,7 +1373,7 @@ float baseClass::getSumTopPtWeights(const char *pName)
   TFile *f = TFile::Open(pName);
   if(!f)
   {
-    STDOUT("File pointer was null. Quitting");
+    STDOUT("File pointer for "<< pName << " came back null. Quitting");
     exit(-1);
   }
   if(!f->IsOpen())
