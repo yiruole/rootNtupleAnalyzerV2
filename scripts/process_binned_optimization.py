@@ -128,6 +128,7 @@ def parse_txt_file (verbose=False):
 
 def parse_root_file( d_input,verbose=False ) :
     d_binNumber_nSample = {}
+    d_binNumber_nSampleErr = {}
     d_binNumber_nEnts = {}
 
     sum_hist = TH1F()
@@ -184,11 +185,12 @@ def parse_root_file( d_input,verbose=False ) :
     
     for ibin in range (0, nbins ) :
         d_binNumber_nSample [ ibin ] = sum_hist.GetBinContent ( ibin+1 )
+        d_binNumber_nSampleErr [ ibin ] = sum_hist.GetBinError ( ibin+1 )
         d_binNumber_nEnts   [ ibin ] = sum_ents_hist.GetBinContent ( ibin+1 )
-        if ibin==5836:
-            print 'sum_ents_hist has',sum_ents_hist.GetBinContent(5836),'entries in bin',ibin
+        #if ibin==5836:
+        #    print 'sum_ents_hist has',sum_ents_hist.GetBinContent(5836),'entries in bin',ibin
     
-    return d_binNumber_nSample,d_binNumber_nEnts
+    return d_binNumber_nSample,d_binNumber_nSampleErr,d_binNumber_nEnts
 
 
 def calculateEfficiency(nS, signal_sample, d_signal_totalEvents):
@@ -277,19 +279,23 @@ intLumi=35867.0 # in pb
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_apr11_ele27OrEle115/analysisClass_lq_eejj_plots.root"
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/enujj_crab_psk_apr6_topPtWeight_recoHeepSF_reminiAOD_sele27wptightEta2p1CurveMC/analysisClass_lq_enujj_MT_plots.root"
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may23_ele27OrEle115/analysisClass_lq_eejj_plots.root"
-mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.root"
-mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
+#mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.root"
+mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+#mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
+mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_oct6/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
 
 #k_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.rootejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.rootqcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_apr13_ele27wptightOrEle115/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
 #qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_enujj_apr11/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
 #qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjQCD_psk_crab_may22/analysisClass_lq_eejj_QCD_plots.root"
-qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_may29_ele27wptightOrEle115OrPhoton175/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
+#qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_may29_ele27wptightOrEle115OrPhoton175/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
+qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejj_QCD_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
 qcd_data_filepath_enujj = os.environ["LQDATA"] + "/2016opt/qcd_enujj_psk_jun1_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
 
 # for eejj
 #ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjTTBar_crab_psk_apr11_ele27OrEle115/analysisClass_lq_ttbarEst_plots.root"
 #ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may22_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
-ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may30_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
+#ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may30_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
+ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/oct2_emujj_ptEE_eejjOptFinalSels/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
 #
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/apr11_ele27OrEle115/optimization/optimizationCuts.txt"
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may23/opt/optimizationCuts.txt"
@@ -297,7 +303,7 @@ ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may30_ttbarBkg_emujj/outp
 txt_file_path_eejj   = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may30/opt/optimizationCuts.txt"
 txt_file_path_enujj  = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/jun2/opt/optimizationCuts.txt"
 #
-doEEJJ = True
+doEEJJ = False
 # if false, uses asymptotic significance formula
 usePunzi = True
 
@@ -316,7 +322,8 @@ d_eejj_background_filepaths = {
 }
 
 d_enujj_background_filepaths = { 
-     "ttbar" : [ "TTbar_amcatnlo_Inc"  , mc_filepath_enujj, 1.0 ],
+    #"ttbar" : [ "TTbar_amcatnlo_Inc"  , mc_filepath_enujj, 1.0 ],
+    "ttbar" : [ "TTbar_powheg"  , mc_filepath_enujj, 1.0 ],
     "qcd"   : [ "QCDFakes_DATA"  , qcd_data_filepath_enujj  , 1.0  ],
     #"ttbar" : [ "TTbar_Madgraph"      , mc_filepath_enujj  , 1.0  ],
     #"qcd"   : [ "QCD_EMEnriched"      , mc_filepath_enujj  , 1.0  ],
@@ -603,9 +610,9 @@ parse_txt_file ()
 print "Parsed."
 
 verbose = False
-d_binNumber_nB,d_binNumber_nBMCEnts = parse_root_file( d_background_filepaths,verbose )
+d_binNumber_nB,d_binNumber_nBErr,d_binNumber_nBMCEnts = parse_root_file( d_background_filepaths,verbose )
 #print 'd_binNumber_nBMCEnts[5836]=',d_binNumber_nBMCEnts[5836]
-d_binNumber_nD,d_binNumber_nDEnts = parse_root_file( d_data_filepaths )
+d_binNumber_nD,d_binNumber_nDErr,d_binNumber_nDEnts = parse_root_file( d_data_filepaths )
 
 selectedEfficienciesByLQMass = []
 selectedNsByLQMass = []
@@ -617,7 +624,7 @@ lqMasses = []
 #    parse_root_file( signal_sample ) 
 
 for signal_sample in d_signal_filepaths_list: 
-    d_binNumber_nS,d_binNumber_nSEnts = parse_root_file( signal_sample ) 
+    d_binNumber_nS,d_binNumber_nSErr,d_binNumber_nSEnts = parse_root_file( signal_sample ) 
     print "looking at",signal_sample
     # XXX SIC make histo
     #mejHisto = TH1F('mej_hist',',mej_hist',len(bin_numbers),0,len(bin_numbers)+1)
@@ -632,15 +639,17 @@ for signal_sample in d_signal_filepaths_list:
 
     for binNumber in bin_numbers:
         nS = d_binNumber_nS [ binNumber ] 
+        nSErr = d_binNumber_nSErr [ binNumber ] 
         nB = d_binNumber_nB [ binNumber ] 
+        nBErr = d_binNumber_nBErr [ binNumber ] 
         nBMCEnts = d_binNumber_nBMCEnts [ binNumber ] 
         nD = d_binNumber_nD [ binNumber ] 
         #if nS < 0:
         #  nS = 0
         #if nB < 0:
         #  nB = 0
-        ##XXX ignore any set of cuts with nB<0.001
-        #if nB < 0.001:
+        ##XXX ignore any set of cuts with nB<0.01
+        #if nB < 0.01:
         #  continue
         ##XXX ignore any cuts with less than 5 background events
         #if nBMCEnts < 5:
@@ -648,6 +657,9 @@ for signal_sample in d_signal_filepaths_list:
         ##XXX ignore any set of cuts with nB < 0
         if nB < 0:
           continue
+        ## ignore any set of cuts if the nBErr/nB > 50%
+        #if nBErr/nB > 0.5:
+        #  continue
         if verbose:
           print 'binNumber=',binNumber,
           print 'evaluated to: nS=',nS,'nB=',nB,';',
@@ -672,7 +684,7 @@ for signal_sample in d_signal_filepaths_list:
               print '     evaluated to: nS=',nS,'nB=',nB,'nBMCEnts=',nBMCEnts
               print '     d_binNumber_nBMCEnts [ max_bin ] =',d_binNumber_nBMCEnts [ max_bin ] 
             
-    print signal_sample.keys()[0], ": Bin with best value was bin #" + str ( max_bin ), "\tCut info was:\t" +  max_string , "\t v = %.2f" % max_value, " nS = %.2f" % max_nS, ", nB = %.2f" % max_nB, ", nD = %d" % max_nD
+    print signal_sample.keys()[0], ": Bin with best value was bin #" + str ( max_bin ), "\tCut info was:\t" +  max_string , "\t v = %.2f" % max_value, " nS = %.2f" % max_nS, ", nB = %.2f" % max_nB#, ", nD = %d" % max_nD
     signalSampleName = signal_sample.values()[0][0]
     signalSampleMass = int(signalSampleName[signalSampleName.find('_M')+2:])
     print 'LQ mass:',signalSampleMass,'had efficiency at maxOptPoint:',max_eff
@@ -785,8 +797,18 @@ print table
 
 print "\n\n"
 
-func2 = TF1("func2", "pol2(0)", 150., 1500. )
-func1 = TF1("func1", "pol1(0)", 150., 1500. )
+# get max fit range
+maxFitMass = 0.0
+for i,mass in enumerate(lqMasses):
+  nB = selectedNbByLQMass[i]
+  if nB > 1:
+    maxFitMass = mass
+  else:
+    break
+print 'maxFitMass=',maxFitMass
+    
+func2 = TF1("func2", "pol2(0)", 150., maxFitMass )
+func1 = TF1("func1", "pol1(0)", 150., maxFitMass )
 
 fit_functions = [ "func1", "func2" ]
 
