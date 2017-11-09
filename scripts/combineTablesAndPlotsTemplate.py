@@ -50,14 +50,17 @@ def updateSample(dictFinalHistoAtSample,htemp,h,toBeUpdated,plotWeight):
       if 'optimizerentries' in histoName.lower() or 'noweight' in histoName.lower():
           returnVal = dictFinalHistoAtSample[h].Add(htemp)
       else:
-          returnVal = dictFinalHistoAtSample[h].Add(htemp, plotWeight)
+          #returnVal = dictFinalHistoAtSample[h].Add(htemp, plotWeight)
+          # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
+          htemp.Scale(plotWeight)
+          returnVal = dictFinalHistoAtSample[h].Add(htemp)
       ##XXX DEBUG
       #if 'OptBinLQ60' in histoName:
       #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
       #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
       #    print
       if not returnVal:
-          print 'ERROR: Failed adding',htemp.GetName(),'to',dictFinalHistoAtSample[h].GetName()
+          print 'ERROR: Failed adding hist named"'+histoName+'"to',dictFinalHistoAtSample[h].GetName()
           exit(-1)
 
 
@@ -206,6 +209,39 @@ for lin in open( options.inputList ):
     #xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
     xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
 
+#---Loop over datasets in the inputlist to check if dat/root files are there
+print
+print 'Checking for root/dat files from samples in inputList...',
+for lin in open( options.inputList ):
+
+    lin = string.strip(lin,"\n")
+    #print 'lin=',lin
+    if lin.startswith('#'):
+      continue
+    
+    dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
+    # strip off the slashes and the .txt at the end
+    # so this will look like 'TTJets_DiLept_reduced_skim'
+    #print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
+    #print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
+    sys.stdout.flush()
+
+    inputRootFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".root"
+    inputDataFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
+
+    #---Check if .root and .dat file exist
+    if(os.path.isfile(inputRootFile) == False):
+        print
+        print "ERROR: file " + inputRootFile + " not found"
+        print "exiting..."
+        sys.exit()
+    if(os.path.isfile(inputDataFile) == False):
+        print
+        print "ERROR: file " + inputDataFile + " not found"
+        print "exiting..."
+        sys.exit()
+print 'Done.  All root/dat files are present.'
+
 #---Loop over datasets in the inputlist
 print
 for lin in open( options.inputList ):
@@ -225,25 +261,30 @@ for lin in open( options.inputList ):
     inputRootFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".root"
     inputDataFile = options.inputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
 
-    #---Check if .root and .dat file exist
-    if(os.path.isfile(inputRootFile) == False):
-        print "ERROR: file " + inputRootFile + " not found"
-        print "exiting..."
-        sys.exit()
-    #else:
-    #  print 'opened file:',inputRootFile
+    # we checked this above, so no need to check again
+    ##---Check if .root and .dat file exist
+    #if(os.path.isfile(inputRootFile) == False):
+    #    print "ERROR: file " + inputRootFile + " not found"
+    #    print "exiting..."
+    #    sys.exit()
+    ##else:
+    ##  print 'opened file:',inputRootFile
 
 
-    if(os.path.isfile(inputDataFile) == False):
-        print "ERROR: file " + inputDataFile + " not found"
-        print "exiting..."
-        sys.exit()
-    #else:
-    #    print 'opened file:',inputDataFile
+    #if(os.path.isfile(inputDataFile) == False):
+    #    print "ERROR: file " + inputDataFile + " not found"
+    #    print "exiting..."
+    #    sys.exit()
+    ##else:
+    ##    print 'opened file:',inputDataFile
 
     #---Find xsection correspondent to the current dataset
     #dataset_fromInputList = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
+    print 'looking up xsection...',
+    sys.stdout.flush()
     xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+    print 'found',xsection_val,'pb',
+    sys.stdout.flush()
     #xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
     #this is the current cross section
     #print dataset_fromInputList,xsection_val
@@ -253,7 +294,8 @@ for lin in open( options.inputList ):
     column=[]
     lineCounter = int(0)
 
-    #print 'opening:',inputDataFile
+    print '(opening:',inputDataFile,
+    sys.stdout.flush()
     for j,line in enumerate( open( inputDataFile ) ):
 
         if( re.search("^###", line) ):
@@ -277,6 +319,9 @@ for lin in open( options.inputList ):
 
         lineCounter = lineCounter+1
 
+    print 'Done reading dat file.)'
+    sys.stdout.flush()
+
     # example
     Ntot = float(data[0]['N'])
     #print 'Ntot=',Ntot
@@ -287,8 +332,12 @@ for lin in open( options.inputList ):
         weight = 1.0
         plotWeight = 1.0
         xsection_X_intLumi = Ntot
+        print '[data]',
+        sys.stdout.flush()
     else:
         xsection_X_intLumi = float(xsection_val) * float(options.intLumi)
+        print '[MC]',
+        sys.stdout.flush()
         # for amc@NLO need to multiply by sum of weights
         tfile = TFile(inputRootFile)
         sumOfWeightsHist = tfile.Get('SumOfWeights')
@@ -319,9 +368,11 @@ for lin in open( options.inputList ):
             weight = xsection_X_intLumi / Ntot 
 
         plotWeight = weight/1000.0
-    print "xsection: " + xsection_val,
+    #print "xsection: " + xsection_val,
     print "weight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/",
+    sys.stdout.flush()
     print str(sumAMCatNLOweights) if re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE) else str(Ntot)
+    sys.stdout.flush()
     
     #---Create new table using weight
     newtable={}
@@ -381,8 +432,8 @@ for lin in open( options.inputList ):
     if not options.tablesOnly:
       #---Combine histograms using PYROOT
       file = TFile(inputRootFile)
-      #nHistos = int( file.GetListOfKeys().GetEntries() )
-      #print "nHistos: " , nHistos, "\n"
+      nHistos = len(file.GetListOfKeys())
+      print "nKeys: " , nHistos
       #print 'list of keys in this rootfile:',file.GetListOfKeys()
 
 
@@ -498,20 +549,27 @@ if options.ttbarBkg:
     # FIXME: we hardcode the sample names for now
     ttbarDataRawSampleName = 'TTBarUnscaledRawFromDATA'
     ttbarDataPredictionTable = dictFinalTables[ttbarDataRawSampleName]
-    nonTTbarMCBkgSampleName = 'NONTTBARBKG_amcatnlo'
-    nonTTbarMCBkgTable = dictFinalTables[nonTTbarMCBkgSampleName]
+    nonTTbarAMCBkgSampleName = 'NONTTBARBKG_amcatnloPt_emujj'
+    nonTTbarAMCBkgTable = dictFinalTables[nonTTbarAMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
-    # from May29 Ele27OREle115ORPhoton175
-    Rfactor = 0.440998 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.00121
+    # from Jul4 Ele27OREle115ORPhoton175 amc@NLO
+    #Rfactor = 0.440998 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.00121
+    ## from Jul4 Ele27OREle115ORPhoton175 powheg
+    #Rfactor = 0.436873 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.002086
+    # from Oct2 powheg with PtEE>70 GeV [updated Oct. 6]
+    Rfactor = 0.43789 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.002683
+    print 'TTBar data-driven: Using Rfactor =',Rfactor,'+/-',errRfactor
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
-    combineCommon.ScaleTable(nonTTbarMCBkgTable,1.0/1000.0,0.0)
+    combineCommon.ScaleTable(nonTTbarAMCBkgTable,1.0/1000.0,0.0)
     #print '1) WHAT DOES THE SCALED MC TABLE LOOK LIKE?'
     #WriteTable(nonTTbarMCBkgTable, nonTTbarMCBkgSampleName, outputTableFile)
     # subtract the nonTTBarBkgMC from the ttbarRawData, NOT zeroing entries where we run out of data
-    combineCommon.SubtractTables(nonTTbarMCBkgTable,ttbarDataPredictionTable)
+    combineCommon.SubtractTables(nonTTbarAMCBkgTable,ttbarDataPredictionTable)
     #print '2) WHAT DOES THE SUBTRACTEDTABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttBarPredName, outputTableFile)
     # scale by Ree,emu
@@ -566,7 +624,7 @@ if not options.tablesOnly:
         for n, histo in ttbarDataPredictionHistos.iteritems():
             # subtract the nonTTBarBkgMC from the ttbarRawData
             # find nonTTbarMCBkg histo; I assume they are in the same order here
-            histoToSub = dictFinalHisto[nonTTbarMCBkgSampleName][n]
+            histoToSub = dictFinalHisto[nonTTbarAMCBkgSampleName][n]
             ## also write histos that are subtracted
             #histToSub.Write()
             #print 'n=',n,'histo=',histo
