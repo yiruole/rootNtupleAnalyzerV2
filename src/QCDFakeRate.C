@@ -9,12 +9,14 @@ QCDFakeRate::QCDFakeRate(string qcdFilename)
 {
   TFile* qcdTFile = TFile::Open(qcdFilename.c_str());
   //FIXME right now the graph name, etc. are hardcoded, fix
-  TH2F* histoB;
+  TH2F* histoB = 0;
   qcdTFile->GetObject("Barrel_Fake_Rate",histoB);
+  assert(histoB>0);
   histoBarrel = histoB;
 
-  TH2F* histoE;
+  TH2F* histoE = 0;
   qcdTFile->GetObject("Endcap_Fake_Rate",histoE);
+  assert(histoE>0);
   histoEndcap = histoE;
 }
 
@@ -26,9 +28,9 @@ QCDFakeRate::~QCDFakeRate()
 float QCDFakeRate::GetFakeRate(const float& eta, const float& et)
 {
   float fr = -1.0;
+  float etLookup = et;
   if(et>=35)
   {
-    float etLookup = et;
     // make sure that we don't ask for an Et that is beyond the max x range of the histogram
     // NB: fix this by filling the overflow with the same bin content as the last bin
     if(et > histoBarrel->GetXaxis()->GetXmax() || et > histoEndcap->GetXaxis()->GetXmax())
@@ -43,8 +45,10 @@ float QCDFakeRate::GetFakeRate(const float& eta, const float& et)
   else if(et==0 && eta==0) // uninitialized/unstored electron2 (events with only 1 loose ele)
     fr = 1.0;
 
-  if(fr<=0)
+  if(fr<=0) {
     std::cerr << "Found an electron with unknown fake rate: eta=" << eta << "; eT=" << et << "; return " << fr << " for qcd fake rate" << std::endl;
+    std::cerr << "Found endcap eta bin: " << histoEndcap->GetYaxis()->FindBin(fabs(eta)) << "; found endcap et bin: " << histoEndcap->GetXaxis()->FindBin(etLookup) << std::endl;
+  }
   assert(fr>0);
   return fr;
 }
