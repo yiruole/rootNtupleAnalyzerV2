@@ -24,20 +24,32 @@ except ImportError:
 from httplib import HTTPException
 
 
-def crabSubmit(config,dryRun=False):
-    try:
-      if dryRun:
-        print 'crabSubmit(): doing crab3 dryrun'
-      #  crabCommand('submit',dryrun=dryRun,config = config)
-      #else:
-      #  #print "crabSubmit(): calling crabCommand('submit',config=config)"
-      #  crabCommand('submit',config = config)
-      crabCommand('submit',dryrun=dryRun,config = config)
-    except HTTPException, hte:
-      print '-----> there was a problem. see below.'
-      print hte.headers
-      print 'Quitting here'
-      exit(-1)
+def crabSubmit(config,crabDir,dryRun=False):
+    maxRetries = 5
+    for trial in xrange(0,maxRetries+1):
+        if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
+          print 'remove already-existing crab project dir:',crabDir
+          os.system('rm -rf '+workingDir+'crab_'+outputPrefix)
+        try:
+          if dryRun:
+            print 'crabSubmit(): doing crab3 dryrun'
+          #  crabCommand('submit',dryrun=dryRun,config = config)
+          #else:
+          #  #print "crabSubmit(): calling crabCommand('submit',config=config)"
+          #  crabCommand('submit',config = config)
+          crabCommand('submit',dryrun=dryRun,config = config)
+        except HTTPException, hte:
+          print '-----> there was a problem. see below.'
+          print hte.headers
+          #print 'Quitting here'
+          #exit(-1)
+          print 'WARN: Retrying submission;',maxRetries-trial,'attempts remain'
+          continue
+        # no exception, so we succeeded
+        return
+    # we finished the loop
+    print 'ERROR: Tried',maxRetries,'times without success; quitting here'
+    exit(-1)
     
 def validateOptions(options):
   error = ''
@@ -165,9 +177,12 @@ workingDir = outputmain[0:outputmain.rstrip('/').rfind('/')]
 #print 'workingDir=',workingDir
 workingDir+='/crab/'
 if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
+  print 'NOT REMOVING ALREADY-EXISTING dir:',workingDir+'crab_'+outputPrefix
+  exit(-1)
   print '-->removing already-existing crab project dir:',workingDir+'crab_'+outputPrefix
   os.system('rm -rf '+workingDir+'crab_'+outputPrefix)
 os.system("mkdir -p "+workingDir)
+crabDir = workingDir+'crab_'+outputPrefix
 #print 'workingDir:',workingDir
 
 # splitting handled by crab3
@@ -328,7 +343,8 @@ else:
     exit(-1)
 
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 5 # 5 files per job
+#config.Data.unitsPerJob = 5 # 5 files per job
+config.Data.unitsPerJob = 10 # 10 files per job
 config.Data.totalUnits = -1
 config.Data.publication = False
 if options.isSkimTask or options.isReducedSkimTask:
@@ -420,5 +436,5 @@ config.JobType.inputFiles += ['scripts/FrameworkJobReport.xml']
 #print 'using outLFNDirBase=',config.Data.outLFNDirBase
 #print 'submit!'
 
-crabSubmit(config,options.dryRun)
+crabSubmit(config,crabDir,options.dryRun)
 
