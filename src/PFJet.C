@@ -27,6 +27,8 @@ int    PFJet::ChargedMultiplicity        () { return m_collection -> GetData() -
 float PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData() -> PFJetChargedEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
 
 float PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
+float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedInclusiveSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
+float PFJet::CombinedMVABTag() { return m_collection -> GetData() -> PFJetCombinedMVABTagAK4CHS -> at ( m_raw_index ); }
 
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
