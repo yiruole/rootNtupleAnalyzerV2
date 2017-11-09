@@ -13,7 +13,7 @@ enum ID {
   ECAL_FIDUCIAL            = 8,
   		        
   MUON_HIGH_PT_TRKRELISO03 = 9,
-  MUON_TIGHT_PFISO04       = 10,
+  MUON_TIGHT_PFISO04TIGHT  = 10,
   MUON_FIDUCIAL            = 11,
   		        
   PFJET_LOOSE              = 12,
@@ -45,6 +45,7 @@ enum ID {
   HEEP70_MANUAL            = 44,
 
   HIGH_PT_MUON_TRKRELISO01 = 50, // keep for compatibility
+  MUON_LOOSE_PFISO04LOOSE  = 51,
 
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h

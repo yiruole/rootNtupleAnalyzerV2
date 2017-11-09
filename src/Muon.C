@@ -33,6 +33,7 @@ float Muon::PFIsoR04PU                (){ return m_collection -> GetData() -> Mu
 // ID variables					                                      
 						   				   
 int    Muon::IsGlobal                  (){ return m_collection -> GetData() -> MuonIsGlobal                   -> at ( m_raw_index ); } 
+int    Muon::IsTracker                 (){ return m_collection -> GetData() -> MuonIsTracker                  -> at ( m_raw_index ); } 
 int    Muon::IsPFMuon                  (){ return m_collection -> GetData() -> MuonIsPF                       -> at ( m_raw_index ); } 
 float Muon::GlobalChi2                (){ return m_collection -> GetData() -> MuonGlobalChi2                 -> at ( m_raw_index ); } 
 int    Muon::GlobalTrkValidHits        (){ return m_collection -> GetData() -> MuonGlobalTrkValidHits         -> at ( m_raw_index ); }  

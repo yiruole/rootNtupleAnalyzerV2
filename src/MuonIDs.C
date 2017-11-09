@@ -6,7 +6,8 @@
 
 bool Muon::PassUserID (ID id, bool verbose){ 
   if      ( id == MUON_HIGH_PT_TRKRELISO03 ) return PassUserID_MuonHighPt_TrkRelIso03 ( verbose );
-  else if ( id == MUON_TIGHT_PFISO04       ) return PassUserID_MuonTight_PFIso04 ( verbose );
+  else if ( id == MUON_TIGHT_PFISO04TIGHT  ) return PassUserID_MuonTight_PFIso04Tight ( verbose );
+  else if ( id == MUON_LOOSE_PFISO04LOOSE  ) return PassUserID_MuonLoose_PFIso04Loose ( verbose );
   else if ( id == MUON_FIDUCIAL            ) return PassUserID_MuonFiducial      ( verbose );
   else return false;
 }
@@ -54,7 +55,7 @@ bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
 
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
 //   since Run I: changed PFISO cut from 0.12 to 0.15
-bool Muon::PassUserID_MuonTight_PFIso04 ( bool verbose ){
+bool Muon::PassUserID_MuonTight_PFIso04Tight ( bool verbose ){
 
   double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
   
@@ -86,5 +87,21 @@ bool Muon::PassUserID_MuonTight_PFIso04 ( bool verbose ){
 bool Muon::PassUserID_MuonFiducial ( bool verbose ) {
   if ( IsMuonFiducial() ) return true;
   else return false;
+}
+
+// see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
+bool Muon::PassUserID_MuonLoose_PFIso04Loose ( bool verbose ){
+  bool pass_isGlobal   = bool ( IsGlobal()                   == 1   );
+  bool pass_isTracker  = bool ( IsTracker()                  == 1   );
+  bool pass_isPF       = bool ( IsPFMuon()                   == 1   );
+
+  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
+  bool pass_pfiso04   = bool ( pfiso04                       < 0.25); // loose iso
+  
+  bool decision = (pass_isGlobal || pass_isTracker) &&
+    pass_isPF &&
+    pass_pfiso04;
+
+  return decision;
 }
 

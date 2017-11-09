@@ -38,20 +38,22 @@ class Muon : public Object {
   // ID variables      
          
   int    IsGlobal                  ();
+  int    IsTracker                 ();
   int    IsPFMuon                  ();
-  float GlobalChi2                ();
+  float GlobalChi2                 ();
   int    GlobalTrkValidHits        (); 
   int    StationMatches            ();
-  float BestTrackVtxDistXY        ();
-  float BestTrackVtxDistZ         ();
+  float BestTrackVtxDistXY         ();
+  float BestTrackVtxDistZ          ();
   int    TrkPixelHits              ();
   int    TrackLayersWithMeasurement();
   
  private:
 
-  bool PassUserID_MuonHighPt_TrkRelIso03 (bool verbose);
-  bool PassUserID_MuonTight_PFIso04      (bool verbose);
-  bool PassUserID_MuonFiducial           (bool verbose);
+  bool PassUserID_MuonHighPt_TrkRelIso03  (bool verbose);
+  bool PassUserID_MuonTight_PFIso04Tight  (bool verbose);
+  bool PassUserID_MuonFiducial            (bool verbose);
+  bool PassUserID_MuonLoose_PFIso04Loose  (bool verbose);
 
 };
 
