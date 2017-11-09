@@ -37,7 +37,7 @@ def make_filenamelist_eos(inputDir):
     #path = inputDir
     filenamelist = []
     #proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/pro/bin/eos.select ls ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
-    proc = subprocess.Popen( '/afs/cern.ch/project/eos/installation/pro/bin/eos.select find -f ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
+    proc = subprocess.Popen( 'eos find -f ' + inputDir , shell=True,stdout = subprocess.PIPE, stderr = subprocess.STDOUT )
     # this gives the full path though
     output = proc.communicate()[0]
     if proc.returncode != 0:
@@ -217,18 +217,27 @@ def combineExtDatasets(filelist):
         wasCombined[dataset1] = True
   # remove
   for d in datasetsToRemove:
+    #print 'deleting dataset:',d,'from filelist'
     del filelist[d]
+  # don't rename--just use name of first similar dataset we read
+  # otherwise we modify the dict as we are looping over it...
   # rename
-  for dataset in filelist.iterkeys():
-    if wasCombined[dataset]:
-      if 'ext' in dataset:
-        datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
-      elif 'backup' in dataset:
-        datasetmod = dataset[0:dataset.find('backup')]+dataset[dataset.find('backup')+len('backup')+1:]
-      else:
-        continue
-      #print 'rename this dataset from:',dataset,'to:',datasetmod
-      filelist[datasetmod] = filelist.pop(dataset)
+  #for dataset in filelist.iterkeys():
+  #  #print 'look for dataset=',dataset
+  #  try:
+  #    itWasCombined = wasCombined[dataset]
+  #  except KeyError as e:
+  #    print 'could not find dataset:',e,' in wasCombined dict'
+  #    exit(-1)
+  #  if itWasCombined:
+  #    if 'ext' in dataset:
+  #      datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+  #    elif 'backup' in dataset:
+  #      datasetmod = dataset[0:dataset.find('backup')]+dataset[dataset.find('backup')+len('backup')+1:]
+  #    else:
+  #      continue
+  #    print 'rename this dataset from:',dataset,'to:',datasetmod
+  #    filelist[datasetmod] = filelist.pop(dataset)
   return
 
 
