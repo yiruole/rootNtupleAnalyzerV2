@@ -4,6 +4,7 @@ FLAGS =
 FLAGS += -DSAVE_ALL_HISTOGRAMS 
 FLAGS += -std=c++11
 FLAGS += -O2
+#FLAGS += -g
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
 INC= -I.. -I. -I./include
 ROOTINC= -I${ROOTSYS}/include
