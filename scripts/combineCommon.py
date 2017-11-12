@@ -138,8 +138,8 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
       return xsectionDict[dataset]
   print
   print 'ERROR'
-  for key in sorted(xsectionDict.iterkeys()):
-    print 'sample=',key,'xsection=',xsectionDict[key]
+  #for key in sorted(xsectionDict.iterkeys()):
+  #  print 'sample=',key,'xsection=',xsectionDict[key]
   print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList,'; i.e., no dataset in xsectionDict starts with this.'
   exit(-1)
 
