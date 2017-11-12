@@ -162,6 +162,7 @@ class baseClass : public rootNtupleClass {
   bool passedAllOtherSameAndLowerLevelCuts(const string& s);
   bool variableIsFilled(const string& s);
   bool isOptimizationEnabled() { return optimizeName_cut_.size()>0; }
+  bool hasCut(const string& s);
   double getVariableValue(const string& s);
   double getPreCutValue1(const string& s);
   double getPreCutValue2(const string& s);

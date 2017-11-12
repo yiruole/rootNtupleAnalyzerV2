@@ -665,6 +665,18 @@ bool baseClass::passedCut(const string& s)
   return (ret=false);
 }
 
+bool baseClass::hasCut(const string& s)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc != cutName_cut_.end() )
+    return true;
+  // check the comb map for completeness
+  map<string, bool>::iterator cp = combCutName_passed_.find(s);
+  if( cp != combCutName_passed_.end() )
+    return true;
+  return false;
+}
+
 bool baseClass::passedAllPreviousCuts(const string& s)
 {
   //STDOUT("Examining variableName = "<<s);
