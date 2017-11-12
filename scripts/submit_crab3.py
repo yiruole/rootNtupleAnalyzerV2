@@ -343,8 +343,10 @@ else:
     exit(-1)
 
 config.Data.splitting = 'FileBased'
-#config.Data.unitsPerJob = 5 # 5 files per job
-config.Data.unitsPerJob = 10 # 10 files per job
+if options.isReducedSkimTask:
+  config.Data.unitsPerJob = 10 # 10 files per job for reduced skims
+elif options.isSkimTask:
+  config.Data.unitsPerJob = 20 # 20 files per job for flat skims
 config.Data.totalUnits = -1
 config.Data.publication = False
 if options.isSkimTask or options.isReducedSkimTask:
