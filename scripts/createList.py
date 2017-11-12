@@ -211,7 +211,8 @@ def combineExtDatasets(filelist):
         dataset2mod = dataset2
       #print '\tcompare to dataset:',dataset2,'; renamed to:',dataset2mod
       if dataset2mod==dataset1mod:
-        print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
+        #print '\033[92m'+'Found 2 datasets that look alike:'+'\033[0m',dataset1,'and',dataset2,'; will combine'
+        print '\033[92m'+'Found a similar dataset \033[0m '+dataset2+' to combine with:',dataset1
         filelist[dataset1].extend(filelist[dataset2])
         datasetsToRemove.append(dataset2)
         wasCombined[dataset1] = True
@@ -219,26 +220,30 @@ def combineExtDatasets(filelist):
   for d in datasetsToRemove:
     #print 'deleting dataset:',d,'from filelist'
     del filelist[d]
-  # don't rename--just use name of first similar dataset we read
-  # otherwise we modify the dict as we are looping over it...
   # rename
-  #for dataset in filelist.iterkeys():
-  #  #print 'look for dataset=',dataset
-  #  try:
-  #    itWasCombined = wasCombined[dataset]
-  #  except KeyError as e:
-  #    print 'could not find dataset:',e,' in wasCombined dict'
-  #    exit(-1)
-  #  if itWasCombined:
-  #    if 'ext' in dataset:
-  #      datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
-  #    elif 'backup' in dataset:
-  #      datasetmod = dataset[0:dataset.find('backup')]+dataset[dataset.find('backup')+len('backup')+1:]
-  #    else:
-  #      continue
-  #    print 'rename this dataset from:',dataset,'to:',datasetmod
-  #    filelist[datasetmod] = filelist.pop(dataset)
-  return
+  filelistFinal = {}
+  for dataset in filelist.iterkeys():
+    #print 'look for dataset=',dataset
+    try:
+      itWasCombined = wasCombined[dataset]
+    except KeyError as e:
+      print 'could not find dataset:',e,' in wasCombined dict'
+      exit(-1)
+    if itWasCombined:
+      if 'ext' in dataset:
+        datasetmod = dataset[0:dataset.find('ext')]+dataset[dataset.find('ext')+len('ext')+2:]
+      elif 'backup' in dataset:
+        datasetmod = dataset[0:dataset.find('backup')]+dataset[dataset.find('backup')+len('backup')+1:]
+      else:
+        datasetmod = dataset
+      #print 'rename this dataset from:',dataset,'to:',datasetmod
+      filelistFinal[datasetmod] = filelist[dataset]
+    else:
+      filelistFinal[dataset] = filelist[dataset]
+  #print 'Final dataset list looks like:'
+  #for dataset in sorted(filelistFinal.iterkeys()):
+  #  print dataset
+  return filelistFinal
 
 
 def main():
@@ -268,7 +273,7 @@ def main():
         process_input_dir(inputDir, options.match, filelist, options.useCERNEOS)
 
     if options.combineLikeDatasets:
-      combineExtDatasets(filelist)
+      filelist = combineExtDatasets(filelist)
 
     write_inputlists(filelist, options.outputDir)
 
