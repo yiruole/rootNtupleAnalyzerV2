@@ -294,7 +294,7 @@ for lin in open( options.inputList ):
     column=[]
     lineCounter = int(0)
 
-    print '(opening:',inputDataFile,
+    #print '(opening:',inputDataFile,
     sys.stdout.flush()
     for j,line in enumerate( open( inputDataFile ) ):
 
@@ -319,7 +319,7 @@ for lin in open( options.inputList ):
 
         lineCounter = lineCounter+1
 
-    print 'Done reading dat file.)'
+    #print 'Done reading dat file.)'
     sys.stdout.flush()
 
     # example
@@ -526,8 +526,8 @@ for sample,pieceList in dictSamples.iteritems():
     print sorted(pieceList)
     print '\tand the pieces added were:'
     print sorted(piecesAdded)
-    print '\tRefusing to proceed.'
-    exit(-1)
+    #print '\tRefusing to proceed.'
+    #exit(-1)
 
 if not os.path.isdir(options.outputDir):
   os.makedirs(options.outputDir)
