@@ -51,6 +51,9 @@ def getOptions():
     parser.add_option("-p", "--doCrabPurge", dest="doCrabPurge",
          help=("run crab purge for completed tasks"),
          metavar="doCrabPurge",default=False,action="store_true")
+    parser.add_option("-f", "--resubmitCERN", dest="resubmitCERN",
+         help=("force to resubmit to CERN T2 only"),
+         metavar="resubmitCERN",default=False,action="store_true")
 
     (options, args) = parser.parse_args()
 
@@ -120,6 +123,9 @@ def main():
         if task in completedTasksFromCache:
           print "Don't check status of task, was already completed:",task
           continue
+        ## XXX SIC TEST
+        #tasksStatusDict[task] = 'FAILED'
+        ## XXX SIC TEST
         print
         print ("Executing (the equivalent of): crab %s %s %s" %
               (options.crabCmd, task, options.crabCmdOptions))
@@ -137,6 +143,12 @@ def main():
         except ConfigurationException:
           print 'Got a ConfigurationException; continue to next task anyway.'
           continue
+        except Exception as e:
+          print 'Got an exception:',
+          print(e)
+          print 'Skipping this task...'
+          tasksStatusDict[task] = 'CAUGHT_EXCEPTION'
+          continue
 
         if options.crabCmd != 'status':
           continue
@@ -144,6 +156,9 @@ def main():
         #print 'res[jobPerStatus]=',res['jobsPerStatus']
         #print 'res[status]=',res['status']
         #exit(0)
+        if res['status']=='QUEUED':
+            tasksStatusDict[task] = 'QUEUED'
+            continue
         tasksStatusDict[task] = 'COMPLETED'
         #print res
         #for jobStatus in res[1]['jobList']:
@@ -158,6 +173,8 @@ def main():
             tasksStatusDict[task] = 'SUBMITTED'
           elif 'transferring' in jobStatus:
             tasksStatusDict[task] = 'SUBMITTED'
+        if tasksStatusDict[task] != 'FAILED' and 'failed' in res['status'].lower():
+          tasksStatusDict[task] = res['status']
         print 'taskStatus=',tasksStatusDict[task]
         #if 'failed' in res['jobsPerStatus'].keys():
         #  tasksStatusDict[task] = 'FAILED' # if there's at least one failed job, count task as FAILED so we resubmit
@@ -179,6 +196,8 @@ def main():
       if options.projDir[-1] != '/':
         options.projDir+='/'
       for taskName in tasksCompleted:
+      # XXX SIC move dat files for all tasks, even partially completed ones
+      #for taskName in tasksStatusDict.keys():
         # redirect the dump output so it doesn't fill up the screen
         print 'getting output file list for task:',taskName
         sys.stdout = open(os.devnull,'w')
@@ -225,6 +244,7 @@ def main():
           outputFilesNotMoved = MoveFiles(outputFilesNotMoved,taskName)
           print 'taskName:',taskName,'still has',len(outputFilesNotMoved),'output files to move; try again'
           tries+=1
+        # XXX SIC disable
         print '      Successfully moved all files; write to cache.'
         # check again, shouldn't be necessary
         # if we moved the files, call it OK even if purge fails later
@@ -295,7 +315,10 @@ def main():
       #    print hte.headers
       print 'commands to resubmit failed tasks (or tasks with failed jobs):'
       for task in tasksFailed:
-        resubmitCmd = 'crab resubmit '+task  
+        resubmitCmd = 'crab resubmit '
+        if options.resubmitCERN:
+          resubmitCmd+="--sitewhitelist=T2_CH_CERN "
+        resubmitCmd+=task  
         print
         print '\t'+resubmitCmd
         if not options.noAutoResubmit:
