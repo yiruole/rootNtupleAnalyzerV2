@@ -158,7 +158,7 @@ if(os.path.isfile(options.logFile)):
     foundError = False
     with open(options.logFile, 'r') as logFile:
         for line in logFile:
-            if 'error' in line or 'ERROR' in line:
+            if 'error' in line or 'ERROR' in line and not 'ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!' in line:
                 print 'Found error line in logfile:',line
                 foundError = True
     if foundError:
@@ -355,15 +355,17 @@ for lin in open( options.inputList ):
             weight = float(0)
         # if 'amcatnlo' (ignoring case) is in the dataset name, it's an amc@NLO sample
         elif re.search('amcatnlo',dataset_fromInputList,re.IGNORECASE):
-          if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
-            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            weight = xsection_X_intLumi / sumAMCatNLOweights
-          elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
-            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            weight = xsection_X_intLumi / sumAMCatNLOweights
-          elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
-            print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            weight = xsection_X_intLumi / sumAMCatNLOweights
+          #if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
+          #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+          #  weight = xsection_X_intLumi / sumAMCatNLOweights
+          #elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
+          #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+          #  weight = xsection_X_intLumi / sumAMCatNLOweights
+          #elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
+          #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+          #  weight = xsection_X_intLumi / sumAMCatNLOweights
+          print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
+          weight = xsection_X_intLumi / sumAMCatNLOweights
         else:
             weight = xsection_X_intLumi / Ntot 
 
