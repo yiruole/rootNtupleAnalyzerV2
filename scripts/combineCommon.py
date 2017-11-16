@@ -52,6 +52,8 @@ def SanitizeDatasetNameFromFullDataset(dataset):
       outputFile+='_madgraphMLM'
     elif 'amcatnloFXFX' in dataset:
       outputFile+='_amcatnloFXFX'
+    #print 'SanitizeDatasetNameFromInputList:',dataset,'shortened to:',outputFile
+    #print 'choices were:',outputFileNames
   else:
     #outputFile = dataset[1:].replace('/','__')
     #outputFile = outputFile.split('__')[0]+'__'+outputFile.split('__')[1]
@@ -135,11 +137,15 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
     exit(-1)
   for dataset in xsectionDict.keys():
     if dataset.startswith(datasetNameFromInputList):
-      return xsectionDict[dataset]
+      # check to make sure dataset in xsec file up to first underscore matches the datasetNameFromInputList
+      # this should catch a case where we have TT as the datasetNameFromInputList [e.g., powheg] and it would otherwise match TTJets in the xsec file
+      if datasetNameFromInputList.startswith(dataset.split('_')[0]):
+        print 'INFO: found dataset in xsec file:',dataset,'that starts with the one we are asking for:',datasetNameFromInputList
+        return xsectionDict[dataset]
   print
   print 'ERROR'
-  #for key in sorted(xsectionDict.iterkeys()):
-  #  print 'sample=',key,'xsection=',xsectionDict[key]
+  for key in sorted(xsectionDict.iterkeys()):
+    print 'sample=',key,'xsection=',xsectionDict[key]
   print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList,'; i.e., no dataset in xsectionDict starts with this.'
   exit(-1)
 
