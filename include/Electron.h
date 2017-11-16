@@ -13,7 +13,7 @@ class Electron : public Object {
 
   // Kinematic variables
   
-  float & Pt                 ();
+  virtual float & Pt         ();
   float & PtHeep             ();
   float & Eta                (); 
   float & Phi                (); 

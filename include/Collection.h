@@ -112,7 +112,7 @@ class Collection {
     }
     return new_collection;
   }
-  
+
   // For skimming by eta range
   
   template<class Object1>
@@ -154,7 +154,7 @@ class Collection {
         if ( dr < tmp_min_dr ) tmp_min_dr = dr;
       }
       if ( tmp_min_dr >= min_dr ) { 
-	new_collection -> Append ( this_collection_constituent.GetRawIndex() );
+        new_collection -> Append ( this_collection_constituent.GetRawIndex() );
       }
     }
     return new_collection;
