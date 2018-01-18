@@ -498,18 +498,23 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   bool is_barrel = false;
   bool is_endcap = false;
 
+
+  float hoe = HoE();
+  //XXX SIC remove energy corrections
+  hoe *= (Pt()/SCPt());
+
   if ( fabs(SCEta()) < 1.4442 ){
     is_barrel = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.02  );
     pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
-    pass_hoe              = bool ( HoE()                 < 0.15  );
+    pass_hoe              = bool ( hoe                 < 0.15  );
   }
   
   else if ( fabs(SCEta()) > 1.566 && fabs(SCEta()) < 2.5 ){ 
     is_endcap = true;
     pass_dxy              = bool ( fabs(LeadVtxDistXY()) < 0.05  );
     pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.034 );
-    pass_hoe              = bool ( HoE()                 < 0.10  );
+    pass_hoe              = bool ( hoe                 < 0.10  );
   }
   
   bool decision = ( pass_ecalDriven    && 
@@ -530,7 +535,7 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
         if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
         if ( !pass_dxy           ) std::cout << "\t\t\tfail dxy           :\t " << LeadVtxDistXY() << std::endl;
         if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << Full5x5SigmaIEtaIEta() << std::endl;
-        if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+        if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << hoe           << std::endl;
       }
       else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
     }
