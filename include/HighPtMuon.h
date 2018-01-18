@@ -26,10 +26,10 @@ class HighPtMuon : public Object {
   // Isolation variables
 
   float TrkIso                    ();
-  float PFIsoR04ChargedHadron     ();
-  float PFIsoR04NeutralHadron     ();
-  float PFIsoR04Photon            ();
-  float PFIsoR04PU                ();
+//  float PFIsoR04ChargedHadron     ();
+//  float PFIsoR04NeutralHadron     ();
+//  float PFIsoR04Photon            ();
+//  float PFIsoR04PU                ();
          
   // ID variables      
          

@@ -35,10 +35,10 @@ float   HighPtMuon::PtError                 (){ return (m_isGlobal ? m_collectio
 // Isolation variables				   				   
 						   				   
 float HighPtMuon::TrkIso                    (){ return m_collection -> GetData() -> MuonTrkIso                     -> at ( m_raw_index ); } // No change
-float HighPtMuon::PFIsoR04ChargedHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } // No change
-float HighPtMuon::PFIsoR04NeutralHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } // No change
-float HighPtMuon::PFIsoR04Photon            (){ return m_collection -> GetData() -> MuonPFIsoR04Photon             -> at ( m_raw_index ); } // No change
-float HighPtMuon::PFIsoR04PU                (){ return m_collection -> GetData() -> MuonPFIsoR04PU                 -> at ( m_raw_index ); } // No change
+//float HighPtMuon::PFIsoR04ChargedHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } // No change
+//float HighPtMuon::PFIsoR04NeutralHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } // No change
+//float HighPtMuon::PFIsoR04Photon            (){ return m_collection -> GetData() -> MuonPFIsoR04Photon             -> at ( m_raw_index ); } // No change
+//float HighPtMuon::PFIsoR04PU                (){ return m_collection -> GetData() -> MuonPFIsoR04PU                 -> at ( m_raw_index ); } // No change
 						   				   
 // ID variables					                                      
 						   				   
