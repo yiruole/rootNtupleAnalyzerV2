@@ -108,11 +108,12 @@ WZTo2Q2Nu    /WZTo2Q2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv
 ZZTo2Q2Nu    /ZZTo2Q2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 ZZTo4L       /ZZTo4L_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM
 ZZTo4Q       /ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+ZZTo2L2Q     /ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 # VV has WW->2L2Nu and ZZ->2L2Nu
 VVTo2L2Nu    /VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WW_amcatnlo    WWTo1L1Nu2Q  WWTo4Q
 WZ_amcatnlo    WZTo1L1Nu2Q  WZTo1L3Nu  WZTo2L2Q  WZTo3LNu  WZTo2Q2Nu  
-ZZ_amcatnlo    ZZTo4L  ZZTo4Q
+ZZ_amcatnlo    ZZTo4L  ZZTo4Q ZZTo2L2Q
 DIBOSON_amcatnlo    WW_amcatnlo WZ_amcatnlo ZZ_amcatnlo  VVTo2L2Nu
 
 ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		WJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
