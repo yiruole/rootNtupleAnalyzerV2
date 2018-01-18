@@ -344,7 +344,7 @@ else:
 
 config.Data.splitting = 'FileBased'
 if options.isReducedSkimTask:
-  config.Data.unitsPerJob = 10 # 10 files per job for reduced skims
+  config.Data.unitsPerJob = 20 # 20 files per job for reduced skims
 elif options.isSkimTask:
   config.Data.unitsPerJob = 20 # 20 files per job for flat skims
 config.Data.totalUnits = -1
