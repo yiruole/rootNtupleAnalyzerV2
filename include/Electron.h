@@ -18,7 +18,9 @@ class Electron : public Object {
   float & Eta                (); 
   float & Phi                (); 
   float SCEta                (); 
+  float SCSeedEta            (); 
   float SCPhi                (); 
+  float SCPt                 (); 
   float SCEnergy             (); 
   float Charge               (); 
 
@@ -44,11 +46,11 @@ class Electron : public Object {
   float DeltaEtaSeed         ();
   float DeltaPhi             ();
   float HoE                  ();
-  float SigmaIEtaIEta        ();
+  //float SigmaIEtaIEta        ();
   float Full5x5SigmaIEtaIEta ();
   float SigmaEtaEta          ();
-  float E1x5OverE5x5         ();
-  float E2x5OverE5x5         ();
+  //float E1x5OverE5x5         ();
+  //float E2x5OverE5x5         ();
   float Full5x5E1x5OverE5x5     ();
   float Full5x5E2x5OverE5x5     ();
   float LeadVtxDistXY        ();
@@ -100,9 +102,9 @@ class Electron : public Object {
   float PFNeutralHadronIso03 ();
   float PFPUIso03            ();
 
-  float PFChargedHadronIso04 ();
-  float PFPhotonIso04        ();
-  float PFNeutralHadronIso04 ();
+  //float PFChargedHadronIso04 ();
+  //float PFPhotonIso04        ();
+  //float PFNeutralHadronIso04 ();
   
   
   // GEN matching
@@ -120,6 +122,7 @@ class Electron : public Object {
   float HEEPCorrIsolation    ();
   float HEEP70TrackIsolation ();
   float TrackPt              ();
+  float TrackEta             ();
   float RawEnergy            ();
 
  private:
