@@ -1,12 +1,14 @@
 from ROOT import TFile,TH2F,TProfile,TCanvas,TColor,kRed,kBlue,TGraphAsymmErrors,TH1D,THStack,TLegend,kWhite,kGreen
 import math
 import numpy
+import copy
 
 
-def GetFakeRate(lowEnd,highEnd,reg,jets,histDict):
-  #print 'Considering region=',reg
-  #print 'Considering jets=',jets
-  #print 'Considering electron Pt:',str(lowEnd)+'-'+str(highEnd),'GeV'
+def GetFakeRate(lowEnd,highEnd,reg,jets,histDict,verbose=False):
+  if verbose:
+    print 'Considering region=',reg
+    print 'Considering jets=',jets
+    print 'Considering electron Pt:',str(lowEnd)+'-'+str(highEnd),'GeV'
   histo2D_Electrons = histDict[reg]['Electrons'][jets]
   histo2D_Jets = histDict[reg]['Jets'][jets]
   histo2D_Data = histDict[reg]['Total'][jets]
@@ -20,23 +22,27 @@ def GetFakeRate(lowEnd,highEnd,reg,jets,histDict):
   data = proj_Data.Integral()
   jets_SB = proj_Jets.Integral(proj_Jets.GetXaxis().FindBin(10),proj_Jets.GetXaxis().FindBin(20)-1)
   jets_SR = proj_Jets.Integral(proj_Jets.GetXaxis().FindBin(0),proj_Jets.GetXaxis().FindBin(5)-1)
-  ##print 'endcap1 N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
-  ##print 'barrel N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
-  #print 'nHEEPprime=',ele,'jetsSR=',jets_SR,'jetsSB=',jets_SB,'data=',data
-  #print 'FR=',((jets_SR/jets_SB) * ele)/data
+  if verbose:
+    #print 'endcap1 N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
+    #print 'barrel N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
+    print 'nHEEPprime=',ele,'jetsSR=',jets_SR,'jetsSB=',jets_SB,'data=',data
+    print 'FR=',((jets_SR/jets_SB) * ele)/data
   return ((jets_SR/jets_SB) * ele),data
 
 
-def GetFakeRateMCSub(lowEnd,highEnd,reg,jets,histDict):
-  #print 'GetFakeRateMCSub'
-  #print '\tConsidering region=',reg
-  #print '\tConsidering jets=',jets
-  #print '\tConsidering electron Pt:',str(lowEnd)+'-'+str(highEnd),'GeV'
+def GetFakeRateMCSub(lowEnd,highEnd,reg,jets,histDict,verbose=False):
+  if verbose:
+    print 'GetFakeRateMCSub'
+    print '\tConsidering region=',reg
+    print '\tConsidering jets=',jets
+    print '\tConsidering electron Pt:',str(lowEnd)+'-'+str(highEnd),'GeV'
   histo2D_Electrons = histDict[reg]['Electrons'][jets]
   histo2D_MC = histDict[reg]['MC'][jets]
+  mc2DHists = [histDict[reg][y][jets] for y in mcNames]
   histo2D_Data = histDict[reg]['Total'][jets]
   proj_Electrons = histo2D_Electrons.ProjectionY('ElesTrkIso',histo2D_Electrons.GetXaxis().FindBin(lowEnd),histo2D_Electrons.GetXaxis().FindBin(highEnd)-1)
-  proj_MC = histo2D_MC.ProjectionY('TrkIso',histo2D_MC.GetXaxis().FindBin(lowEnd),histo2D_MC.GetXaxis().FindBin(highEnd)-1)
+  proj_MC = histo2D_MC.ProjectionY('TrkIsoMC',histo2D_MC.GetXaxis().FindBin(lowEnd),histo2D_MC.GetXaxis().FindBin(highEnd)-1)
+  mcProjs = [histo2D.ProjectionY('TrkIsoProj'+histo2D.GetName(),histo2D.GetXaxis().FindBin(lowEnd),histo2D.GetXaxis().FindBin(highEnd)-1) for histo2D in mc2DHists]
   proj_Data = histo2D_Data.ProjectionY('DataTrkIso',histo2D_Data.GetXaxis().FindBin(lowEnd),histo2D_Data.GetXaxis().FindBin(highEnd)-1)
   # number of HEEP electrons: pass trkIso < 5 GeV
   ele = proj_Electrons.Integral(proj_Electrons.GetXaxis().FindBin(0),proj_Electrons.GetXaxis().FindBin(5)-1)
@@ -44,12 +50,23 @@ def GetFakeRateMCSub(lowEnd,highEnd,reg,jets,histDict):
   data = proj_Data.Integral()
   # MC for real electron subtraction: also trkIso < 5 GeV
   realEle = proj_MC.Integral(proj_MC.GetXaxis().FindBin(0),proj_MC.GetXaxis().FindBin(5)-1)
-  #print '\tnumer:ele=',ele,'numMC=',realEle,'numMCSubd',ele-realEle,'denom:data=',data
-  #print '\tFR=',(ele-realEle)/data
+  realEleMCList = [proj.Integral(proj.GetXaxis().FindBin(0),proj.GetXaxis().FindBin(5)-1) for proj in mcProjs]
+  if verbose:
+    print '\tnumer:ele=',ele,'numMC=',realEle,'numMCSubd',ele-realEle,'denom:data=',data
+    if realEle > ele:
+        print '\tbreakdown of MC:'
+        for i,sample in enumerate(mcNames):
+          print '\t\t'+sample,realEleMCList[i]
+        print 'histo2D_Electrons has name:',histo2D_Electrons.GetName()
+        print 'histo2D_Electrons has entries:',histo2D_Electrons.GetEntries()
+    print '\tFR=',(ele-realEle)/data
   return (ele-realEle),data
 
 
 def MakeFakeRatePlot(reg,jets,histDict,dataDriven=True):
+  verbose=True
+  if verbose:
+    print 'MakeFakeRatePlot:reg=',reg,'jets=',jets,'dataDriven=',dataDriven
   if reg=='Bar':
     bins = [45,50,60,70,80,90,100,110,130,150,170,200,250,300,400,500,600,800,1000]
   else:
@@ -61,15 +78,16 @@ def MakeFakeRatePlot(reg,jets,histDict,dataDriven=True):
       break
     binHigh = bins[index+1]
     if dataDriven:
-      num,den = GetFakeRate(binLow,binHigh,reg,jets,histDict)
+      num,den = GetFakeRate(binLow,binHigh,reg,jets,histDict,verbose)
     else:
-      num,den = GetFakeRateMCSub(binLow,binHigh,reg,jets,histDict)
+      num,den = GetFakeRateMCSub(binLow,binHigh,reg,jets,histDict,verbose)
     histNum.SetBinContent(histNum.GetXaxis().FindBin(binLow),num)
     histDen.SetBinContent(histDen.GetXaxis().FindBin(binLow),den)
-    #print 'look at Pt:',str(binLow)+'-'+str(binHigh)
-    #print 'num=',num,'den=',den
-    #print 'set bin:',histNum.GetXaxis().FindBin(binLow),'to',num
-    #print 'bin content is:',histNum.GetBinContent(histNum.GetXaxis().FindBin(binLow))
+    if verbose:
+      print 'look at Pt:',str(binLow)+'-'+str(binHigh)
+      print 'num=',num,'den=',den
+      print 'set bin:',histNum.GetXaxis().FindBin(binLow),'to',num
+      print 'bin content is:',histNum.GetBinContent(histNum.GetXaxis().FindBin(binLow))
   #c = TCanvas()
   #c.cd()
   #histNum.Draw()
@@ -78,6 +96,7 @@ def MakeFakeRatePlot(reg,jets,histDict,dataDriven=True):
   #histDen.Draw()
   graphFR = TGraphAsymmErrors()
   graphFR.BayesDivide(histNum,histDen)
+  graphFR.SetName('fr{reg}_{jets}{dataDriven}'.format(reg=reg,jets=jets,dataDriven='template' if dataDriven else 'MCsub'))
   return graphFR
 
 
@@ -115,12 +134,48 @@ def MakeFRCanvas(plotList,titleList,canTitle):
     leg.SetShadowColor(10)
     leg.SetMargin(0.2)
     leg.SetTextFont(132)
+    if len(titleList) != len(plotList):
+        print 'ERROR: titleList and plotList passed into MakeFRCanvas are different lengths!'
     for i,title in enumerate(titleList):
         leg.AddEntry(plotList[i],title,'lp')
+        print 'For canvas titled:',canTitle,', added entry in legend for plot:',plotList[i].GetName(),'setting title to:',title
     leg.Draw()
     can.Modified()
     can.Update()
     return can,leg
+
+
+def LoadHistosData(histos,varName):
+  for reg in detectorRegions:
+    histos[reg] = {}
+    for eType in electronTypes:
+      histos[reg][eType] = {}
+      for jet in jetBins:
+        hist = tfile.Get(histoBaseName.format(sample='QCDFakes_DATA',type=eType,region=reg,jets=jet,varName=varName))
+        histos[reg][eType][jet] = hist
+        #print 'added histo:',hist.GetName(),'with entries:',hist.GetEntries(),'to','['+reg+']['+eType+']['+jet+']'
+
+
+def LoadHistosMC(histos,varName):
+  # we only care about electrons in the MC
+  eType = 'Electrons'
+  for reg in detectorRegions:
+    histos[reg]['MC'] = {}
+    for name in mcNames:
+      histos[reg][name] = {}
+    for jet in jetBins:
+      mcTotalHist = 0
+      for i,name in enumerate(mcNames):
+        histName = histoBaseName.format(type=eType,region=reg,jets=jet,sample=mcSamples[i],varName=varName)
+        hist = tfile.Get(histName)
+        histos[reg][name][jet] = hist
+        if not mcTotalHist:
+          #mcTotalHist = hist.Clone()
+          mcTotalHist = copy.deepcopy(hist)
+          mcTotalHist.SetName(histoBaseName.format(type=eType,region=reg,jets=jet,sample='MCTotal',varName=varName))
+        else:
+          mcTotalHist.Add(hist)
+      histos[reg]['MC'][jet] = mcTotalHist
 
 
 ####################################################################################################
@@ -129,240 +184,226 @@ def MakeFRCanvas(plotList,titleList,canTitle):
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/nov20_test/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec8_addPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec8_noPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec15_tightenJets/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec15_tightenJets/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec17_tightenJetsAddMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec18_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 tfile = TFile.Open(filename)
 
-histoBaseName = 'histo2D__{sample}__{type}_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
+writeOutput = False
 
-detectorRegions = ['Bar','End1','End2']
+histoBaseName = 'histo2D__{sample}__{type}_{region}_{jets}{varName}'
+
 electronTypes = ['Jets','Electrons','Total']
-jetBins = ['','1Jet_','2Jet_','3Jet_']
-histos = {}
-for reg in detectorRegions:
-  histos[reg] = {}
-  for eType in electronTypes:
-    histos[reg][eType] = {}
-    for jet in jetBins:
-      hist = tfile.Get(histoBaseName.format(sample='QCDFakes_DATA',type=eType,region=reg,jets=jet))
-      histos[reg][eType][jet] = hist
-      #print 'added histo:',hist.GetName(),'with entries:',hist.GetEntries(),'to','['+reg+']['+eType+']['+jet+']'
-
-# for MC
-histoNameZ = 'histo2D__ZJet_amcatnlo_ptBinned__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-histoNameW = 'histo2D__WJet_amcatnlo_ptBinned__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-histoNameTTBar = 'histo2D__TTbar_powheg__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-histoNameST = 'histo2D__SingleTop__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-histoNameGJets = 'histo2D__PhotonJets_Madgraph__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-histoNameDiboson = 'histo2D__DIBOSON_amcatnlo__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
 detectorRegions = ['Bar','End1','End2']
 jetBins = ['','1Jet_','2Jet_','3Jet_']
-for reg in detectorRegions:
-  histos[reg]['MC'] = {}
-  for jet in jetBins:
-    histZ = tfile.Get(histoNameZ.format(type=eType,region=reg,jets=jet))
-    histW = tfile.Get(histoNameW.format(type=eType,region=reg,jets=jet))
-    histTTBar = tfile.Get(histoNameTTBar.format(type=eType,region=reg,jets=jet))
-    histST = tfile.Get(histoNameST.format(type=eType,region=reg,jets=jet))
-    histGJets = tfile.Get(histoNameGJets.format(type=eType,region=reg,jets=jet))
-    histDiboson = tfile.Get(histoNameDiboson.format(type=eType,region=reg,jets=jet))
-    hist = histZ.Clone()
-    hist.Add(histW)
-    hist.Add(histTTBar)
-    hist.Add(histST)
-    hist.Add(histGJets)
-    hist.Add(histDiboson)
-    histos[reg]['MC'][jet] = hist
+# for MC
+mcSamples = ['ZJet_amcatnlo_ptBinned','WJet_amcatnlo_ptBinned','TTbar_powheg','SingleTop','PhotonJets_Madgraph','DIBOSON']
+mcNames = ['ZJets','WJets','TTBar','ST','GJets','Diboson']
+
+varNameList = ['TrkIsoHEEP7vsPt_PAS','TrkIsoHEEP7vsMTenu_PAS']
+
+allHistos = {}
+for varName in varNameList:
+    allHistos[varName] = {}
+    LoadHistosData(allHistos[varName],varName)
+    LoadHistosMC(allHistos[varName],varName)
+
+
 
 
 myCanvases = []
+if writeOutput:
+  outputFile = TFile('plots.root','recreate')
+  outputFile.cd()
 #TEST end2 FR plots
-# get Muzamil's hist
-#tfileMuzamil = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR2D2JetScEt.root')
-tfileMuzamil = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR0JET_HLT.root')
-muzHist2D = tfileMuzamil.Get('Endcap_Fake_Rate')
-muzHistEnd2ZeroJ = muzHist2D.ProjectionX('projMuzEnd2_0Jets',2,2)
-# get Sam's hist
+# get Muzamil's hists
+tfileMuzamilTwoJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR2D2JetScEt.root')
+tfileMuzamilZeroJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR0JET_HLT.root')
+muzHist2DZeroJ = tfileMuzamilZeroJ.Get('Endcap_Fake_Rate')
+muzHist2DZeroJBar = tfileMuzamilZeroJ.Get('Barrel_Fake_Rate')
+muzHistEnd2ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd2_0Jets',2,2)
+muzHistEnd1ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd1_0Jets',1,1)
+muzHistBarZeroJ = muzHist2DZeroJBar.ProjectionX('projMuzBar_0Jets')
+# get Sam's hists
 tfileZPrime = TFile('/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleAnalyzerV2/versionsOfAnalysis_fakeRateCalc/dec8/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root')
 zprimeHistEnd2ZeroJ = tfileZPrime.Get('frHistEEHigh')
+zprimeHistEnd1ZeroJ = tfileZPrime.Get('frHistEELow')
+zprimeHistBarZeroJ = tfileZPrime.Get('frHistEB')
+# my hists
+histos = allHistos['TrkIsoHEEP7vsPt_PAS']
 graphEnd2ZeroJ = MakeFakeRatePlot('End2','',histos)
 graphEnd2ZeroJMC = MakeFakeRatePlot('End2','',histos,False)
+graphEnd1ZeroJ = MakeFakeRatePlot('End1','',histos)
+graphEnd1ZeroJMC = MakeFakeRatePlot('End1','',histos,False)
+graphBarZeroJ = MakeFakeRatePlot('Bar','',histos)
+graphBarZeroJMC = MakeFakeRatePlot('Bar','',histos,False)
+# for writing output
+histList = [graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ,
+    graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ,
+    graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ]
+
+
 titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})','Zprime (E_{T}^{HLT})']
 myCanvases.append(MakeFRCanvas([graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ],titleList,'Endcap2, >=0 jets'))
+myCanvases.append(MakeFRCanvas([graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ],titleList,'Endcap1, >=0 jets'))
+myCanvases.append(MakeFRCanvas([graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ],titleList,'Barrel, >=0 jets'))
 
-myCanvases[-1][0].Draw()
-myCanvases[-1][1].Draw()
+#for canLeg in myCanvases:
+#    canLeg[0].Draw() #canvas
+#    #canLeg[-1][1].Draw() #legend
 
-#canEnd2ZeroJ = TCanvas()
-#canEnd2ZeroJ.cd()
-#canEnd2ZeroJ.SetGridy()
-#canEnd2ZeroJ.SetTitle('Endcap2, >=0 jets')
-#graphEnd2ZeroJ.Draw('ap')
-#graphEnd2ZeroJ.GetXaxis().SetRangeUser(0,1000)
-#graphEnd2ZeroJ.GetXaxis().SetTitle('E_{T} [GeV]')
-#graphEnd2ZeroJ.GetYaxis().SetRangeUser(0,0.08)
-#graphEnd2ZeroJ.GetYaxis().SetNdivisions(510)
-#graphEnd2ZeroJ.SetMarkerColor(9)
-#graphEnd2ZeroJ.SetMarkerStyle(4)
-#graphEnd2ZeroJ.SetMarkerSize(0.8)
-#graphEnd2ZeroJ.SetLineColor(9)
-#graphEnd2ZeroJ.Draw('ap')
-# not data-driven but MC sub
-#graphEnd2ZeroJMC.SetMarkerColor(2)
-#graphEnd2ZeroJMC.SetLineColor(2)
-#graphEnd2ZeroJMC.SetLineStyle(2)
-#graphEnd2ZeroJMC.Draw('psames')
-#
-#zprimeHist.SetLineColor(kBlue)
-#zprimeHist.SetMarkerColor(kBlue)
-#zprimeHist.SetMarkerStyle(23)
-#zprimeHist.SetMarkerSize(0.9)
-#zprimeHist.SetStats(0)
-#zprimeHist.Draw('psames')
-#
-#muzHist.SetLineColor(6)
-#muzHist.SetMarkerColor(6)
-#muzHist.SetMarkerStyle(22)
-#muzHist.SetMarkerSize(0.9)
-#muzHist.SetStats(0)
-#muzHist.Draw('psames')
-#hsize=0.20
-#vsize=0.35
-##leg = TLegend(0.19,0.18,0.44,0.35)
-#leg = TLegend(0.38,0.71,0.63,0.88)
-#leg.SetFillColor(kWhite)
-#leg.SetFillStyle(1001)
-##leg.SetBorderSize(0)
-#leg.SetShadowColor(10)
-#leg.SetMargin(0.2)
-#leg.SetTextFont(132)
-#leg.AddEntry(graphEnd2ZeroJ,'Seth','lp')
-#leg.AddEntry(graphEnd2ZeroJMC,'Seth (MCSub)','lp')
-#leg.AddEntry(zprimeHist,'Zprime (E_{T}^{HLT})','lp')
-#leg.AddEntry(muzHist,'Muzamil (E_{T}^{HLT})','lp')
-#leg.Draw('same')
-#canEnd2ZeroJ.Modified()
-#canEnd2ZeroJ.Update()
-##
-##TEST end1
-##
-#graphEnd1ZeroJ = MakeFakeRatePlot('End1','',histos)
-#canEnd1ZeroJ = TCanvas()
-#canEnd1ZeroJ.cd()
-#canEnd1ZeroJ.SetGridy()
-#canEnd1ZeroJ.SetTitle('Endcap1, >=0 jets')
-#graphEnd1ZeroJ.Draw('ap')
-#graphEnd1ZeroJ.GetXaxis().SetRangeUser(0,1000)
-#graphEnd1ZeroJ.GetYaxis().SetRangeUser(0,0.1)
-#graphEnd1ZeroJ.GetYaxis().SetNdivisions(516)
-#graphEnd1ZeroJ.Draw('ap')
-## not data-driven but MC sub
-#graphEnd1ZeroJMC = MakeFakeRatePlot('End1','',histos,False)
-#graphEnd1ZeroJMC.SetMarkerColor(2)
-#graphEnd1ZeroJMC.SetLineColor(2)
-#graphEnd1ZeroJMC.SetLineStyle(2)
-#graphEnd1ZeroJMC.Draw('psames')
-## get Sam's hist
-#zprimeEnd1Hist = tfileZPrime.Get('frHistEELow')
-#zprimeEnd1Hist.SetLineColor(kBlue)
-#zprimeEnd1Hist.SetMarkerColor(kBlue)
-#zprimeEnd1Hist.Draw('psames')
-## get Muzamil's hist
-#muzEnd1HistHist2D = tfileMuzamil.Get('Endcap_Fake_Rate')
-#muzEnd1Hist = muzHist2D.ProjectionX('projMuzEnd1',1,1)
-#muzEnd1Hist.SetLineColor(6)
-#muzEnd1Hist.SetMarkerColor(6)
-#muzEnd1Hist.Draw('psames')
-#canEnd1ZeroJ.Modified()
-#canEnd1ZeroJ.Update()
-##
-##graphEnd2ZeroJMC.GetXaxis().SetRangeUser(0,1000)
-##graphEnd2ZeroJMC.GetYaxis().SetRangeUser(0,0.1)
-##graphEnd2ZeroJMC.GetYaxis().SetNdivisions(516)
-##graphEnd2ZeroJMC.Draw('ap')
-###
-## >= 2 jet
-#graphEnd2TwoJ = MakeFakeRatePlot('End2','2Jet_',histos)
-#canEnd2TwoJ = TCanvas()
-#canEnd2TwoJ.cd()
-#canEnd2TwoJ.SetGridy()
-#canEnd2TwoJ.SetTitle('Endcap2, >=2 jets')
-#graphEnd2TwoJ.Draw('ap')
-#graphEnd2TwoJ.GetXaxis().SetRangeUser(0,1000)
-#graphEnd2TwoJ.GetYaxis().SetRangeUser(0,0.1)
-#graphEnd2TwoJ.GetYaxis().SetNdivisions(516)
-#graphEnd2TwoJ.Draw('ap')
-##
-#graphEnd2TwoJMC = MakeFakeRatePlot('End2','2Jet_',histos,False)
-#graphEnd2TwoJMC.SetMarkerColor(2)
-#graphEnd2TwoJMC.SetLineColor(2)
-#graphEnd2TwoJMC.SetLineStyle(2)
-#graphEnd2TwoJMC.Draw('psames')
-## get Muzamil's hist
-#muzEnd2Hist2Jets2D = tfileMuzamil.Get('Endcap_Fake_Rate')
-#muzEnd2Hist2Jets = muzHist2D.ProjectionX('projMuzEnd2_2Jets',1,1)
-#muzEnd2Hist2Jets.SetLineColor(6)
-#muzEnd2Hist2Jets.SetMarkerColor(6)
-#muzEnd2Hist2Jets.Draw('psames')
-#canEnd2TwoJ.Modified()
-#canEnd2TwoJ.Update()
+##################################################
+# >= 1 jet
+##################################################
+##################################################
+if writeOutput:
+  outputFile.cd()
+# my hists
+graphEnd2OneJ = MakeFakeRatePlot('End2','1Jet_',histos)
+graphEnd2OneJMC = MakeFakeRatePlot('End2','1Jet_',histos,False)
+graphEnd1OneJ = MakeFakeRatePlot('End1','1Jet_',histos)
+graphEnd1OneJMC = MakeFakeRatePlot('End1','1Jet_',histos,False)
+graphBarOneJ = MakeFakeRatePlot('Bar','1Jet_',histos)
+graphBarOneJMC = MakeFakeRatePlot('Bar','1Jet_',histos,False)
+# for writing output
+histList.extend([graphEnd2OneJ,graphEnd2OneJMC,#muzHistEnd2OneJ,zprimeHistEnd2OneJ,
+    graphEnd1OneJ,graphEnd1OneJMC,#muzHistEnd1OneJ,zprimeHistEnd1OneJ,
+    graphBarOneJ,graphBarOneJMC])#,muzHistBarOneJ,zprimeHistBarOneJ])
 
+##################################################
+# >= 2 jet
+##################################################
+if writeOutput:
+  outputFile.cd()
+# Muzamil's plots
+muzHist2DTwoJ = tfileMuzamilTwoJ.Get('Endcap_Fake_Rate')
+muzHist2DTwoJBar = tfileMuzamilTwoJ.Get('Barrel_Fake_Rate')
+muzHistEnd2TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd2_2Jets',2,2)
+muzHistEnd1TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd1_2Jets',1,1)
+muzHistBarTwoJ = muzHist2DTwoJBar.ProjectionX('projMuzBar_2Jets')
+# my hists
+graphEnd2TwoJ = MakeFakeRatePlot('End2','2Jet_',histos)
+graphEnd2TwoJMC = MakeFakeRatePlot('End2','2Jet_',histos,False)
+graphEnd1TwoJ = MakeFakeRatePlot('End1','2Jet_',histos)
+graphEnd1TwoJMC = MakeFakeRatePlot('End1','2Jet_',histos,False)
+graphBarTwoJ = MakeFakeRatePlot('Bar','2Jet_',histos)
+graphBarTwoJMC = MakeFakeRatePlot('Bar','2Jet_',histos,False)
+# for writing output
+histList.extend([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ,
+    graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ,
+    graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ])
+
+titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})']
+myCanvases.append(MakeFRCanvas([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ],titleList,'Endcap2, >=2 jets'))
+myCanvases.append(MakeFRCanvas([graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ],titleList,'Endcap1, >=2 jets'))
+myCanvases.append(MakeFRCanvas([graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ],titleList,'Barrel, >=2 jets'))
+
+for canLeg in myCanvases:
+    canLeg[0].Draw() #canvas
+    #canLeg[-1][1].Draw() #legend
+
+
+
+exit(0)
+##################################################
 ## make Et plot
+##################################################
 #histoNameZ = 'histo2D__ZJet_amcatnlo_ptBinned__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
 #histoNameW = 'histo2D__WJet_amcatnlo_ptBinned__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
 #histoNameData = 'histo2D__QCDFakes_DATA__Electrons_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-#histoNameDataLoose = 'histo2D__QCDFakes_DATA__Total_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
-#histosPt = {}
-#for reg in detectorRegions:
-#  histosPt[reg] = {}
-#  histosPt[reg]['ZElectrons'] = {}
-#  histosPt[reg]['WElectrons'] = {}
-#  histosPt[reg]['DataLooseElectrons'] = {}
-#  histosPt[reg]['DataElectrons'] = {}
-#  for jet in jetBins:
-#    histo2D_MC = tfile.Get(histoNameZ.format(region=reg,jets=jet))
-#    proj_MC = histo2D_MC.ProjectionX('EtZ',histo2D_MC.GetYaxis().FindBin(0),histo2D_MC.GetYaxis().FindBin(5)-1)
-#    histosPt[reg]['ZElectrons'][jet] = proj_MC
-#    histo2D_MC = tfile.Get(histoNameW.format(region=reg,jets=jet))
-#    proj_MC = histo2D_MC.ProjectionX('EtW',histo2D_MC.GetYaxis().FindBin(0),histo2D_MC.GetYaxis().FindBin(5)-1)
-#    histosPt[reg]['WElectrons'][jet] = proj_MC
-#    histo2D_data = tfile.Get(histoNameDataLoose.format(region=reg,jets=jet))
-#    proj_data = histo2D_data.ProjectionX('EtDataLoose',histo2D_data.GetYaxis().FindBin(0),histo2D_data.GetYaxis().FindBin(5)-1)
-#    histosPt[reg]['DataLooseElectrons'][jet] = proj_data
-#    histo2D_data = tfile.Get(histoNameData.format(region=reg,jets=jet))
-#    proj_data = histo2D_data.ProjectionX('EtData',histo2D_data.GetYaxis().FindBin(0),histo2D_data.GetYaxis().FindBin(5)-1)
-#    histosPt[reg]['DataElectrons'][jet] = proj_data
-#    #print 'added histo:',hist.GetName(),' to ','['+reg+']['+eType+']['+jet+']'
-#canvasEt = TCanvas()
-#canvasEt.cd()
-#canvasEt.SetLogy()
-#reg = 'Bar'
-#jets = ''
-#rebinFactor = 20
-#histData = histosPt[reg]['DataElectrons'][jets]
-#histData.Rebin(rebinFactor)
-#stack = THStack()
-#histZ = histosPt[reg]['ZElectrons'][jets]
-#histZ.Rebin(rebinFactor)
-#histZ.SetLineColor(7)
-#histZ.SetLineWidth(2)
-#histZ.SetFillColor(7)
-#histZ.SetMarkerColor(7)
-#stack.Add(histZ)
-#histW = histosPt[reg]['WElectrons'][jets]
-#print 'W entries:',histW.GetEntries()
-#histW.Rebin(rebinFactor)
-#histW.SetLineColor(kBlue)
-#histW.SetLineWidth(2)
-#histW.SetFillColor(kBlue)
-#histW.SetMarkerColor(kBlue)
-#stack.Add(histW)
-#stack.Draw('hist')
-#stack.SetMaximum(1.2*histData.GetMaximum())
-#stack.SetMinimum(1e-1)
-#stack.GetXaxis().SetTitle('Et [GeV]')
-#stack.Draw('hist')
-#histData.Draw('psame')
+histoNameDataLoose = 'histo2D__QCDFakes_DATA__Total_{region}_{jets}TrkIsoHEEP7vsPt_PAS'
+histosPt = {}
+for reg in detectorRegions:
+  histosPt[reg] = {}
+  histosPt[reg]['ZElectrons'] = {}
+  histosPt[reg]['WElectrons'] = {}
+  histosPt[reg]['DataLooseElectrons'] = {}
+  histosPt[reg]['DataElectrons'] = {}
+  for jet in jetBins:
+    #histo2D_MC = tfile.Get(histoNameZ.format(region=reg,jets=jet))
+    histo2D_MC = histos[reg]['ZJets'][jet]
+    proj_MC = histo2D_MC.ProjectionX('EtZ',histo2D_MC.GetYaxis().FindBin(0),histo2D_MC.GetYaxis().FindBin(5)-1)
+    histosPt[reg]['ZElectrons'][jet] = proj_MC
+    #histo2D_MC = tfile.Get(histoNameW.format(region=reg,jets=jet))
+    histo2D_MC = histos[reg]['WJets'][jet]
+    proj_MC = histo2D_MC.ProjectionX('EtW',histo2D_MC.GetYaxis().FindBin(0),histo2D_MC.GetYaxis().FindBin(5)-1)
+    histosPt[reg]['WElectrons'][jet] = proj_MC
+    histo2D_data = tfile.Get(histoNameDataLoose.format(region=reg,jets=jet))
+    proj_data = histo2D_data.ProjectionX('EtDataLoose',histo2D_data.GetYaxis().FindBin(0),histo2D_data.GetYaxis().FindBin(5)-1)
+    histosPt[reg]['DataLooseElectrons'][jet] = proj_data
+    #histo2D_data = tfile.Get(histoNameData.format(region=reg,jets=jet))
+    histo2D_data = histos[reg]['Electrons'][jet]
+    proj_data = histo2D_data.ProjectionX('EtData',histo2D_data.GetYaxis().FindBin(0),histo2D_data.GetYaxis().FindBin(5)-1)
+    histosPt[reg]['DataElectrons'][jet] = proj_data
+    #print 'added histo:',hist.GetName(),' to ','['+reg+']['+eType+']['+jet+']'
 
+canvasEt = TCanvas()
+canvasEt.cd()
+canvasEt.SetLogy()
+reg = 'Bar'
+jets = ''
+rebinFactor = 20
+histData = histosPt[reg]['DataElectrons'][jets]
+histData.Rebin(rebinFactor)
+histDataLoose = histosPt[reg]['DataLooseElectrons'][jets]
+histDataLoose.Rebin(rebinFactor)
+histDataLoose.SetMarkerColor(kRed)
+histDataLoose.SetLineColor(kRed)
+histDataLoose.SetLineStyle(2)
+#
+stack = THStack()
+histZ = histosPt[reg]['ZElectrons'][jets]
+histZ.Rebin(rebinFactor)
+histZ.SetLineColor(7)
+histZ.SetLineWidth(2)
+histZ.SetFillColor(7)
+histZ.SetMarkerColor(7)
+stack.Add(histZ)
+histW = histosPt[reg]['WElectrons'][jets]
+#print 'W entries:',histW.GetEntries()
+histW.Rebin(rebinFactor)
+histW.SetLineColor(kBlue)
+histW.SetLineWidth(2)
+histW.SetFillColor(kBlue)
+histW.SetMarkerColor(kBlue)
+stack.Add(histW)
+stack.Draw('hist')
+stack.SetMaximum(1.2*histData.GetMaximum())
+stack.SetMinimum(1e-1)
+stack.GetXaxis().SetTitle('Et [GeV]')
+stack.Draw('hist')
+histData.Draw('psame')
+histDataLoose.Draw('psame')
+legEt = TLegend(0.38,0.71,0.63,0.88)
+legEt.SetFillColor(kWhite)
+legEt.SetFillStyle(1001)
+legEt.SetBorderSize(0)
+legEt.SetShadowColor(10)
+legEt.SetMargin(0.2)
+legEt.SetTextFont(132)
+legEt.AddEntry(histZ,'ZJets','lp')
+legEt.AddEntry(histW,'WJets','lp')
+legEt.AddEntry(histData,'Data','lp')
+legEt.AddEntry(histDataLoose,'Data (loose e)','lp')
+legEt.Draw()
+canvasEt.Modified()
+canvasEt.Update()
+low=800
+high=1000
+print 'integrals in 800-1000:'
+print 'dataLoose=',histDataLoose.Integral(histDataLoose.FindBin(low),histDataLoose.FindBin(high)-1)
+print 'dataEle=',histData.Integral(histData.FindBin(low),histData.FindBin(high)-1)
+print 'WEle=',histW.Integral(histW.FindBin(low),histW.FindBin(high)-1)
+print 'ZEle=',histZ.Integral(histZ.FindBin(low),histZ.FindBin(high)-1)
+
+
+if writeOutput:
+    for hist in histList:
+        hist.Write()
+    outputFile.Close()
 
 #histo2D_DY_zeroJ = tfile.Get('histo2D__ZJet_amcatnlo_ptBinned__Electrons_End1_TrkIsoHEEP7vsPt_PAS')
 #histo2D_Jets_zeroJ = tfile.Get('histo2D__QCDFakes_DATA__Jets_End1_TrkIsoHEEP7vsPt_PAS')
