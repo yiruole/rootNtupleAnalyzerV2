@@ -14,8 +14,8 @@ class QCDFakeRate {
   
   void addHistoBarrel  ( TH2F* histo ) { histoBarrel = histo; };
   void addHistoEndcap  ( TH2F* histo ) { histoEndcap = histo; };
-  float GetFakeRate(const float& eta, const float& et);
-  float GetFakeRateError(const float& eta, const float& et);
+  float GetFakeRate(const float& eta, const float& et, bool verbose=false);
+  float GetFakeRateError(const float& eta, const float& et, bool verbose=false);
 
  private:
   //TFile* qcdTFile;
