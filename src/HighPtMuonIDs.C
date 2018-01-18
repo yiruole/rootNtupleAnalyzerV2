@@ -12,8 +12,6 @@ bool HighPtMuon::PassUserID (ID id, bool verbose){
 
 bool HighPtMuon::PassUserID_HighPtMuon_TrackRelIso01 ( bool verbose ){
 
-  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
-  
   bool pass_isGlobal  = bool ( IsGlobal()                   == 1   );
   bool pass_muonHits  = bool ( GlobalTrkValidHits()          > 0   );
   bool pass_stations  = bool ( StationMatches()              > 1   );

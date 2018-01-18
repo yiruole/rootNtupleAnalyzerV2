@@ -6,10 +6,13 @@
 
 bool Muon::PassUserID (ID id, bool verbose){ 
   if      ( id == MUON_HIGH_PT_TRKRELISO03 ) return PassUserID_MuonHighPt_TrkRelIso03 ( verbose );
-  else if ( id == MUON_TIGHT_PFISO04TIGHT  ) return PassUserID_MuonTight_PFIso04Tight ( verbose );
-  else if ( id == MUON_LOOSE_PFISO04LOOSE  ) return PassUserID_MuonLoose_PFIso04Loose ( verbose );
+  //else if ( id == MUON_TIGHT_PFISO04TIGHT  ) return PassUserID_MuonTight_PFIso04Tight ( verbose );
+  //else if ( id == MUON_LOOSE_PFISO04LOOSE  ) return PassUserID_MuonLoose_PFIso04Loose ( verbose );
   else if ( id == MUON_FIDUCIAL            ) return PassUserID_MuonFiducial      ( verbose );
-  else return false;
+  else {
+    std::cerr << "ERROR: Could not find implementation for requested MuonId: " << id << "; quitting." << std::endl;
+    exit(-111);
+  }
 }
 
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
@@ -53,36 +56,36 @@ bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
   return decision;
 }
 
-// see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
-//   since Run I: changed PFISO cut from 0.12 to 0.15
-bool Muon::PassUserID_MuonTight_PFIso04Tight ( bool verbose ){
-
-  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
-  
-  bool pass_isGlobal  = bool ( IsGlobal()                   == 1   );
-  bool pass_isPF      = bool ( IsPFMuon()                   == 1   );
-  bool pass_chi2      = bool ( GlobalChi2 ()                 < 10. );
-  bool pass_muonHits  = bool ( GlobalTrkValidHits()          > 0   );
-  bool pass_stations  = bool ( StationMatches()              > 1   );
-  bool pass_dxy       = bool ( fabs(BestTrackVtxDistXY())    < 0.2 );
-  bool pass_dz        = bool ( fabs(BestTrackVtxDistZ ())    < 0.5 );
-  bool pass_pixelHits = bool ( TrkPixelHits()                > 0   );
-  bool pass_trkLayers = bool ( TrackLayersWithMeasurement()  > 5   );
-  bool pass_pfiso04   = bool ( pfiso04                       < 0.15);
-  
-  bool decision = ( pass_isGlobal  && 
-		    pass_isPF      && 
-		    pass_chi2      && 
-		    pass_muonHits  && 
-		    pass_stations  && 
-		    pass_dxy       && 
-		    pass_dz        && 
-		    pass_pixelHits && 
-		    pass_trkLayers && 
-		    pass_pfiso04   );
-  
-  return decision;
-}
+//// see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
+////   since Run I: changed PFISO cut from 0.12 to 0.15
+//bool Muon::PassUserID_MuonTight_PFIso04Tight ( bool verbose ){
+//
+//  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
+//  
+//  bool pass_isGlobal  = bool ( IsGlobal()                   == 1   );
+//  bool pass_isPF      = bool ( IsPFMuon()                   == 1   );
+//  bool pass_chi2      = bool ( GlobalChi2 ()                 < 10. );
+//  bool pass_muonHits  = bool ( GlobalTrkValidHits()          > 0   );
+//  bool pass_stations  = bool ( StationMatches()              > 1   );
+//  bool pass_dxy       = bool ( fabs(BestTrackVtxDistXY())    < 0.2 );
+//  bool pass_dz        = bool ( fabs(BestTrackVtxDistZ ())    < 0.5 );
+//  bool pass_pixelHits = bool ( TrkPixelHits()                > 0   );
+//  bool pass_trkLayers = bool ( TrackLayersWithMeasurement()  > 5   );
+//  bool pass_pfiso04   = bool ( pfiso04                       < 0.15);
+//  
+//  bool decision = ( pass_isGlobal  && 
+//		    pass_isPF      && 
+//		    pass_chi2      && 
+//		    pass_muonHits  && 
+//		    pass_stations  && 
+//		    pass_dxy       && 
+//		    pass_dz        && 
+//		    pass_pixelHits && 
+//		    pass_trkLayers && 
+//		    pass_pfiso04   );
+//  
+//  return decision;
+//}
 
 bool Muon::PassUserID_MuonFiducial ( bool verbose ) {
   if ( IsMuonFiducial() ) return true;
@@ -90,18 +93,18 @@ bool Muon::PassUserID_MuonFiducial ( bool verbose ) {
 }
 
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
-bool Muon::PassUserID_MuonLoose_PFIso04Loose ( bool verbose ){
-  bool pass_isGlobal   = bool ( IsGlobal()                   == 1   );
-  bool pass_isTracker  = bool ( IsTracker()                  == 1   );
-  bool pass_isPF       = bool ( IsPFMuon()                   == 1   );
-
-  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
-  bool pass_pfiso04   = bool ( pfiso04                       < 0.25); // loose iso
-  
-  bool decision = (pass_isGlobal || pass_isTracker) &&
-    pass_isPF &&
-    pass_pfiso04;
-
-  return decision;
-}
+//bool Muon::PassUserID_MuonLoose_PFIso04Loose ( bool verbose ){
+//  bool pass_isGlobal   = bool ( IsGlobal()                   == 1   );
+//  bool pass_isTracker  = bool ( IsTracker()                  == 1   );
+//  bool pass_isPF       = bool ( IsPFMuon()                   == 1   );
+//
+//  double pfiso04 = ( PFIsoR04ChargedHadron() + std::max (0., PFIsoR04NeutralHadron() + PFIsoR04Photon() - ( 0.5 * PFIsoR04PU() ))) / Pt();
+//  bool pass_pfiso04   = bool ( pfiso04                       < 0.25); // loose iso
+//  
+//  bool decision = (pass_isGlobal || pass_isTracker) &&
+//    pass_isPF &&
+//    pass_pfiso04;
+//
+//  return decision;
+//}
 
