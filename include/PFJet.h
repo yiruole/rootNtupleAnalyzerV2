@@ -42,7 +42,7 @@ class PFJet : public Object {
   
   // BTag variables
   
-  float CombinedSecondaryVertexBTag ();
+  //float CombinedSecondaryVertexBTag ();
   float CombinedInclusiveSecondaryVertexBTag();
   float CombinedMVABTag();
   
