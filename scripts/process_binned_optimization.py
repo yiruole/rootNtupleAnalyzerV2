@@ -13,7 +13,13 @@ def parse_txt_file (verbose=False):
     # and a collection of cuts
     #-----------------------------------------------------------------
 
-    for line in txt_file:
+    totLines = sum(1 for line in txt_file)
+    txt_file.seek(0)
+    for idx,line in enumerate(txt_file):
+        if (idx%1000)==0:
+            print_str = 'Reading line number '+str(idx)+' out of '+str(totLines)
+            sys.stdout.write('%s\r' % print_str)
+            sys.stdout.flush()
 
         #-----------------------------------------------------------------
         # First, get the important data from the line
@@ -91,8 +97,10 @@ def parse_txt_file (verbose=False):
                 d_binNumber_cutVariable_cutValue [ bin_number ][ this_cut_variable ] = this_cut_value
             else:
                 print "ERROR: This should never happen!"
+                txt_file.close()
                 sys.exit()
 
+    txt_file.close()
     return
 
     #-----------------------------------------------------------------
@@ -280,30 +288,36 @@ intLumi=35867.0 # in pb
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/enujj_crab_psk_apr6_topPtWeight_recoHeepSF_reminiAOD_sele27wptightEta2p1CurveMC/analysisClass_lq_enujj_MT_plots.root"
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may23_ele27OrEle115/analysisClass_lq_eejj_plots.root"
 #mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.root"
-mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+#mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+mc_filepath         = os.environ["LQDATA"] + "/2016opt/eejj_psk_nov27_fixTrigEff_finalSels_muonVetoDef20GeV_nEleGte2/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
 #mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
-mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_oct6/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
+#mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_oct6/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
+mc_filepath_enujj   = os.environ["LQDATA"] + "/2016opt/enujj_psk_jan19/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.root"
 
 #k_jun1_reminiAOD_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_opt/analysisClass_lq_enujj_MT_plots.rootejj_crab_psk_may30_properEle27OrEle115OrPhoton175/analysisClass_lq_eejj_plots.rootqcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_apr13_ele27wptightOrEle115/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
 #qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_enujj_apr11/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
 #qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjQCD_psk_crab_may22/analysisClass_lq_eejj_QCD_plots.root"
 #qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/qcd_eejj_may29_ele27wptightOrEle115OrPhoton175/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
-qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejj_QCD_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
-qcd_data_filepath_enujj = os.environ["LQDATA"] + "/2016opt/qcd_enujj_psk_jun1_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
+#qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejj_QCD_psk_oct4_ptEECut/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
+qcd_data_filepath = os.environ["LQDATA"] + "/2016opt/eejj_QCD_psk_nov27_finalSels_muonVeto35GeV_nEleGte2/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+#qcd_data_filepath_enujj = os.environ["LQDATA"] + "/2016opt/qcd_enujj_psk_jun1_ele27wptightOREle115ORPhoton175/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
+qcd_data_filepath_enujj = os.environ["LQDATA"] + "/2016opt/enujj_QCD_jan19/output_cutTable_lq_enujj_MT_QCD_opt/analysisClass_lq_enujj_QCD_plots.root"
 
 # for eejj
 #ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/eejjTTBar_crab_psk_apr11_ele27OrEle115/analysisClass_lq_ttbarEst_plots.root"
 #ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may22_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
 #ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/may30_ttbarBkg_emujj/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
-ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/oct2_emujj_ptEE_eejjOptFinalSels/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
+#ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/oct2_emujj_ptEE_eejjOptFinalSels/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
+ttbar_data_filepath = os.environ["LQDATA"] + "/2016opt/nov19_emujj_ttbar/output_cutTable_lq_ttbar_emujj_correctTrig_opt/analysisClass_lq_ttbarEst_plots.root"
 #
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/apr11_ele27OrEle115/optimization/optimizationCuts.txt"
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may23/opt/optimizationCuts.txt"
 #txt_file_path        = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/apr11_testOpt/optimizationCuts.txt"
-txt_file_path_eejj   = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/may30/opt/optimizationCuts.txt"
-txt_file_path_enujj  = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/jun2/opt/optimizationCuts.txt"
+txt_file_path_eejj   = os.environ["LQANA"] + "/versionsOfAnalysis_eejj/2017/may30/opt/optimizationCuts.txt"
+#txt_file_path_enujj  = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/jun2/opt/optimizationCuts.txt"
+txt_file_path_enujj  = os.environ["LQANA"] + "/versionsOfAnalysis_enujj/jan17/opt_jan19/optimizationCuts.txt"
 #
-doEEJJ = False
+doEEJJ = True
 # if false, uses asymptotic significance formula
 usePunzi = True
 
@@ -317,7 +331,7 @@ d_eejj_background_filepaths = {
     "wjet"  : [ "WJet_amcatnlo_ptBinned"    , mc_filepath  , 1.0  ],
     "zjet"  : [ "ZJet_amcatnlo_ptBinned"    , mc_filepath  , 1.0  ],
     "stop"  : [ "SingleTop"           , mc_filepath  , 1.0  ],
-    "vv"    : [ "DIBOSON"             , mc_filepath  , 1.0  ],
+    "vv"    : [ "DIBOSON_amcatnlo"    , mc_filepath  , 1.0  ],
     "gjet"  : [ "PhotonJets_Madgraph" , mc_filepath  , 1.0  ] 
 }
 
@@ -330,7 +344,7 @@ d_enujj_background_filepaths = {
     "wjet"  : [ "WJet_amcatnlo_ptBinned"    , mc_filepath_enujj  , 1.0  ],
     "zjet"  : [ "ZJet_amcatnlo_ptBinned"    , mc_filepath_enujj  , 1.0  ],
     "stop"  : [ "SingleTop"           , mc_filepath_enujj  , 1.0  ],
-    "vv"    : [ "DIBOSON"             , mc_filepath_enujj  , 1.0  ],
+    "vv"    : [ "DIBOSON_amcatnlo"    , mc_filepath_enujj  , 1.0  ],
     "gjet"  : [ "PhotonJets_Madgraph" , mc_filepath_enujj  , 1.0  ] 
 }
 
@@ -604,7 +618,7 @@ d_cutValuesString_binNumber      = {}
 ####################################################################################################
 # Run!
 ####################################################################################################
-print 'Parsing txt file',txt_file_path,'...',
+print 'Parsing txt file',txt_file_path,'...'
 sys.stdout.flush()
 parse_txt_file ()
 print "Parsed."
