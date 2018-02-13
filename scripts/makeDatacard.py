@@ -8,13 +8,33 @@ from ROOT import *
 
 from combineCommon import *
 
-def GetStatErrors(nevts):
-    nevts = int(nevts)
+def GetStatErrors(nevts, theta=1.0, nScaledEvents=-1):
+    #nevts = int(nevts)
+    if nScaledEvents==-1:
+        # this is the case for data, as there's no scaling
+        nScaledEvents=nevts
     alpha = 1.0 - 0.6827
     #print 'calculate errors on nevts=',nevts
-    l = 0 if nevts==0 else ROOT.Math.gamma_quantile(alpha/2.0,nevts,1.0)
-    u = ROOT.Math.gamma_quantile_c(alpha/2.0,nevts+1,1.0)
-    return u-nevts,nevts-l
+    if nevts < 0:
+      print 'ERROR: nevts < 0:',nevts
+      return -999,-999
+    if theta < 0:
+      print 'ERROR: theta < 0:',theta
+      return -999,-999
+    # if nevts=0, lower error is zero
+    # if scaled events is zero, lower error is also zero. For amc@NLO with negative weights, or ttbar data driven (subtracting MC),
+    #   it can be the case that nevts>0 but nScaledEvents<=0 (set to zero previously)
+    l = 0 if nevts==0 or nScaledEvents==0 else ROOT.Math.gamma_quantile(alpha/2.0,nevts,theta)
+    u = ROOT.Math.gamma_quantile_c(alpha/2.0,nevts+1,theta)
+    #return u-nevts,nevts-l
+    return u-nScaledEvents,nScaledEvents-l
+
+
+def GetStatErrorFromDict(statErrDict, mass):
+    availMasses = sorted(statErrDict.keys())
+    if mass not in availMasses and mass > availMasses[-1]:
+        mass = availMasses[-1]
+    return statErrDict[mass]
 
 
 def GetBackgroundSyst(background_name, selectionName):
@@ -248,7 +268,9 @@ def FindUnscaledSampleRootFile(sampleName, bkgType=''):
 
 
 def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sampleName,selection,isDataOrQCD=False,isTTBarFromData=False):
-    #print 'GetRatesAndErrors(',unscaledRootFile,combinedRootFile,unscaledTotalEvts,sampleName,selection,isDataOrQCD,')'
+    verbose = False
+    if verbose:
+      print 'GetRatesAndErrors(',unscaledRootFile,combinedRootFile,unscaledTotalEvts,sampleName,selection,isDataOrQCD,')'
     if selection=='preselection':
         selection = 'PAS'
     if doEEJJ:
@@ -275,17 +297,21 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
         #rate = mejHist.Integral()
         rate = mejHist.IntegralAndError(1,mejHist.GetNbinsX()+1,rateErr)
         unscaledHist = mejUnscaledRawHist.Clone()
-        unscaledHist.Add(mejNonTTBarHist,-1)
+        #unscaledHist.Add(mejNonTTBarHist,-1) #LQ2 only uses emujj data events
         #integ = mejUnscaledHist.IntegralAndError(1,mejUnscaledHist.GetNbinsX(),rateErr)
         #print 'mejUnscaled:',integ,',+/-',rateErr
         #scaledHist = unscaledHist.Clone()
         #scaledHist.Scale(0.436873)
         #integ = mejScaledHist.IntegralAndError(1,mejScaledHist.GetNbinsX(),rateErr)
         #print 'mejScaled:',integ,',+/-',rateErr
-        unscaledRate = unscaledHist.Integral()
-        unscaledRateErr = mejHist.IntegralAndError(1,mejHist.GetNbinsX()+1,rateErr)
-        #print 'TTBARFROMDATA-->rate=',rate,'+/-',rateErr
-        #print 'using hist:',mejHist.GetName(),'from file:',combinedRootFile
+        #unscaledRate = unscaledHist.Integral()
+        unscaledRateErr = Double(0)
+        unscaledRate = unscaledHist.IntegralAndError(1,mejHist.GetNbinsX()+1,unscaledRateErr)
+        if verbose:
+          print 'using unscaled (minus nonttbarMC) hist:',unscaledHist.GetName(),'from file:',combinedRootFile.GetName()
+          print 'TTBARFROMDATA-->rate=',rate,'+/-',rateErr
+          print 'mejUnscaled:',unscaledRate,',+/-',unscaledRateErr
+          print 'using hist:',mejHist.GetName(),'from file:',combinedRootFile.GetName()
         return rate,rateErr,unscaledRate
     #mejHist = combinedRootFile.Get('histo1D__'+sampleName+histName+'_'+selection)
     #if not mejHist:
@@ -336,7 +362,11 @@ def GetUnscaledTotalEvents(unscaledRootFile,isTTBarData=False):
         unscaledEvtsHist = unscaledRootFile.Get('EventsPassingCuts')
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
     else:
-        unscaledEvtsHist = unscaledRootFile.Get('histo1D__TTBarFromDATA__EventsPassingCuts')
+        #scaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
+        unscaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttBarUnscaledRawSampleName+'__EventsPassingCuts')
+        #nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
+        #unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
+        #print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
     return unscaledTotalEvts
 
@@ -411,10 +441,11 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
                       exit(-1)
                     unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile,bkgType=='TTData')
                     sampleUnscaledTotalEvts+=unscaledTotalEvts
-                    # preselection
-                    #print '------>Call GetRatesAndErrors for sampleName=',bkgSample
                     rate,rateErr,unscaledRate = GetRatesAndErrors(bkgUnscaledRootFile,scaledRootFile,unscaledTotalEvts,bkgSample,selectionName,not bkgType=='MC',bkgType=='TTData')
-                    #print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
+                    #if bkgType=='TTData':
+                    #  print '------>Called GetRatesAndErrors for sampleName=',bkgSample
+                    #  print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
+                    #  print '------>from file=:',bkgUnscaledRootFilename
                     #if isQCD:
                     #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
                     sampleRate+=rate
@@ -562,7 +593,7 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 ###################################################################################################
 
 blinded=True
-doEEJJ=False
+doEEJJ=True
 
 #mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
 #mass_points = [str(i) for i in range(200,1550,50)] # go from 200-1500 in 50 GeV steps
@@ -571,7 +602,8 @@ mass_points = [str(i) for i in range(200,2050,50)] # go from 200-2000 in 50 GeV 
 if doEEJJ:
   signal_names = [ "LQ_M_" ] 
   systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "DYShape" ]
-  background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
+  #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
+  background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON_amcatnlo","SingleTop" ]
   syst_background_names = ['GJets', 'QCDFakes_DATA', 'TTBarFromDATA', 'DY', 'WJets', 'Diboson', 'Singletop']
   maxLQselectionBkg = 'LQ1200' # max background selection point used
   systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER" ]
@@ -579,7 +611,8 @@ else:
   signal_names = [ "LQ_BetaHalf_M_" ] 
   systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "MET", "WShape", "TTShape" ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_amcatnlo_Inc", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
-  background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
+  #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
+  background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON_amcatnlo","SingleTop" ]
   syst_background_names = ['GJets', 'QCDFakes_DATA', 'TTbar', 'DY', 'WJets', 'Diboson', 'Singletop']
   maxLQselectionBkg = 'LQ900' # max background selection point used
   systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "MET" ]
@@ -590,13 +623,16 @@ minLQselectionBkg='LQ200'
 if doEEJJ:
   #zjetsSF = 1.05
   #zjetsSFerr = 0.01
-  zjetsSF = 0.9815
-  zjetsSFerr = 0.0075
+  #zjetsSF = 0.9815
+  zjetsSF = 0.9742
+  zjetsSFerr = 0.0076
   zJetNormDeltaXOverX=zjetsSFerr/zjetsSF
 # add Wjets scale factor norm for enujj
 else:
-  zjetsSF = 0.823
-  zjetsSFerr = 0.008
+  #zjetsSF = 0.823
+  #zjetsSFerr = 0.008
+  zjetsSF = 0.8782
+  zjetsSFerr = 0.0067
   zJetNormDeltaXOverX=zjetsSFerr/zjetsSF
 # for ttbar, we have 0.037 stat error on the scale factor of 0.83
 # min SF is 0.665 (wrt dataDriven)
@@ -614,19 +650,20 @@ if doEEJJ:
   ttBarNormDeltaXOverX = 0.01
   ttbarSampleName='TTBarFromDATA'
   ttBarUnscaledRawSampleName='TTBarUnscaledRawFromDATA'
-  nonTTBarSampleName='NONTTBARBKG_amcatnloPt_emujj'
+  #nonTTBarSampleName='NONTTBARBKG_amcatnloPt_emujj'
+  nonTTBarSampleName='NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj'
 else:
   ttBarNormDeltaXOverX = 0.01
   ttbarSampleName='TTbar_powheg'
   ttBarUnscaledRawSampleName='TTbar_powheg'
-  nonTTBarSampleName='NONTTBARBKG_amcatnloPt'
+  #nonTTBarSampleName='NONTTBARBKG_amcatnloPt'
 
 # update to 2016 analysis numbers
-# QCDNorm is 0.40 [40% norm uncertainty for eejj = uncertaintyPerElectron*2]
+# QCDNorm is 0.50 [50% norm uncertainty for eejj = uncertaintyPerElectron*2]
 if doEEJJ:
-  qcdNormDeltaXOverX = 0.40
+  qcdNormDeltaXOverX = 0.50
 else:
-  qcdNormDeltaXOverX = 0.20
+  qcdNormDeltaXOverX = 0.25
 
 n_background = len ( background_names  )
 # all bkg systematics, plus stat 'systs' for all bkg plus signal plus 3 backNormSysts
@@ -649,24 +686,61 @@ d_data_totalEvents = {}
 intLumi = 35867.0
 
 if doEEJJ:
-  inputList = os.environ["LQANA"]+'/config/PSKeejj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
   sampleListForMerging = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_eejj.txt'
   sampleListForMergingQCD = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_QCD_dataDriven.txt'
   sampleListForMergingTTBar = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_ttbarBkg_emujj.txt'
-  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/sep29_ptEE/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
-  filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_oct6_ptEECut_updateFinalSels/output_cutTable_lq_eejj/'
-  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_psk_oct6_ptEECut_actualUpdateFinalSels/output_cutTable_lq_eejj_QCD/'
-  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/oct6_emujj_ptEE_updateFinalSels/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #inputList = os.environ["LQANA"]+'/config/PSKeejj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/sep29_ptEE/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_oct6_ptEECut_updateFinalSels/output_cutTable_lq_eejj/'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_psk_oct6_ptEECut_actualUpdateFinalSels/output_cutTable_lq_eejj_QCD/'
+  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/oct6_emujj_ptEE_updateFinalSels/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #
+  #inputList = os.environ["LQANA"]+'/config/PSKeejj_nov15_SEleL_reminiaod_v236_eoscms_comb/inputListAllCurrent.txt'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/nov24_muonVeto35GeV/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_jan20_updateFinalSels/output_cutTable_lq_eejj/'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016analysis/eejj_QCD_jan20_finalSels/output_cutTable_lq_eejj_QCD/'
+  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/jan20_emujj_correctTrig_finalSelections/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  ##filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_jan19_updateFinalSels/output_cutTable_lq_eejj/'
+  ##qcdFilePath = os.environ["LQDATA"] + '/2016analysis/eejj_QCD_jan19_finalSels/output_cutTable_lq_eejj_QCD/'
+  ##ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/jan19_emujj_correctTrig_finalSelections/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #
+  inputList = os.environ["LQANA"]+'/config/PSKeejj_jan22_SEleL_v237_eoscms_comb/inputListAllCurrent.txt'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb1/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_jan26_gsfEtaCheck_finalSels/output_cutTable_lq_eejj/'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_jan26_gsfEtaCheck_finalSels/output_cutTable_lq_eejj_QCD/'
+  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb2_newSkim_emujj_correctTrig_finalSelections/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #
+  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb11/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb10_bugfix/output_cutTable_lq_eejj/'
+  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_feb10_bugfix/output_cutTable_lq_eejj_QCD/'
+  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb11_emujj_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  # calculated with fitForStatErrs.py script. mass, stat. uncert.
+  statErrorsSingleTop = { 800: 1.10, 850: 0.85, 900: 0.67, 950: 0.53, 1000: 0.42, 1050: 0.33 }
+  # here we increased the fit range
+  statErrorsPhotonJets = { 450:3.72 ,500:2.93 ,550:2.31 ,600:1.82 ,650:1.46 ,700:1.15 ,750:0.92 ,800:0.74 ,850:0.58 ,900:0.47 ,950:0.38 ,1000:0.30 ,1050:0.25  }
 else:
-  inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
   sampleListForMerging = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_enujj.txt'
   sampleListForMergingQCD = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_QCD_dataDriven.txt'
+  inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/oct6_finerTrigEff/unscaled/btagCR/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
-  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/oct6_finerTrigEff/unscaled/njetCR/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
-  filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_oct6_finerBinnedTrigEff_updateFinalSels/output_cutTable_lq_enujj_MT/'
-  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_psk_oct6_updateFinalSels/output_cutTable_lq_enujj_MT_QCD/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/oct6_finerTrigEff/unscaled/njetCR/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_oct6_finerBinnedTrigEff_updateFinalSels/output_cutTable_lq_enujj_MT/'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_psk_oct6_updateFinalSels/output_cutTable_lq_enujj_MT_QCD/'
   #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_sep13_ele27wptightOREle115ORPhoton175_enujjPowhegOptFinalSels/output_cutTable_lq_enujj_MT/'
   #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_psk_jul1_ele27wptightOREle115ORPhoton175_enujjOptFinalSels/output_cutTable_lq_enujj_MT_QCD/'
+  #
+  #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_jan20_usePtHeep_finalSels/output_cutTable_lq_enujj_MT/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/jan17/unscaled/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_newRsk237_jan20_finalSels/output_cutTable_lq_enujj_MT_QCD/'
+  #
+  #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_feb4_v237_MET100_PtEMET70/output_cutTable_lq_enujj_MT/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/feb4_ptEMet/unscaled/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_newRsk237_feb4_gsfEtaCheck_MET100_PtEMET70/output_cutTable_lq_enujj_MT_QCD/'
+  #ttbarFilePath = filePath
+  #
+  filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_feb10_v237_bugfix/output_cutTable_lq_enujj_MT/'
+  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/feb11/unscaled/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
+  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_feb10_bugfix//output_cutTable_lq_enujj_MT_QCD/'
   ttbarFilePath = filePath
 
 # this has the TopPtReweight+updatedSF and the Z+jets St corrections at final selections
@@ -933,10 +1007,12 @@ for i_signal_name, signal_name in enumerate(signal_names):
             else: 
                 # for small uncertainties, use gamma distribution with alpha=(factor to go to signal region from control/MC)
                 # since we can't compute evts/entries, we use it from the preselection (following LQ2)
-                if thisBkgEvts > 0:
-                  gmN_weight = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
-                else:
-                  gmN_weight = 0.0
+                gmN_weight = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
+                # special handling of stat errors for small backgrounds
+                if doEEJJ and background_name=='SingleTop':
+                    gmN_weight = GetStatErrorFromDict(statErrorsSingleTop,int(selectionName.replace('LQ','')))
+                elif doEEJJ and background_name=='PhotonJets_Madgraph':
+                    gmN_weight = GetStatErrorFromDict(statErrorsPhotonJets,int(selectionName.replace('LQ','')))
             
             line_ln = "stat_" + background_name + " lnN -"
             line_gm = "stat_" + background_name + " gmN " + str(int(thisBkgTotalEntries)) + " -"
@@ -972,7 +1048,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
           lnN_f = 1.0 + 1.0/math.sqrt(thisSigTotalEntries+1) # Poisson becomes Gaussian, approx by logN with this kappa
           gmN_weight = thisSigEvts / thisSigTotalEntries
         else:
-          # THIS IS BROKEN FIXME
+          # THIS IS BROKEN FIXME ???
           gmN_weight = d_signal_rates[background_name]['preselection'] / d_signal_unscaledRates[background_name]['preselection']
         line_ln = "stat_Signal lnN " + str(lnN_f)
         line_gm = "stat_Signal gmN " + str(int(thisBkgTotalEntries)) + " " + str(gmN_weight)
@@ -1001,11 +1077,12 @@ else:
 #for bn in background_names:
 #  columnNames.append(bn)
 if doEEJJ:
-  otherBackgrounds = ['PhotonJets_Madgraph','WJet_amcatnlo_ptBinned','DIBOSON','SingleTop']
+  otherBackgrounds = ['PhotonJets_Madgraph','WJet_amcatnlo_ptBinned','DIBOSON_amcatnlo','SingleTop']
 else:
-  otherBackgrounds = ['PhotonJets_Madgraph','ZJet_amcatnlo_ptBinned','DIBOSON','SingleTop']
+  otherBackgrounds = ['PhotonJets_Madgraph','ZJet_amcatnlo_ptBinned','DIBOSON_amcatnlo','SingleTop']
 #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_Madgraph", "WJet_Madgraph_HT", "ZJet_Madgraph_HT", "DIBOSON","SingleTop"  ]
-latexRows = []
+latexRowsAN = []
+latexRowsPaper = []
 t = PrettyTable(columnNames)
 t.float_format = "4.3"
 selectionNames = ['LQ'+mass_point for mass_point in mass_points]
@@ -1036,17 +1113,41 @@ for i_signal_name, signal_name in enumerate(signal_names):
         otherBackgroundErrStatDown = 0.0
         for i_background_name ,background_name in enumerate(background_names):
             thisBkgEvts = d_background_rates[background_name][selectionName]
+            thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgEvtsErrUp = d_background_rateErrs[background_name][selectionName]
             thisBkgEvtsErrDown = thisBkgEvtsErrUp
             thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
             backgroundEvtsErrIsAsymm[background_name] = False
-            #if thisBkgEvts==0.0:
-            if thisBkgTotalEntries < 10.0:
-                #thisBkgEvtsErr = 1.8 # error is +1.8 from StatComm: twiki.cern.ch/twiki/bin/view/CMS/PoissonErrorBars
-                thisBkgEvtsErrUp,thisBkgEvtsErrDown = GetStatErrors(thisBkgTotalEntries)
-                rateOverUnscaledRatePresel = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
-                thisBkgEvtsErrUp *= rateOverUnscaledRatePresel
-                thisBkgEvtsErrDown *= rateOverUnscaledRatePresel
+            if thisBkgTotalEntries <= 10.0:
+                if thisBkgEvts > 0.0:
+                    thisBkgEvtsErrUp,thisBkgEvtsErrDown = GetStatErrors(thisBkgTotalEntries,thisBkgEvts/thisBkgTotalEntries,thisBkgEvts)
+                    print 'INFO:  using:',background_name,': selection',selectionName,' thisBkgEvts=',thisBkgEvts,'thisBkgTotalEntries=',thisBkgTotalEntries,'thisBkgEvtsErr=',thisBkgEvtsErr
+                    print 'INFO:      thisBkgEvtsErrUp=',thisBkgEvtsErrUp,'; thisBkgEvtsErrDown=',thisBkgEvtsErrDown,'nevts=',thisBkgTotalEntries,'theta=',thisBkgEvts/thisBkgTotalEntries
+                    if thisBkgEvtsErrUp < 0 or thisBkgEvtsErrDown < 0:
+                        print 'ERROR:  thisBkgEvtsErrUp=',thisBkgEvtsErrUp,'; thisBkgEvtsErrDown=',thisBkgEvtsErrDown,'nevts=',thisBkgTotalEntries,'theta=',thisBkgEvts/thisBkgTotalEntries
+                        print 'ERROR:      using:',background_name,': selection',selectionName,'thisBkgEvts=',thisBkgEvts,'thisBkgTotalEntries=',thisBkgTotalEntries,'thisBkgEvtsErr=',thisBkgEvtsErr
+                        #exit(-1)
+                else:
+                    rateOverUnscaledRatePresel = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
+                    thisBkgEvtsErrUp,thisBkgEvtsErrDown = GetStatErrors(thisBkgTotalEntries,rateOverUnscaledRatePresel,thisBkgEvts)
+                    # special handling of stat errors for small backgrounds
+                    if doEEJJ and background_name=='SingleTop':
+                        thisBkgEvtsErrDown=0
+                        thisBkgEvtsErrUp = GetStatErrorFromDict(statErrorsSingleTop,int(selectionName.replace('LQ','')))
+                    elif doEEJJ and background_name=='PhotonJets_Madgraph':
+                        thisBkgEvtsErrDown=0
+                        thisBkgEvtsErrUp = GetStatErrorFromDict(statErrorsPhotonJets,int(selectionName.replace('LQ','')))
+                    print 'INFO:  using:',background_name,': selection',selectionName,' thisBkgEvts=',thisBkgEvts,'thisBkgTotalEntries=',thisBkgTotalEntries,'thisBkgEvtsErr=',thisBkgEvtsErr
+                    print 'INFO:      thisBkgEvtsErrUp=',thisBkgEvtsErrUp,'; thisBkgEvtsErrDown=',thisBkgEvtsErrDown,'nevts=',thisBkgTotalEntries,'theta=',rateOverUnscaledRatePresel,'[preselection]'
+                    if thisBkgEvtsErrUp < 0 or thisBkgEvtsErrDown < 0:
+                        print 'ERROR:  thisBkgEvtsErrUp=',thisBkgEvtsErrUp,'; thisBkgEvtsErrDown=',thisBkgEvtsErrDown,'nevts=',thisBkgTotalEntries,'theta=',rateOverUnscaledRatePresel,'[preselection]'
+                        print 'ERROR:      using:',background_name,': selection',selectionName,' thisBkgEvts=',thisBkgEvts,'thisBkgTotalEntries=',thisBkgTotalEntries,'thisBkgEvtsErr=',thisBkgEvtsErr
+                        #exit(-1)
+                #rateOverUnscaledRatePresel = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
+                #thisBkgEvtsErrUp,thisBkgEvtsErrDown = GetStatErrors(thisBkgTotalEntries,rateOverUnscaledRatePresel)
+                ##rateOverUnscaledRatePresel = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']
+                ##thisBkgEvtsErrUp *= rateOverUnscaledRatePresel
+                ##thisBkgEvtsErrDown *= rateOverUnscaledRatePresel
                 backgroundEvtsErrIsAsymm[background_name] = True
                 backgroundEvtsErrUp[background_name] = thisBkgEvtsErrUp
                 backgroundEvtsErrDown[background_name] = thisBkgEvtsErrDown
@@ -1057,11 +1158,11 @@ for i_signal_name, signal_name in enumerate(signal_names):
             totalBackgroundErrStatUp+=(thisBkgEvtsErrUp*thisBkgEvtsErrUp)
             totalBackgroundErrStatDown+=(thisBkgEvtsErrDown*thisBkgEvtsErrDown)
             totalBackgroundErrSyst+=(thisBkgSystErr*thisBkgSystErr)
-            if selectionName=='preselection':
-              print 'background:',background_name,'thisBkgEvents =',thisBkgEvts,'GetBackgroundSyst(syst_background_names['+str(i_background_name)+'],'+selectionName+')=',thisBkgSyst
-              print 'thisBkgSystErr=',math.sqrt(thisBkgSystErr)
-              print 'updated totalBackgroundErrSyst',math.sqrt(totalBackgroundErrSyst)
-              #print 'totalBackgound=',totalBackground
+            #if selectionName=='preselection':
+            #  print 'background:',background_name,'thisBkgEvents =',thisBkgEvts,'GetBackgroundSyst(syst_background_names['+str(i_background_name)+'],'+selectionName+')=',thisBkgSyst
+            #  print 'thisBkgSystErr=',math.sqrt(thisBkgSystErr)
+            #  print 'updated totalBackgroundErrSyst',math.sqrt(totalBackgroundErrSyst)
+            #  #print 'totalBackgound=',totalBackground
             if background_name in otherBackgrounds:
               otherBackground+=thisBkgEvts
               otherBackgroundErrStatUp+=(thisBkgEvtsErrUp*thisBkgEvtsErrUp)
@@ -1099,7 +1200,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         row.extend([
             GetTableEntryStr(backgroundEvts['QCDFakes_DATA'],backgroundEvtsErrUp['QCDFakes_DATA'],backgroundEvtsErrDown['QCDFakes_DATA']),
             #GetTableEntryStr(otherBackground,otherBackgroundErrStatUp,otherBackgroundErrStatDown),
-            GetTableEntryStr(backgroundEvts['DIBOSON'],backgroundEvtsErrUp['DIBOSON'],backgroundEvtsErrDown['DIBOSON']),
+            GetTableEntryStr(backgroundEvts['DIBOSON_amcatnlo'],backgroundEvtsErrUp['DIBOSON_amcatnlo'],backgroundEvtsErrDown['DIBOSON_amcatnlo']),
             GetTableEntryStr(backgroundEvts['SingleTop'],backgroundEvtsErrUp['SingleTop'],backgroundEvtsErrDown['SingleTop']),
             ])
         if doEEJJ:
@@ -1112,8 +1213,8 @@ for i_signal_name, signal_name in enumerate(signal_names):
           GetTableEntryStr(thisDataEvents),
           ])
         t.add_row(row)
-        # latex table
-        latexRow = [selectionName,
+        # latex tables
+        latexRow = [selectionName.replace('LQ',''),
             GetTableEntryStr(thisSigEvts,thisSigEvtsErr,thisSigEvtsErr,latex=True), # assumes we always have > 0 signal events
             ]
         if doEEJJ:
@@ -1127,10 +1228,18 @@ for i_signal_name, signal_name in enumerate(signal_names):
             #GetTableEntryStr(backgroundEvts['TTbar_amcatnlo_Inc'],backgroundEvtsErrUp['TTbar_amcatnlo_Inc'],backgroundEvtsErrDown['TTbar_amcatnlo_Inc'],latex=True)
             GetTableEntryStr(backgroundEvts['TTbar_powheg'],backgroundEvtsErrUp['TTbar_powheg'],backgroundEvtsErrDown['TTbar_powheg'],latex=True)
             ])
+        latexRowPaper = list(latexRow) # copy the list
+        # for the paper, we want VV, W/Z, single t, GJets in a single column; then background and data
+        latexRowPaper.extend([
+            GetTableEntryStr(backgroundEvts['QCDFakes_DATA'],backgroundEvtsErrUp['QCDFakes_DATA'],backgroundEvtsErrDown['QCDFakes_DATA'],latex=True),
+            GetTableEntryStr(otherBackground,otherBackgroundErrStatUp,otherBackgroundErrStatDown,latex=True),
+            GetTableEntryStr(totalBackground,totalBackgroundErrStatUp,totalBackgroundErrStatDown,totalBackgroundErrSyst,True),
+            GetTableEntryStr(thisDataEvents,latex=True)])
+        # for the AN, break down the other backgrounds
         latexRow.extend([
             GetTableEntryStr(backgroundEvts['QCDFakes_DATA'],backgroundEvtsErrUp['QCDFakes_DATA'],backgroundEvtsErrDown['QCDFakes_DATA'],latex=True),
             #GetTableEntryStr(otherBackground,otherBackgroundErrStatUp,otherBackgroundErrStatDown,latex=True),
-            GetTableEntryStr(backgroundEvts['DIBOSON'],backgroundEvtsErrUp['DIBOSON'],backgroundEvtsErrDown['DIBOSON'],latex=True),
+            GetTableEntryStr(backgroundEvts['DIBOSON_amcatnlo'],backgroundEvtsErrUp['DIBOSON_amcatnlo'],backgroundEvtsErrDown['DIBOSON_amcatnlo'],latex=True),
             GetTableEntryStr(backgroundEvts['SingleTop'],backgroundEvtsErrUp['SingleTop'],backgroundEvtsErrDown['SingleTop'],latex=True),
             ])
         if doEEJJ:
@@ -1143,6 +1252,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             GetTableEntryStr(thisDataEvents,latex=True),
             ])
         latexRow = ['$'+entry+'$' if not 'LQ' in entry and not 'pres' in entry else entry for entry in latexRow ]
+        latexRowPaper = ['$'+entry+'$' if not 'LQ' in entry and not 'pres' in entry else entry for entry in latexRowPaper ]
         for i,rowEntry in enumerate(latexRow):
             if i<len(latexRow)-1:
                 #rowEntry+=' & '
@@ -1150,16 +1260,33 @@ for i_signal_name, signal_name in enumerate(signal_names):
             else:
                 #rowEntry+=' \\\\ '
                 latexRow[i]+=' \\\\ '
-        latexRows.append(''.join(latexRow))
+        latexRowsAN.append(''.join(latexRow))
+        #
+        for i,rowEntry in enumerate(latexRowPaper):
+            if i<len(latexRowPaper)-1:
+                latexRowPaper[i]+=' & '
+            else:
+                latexRowPaper[i]+=' \\\\ '
+        latexRowsPaper.append(''.join(latexRowPaper))
         if selectionName=='preselection':
-          latexRows.append('\\hline')
+          latexRowsAN.append('\\hline')
+          latexRowsPaper.append('\\hline')
 print t
 
 print
-# latex table
-for line in latexRows:
+print 'Latex table: AN'
+print
+# latex table -- AN
+for line in latexRowsAN:
   print(line)
 print
 
+print
+print 'Latex table: Paper'
+print
+# latex table -- Paper
+for line in latexRowsPaper:
+  print(line)
+print
 exit(0)
 
