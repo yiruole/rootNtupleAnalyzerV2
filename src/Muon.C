@@ -45,7 +45,7 @@ int    Muon::TrackLayersWithMeasurement(){ return m_collection -> GetData() -> M
 
 std::ostream& operator<<(std::ostream& stream, Muon& object) {
   stream << object.Name() << " " << ": "
-	 << "Pt = "  << object.Pt ()    << ", "
+	 << "Pt = "  << object.Pt ()    << " +/- " << object.PtError() << ", "
 	 << "Eta = " << object.Eta()    << ", "
 	 << "Phi = " << object.Phi();
   return stream;
