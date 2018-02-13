@@ -18,19 +18,22 @@ def makePaperTableLine(cutList,title):
 gROOT.SetBatch(True)
 
 # XXX must modify this by hand
-isEEJJ = False
+isEEJJ = True
 if isEEJJ:
-  maxMassPointToUse = 1200 # eejj
+  maxMassPointToUse = 1050 # eejj, last point where nB > 1
+  #maxMassPointToUse = 1100 # eejj, last point where nB > 1
   #optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/may30/opt/cutOffFitRange/optimization.root'
-  optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/sep29_ptEE/opt/optimization.root'
+  #optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/sep29_ptEE/opt/optimization.root'
+  optimizationFileName = '$LQANA/versionsOfAnalysis_eejj/nov24_muonVeto35GeV/opt/optimization.root'
 else:
   #maxMassPointToUse = 900 # enujj
   #maxMassPointToUse = 1200 # last point where we have nB > 1
-  maxMassPointToUse = 1200 # last point where we have nB > 5
+  maxMassPointToUse = 1200 # last point where we have nB > 1
   #optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/jun2/opt/cutOffFitRange/optimization.root'
   #optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/aug9/opt_fromJun2processing/powhegTTBar/optimization.root'
   #optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/oct6_oldOptUpdateRescale/optimization.root'
-  optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/oct6_finerTrigEff/opt/optimization.root'
+  #optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/oct6_finerTrigEff/opt/optimization.root'
+  optimizationFileName = '$LQANA/versionsOfAnalysis_enujj/jan17/opt_jan19/optimization.root'
 
 optimizationTFile = TFile.Open(optimizationFileName)
 optimizationTFile.cd()
@@ -110,7 +113,8 @@ for key in gDirectory.GetListOfKeys():
         mg.GetYaxis().SetTitleSize(0.04)
         mg.GetYaxis().SetTitleOffset(1.0)
         mg.Draw('ap')
-        leg = TLegend(0.5,0.2,0.85,0.3)
+        #leg = TLegend(0.5,0.2,0.85,0.3)
+        leg = TLegend(0.17,0.78,0.42,0.88)
         leg.SetBorderSize(1)
         leg.AddEntry(graph,'"Raw result" of optimization','p')
         leg.AddEntry(fitFunction,'Fit (pol2) of "raw result"','l')
