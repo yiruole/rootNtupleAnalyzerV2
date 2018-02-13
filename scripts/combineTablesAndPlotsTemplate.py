@@ -551,7 +551,9 @@ if options.ttbarBkg:
     # FIXME: we hardcode the sample names for now
     ttbarDataRawSampleName = 'TTBarUnscaledRawFromDATA'
     ttbarDataPredictionTable = dictFinalTables[ttbarDataRawSampleName]
-    nonTTbarAMCBkgSampleName = 'NONTTBARBKG_amcatnloPt_emujj'
+    #nonTTbarAMCBkgSampleName = 'NONTTBARBKG_amcatnloPt_emujj'
+    # move to amcAtNLO diboson
+    nonTTbarAMCBkgSampleName = 'NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj'
     nonTTbarAMCBkgTable = dictFinalTables[nonTTbarAMCBkgSampleName]
     ttBarPredName = 'TTBarFromDATA'
     # from Jul4 Ele27OREle115ORPhoton175 amc@NLO
@@ -560,10 +562,17 @@ if options.ttbarBkg:
     ## from Jul4 Ele27OREle115ORPhoton175 powheg
     #Rfactor = 0.436873 # Ree,emu = Nee/Nemu[TTbarMC]
     #errRfactor = 0.002086
-    # from Oct2 powheg with PtEE>70 GeV [updated Oct. 6]
-    Rfactor = 0.43789 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.002683
+    ## from Oct2 powheg with PtEE>70 GeV [updated Oct. 6]
+    #Rfactor = 0.43789 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.002683
+    ## from Nov19 powheg with PtEE>70 GeV
+    #Rfactor = 0.434050 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.002669
+    # from feb2 new skim, powheg with deltaEtaEleTrk cut
+    Rfactor = 0.478972 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.002991
     print 'TTBar data-driven: Using Rfactor =',Rfactor,'+/-',errRfactor
+    print 'TTBar data-driven: Using non-ttbar background sample:',nonTTbarAMCBkgSampleName
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     #WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
