@@ -140,7 +140,7 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
       # check to make sure dataset in xsec file up to first underscore matches the datasetNameFromInputList
       # this should catch a case where we have TT as the datasetNameFromInputList [e.g., powheg] and it would otherwise match TTJets in the xsec file
       if datasetNameFromInputList.startswith(dataset.split('_')[0]):
-        print 'INFO: found dataset in xsec file:',dataset,'that starts with the one we are asking for:',datasetNameFromInputList
+        #print 'INFO: found dataset in xsec file:',dataset,'that starts with the one we are asking for:',datasetNameFromInputList
         return xsectionDict[dataset]
   print
   print 'ERROR'
