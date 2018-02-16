@@ -275,6 +275,8 @@ if not foundAllFiles:
 else:
     print '\bDone.  All root/dat files are present.'
 
+if not options.tablesOnly:
+    outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
 
 # loop over samples defined in sampleListForMerging
 for sample,pieceList in dictSamples.iteritems():
@@ -483,9 +485,22 @@ for sample,pieceList in dictSamples.iteritems():
               else:
                 updateSample(dictFinalHisto[sample],htemp,h,toBeUpdated,plotWeight)
                 h+=1
-        # SIC: will this be OK?
         file.Close()
-
+     
+    # done with this sample
+    # write histos
+    if not options.tablesOnly:
+        outputTfile.cd()
+        nHistos = len(dictFinalHisto[sample])
+        print 'Writing',nHistos,'histos...',
+        sys.stdout.flush()
+        for histo in dictFinalHisto[sample].itervalues(): # for each hist contained in the sample's dict
+            histo.Write()
+        # if this is not a ttbar sample, we don't need the hists later, so dump them
+        if not 'tt' in sample.lower():
+            dictFinalHisto[sample] = {}
+        print 'Done'
+         
 
 # validation of combining pieces
 for sample,pieceList in dictSamples.iteritems():
@@ -540,9 +555,12 @@ if options.ttbarBkg:
     ## from Nov19 powheg with PtEE>70 GeV
     #Rfactor = 0.434050 # Ree,emu = Nee/Nemu[TTbarMC]
     #errRfactor = 0.002669
-    # from feb2 new skim, powheg with deltaEtaEleTrk cut
-    Rfactor = 0.478972 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.002991
+    ## from feb2 new skim, powheg with deltaEtaEleTrk cut
+    #Rfactor = 0.478972 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.002991
+    # from feb13, updated muon scale factors
+    Rfactor = 0.484022 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.003023
     print 'TTBar data-driven: Using Rfactor =',Rfactor,'+/-',errRfactor
     print 'TTBar data-driven: Using non-ttbar background sample:',nonTTbarAMCBkgSampleName
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
@@ -567,36 +585,37 @@ if options.ttbarBkg:
 outputTableFile.close()
 
 
-# write histos
 if not options.tablesOnly:
-    outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
-    
-    #if not options.ttbarBkg:
-    # get total hists
-    nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-    # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
-    #maxSteps = 50
-    #if nHistos < maxSteps:
-    #  steps = nHistos
-    #else:
-    #  steps = maxSteps
-
-    print 'Writing histos:'
-    #progressString = '0% ['+' '*steps+'] 100%'
-    #print progressString,
-    #print '\b'*(len(progressString)-3),
-    #sys.stdout.flush()
-
-    nForProgress = 0
-    for histDict in dictFinalHisto.itervalues(): # for each sample's dict
-        for histo in histDict.itervalues(): # for each hist contained in the sample's dict
-            #if (nForProgress % (nHistos/steps))==0:
-            #    print '\b.',
-            #    sys.stdout.flush()
-            histo.Write()
-            nForProgress+=1
-    
-    #print '\b] 100%'
+## write histos
+#if not options.tablesOnly:
+#    outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
+#    
+#    #if not options.ttbarBkg:
+#    # get total hists
+#    nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
+#    # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
+#    #maxSteps = 50
+#    #if nHistos < maxSteps:
+#    #  steps = nHistos
+#    #else:
+#    #  steps = maxSteps
+#
+#    print 'Writing histos:'
+#    #progressString = '0% ['+' '*steps+'] 100%'
+#    #print progressString,
+#    #print '\b'*(len(progressString)-3),
+#    #sys.stdout.flush()
+#
+#    nForProgress = 0
+#    for histDict in dictFinalHisto.itervalues(): # for each sample's dict
+#        for histo in histDict.itervalues(): # for each hist contained in the sample's dict
+#            #if (nForProgress % (nHistos/steps))==0:
+#            #    print '\b.',
+#            #    sys.stdout.flush()
+#            histo.Write()
+#            nForProgress+=1
+#    
+#    #print '\b] 100%'
 
     #else:
     if options.ttbarBkg:
@@ -611,6 +630,7 @@ if not options.tablesOnly:
             ## also write histos that are subtracted
             #histToSub.Write()
             #print 'n=',n,'histo=',histo
+            outputTfile.cd()   
             histoTTbarPred = histo.Clone()
             histoTTbarPred.Add(histoToSub,-1)
             # scale by Rfactor
