@@ -8,6 +8,21 @@ from ROOT import *
 
 from combineCommon import *
 
+def GetFullSignalName(signal_name, mass_point):
+  verbose=False
+  fullSignalName = signal_name.replace('[masspoint]',mass_point)
+  if verbose:
+    print 'GetFullSignalName(): signal_name=',signal_name,'fullSignalName=',fullSignalName
+  if 'BetaHalf' in signal_name:
+      signalNameForFile = 'LQToUE_ENuJJFilter_M-'+mass_point+'_BetaHalf'
+  elif 'LQ' in signal_name:
+      signalNameForFile = 'LQToUE_M-'+mass_point+'_BetaOne'
+  elif 'Stop' in signal_name:
+      ctau = signal_name[signal_name.find('CTau')+4:]
+      #print 'found ctau=',ctau,'in signal_name:',signal_name,'mass point:',mass_point
+      signalNameForFile = 'DisplacedSUSY_StopToBL_M-'+mass_point+'_CTau-'+ctau
+  return fullSignalName,signalNameForFile
+
 def GetStatErrors(nevts, theta=1.0, nScaledEvents=-1):
     #nevts = int(nevts)
     if nScaledEvents==-1:
@@ -471,13 +486,23 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 
     # signals
     for i_signal_name, signal_name in enumerate(signal_names):
+        doMassPointLoop=True
         for i_mass_point, mass_point in enumerate(mass_points):
-          if 'BetaHalf' in signal_name:
-              #signalNameForFile = 'LQToUE_' #FIXME
-              signalNameForFile = 'LQToUE_ENuJJFilter_M-'+mass_point+'_BetaHalf'
+          #if 'BetaHalf' in signal_name:
+          #    #signalNameForFile = 'LQToUE_' #FIXME
+          #    signalNameForFile = 'LQToUE_ENuJJFilter_M-'+mass_point+'_BetaHalf'
+          #else:
+          #    signalNameForFile = 'LQToUE_M-'+mass_point+'_BetaOne'
+          #fullSignalName = signal_name+mass_point
+          fullSignalName,signalNameForFile = GetFullSignalName(signal_name,mass_point)
+          if '[masspoint]' in signal_name:
+            selectionName = 'LQ'+mass_point
           else:
-              signalNameForFile = 'LQToUE_M-'+mass_point+'_BetaOne'
-          fullSignalName = signal_name+mass_point
+            # figure out mass point from name. currently the only case for this is RPV stop, where they are like 'Stop_M100_CTau100'
+            selectionName = 'LQ'+signal_name.split('_')[1].replace('M','')
+            #print 'use selection name=',selectionName
+            doMassPointLoop=False
+          #print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
           unscaledRootFilename = FindUnscaledSampleRootFile(signalNameForFile)
           unscaledRootFile = TFile.Open(unscaledRootFilename)
           unscaledTotalEvts = GetUnscaledTotalEvents(unscaledRootFile)
@@ -501,11 +526,15 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
           unscaledRootFile.Close()
 
           # fill full dicts
-          signalFullName = signal_name + mass_point
+          #signalFullName = signal_name + mass_point
+          signalFullName = fullSignalName
+          #print 'fill d_signal_rates['+signalFullName+']'
           d_signal_rates[signalFullName] = sigRatesDict
           d_signal_rateErrs[signalFullName] = sigRateErrsDict
           d_signal_unscaledRates[signalFullName] = sigUnscaledRatesDict
           d_signal_totalEvents[signalFullName] = sigTotalEvts
+          if not doMassPointLoop:
+            break
 
     # DATA
     sampleList = dictSamples['DATA']
@@ -596,14 +625,21 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 ###################################################################################################
 
 blinded=True
-doEEJJ=False
+doEEJJ=True
+doRPV=True
 
-#mass_points = [str(i) for i in range(300,1550,50)] # go from 300-1500 in 50 GeV steps
-#mass_points = [str(i) for i in range(200,1550,50)] # go from 200-1500 in 50 GeV steps
-mass_points = [str(i) for i in range(200,2050,50)] # go from 200-2000 in 50 GeV steps
-#systematics = [ "jes", "ees", "shape", "norm", "lumi", "eer", "jer", "pu", "ereco", "pdf" ]
+if doRPV:
+  mass_points = [str(i) for i in range(200,1250,100)] # go from 200-1200 in 100 GeV steps
+else:
+  # LQ case
+  mass_points = [str(i) for i in range(200,2050,50)] # go from 200-2000 in 50 GeV steps
 if doEEJJ:
-  signal_names = [ "LQ_M_" ] 
+  if doRPV:
+    signal_names = [ "Stop_M[masspoint]_CTau1000","Stop_M[masspoint]_CTau100","Stop_M[masspoint]_CTau10","Stop_M[masspoint]_CTau1"] 
+    # put in some more signals that don't fit the general pattern
+    signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
+  else:
+    signal_names = [ "LQ_M[masspoint]" ] 
   systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "DYShape", 'DY_Norm', "Diboson_shape" ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
   background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON_amcatnlo","SingleTop" ]
@@ -611,7 +647,7 @@ if doEEJJ:
   maxLQselectionBkg = 'LQ1200' # max background selection point used
   systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER" ]
 else:
-  signal_names = [ "LQ_BetaHalf_M_" ] 
+  signal_names = [ "LQ_BetaHalf_M[masspoint]" ] 
   systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "MET", "WShape", 'W_Norm', "TTShape", 'TT_Norm', "Diboson_shape" ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_amcatnlo_Inc", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
@@ -857,9 +893,21 @@ card_file_path = "tmp_card_file.txt"
 card_file = open ( card_file_path, "w" ) 
 
 for i_signal_name, signal_name in enumerate(signal_names):
+    doMassPointLoop=True
     for i_mass_point, mass_point in enumerate(mass_points):
-        fullSignalName = signal_name + mass_point
-        selectionName = 'LQ'+mass_point
+        print 'consider signal_name=',signal_name
+        #fullSignalName = signal_name.replace('[masspoint]',mass_point)
+        fullSignalName,signalNameForFile = GetFullSignalName(signal_name,mass_point)
+        if '[masspoint]' in signal_name:
+          selectionName = 'LQ'+mass_point
+        else:
+          # figure out mass point from name. currently the only case for this is RPV stop, where they are like 'Stop_M100_CTau100'
+          mass = int(signal_name.split('_')[1].replace('M',''))
+          if mass < 200:
+            mass = 200
+          selectionName = 'LQ'+str(mass)
+          #print 'use selection name=',selectionName,'for fullSignalName=',fullSignalName
+          doMassPointLoop=False
         
         txt_file_name = fullSignalName + ".txt\n"
 
@@ -892,7 +940,8 @@ for i_signal_name, signal_name in enumerate(signal_names):
             line = line + "bin1 " 
         card_file.write (line + "\n") 
 
-        line = "process " + signal_name + mass_point + " "
+        #line = "process " + signal_name + mass_point + " "
+        line = "process " + fullSignalName + " "
         for background_name in background_names:
             line = line + background_name + " "
         card_file.write (line + "\n") 
@@ -1076,7 +1125,9 @@ for i_signal_name, signal_name in enumerate(signal_names):
           gmN_weight = thisSigEvts / thisSigTotalEntries
         else:
           # THIS IS BROKEN FIXME ???
-          gmN_weight = d_signal_rates[background_name]['preselection'] / d_signal_unscaledRates[background_name]['preselection']
+          print 'WARN: found zero signal events ['+str(thisSigEvts)+'] for this signal:',fullSignalName,'and selection:',selectionName
+          #gmN_weight = d_signal_rates[background_name]['preselection'] / d_signal_unscaledRates[background_name]['preselection']
+          gmN_weight = 0.0
         line_ln = "stat_Signal lnN " + str(lnN_f)
         line_gm = "stat_Signal gmN " + str(int(thisBkgTotalEntries)) + " " + str(gmN_weight)
         for i_background_name ,background_name in enumerate(background_names):
@@ -1089,6 +1140,8 @@ for i_signal_name, signal_name in enumerate(signal_names):
 
         # DONE!
         card_file.write("\n\n\n")
+        if not doMassPointLoop:
+          break
 
 print 'datacard written to:',card_file_path
 
@@ -1117,7 +1170,10 @@ selectionNames.insert(0,'preselection')
 for i_signal_name, signal_name in enumerate(signal_names):
     for selectionName in selectionNames:
         massPoint = selectionName.replace('LQ','')
-        fullSignalName = signal_name + massPoint
+        #fullSignalName = signal_name + massPoint
+        fullSignalName,filename = GetFullSignalName(signal_name,massPoint)
+        # figure out mass point from name
+        signalMass = fullSignalName.split('_')[1].replace('M','')
         # signal events
         thisSigEvts = '-'
         thisSigEvtsErr = '-'
@@ -1125,6 +1181,10 @@ for i_signal_name, signal_name in enumerate(signal_names):
         if selectionName!='preselection':
             thisSigEvts = d_signal_rates[fullSignalName][selectionName]
             thisSigEvtsErr = d_signal_rateErrs[fullSignalName][selectionName]
+            # the signal name and mass point from the selection need to match
+            if int(signalMass) != int(massPoint):
+              continue
+        print 'INFO: thisSignal=',fullSignalName,'selection=',selectionName
         #print 'd_data_rates[data]['+selectionName+']'
         thisDataEvents = d_data_rates['DATA'][selectionName]
         backgroundEvts = {}
@@ -1229,7 +1289,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         #for bn in background_names:
         #  row.append(GetTableEntryStr(backgroundEvts[bn],backgroundEvtsErrUp[bn],backgroundEvtsErrDown[bn]))
         # actual
-        row = [selectionName,
+        row = [fullSignalName,#selectionName,
             GetTableEntryStr(thisSigEvts,thisSigEvtsErr,thisSigEvtsErr), # assumes we always have > 0 signal events
             ]
         if doEEJJ:
