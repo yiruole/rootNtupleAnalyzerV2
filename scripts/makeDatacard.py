@@ -23,7 +23,9 @@ def GetFullSignalName(signal_name, mass_point):
       signalNameForFile = 'DisplacedSUSY_StopToBL_M-'+mass_point+'_CTau-'+ctau
   return fullSignalName,signalNameForFile
 
+
 def GetStatErrors(nevts, theta=1.0, nScaledEvents=-1):
+    verbose=True
     #nevts = int(nevts)
     if nScaledEvents==-1:
         # this is the case for data, as there's no scaling
@@ -41,6 +43,8 @@ def GetStatErrors(nevts, theta=1.0, nScaledEvents=-1):
     #   it can be the case that nevts>0 but nScaledEvents<=0 (set to zero previously)
     l = 0 if nevts==0 or nScaledEvents==0 else ROOT.Math.gamma_quantile(alpha/2.0,nevts,theta)
     u = ROOT.Math.gamma_quantile_c(alpha/2.0,nevts+1,theta)
+    if verbose:
+      print 'calculate upper gamma quantile=',u,'for nevts=',nevts,'theta=',theta,'; scaledEvents=',nScaledEvents,'; upper error=',u-nScaledEvents
     #return u-nevts,nevts-l
     return u-nScaledEvents,nScaledEvents-l
 
@@ -53,7 +57,7 @@ def GetStatErrorFromDict(statErrDict, mass):
 
 
 def GetBackgroundSyst(background_name, selectionName):
-    verbose = False
+    verbose = True
     #if selectionName=='preselection':
     #  verbose=True
     if verbose:
@@ -82,7 +86,7 @@ def GetBackgroundSyst(background_name, selectionName):
       print 'firstSyst=',math.sqrt(firstSyst)
 
     # background-only special systs: "DYShape", "TTShape", "WShape"
-    specialSysts = ["DYShape",'DY_Norm','Diboson_shape'] if doEEJJ else ["WShape","TTShape",'W_Norm','TT_Norm','Diboson_shape']
+    specialSysts = ["DYShape",'DY_Norm','Diboson_shape'] if doEEJJ else ["WShape","TTShape",'W_Norm','W_btag_Norm','W_RMt_Norm','TT_Norm','TTbar_btag_Norm','Diboson_shape']
     for syst in specialSysts:
         if 'TTBarFromDATA' in background_name or 'DY' in syst and not 'DY' in background_name or 'TT' in syst and not 'TT' in background_name or 'W' in syst and not 'W' in background_name or 'Diboson' in syst and not 'Diboson' in background_name:
             continue
@@ -103,12 +107,12 @@ def GetBackgroundSyst(background_name, selectionName):
     if verbose:
       print 'secondSyst (TT/DYShape)=',math.sqrt(secondSyst)
         
-    # XXX WARNING: hardcoded background name (ick); some checking is done at least
-    if 'TTbar' in background_name:
+    ## XXX WARNING: hardcoded background name (ick); some checking is done at least
+    if doEEJJ and 'TTbar' in background_name:
         thirdSyst = pow(ttBarNormDeltaXOverX,2)
-    elif not doEEJJ and 'W' in background_name:
-        thirdSyst = pow(zJetNormDeltaXOverX,2)
-    elif 'QCD' in background_name:
+    #elif not doEEJJ and 'W' in background_name:
+    #    thirdSyst = pow(zJetNormDeltaXOverX,2)
+    if 'QCD' in background_name:
         thirdSyst = pow(qcdNormDeltaXOverX,2)
 
     if verbose:
@@ -286,9 +290,9 @@ def FindUnscaledSampleRootFile(sampleName, bkgType=''):
 
 
 def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sampleName,selection,isDataOrQCD=False,isTTBarFromData=False):
-    verbose = False
-    if verbose:
-      print 'GetRatesAndErrors(',unscaledRootFile,combinedRootFile,unscaledTotalEvts,sampleName,selection,isDataOrQCD,')'
+    verbose = True
+    if verbose and isTTBarFromData:
+      print 'GetRatesAndErrors(',unscaledRootFile.GetName(),combinedRootFile.GetName(),unscaledTotalEvts,sampleName,selection,isDataOrQCD,')'
     if selection=='preselection':
         selection = 'PAS'
     if doEEJJ:
@@ -307,10 +311,10 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
           print 'EXIT'
           exit(-1)
         rateErr = Double(0)
-        #integ = mejNonTTBarHist.IntegralAndError(1,mejNonTTBarHist.GetNbinsX(),rateErr)
-        #print 'mejNonTTBar:',integ,',+/-',rateErr
-        #integ = mejUnscaledRawHist.IntegralAndError(1,mejUnscaledRawHist.GetNbinsX(),rateErr)
-        #print 'mejUnscaledRaw:',integ,',+/-',rateErr
+        integ = mejNonTTBarHist.IntegralAndError(1,mejNonTTBarHist.GetNbinsX(),rateErr)
+        print 'mejNonTTBar:',integ,',+/-',rateErr
+        integ = mejUnscaledRawHist.IntegralAndError(1,mejUnscaledRawHist.GetNbinsX(),rateErr)
+        print 'mejUnscaledRaw:',integ,',+/-',rateErr
         #mejNonTTBarHist.Scale(1/1000.)
         #rate = mejHist.Integral()
         rate = mejHist.IntegralAndError(1,mejHist.GetNbinsX()+1,rateErr)
@@ -325,6 +329,7 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
         #unscaledRate = unscaledHist.Integral()
         unscaledRateErr = Double(0)
         unscaledRate = unscaledHist.IntegralAndError(1,mejHist.GetNbinsX()+1,unscaledRateErr)
+        #unscaledRate+=mejNonTTBarHist.Integral(1,mejHist.GetNbinsX()+1)
         if verbose:
           print 'using unscaled (minus nonttbarMC) hist:',unscaledHist.GetName(),'from file:',combinedRootFile.GetName()
           print 'TTBARFROMDATA-->rate=',rate,'+/-',rateErr
@@ -369,10 +374,11 @@ def GetRatesAndErrors(unscaledRootFile,combinedRootFile,unscaledTotalEvts,sample
         #print 'applying extra average weight to',sampleName
         rate/=avgTopPtWeight
         rateErr/=avgTopPtWeight
-    #if selection=='LQ1500':
-    #  print 'INFO: hist',histName+'_'+selection,' in file:',unscaledRootFile.GetName()
-    #  print 'unscaledRate=',unscaledRate,'unscaled entries=',mejUnscaledHist.GetEntries()
-    #  print 'xsecTimesIntLumi=',xsecTimesIntLumi,'unscaledInt=',unscaledInt,'unscaledRate=',unscaledRate,'unscaledTotalEvts=',unscaledTotalEvts,'rate=unscaledInt*xsecTimesIntLumi/unscaledTotalEvts=',rate
+    if verbose:
+      if selection=='LQ550':
+        print 'INFO: hist',histName+'_'+selection,' in file:',unscaledRootFile.GetName()
+        print 'unscaledRate=',unscaledRate,'unscaled entries=',mejUnscaledHist.GetEntries()
+        print 'xsecTimesIntLumi=',xsecTimesIntLumi,'unscaledInt=',unscaledInt,'unscaledRate=',unscaledRate,'unscaledTotalEvts=',unscaledTotalEvts,'rate=unscaledInt*xsecTimesIntLumi/unscaledTotalEvts=',rate
     return rate,rateErr,unscaledRate
 
 def GetUnscaledTotalEvents(unscaledRootFile,isTTBarData=False):
@@ -441,7 +447,13 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
         bkgRateErrsDict['preselection'] = sampleRateErr
         bkgUnscaledRatesDict = {}
         bkgUnscaledRatesDict['preselection'] = sampleUnscaledRate
+        if bkgUnscaledRatesDict['preselection'] < 0:
+          print 'WARN: for sample',bkg_name,'preselection','found negative unscaled rate:',sampleUnscaledRate,'; set to zero.'
+          bkgUnscaledRatesDict['preselection'] = 0.0
         bkgTotalEvts = sampleUnscaledTotalEvts
+        if bkgTotalEvts < 0:
+          print 'WARN: for sample',bkg_name,'preselection','found negative sampleUnscaledTotalEvents:',bkgTotalEvts,'; set to zero.'
+          bkgTotalEvts = 0.0
         # final selections
         for i_signal_name, signal_name in enumerate(signal_names):
             for i_mass_point, mass_point in enumerate(mass_points):
@@ -478,6 +490,9 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
                   bkgRatesDict[selectionName] = 0.0
                 bkgRateErrsDict[selectionName] = sampleRateErr
                 bkgUnscaledRatesDict[selectionName] = sampleUnscaledRate
+                if bkgUnscaledRatesDict[selectionName] < 0:
+                  print 'WARN: for sample',bkg_name,'selection',selectionName,'found negative unscaled rate:',sampleUnscaledRate,'; set to zero.'
+                  bkgUnscaledRatesDict[selectionName] = 0.0
         # fill full dicts
         d_background_rates[bkg_name] = bkgRatesDict
         d_background_rateErrs[bkg_name] = bkgRateErrsDict
@@ -624,9 +639,9 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 # CONFIGURABLES
 ###################################################################################################
 
-blinded=True
+blinded=False
 doEEJJ=True
-doRPV=True
+doRPV=False
 
 if doRPV:
   mass_points = [str(i) for i in range(200,1250,100)] # go from 200-1200 in 100 GeV steps
@@ -648,7 +663,7 @@ if doEEJJ:
   systematicsNamesSignal = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER" ]
 else:
   signal_names = [ "LQ_BetaHalf_M[masspoint]" ] 
-  systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "MET", "WShape", 'W_Norm', "TTShape", 'TT_Norm', "Diboson_shape" ]
+  systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "MET", "WShape", 'W_Norm', 'W_btag_Norm', 'W_RMt_Norm', "TTShape", 'TT_Norm', 'TTbar_btag_Norm', "Diboson_shape" ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_amcatnlo_Inc", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
   #background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
   background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTbar_powheg", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON_amcatnlo","SingleTop" ]
@@ -658,44 +673,12 @@ else:
 
 minLQselectionBkg='LQ200'
 
-# add Wjets scale factor norm for enujj
-if not doEEJJ:
-  #zjetsSF = 0.823
-  #zjetsSFerr = 0.008
-  zjetsSF = 0.8678
-  zjetsSFerrStat = 0.013 # this is taken into account by the norm syst
-  zjetsSFerrSystBtag = 0.03 # extra 3% syst from btag SF variation [see Feb 20 result]
-  zjetsSFerrSystMT = 0.0 #FIXME
-  zjetsSFerr = math.sqrt(pow(zjetsSFerrSystBtag,2)+pow(zjetsSFerrSystMT,2))
-  zJetNormDeltaXOverX=zjetsSFerr/zjetsSF
-# for ttbar, we have 0.037 stat error on the scale factor of 0.83
-# min SF is 0.665 (wrt dataDriven)
-# absolute error is 0.165 = nominalSF - minSF
-# add in quad with 0.037 -> 0.169
-# so we have 0.83 +/- 0.169
-# deltaX/X is then 
-#ttbarSF = 0.83
-#ttbarSFerr = 0.037
-#lowestSF = 0.665
-#additionalSystAbs = ttbarSF-lowestSF
-#totalTTbarNormSystAbs = math.sqrt(ttbarSFerr*ttbarSFerr + additionalSystAbs*additionalSystAbs)
-#ttBarNormDeltaXOverX = totalTTbarNormSystAbs/ttbarSF # about 0.2
 if doEEJJ:
   ttBarNormDeltaXOverX = 0.01
   ttbarSampleName='TTBarFromDATA'
   ttBarUnscaledRawSampleName='TTBarUnscaledRawFromDATA'
   #nonTTBarSampleName='NONTTBARBKG_amcatnloPt_emujj'
   nonTTBarSampleName='NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj'
-else:
-  ttBarSF = 0.9533
-  #ttBarSFErrStat = 0.01
-  ttBarSFErrSystBtag = 0.03 # extra 3% syst from btag SF variation [see Feb 20 result]
-  #FIXME additional syst?
-  ttBarSFErr = math.sqrt(pow(ttBarSFErrSystBtag,2))
-  ttBarNormDeltaXOverX = ttBarSFErr/ttBarSF
-  ttbarSampleName='TTbar_powheg'
-  ttBarUnscaledRawSampleName='TTbar_powheg'
-  #nonTTBarSampleName='NONTTBARBKG_amcatnloPt'
 
 # update to 2016 analysis numbers
 # QCDNorm is 0.50 [50% norm uncertainty for eejj = uncertaintyPerElectron*2]
@@ -706,7 +689,8 @@ else:
 
 n_background = len ( background_names  )
 # all bkg systematics, plus stat 'systs' for all bkg plus signal plus 3 backNormSysts
-n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 3
+# W/Z norm is part of the txt systs now, so only 2 extra norm systs (QCD, ttbar)
+n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 2
 n_channels = 1
 
 d_background_rates = {}
@@ -752,9 +736,11 @@ if doEEJJ:
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb11/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
   #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb10_bugfix/output_cutTable_lq_eejj/'
   qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_feb10_bugfix/output_cutTable_lq_eejj_QCD/'
-  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb11_emujj_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb11_emujj_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
   filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb20_newSingTop/output_cutTable_lq_eejj/'
   xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb20/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb28_emujj_RTrigBugFix_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/mar1_emujj_RedoRTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
   # calculated with fitForStatErrs.py script. mass, stat. uncert.
   #statErrorsSingleTop = { 800: 1.10, 850: 0.85, 900: 0.67, 950: 0.53, 1000: 0.42, 1050: 0.33 }
   # here we increased the fit range
@@ -895,9 +881,9 @@ card_file = open ( card_file_path, "w" )
 for i_signal_name, signal_name in enumerate(signal_names):
     doMassPointLoop=True
     for i_mass_point, mass_point in enumerate(mass_points):
-        print 'consider signal_name=',signal_name
         #fullSignalName = signal_name.replace('[masspoint]',mass_point)
         fullSignalName,signalNameForFile = GetFullSignalName(signal_name,mass_point)
+        print 'consider fullSignalName=',fullSignalName
         if '[masspoint]' in signal_name:
           selectionName = 'LQ'+mass_point
         else:
@@ -919,12 +905,10 @@ for i_signal_name, signal_name in enumerate(signal_names):
         #card_file.write ( "bin 1\n\n" )
         card_file.write ( "bin bin1\n\n" )
 
-        #XXX FiXME TODO handle betaHalf data somehow
         if "BetaHalf" in signal_name: 
             if blinded:
               card_file.write ( "observation " + str ( -1 ) + "\n\n" )
             else:
-              #total_data = enujj_data["DATA"][i_mass_point]
               total_data = d_data_rates["DATA"][selectionName]
               card_file.write ( "observation " + str ( total_data ) + "\n\n" )
         else : 
@@ -1021,34 +1005,17 @@ for i_signal_name, signal_name in enumerate(signal_names):
             card_file.write(line+'\n')
         
         # background norm systs
-        foundTTBar = False
-        foundZJet = False if not doEEJJ else True
         foundQCD = False
         for ibkg,background_name in enumerate(syst_background_names):
-            # XXX WARNING: hardcoded background name (ick); some checking is done at least
-            if 'ttbar' in background_name.lower() and not foundTTBar:
-                line = 'norm_ttbar lnN - '
-                line += ' - '*(ibkg)
-                line += str(1+ttBarNormDeltaXOverX)+' '
-                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
-                card_file.write(line)
-                foundTTBar = True
-            elif not doEEJJ and 'W' in background_name and not foundZJet:
-                line = 'norm_wjet lnN - '
-                line += ' - '*(ibkg)
-                line += str(1+zJetNormDeltaXOverX)+' '
-                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
-                card_file.write(line)
-                foundZJet = True
-            elif 'QCD' in background_name and not foundQCD:
+            if 'QCD' in background_name and not foundQCD:
                 line = 'norm_QCD lnN - '
                 line += ' - '*(ibkg)
                 line += str(1+qcdNormDeltaXOverX)+' '
                 line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
                 card_file.write(line)
                 foundQCD = True
-        if not foundTTBar or not foundZJet or not foundQCD:
-            print 'ERROR: could not find one or more of [ttbar,zjet/wjet,QCD] background names for normalization syst; check background names'
+        if not foundQCD:
+            print 'ERROR: could not find QCD background name for normalization syst; check background names'
             exit(-1)
 
         card_file.write("\n")
@@ -1058,6 +1025,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             thisBkgEvts = d_background_rates[background_name][selectionName]
             thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
+            print '[datacard] INFO:  for selection:',selectionName,' and background:',background_name,' total unscaled events=',thisBkgTotalEntries
             forceLogNorm = False
 
             if thisBkgEvts != 0.0: 
@@ -1080,8 +1048,12 @@ for i_signal_name, signal_name in enumerate(signal_names):
                   bkgEvents = d_background_unscaledRates[background_name][lastSelectionName]
                   bkgRate = d_background_rates[background_name][lastSelectionName]
                   idx+=1
-                print 'INFO: for background:',background_name,'at selection:',selectionName,'found last selection:',lastSelectionName,'with',bkgEvents,'unscaled MC events. use this for the scale factor.'
+                if background_name!='PhotonJets_Madgraph':
+                  print '[datacard] INFO: for background:',background_name,'at selection:',selectionName,'found last selection:',lastSelectionName,'with',bkgEvents,'unscaled MC events. use this for the scale factor.'
                 gmN_weight = bkgRate / bkgEvents
+                if thisBkgTotalEntries != 0.0 and 'TTBarFromDATA' in background_name:
+                  print '[datacard] WARN: for background:',background_name,'at selection:',selectionName,'setting thisBkgTotalEntries=',thisBkgTotalEntries,'to zero!'
+                  thisBkgTotalEntries = 0.0
 
                 ## special handling of stat errors for small backgrounds
                 #if doEEJJ and background_name=='SingleTop':
@@ -1173,7 +1145,10 @@ for i_signal_name, signal_name in enumerate(signal_names):
         #fullSignalName = signal_name + massPoint
         fullSignalName,filename = GetFullSignalName(signal_name,massPoint)
         # figure out mass point from name
-        signalMass = fullSignalName.split('_')[1].replace('M','')
+        if 'BetaHalf' not in fullSignalName:
+          signalMass = fullSignalName.split('_')[1].replace('M','')
+        else:
+          signalMass = fullSignalName.split('_')[2].replace('M','')
         # signal events
         thisSigEvts = '-'
         thisSigEvtsErr = '-'
@@ -1184,7 +1159,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             # the signal name and mass point from the selection need to match
             if int(signalMass) != int(massPoint):
               continue
-        print 'INFO: thisSignal=',fullSignalName,'selection=',selectionName
+        #print 'INFO: thisSignal=',fullSignalName,'selection=',selectionName
         #print 'd_data_rates[data]['+selectionName+']'
         thisDataEvents = d_data_rates['DATA'][selectionName]
         backgroundEvts = {}
@@ -1233,7 +1208,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
                       idx+=1
                     print 'INFO: for background:',background_name,'at selection:',selectionName,'found last selection:',lastSelectionName,'with',bkgEvents,'unscaled MC events. use this for the scale factor.'
                     rateOverUnscaledRatePresel = bkgRate/bkgEvents
-                    #print 'Call GetStatErrors(',thisBkgTotalEntries,rateOverUnscaledRatePresel,thisBkgEvts,')'
+                    print '[table] Call GetStatErrors(',thisBkgTotalEntries,rateOverUnscaledRatePresel,thisBkgEvts,')'
                     thisBkgEvtsErrUp,thisBkgEvtsErrDown = GetStatErrors(thisBkgTotalEntries,rateOverUnscaledRatePresel,thisBkgEvts)
                     ## special handling of stat errors for small backgrounds
                     #if doEEJJ and background_name=='SingleTop':
