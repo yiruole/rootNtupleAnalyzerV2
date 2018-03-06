@@ -11,47 +11,6 @@ from StringIO import StringIO
 import prettytable
 
 
-#---Read .dat table
-def ParseDatFile(datFilename):
-  data=OrderedDict()
-  colNames = OrderedDict()
-  lineCounter = int(0)
-
-  #print '(opening:',inputDataFile,
-  sys.stdout.flush()
-  with open(datFilename) as datFile:
-    for j,line in enumerate(datFile):
-        # ignore comments
-        if( re.search("^###", line) ):
-            continue
-        line = string.strip(line,"\n")
-        #print "---> lineCounter: " , lineCounter
-        #print line
-        split = line.split()
-        if len(split)==1:
-            # new sample
-            sampleName=split[0]
-            data[sampleName] = OrderedDict()
-            justFoundNewSample = True
-        else:
-            if justFoundNewSample:
-                colNames[sampleName] = OrderedDict()
-                for i,piece in enumerate(split):
-                    colNames[sampleName][i] = piece
-                    data[sampleName][ colNames[sampleName][i] ] = piece
-                justFoundNewSample = False
-
-            for i,piece in enumerate(split):
-                varName = ''
-                if i==0:
-                    varName = piece
-                else:
-                    data[sampleName][varName] = piece
-                #print data[row][ column[i] ] 
-
-  return data
-
-
 ####################################################################################################
 # Config/Run
 ####################################################################################################
@@ -73,17 +32,23 @@ with open(datFilePath) as datFile:
         line = line.strip()
         if len(line.split())==1:
             sample = line.split()[0]
+            lastLineForSampleReached = False
         else:
             if 'variableName' in line:
                 if len(colNames) < 1:
                     colNamesFromLine = line.split()
                     colNames = ['sample']+colNamesFromLine
                 continue
-            else:
+            elif not lastLineForSampleReached:
+                splitLine = line.split()
+                if 'opt' in splitLine[0]:
+                    lastLineForSampleReached = True
+                    splitLine[0] = 'preselection'
                 #print 'line looks line:"'+line+'" with length=',len(line)
-                lineToAdd = [sample]+line.split()
+                lineToAdd = [sample]+splitLine
                 #modLines.append(tuple(sample+'\t'+line))
                 modLines.append(tuple(x for x in lineToAdd))
+                # stop reading table for this sample after 'opt' vars
 
 #print modLines[0:9]
 #df = pd.read_csv(datFilePath,delim_whitespace=True,header=1)
@@ -103,11 +68,29 @@ pd.set_option('display.max_columns', None)
 #    print(df.head(100))
 
 df.drop(['min1','min2','max1','max2'],axis=1,inplace=True)
-df = df.set_index('sample')
+#df = df.set_index('sample')
+
+sampleList = df['sample'].unique()
+sampleToUse = sampleList[0]
+print '#'*100
+print 'Cutflow for',sampleToUse
+print '#'*100
+dfPrint = df.loc[df['sample']==sampleToUse]
+dfPrint = dfPrint.drop(['sample'],axis=1)
+#dfPrint = dfPrint.head(10)
+
 # print
 output = StringIO()
-df.head(10).to_csv(output)
+dfPrint.to_csv(output,index=False)
 output.seek(0)
 pt = prettytable.from_csv(output)
 print pt
 
+print
+print '#'*100
+print 'latex table'
+print '#'*100
+print
+
+print dfPrint.to_latex(index=False)
+print
