@@ -1,30 +1,70 @@
-//From Dave, Feb. 7
+//From Dave, Feb. 13, 2018
 // run-weighted averages over all 2016 data
 // for HighPT Mu ID + TrkRelIso03
 
 class MuonScaleFactors {
   public:
-    static float LookupIDSF(float pt)
+    static float LookupIDSF(float eta)
     {
-      if(pt<55)
-        return 0.9813326964101629;
-      else if(pt<60)
-        return 0.9811215588407185;
-      else if(pt<120)
-        return 0.9888030350742609;
+      if(-2.4 <= eta  && eta < -2.1)
+        return 0.97;
+      else if(eta < -1.6)
+        return 0.98;
+      else if(eta < -1.2)
+        return 0.99;
+      else if(eta < -0.9)
+        return 0.98;
+      else if(eta < -0.3)
+        return 0.99;
+      else if(eta < -0.2)
+        return 0.97;
+      else if(eta < 0.2)
+        return 0.99;
+      else if(eta < 0.3)
+        return 0.96;
+      else if(eta < 0.9)
+        return 0.99;
+      else if(eta < 1.2)
+        return 0.97;
+      else if(eta < 1.6)
+        return 0.99;
+      else if(eta < 2.1)
+        return 0.98;
+      else if(eta < 2.4)
+        return 0.97;
       else
-        return 1.0179598732419621;
+        return -1;
     }
-    static float LookupIsoSF(float pt)
+    static float LookupIsoSF(float eta)
     {
-      if(pt<55)
-        return 0.9985465327438463;
-      else if(pt<60)
-        return 0.9988891755735836;
-      else if(pt<120)
-        return 0.9989480835906359;
+      if(-2.4 <= eta  && eta < -2.1)
+        return 0.999;
+      else if(eta < -1.6)
+        return 1.0;
+      else if(eta < -1.2)
+        return 0.999;
+      else if(eta < -0.9)
+        return 0.999;
+      else if(eta < -0.3)
+        return 0.998;
+      else if(eta < -0.2)
+        return 0.998;
+      else if(eta < 0.2)
+        return 0.998;
+      else if(eta < 0.3)
+        return 0.997;
+      else if(eta < 0.9)
+        return 0.998;
+      else if(eta < 1.2)
+        return 1.0;
+      else if(eta < 1.6)
+        return 0.999;
+      else if(eta < 2.1)
+        return 1.0;
+      else if(eta < 2.4)
+        return 1.0;
       else
-        return 1.0006806854046033;
+        return -1;
     }
 };
 
