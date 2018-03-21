@@ -90,6 +90,8 @@ def GetBackgroundSyst(background_name, selectionName):
     for syst in specialSysts:
         if 'TTBarFromDATA' in background_name or 'DY' in syst and not 'DY' in background_name or 'TT' in syst and not 'TT' in background_name or 'W' in syst and not 'W' in background_name or 'Diboson' in syst and not 'Diboson' in background_name:
             continue
+        if verbose:
+            print 'consider systematic:',syst,'for background_name=',background_name
         if background_name not in backgroundSystDict[syst].keys():
           print 'WARNING: could not find',background_name,'in backgroundSystDict['+syst+']=',backgroundSystDict[syst].keys()
           continue
@@ -162,13 +164,19 @@ def GetSystDictFromFile(filename):
     return systDict
 
 
-def FillSystDicts(systNames,isBackground=True):
+def FillSystDicts(systNames,systematics_filepaths,isBackground=True):
+    verbose = True
     systDict = {}
     for syst in systNames:
-        if isBackground:
+        if isBackground and not doRPV:
           filePath = systematics_filepaths[syst]+syst+'_sys.dat'
-        else:
+        elif not isBackground and not doRPV:
           filePath = systematics_filepaths[syst]+'LQ'+syst+'_sys.dat'
+        elif doRPV:
+          if verbose:
+            print 'INFO: FillSystDicts: [RPV] systematics_filepaths looks like:',systematics_filepaths
+            print 'INFO: FillSystDicts: [RPV] try to fill systematics_filepaths['+syst+']'
+          filePath = systematics_filepaths[syst]+syst+'_sys.dat'
         thisSystDict = GetSystDictFromFile(filePath)
         # this will give the form (for background):
         #   systDict['Trigger'][bkgname]['LQXXXX'] = value
@@ -269,7 +277,8 @@ def FindUnscaledSampleRootFile(sampleName, bkgType=''):
     else:
       analysisCode = 'analysisClass_lq_enujj_MT'
   reducedSkimStrings = ['_reduced_skim','_pythia8_reduced_skim','_ext1_pythia8_reduced_skim']
-  for redSkimStr in reducedSkimStrings:
+  otherSkimStrings = ['_pythia8','_ext1_pythia8','']
+  for redSkimStr in reducedSkimStrings+otherSkimStrings:
       rootFilename = filepath + "/" + analysisCode + "___" + sampleName + redSkimStr + ".root"
       if os.path.isfile(rootFilename):
          #print 'return unscaled rootfile:',rootFilename
@@ -640,8 +649,8 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 ###################################################################################################
 
 blinded=False
-doEEJJ=True
-doRPV=False
+doEEJJ=False
+doRPV=False # to do RPV, set doEEJJ and doRPV to True
 
 if doRPV:
   mass_points = [str(i) for i in range(200,1250,100)] # go from 200-1200 in 100 GeV steps
@@ -651,8 +660,9 @@ else:
 if doEEJJ:
   if doRPV:
     signal_names = [ "Stop_M[masspoint]_CTau1000","Stop_M[masspoint]_CTau100","Stop_M[masspoint]_CTau10","Stop_M[masspoint]_CTau1"] 
+    #signal_names = [ "Stop_M[masspoint]_CTau10","Stop_M[masspoint]_CTau1"] 
     # put in some more signals that don't fit the general pattern
-    signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
+    #signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
   else:
     signal_names = [ "LQ_M[masspoint]" ] 
   systematicsNamesBackground = [ "Trigger", "Reco", "PU", "PDF", "Lumi", "JER", "JEC", "HEEP", "E_scale", "EER", "DYShape", 'DY_Norm', "Diboson_shape" ]
@@ -690,7 +700,10 @@ else:
 n_background = len ( background_names  )
 # all bkg systematics, plus stat 'systs' for all bkg plus signal plus 3 backNormSysts
 # W/Z norm is part of the txt systs now, so only 2 extra norm systs (QCD, ttbar)
-n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 2
+if doEEJJ:
+  n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 2
+else:
+  n_systematics = len ( systematicsNamesBackground ) + n_background + 1 + 1 #QCD norm only
 n_channels = 1
 
 d_background_rates = {}
@@ -727,20 +740,26 @@ if doEEJJ:
   ##qcdFilePath = os.environ["LQDATA"] + '/2016analysis/eejj_QCD_jan19_finalSels/output_cutTable_lq_eejj_QCD/'
   ##ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/jan19_emujj_correctTrig_finalSelections/output_cutTable_lq_ttbar_emujj_correctTrig/'
   #
-  inputList = os.environ["LQANA"]+'/config/PSKeejj_jan22_SEleL_v237_eoscms_comb/inputListAllCurrent.txt'
+  #inputList = os.environ["LQANA"]+'/config/PSKeejj_jan22_SEleL_v237_eoscms_comb/inputListAllCurrent.txt'
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb1/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
   #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_jan26_gsfEtaCheck_finalSels/output_cutTable_lq_eejj/'
   #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_jan26_gsfEtaCheck_finalSels/output_cutTable_lq_eejj_QCD/'
   #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb2_newSkim_emujj_correctTrig_finalSelections/output_cutTable_lq_ttbar_emujj_correctTrig/'
   #
-  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb11/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
-  #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb10_bugfix/output_cutTable_lq_eejj/'
-  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_feb10_bugfix/output_cutTable_lq_eejj_QCD/'
-  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb11_emujj_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
-  filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb20_newSingTop/output_cutTable_lq_eejj/'
-  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb20/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
-  #ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb28_emujj_RTrigBugFix_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
-  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/mar1_emujj_RedoRTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  ##xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb11/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  ##filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb10_bugfix/output_cutTable_lq_eejj/'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_feb10_bugfix/output_cutTable_lq_eejj_QCD/'
+  ##ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb11_emujj_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb20_newSingTop/output_cutTable_lq_eejj/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/feb20/unscaled/xsection_13TeV_2015_Mee_PAS.txt'
+  ##ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/feb28_emujj_RTrigBugFix_correctTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  ##ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/mar1_emujj_RedoRTrig/output_cutTable_lq_ttbar_emujj_correctTrig/'
+  #
+  inputList = os.environ["LQANA"]+'/config/PSKeejj_mar16_v237_local_comb/inputListAllCurrent.txt'
+  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/eejj_QCD_mar16_fixMuons/output_cutTable_lq_eejj_QCD/'
+  filePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_mar16_fixMuons/output_cutTable_lq_eejj/'
+  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_eejj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_Mee_PAS.txt'
+  ttbarFilePath = os.environ["LQDATA"] + '/2016ttbar/mar17_emujj_fixMuons/output_cutTable_lq_ttbar_emujj_correctTrig/'
   # calculated with fitForStatErrs.py script. mass, stat. uncert.
   #statErrorsSingleTop = { 800: 1.10, 850: 0.85, 900: 0.67, 950: 0.53, 1000: 0.42, 1050: 0.33 }
   # here we increased the fit range
@@ -748,7 +767,8 @@ if doEEJJ:
 else:
   sampleListForMerging = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_enujj.txt'
   sampleListForMergingQCD = os.environ["LQANA"]+'/config/sampleListForMerging_13TeV_QCD_dataDriven.txt'
-  inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
+  #inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
+  inputList = os.environ["LQANA"]+'/config/PSKenujj_mar16_v237_local_comb/inputListAllCurrent.txt'
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/oct6_finerTrigEff/unscaled/btagCR/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/oct6_finerTrigEff/unscaled/njetCR/xsection_13TeV_2015_TTbarRescale_WJetsRescale.txt'
   #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_oct6_finerBinnedTrigEff_updateFinalSels/output_cutTable_lq_enujj_MT/'
@@ -772,9 +792,17 @@ else:
   #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/feb14/unscaled/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
   #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_feb14_dPhiEleMET0p8/output_cutTable_lq_enujj_MT_QCD/'
   #
-  filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_feb20_dPhiEleMet0p8_newSingTop/output_cutTable_lq_enujj_MT/'
-  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/feb20/unscaled/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
-  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_feb14_dPhiEleMET0p8/output_cutTable_lq_enujj_MT_QCD/'
+  #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_feb20_dPhiEleMet0p8_newSingTop/output_cutTable_lq_enujj_MT/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/feb20/unscaled/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_feb14_dPhiEleMET0p8/output_cutTable_lq_enujj_MT_QCD/'
+  #
+  #filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_mar5_removeTopPtReweight/output_cutTable_lq_enujj_MT/'
+  #xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/mar6_noTopPtReweight/unscaled/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
+  #qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_feb14_dPhiEleMET0p8/output_cutTable_lq_enujj_MT_QCD/'
+  #
+  filePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_mar16_fixMuons/output_cutTable_lq_enujj_MT/'
+  xsection = os.environ["LQANA"]+'/versionsOfAnalysis_enujj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt'
+  qcdFilePath = os.environ["LQDATA"] + '/2016qcd/enujj_mar16_fixMuons/output_cutTable_lq_enujj_MT_QCD/'
   ## calculated with fitForStatErrs.py script. mass, stat. uncert.
   #statErrorsSingleTop = { 650:0.213, 700:0.330, 750:0.399, 800:0.431, 850:0.442, 900:0.438, 950:0.425, 1000:0.407, 1050:0.385, 1100:0.363, 1150:0.342, 1200:0.321 }
 
@@ -788,16 +816,25 @@ if doEEJJ:
 else:
   ttbar_data_filepath = ''
   #ttbarFilePath = filePath
-systematics_filepaths = {}
+systematics_filepaths_background = dict()
+systematics_filepaths_signal = dict()
+systematics_filepaths_ctau1 = dict()
+systematics_filepaths_ctau10 =  dict()
+systematics_filepaths_ctau100 =  dict()
+systematics_filepaths_ctau1000 =  dict()
 for systName in systematicsNamesBackground:
-  if doEEJJ:
-    systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4eejj_DibosonAMCATNLO_18_02_2018/'
-    #systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4eejj_05_09_2017/'
-    #systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_txtfiles_20_07_2016/'
-  #systematics_filepaths['EER'] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_textfiles_28_07_2016/'
-  else:
-    systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4enujj_DibosonamcATnlo_18_02_2018/'
-    #systematics_filepaths[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4enujj_1_09_2017/'
+  if doEEJJ and not doRPV:
+    systematics_filepaths_background[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4eejj_DibosonAMCATNLO_18_02_2018/'
+    systematics_filepaths_signal[systName] = systematics_filepaths_background[systName]
+  elif doEEJJ and doRPV:
+    systematics_filepaths_background[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4eejj_DibosonAMCATNLO_18_02_2018/'
+    systematics_filepaths_ctau1[systName] = '/afs/cern.ch/user/m/mbhat/work/public/RPV_ctau1_stop_systematics_24_02_2018/'
+    systematics_filepaths_ctau10[systName] = '/afs/cern.ch/user/m/mbhat/work/public/RPV_ctau10_stop_systematics_24_02_2018/'
+    systematics_filepaths_ctau100[systName] = '/afs/cern.ch/user/m/mbhat/work/public/RPV_ctau10_stop_systematics_24_02_2018/'
+    systematics_filepaths_ctau1000[systName] = '/afs/cern.ch/user/m/mbhat/work/public/RPV_ctau10_stop_systematics_24_02_2018/'
+  elif not doEEJJ:
+    systematics_filepaths_background[systName] = '/afs/cern.ch/user/m/mbhat/work/public/Systematics_4enujj_DibosonamcATnlo_18_02_2018/'
+    systematics_filepaths_signal[systName] = systematics_filepaths_background[systName]
 
 
 ###################################################################################################
@@ -828,7 +865,14 @@ for arg in sys.argv:
 print 'Using tables:'
 print '\t Data/MC:',dataMC_filepath
 print '\t QCD(data):',qcd_data_filepath
-print 'Using systematics files:',systematics_filepaths
+print 'Using systematics files [background]:',systematics_filepaths_background
+if not doRPV:
+  print 'Using systematics files [signal]:',systematics_filepaths_signal
+else:
+  print 'Using systematics files [RPV ctau1]:',systematics_filepaths_ctau1
+  print 'Using systematics files [RPV ctau10]:',systematics_filepaths_ctau10
+  print 'Using systematics files [RPV ctau100]:',systematics_filepaths_ctau100
+  print 'Using systematics files [RPV ctau1000]:',systematics_filepaths_ctau1000
 
 # get xsections
 xsectionDict = ParseXSectionFile(xsection)
@@ -863,8 +907,15 @@ for lin in open( inputList ):
 # rates/etc.
 FillDicts(dataMC_filepath,qcd_data_filepath,ttbar_data_filepath)
 # systematics
-backgroundSystDict = FillSystDicts(systematicsNamesBackground)
-signalSystDict = FillSystDicts(systematicsNamesSignal,False)
+backgroundSystDict = FillSystDicts(systematicsNamesBackground,systematics_filepaths_background)
+if not doRPV:
+  signalSystDict = FillSystDicts(systematicsNamesSignal,systematics_filepaths_signal,False)
+else:
+  signalSystDictByCTau = {}
+  signalSystDictByCTau[1] = FillSystDicts(systematicsNamesSignal,systematics_filepaths_ctau1,False)
+  signalSystDictByCTau[10] = FillSystDicts(systematicsNamesSignal,systematics_filepaths_ctau10,False)
+  signalSystDictByCTau[100] = FillSystDicts(systematicsNamesSignal,systematics_filepaths_ctau100,False)
+  signalSystDictByCTau[1000] = FillSystDicts(systematicsNamesSignal,systematics_filepaths_ctau1000,False)
 # print one of them for checking
 #for syst in backgroundSystDict.keys():
 #    print 'Syst is:',syst
@@ -883,7 +934,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
     for i_mass_point, mass_point in enumerate(mass_points):
         #fullSignalName = signal_name.replace('[masspoint]',mass_point)
         fullSignalName,signalNameForFile = GetFullSignalName(signal_name,mass_point)
-        print 'consider fullSignalName=',fullSignalName
+        #print 'consider fullSignalName=',fullSignalName
         if '[masspoint]' in signal_name:
           selectionName = 'LQ'+mass_point
         else:
@@ -951,6 +1002,10 @@ for i_signal_name, signal_name in enumerate(signal_names):
 
         # recall the form: signal --> sysDict['Trigger']['LQXXXX'] = value
         #             backgrounds --> sysDict['Trigger'][bkgName]['LQXXXX'] = value
+        # for RPV, select proper signalSystDict based on ctau of signal
+        if doRPV:
+            ctau = int(signal_name[signal_name.find('CTau')+4:])
+            signalSystDict = signalSystDictByCTau[ctau]
         for syst in signalSystDict.keys():
             line = syst + ' lnN '
             if selectionName not in signalSystDict[syst].keys():
@@ -979,7 +1034,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             card_file.write(line+'\n')
 
         # background-only special systs: "DYShape", "TTShape"
-        specialSysts = ["DYShape",'DY_Norm','Diboson_shape'] if doEEJJ else ["WShape","TTShape",'W_Norm','TT_Norm','Diboson_shape']
+        specialSysts = ["DYShape",'DY_Norm','Diboson_shape'] if doEEJJ else ["WShape","TTShape",'W_Norm','W_btag_Norm','W_RMt_Norm','TT_Norm','TTbar_btag_Norm','Diboson_shape']
         for syst in specialSysts:
             line = syst + ' lnN - '
             for ibkg,background_name in enumerate(syst_background_names):
@@ -1006,6 +1061,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         
         # background norm systs
         foundQCD = False
+        foundTTBar = False if doEEJJ else True
         for ibkg,background_name in enumerate(syst_background_names):
             if 'QCD' in background_name and not foundQCD:
                 line = 'norm_QCD lnN - '
@@ -1014,8 +1070,18 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
                 card_file.write(line)
                 foundQCD = True
+            if doEEJJ and 'TTBar' in background_name:
+                line = 'norm_TTbar lnN - '
+                line += ' - '*(ibkg)
+                line += str(1+ttBarNormDeltaXOverX)+' '
+                line += ' - '*(len(syst_background_names)-ibkg-1)+'\n'
+                card_file.write(line)
+                foundTTBar = True
         if not foundQCD:
             print 'ERROR: could not find QCD background name for normalization syst; check background names'
+            exit(-1)
+        if not foundTTBar:
+            print 'ERROR: could not find TTBar background name for normalization syst; check background names'
             exit(-1)
 
         card_file.write("\n")
@@ -1025,7 +1091,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
             thisBkgEvts = d_background_rates[background_name][selectionName]
             thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
-            print '[datacard] INFO:  for selection:',selectionName,' and background:',background_name,' total unscaled events=',thisBkgTotalEntries
+            #print '[datacard] INFO:  for selection:',selectionName,' and background:',background_name,' total unscaled events=',thisBkgTotalEntries
             forceLogNorm = False
 
             if thisBkgEvts != 0.0: 
