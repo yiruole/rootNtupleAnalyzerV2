@@ -1,2 +1,12 @@
 # ignore all .o
 *.o
+*.so
+*.txt
+*.png
+*.root
+*.list
+*.log
+*.pdf
+*.png
+*.ps
+main*
