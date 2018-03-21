@@ -20,7 +20,7 @@ TriggerEfficiency::~TriggerEfficiency()
 
 float TriggerEfficiency::GetEfficiency(const float& eta, const float& et, bool verbose)
 {
-  float eff = -1.0;
+  float eff = 0.0;
   float etLookup = et;
   // make sure that we don't ask for an Et that is beyond the max y range of the histogram
   // NB: fix this by filling the overflow with the same bin content as the last bin
@@ -47,9 +47,9 @@ float TriggerEfficiency::GetEfficiency(const float& eta, const float& et, bool v
       << eff << " for efficiency." << std::endl;
   }
 
-  if(eff<=0)
-    std::cerr << "ERROR: Found an electron and could not lookup trigger efficiency: eta=" << eta << "; eT=" << et << "; return " << eff << " for efficiency." << std::endl;
-  assert(eff>0);
+  //if(eff<=0)
+  //  std::cerr << "ERROR: Found an electron and could not lookup trigger efficiency: eta=" << eta << "; eT=" << et << "; return " << eff << " for efficiency." << std::endl;
+  //assert(eff>0);
   return eff;
 }
 
