@@ -46,6 +46,7 @@ enum ID {
 
   HIGH_PT_MUON_TRKRELISO01 = 50, // keep for compatibility
   MUON_LOOSE_PFISO04LOOSE  = 51,
+  MUON_LOOSE               = 52,
 
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h

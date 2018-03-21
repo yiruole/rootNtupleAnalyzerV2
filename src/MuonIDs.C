@@ -9,6 +9,7 @@ bool Muon::PassUserID (ID id, bool verbose){
   //else if ( id == MUON_TIGHT_PFISO04TIGHT  ) return PassUserID_MuonTight_PFIso04Tight ( verbose );
   //else if ( id == MUON_LOOSE_PFISO04LOOSE  ) return PassUserID_MuonLoose_PFIso04Loose ( verbose );
   else if ( id == MUON_FIDUCIAL            ) return PassUserID_MuonFiducial      ( verbose );
+  else if ( id == MUON_LOOSE               ) return PassUserID_MuonLoose    ( verbose );
   else {
     std::cerr << "ERROR: Could not find implementation for requested MuonId: " << id << "; quitting." << std::endl;
     exit(-111);
@@ -19,13 +20,14 @@ bool Muon::PassUserID (ID id, bool verbose){
 bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
 
   // Checked against Dave's definition: Jan. 30 2016
+  // updated Mar. 8 2018 to extend eta to 2.4
 
   // All non-global muons have cocktail Pt of -1 in the ntuples
   bool pass_isGlobalAndPt = bool ( CocktailPt()                    > 35 );
-  bool pass_eta           = bool ( fabs(Eta())                     < 2.1);
-  bool pass_muonHits      = bool ( GlobalTrkValidHits()            >= 1   );
-  bool pass_stations      = bool ( StationMatches()                > 1   );
-  bool pass_dxy           = bool ( fabs(BestTrackVtxDistXY())      < 0.2 );
+  bool pass_eta           = bool ( fabs(CocktailEta())             < 2.4);
+  bool pass_muonHits      = bool ( GlobalTrkValidHits()            >= 1 );
+  bool pass_stations      = bool ( StationMatches()                > 1  );
+  bool pass_dxy           = bool ( fabs(BestTrackVtxDistXY())      < 0.2);
   // [1] The most accurate way of computing this value is by using IPTools (example).
   // The dB() method of the pat::Muon uses the version in IPTools, so there are tiny differences
   //   between the values returned by dxy(vertex->position()) and dB(). 
@@ -108,3 +110,14 @@ bool Muon::PassUserID_MuonFiducial ( bool verbose ) {
 //  return decision;
 //}
 
+bool Muon::PassUserID_MuonLoose ( bool verbose ) {
+  bool pass_isGlobal   = bool ( IsGlobal()                   == 1   );
+  bool pass_isTracker  = bool ( IsTracker()                  == 1   );
+  bool pass_isPF       = bool ( IsPFMuon()                   == 1   );
+
+  
+  bool decision = (pass_isGlobal || pass_isTracker) &&
+    pass_isPF;
+
+  return decision;
+}

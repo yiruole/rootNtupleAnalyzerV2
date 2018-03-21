@@ -13,14 +13,29 @@ class Muon : public Object {
   
   // Kinematic variables         
 
-  float & Pt                      ();
-  float & PtError                 ();
-  float & Eta                     ();
-  float & Phi                     ();
-  float   Charge                  ();
+  float & Pt                      (); // this is cocktail/TuneP, the one we want by default
+  float & PtError                 (); // this is cocktail/TuneP, the one we want by default
+  float & Eta                     (); // this is cocktail/TuneP, the one we want by default
+  float & EtaError                (); // this is cocktail/TuneP, the one we want by default
+  float & Phi                     (); // this is cocktail/TuneP, the one we want by default
+  float & PhiError                (); // this is cocktail/TuneP, the one we want by default
 
+  float & PFPt                    ();
+  float & PFPtError               ();
+  float & PFEta                   ();
+  float & PFEtaError              ();
+  float & PFPhi                   ();
+  float & PFPhiError              ();
+
+  float & CocktailEta             ();
+  float & CocktailEtaError        ();
+  float & CocktailPhi             ();
+  float & CocktailPhiError        ();
   float & CocktailPt              ();
   float & CocktailPtError         ();
+
+  float   Charge                  ();
+
 
   // IDs 
 
@@ -54,6 +69,7 @@ class Muon : public Object {
   bool PassUserID_MuonTight_PFIso04Tight  (bool verbose);
   bool PassUserID_MuonFiducial            (bool verbose);
   bool PassUserID_MuonLoose_PFIso04Loose  (bool verbose);
+  bool PassUserID_MuonLoose               (bool verbose);
 
 };
 
