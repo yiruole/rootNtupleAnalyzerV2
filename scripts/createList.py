@@ -90,7 +90,7 @@ def make_filenamelist_default(inputDir):
     return filenamelist
 
 
-def process_input_dir(inputDir, match, filelist, useCERNEOS):
+def process_input_dir(inputDir, match, filelist, useCERNEOS, eosHost):
     inputDir = inputDir.rstrip('/')+'/'
     prefix = ''
     filenamelist = []
@@ -100,15 +100,15 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS):
         #filenamelist = make_filenamelist_castor(inputDir)
         print 'ERROR: unsupported access protocol'
         exit(-1)
-    elif( re.search("^/eos/cms/", inputDir) ):
+    elif( re.search("^/eos/", inputDir) ):
         if useCERNEOS:
-          prefix = "root://eoscms/"
+          prefix = eosHost
         else:
           prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
     elif( re.search("^/store/", inputDir) ):
         if useCERNEOS:
-          prefix = "root://eoscms/"
+          prefix = eosHost
         else:
           prefix = "root://cms-xrd-global.cern.ch/"
         filenamelist = make_filenamelist_eos(inputDir)
@@ -132,6 +132,14 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS):
         dataset = ''
         if '_reduced_skim' in filename:
             dataset = filename[0:filename.find('_reduced_skim')+len('_reduced_skim')]
+        elif '_rsk' in filename:
+            #dataset = filename[0:filename.find('_rsk')+len('_rsk')]
+            # try to find [number(s)].root
+            m = re.search('_\d+_rsk.root', filename)
+            dataset = filename[0:m.start()]
+        elif '_sk' in filename:
+            m = re.search('_\d+_sk.root', filename)
+            dataset = filename[0:m.start()]
         else:
             # try to find [number(s)].root
             m = re.search('_\d+.root', filename)
@@ -254,8 +262,9 @@ def main():
     parser.add_option( '-m', '--match', metavar='MATCH', action='store', help='Only files containing the MATCH string in their names will be considered',default='' )
     parser.add_option( '-i', '--inputDirs', metavar='INPUTDIR(S)', action="callback", callback=cb, dest="inputDirs", help='Specifies the input directory (or directories separated by space) containing .root files. Please use the full path. Castor directories are also supported' )
     parser.add_option( '-o', '--outputDir', metavar='OUTPUTDIR', action='store', help='Specifies the output directory where the .txt list files will be stored. Please use the full path' )
-    parser.add_option( '-f', '--cernEOS', dest='useCERNEOS',metavar='useCERNEOS',default=False,action='store_true', help='Write root file URLs with local CERN eoscms, not global xrootd redirector')
+    parser.add_option( '-f', '--cernEOS', dest='useCERNEOS',metavar='useCERNEOS',default=False,action='store_true', help='Write root file URLs with local CERN eos, not global xrootd redirector')
     parser.add_option( '-c', '--combineLikeDatasets', dest='combineLikeDatasets',metavar='combineLikeDatasets',default=False,action='store_true', help='Combine "like" datasets (those that only differ by extN) into one dataset')
+    parser.add_option( '-e', '--eosHost', metavar='EOSHOST', action='store', help='root:// URL of eos host',default='root://eoscms.cern.ch/' )
 
 
     (options, args) = parser.parse_args(args=None)
@@ -265,12 +274,15 @@ def main():
         parser.print_help()
         sys.exit()
 
+    # set eos mgm url
+    os.environ['EOS_MGM_URL'] = options.eosHost
+
     filelist = {}
 
     inputDirs = unique(options.inputDirs)
 
     for inputDir in inputDirs:
-        process_input_dir(inputDir, options.match, filelist, options.useCERNEOS)
+        process_input_dir(inputDir, options.match, filelist, options.useCERNEOS, options.eosHost)
 
     if options.combineLikeDatasets:
       filelist = combineExtDatasets(filelist)
