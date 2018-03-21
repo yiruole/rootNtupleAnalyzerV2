@@ -4,6 +4,7 @@
 import sys
 import string
 import math
+import re
 
 
 def SanitizeDatasetNameFromInputList(dataset_fromInputList):
@@ -40,7 +41,7 @@ def SanitizeDatasetNameFromFullDataset(dataset):
     try:
       outputFileNames.append(dataset.split('/')[1])
     except IndexError:
-      print "Had an IndexError trying to split('/') dataset:",dataset,'; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile'
+      print "SanitizeDatasetNameFromFullDataset(): Had an IndexError trying to split('/') dataset:",dataset,'; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile'
       exit(-1)
 
     # use the one with the shortest filename
@@ -123,6 +124,7 @@ def ParseXSectionFile(xsectionFile):
       print 'ERROR: could not split line "',line,'"'
       exit(-1)
 
+    #print 'ParseXSectionFile: line looked like:"'+line+'"; call SanitizeDatasetNameFromFullDataset on dataset=',dataset
     outputFile = SanitizeDatasetNameFromFullDataset(dataset)
     xsectionDict[outputFile] = xsection_val
     #print outputFile + " " + xsection_val
@@ -144,10 +146,43 @@ def lookupXSection(datasetNameFromInputList,xsectionDict):
         return xsectionDict[dataset]
   print
   print 'ERROR'
-  for key in sorted(xsectionDict.iterkeys()):
-    print 'sample=',key,'xsection=',xsectionDict[key]
+  #for key in sorted(xsectionDict.iterkeys()):
+  #  print 'sample=',key,'xsection=',xsectionDict[key]
   print 'ERROR: lookupXSection(): xsectionDict does not have an entry for',datasetNameFromInputList,'; i.e., no dataset in xsectionDict starts with this.'
   exit(-1)
+
+
+def ParseDatFile(datFilename):
+  #---Read .dat table for current dataset
+  data={}
+  column=[]
+  lineCounter = int(0)
+
+  #print '(opening:',inputDataFile,
+  sys.stdout.flush()
+  with open(datFilename) as datFile:
+    for j,line in enumerate(datFile):
+        # ignore comments
+        if( re.search("^###", line) ):
+            continue
+        line = string.strip(line,"\n")
+        #print "---> lineCounter: " , lineCounter
+        #print line
+
+        if lineCounter == 0:
+            for i,piece in enumerate(line.split()):
+                column.append(piece)
+        else:
+            for i,piece in enumerate(line.split()):
+                if i == 0:
+                    data[int(piece)] = {}
+                    row = int(piece)
+                else:
+                    data[row][ column[i] ] = piece
+                    #print data[row][ column[i] ] 
+
+        lineCounter = lineCounter+1
+  return data
 
 
 def UpdateTable(inputTable, outputTable):
