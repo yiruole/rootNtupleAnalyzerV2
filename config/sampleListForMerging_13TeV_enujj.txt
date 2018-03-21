@@ -9,7 +9,7 @@
 
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 #ZJet_Madgraph_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
-ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM
+#ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM
 #ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
 #ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
 #ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
@@ -29,7 +29,7 @@ ZJet_amcatnlo_pt650toInf    /DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloF
 ZJet_amcatnlo_ptBinned    ZJet_amcatnlo_pt0to50  ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 #ZJet_amcatnlo_ptBinned_noIncZ    ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 
-WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+#WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 #WJet_Madgraph_HT100to200    /WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
 #WJet_Madgraph_HT200to400    /WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
@@ -55,7 +55,7 @@ WJet_amcatnlo_ptBinnedFrom100    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250
 #TTJets_SingleLeptFromTbar    /TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #TTbar_Madgraph       	TTJets_DiLept  TTJets_SingleLeptFromT  TTJets_SingleLeptFromTbar
 ##TTbar_Madgraph_Inc   /TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM 
-TTbar_amcatnlo_Inc    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+#TTbar_amcatnlo_Inc    /TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 TTbar_powheg    /TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM 
 
 #OldSingleTop	Tbar_tW-channel Tbar_t-channel Tbar_s-channel T_tW-channel T_t-channel T_s-channel
@@ -93,10 +93,10 @@ PhotonJets_Madgraph  GJets_HT-40To100 GJets_HT-100To200 GJets_HT-200To400 GJets_
 #QCDFakes_SingleElectron_2015D-PromptReco-v4    /SingleElectron/Run2015D-PromptReco-v4_forDataDrivenQCD/MINIAOD
 #QCDFakes_DATA    QCDFakes_SingleElectron_2015D-05Oct2015    QCDFakes_SingleElectron_2015D-PromptReco-v4
 
-WW    /WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-WZ    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-ZZ    /ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-DIBOSON		WW WZ ZZ
+#DIBOSON		WW WZ ZZ
+#WW    /WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+#WZ    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+#ZZ    /ZZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 
 WWTo1L1Nu2Q  /WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WWTo4Q       /WWTo4Q_4f_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
@@ -116,11 +116,11 @@ WZ_amcatnlo    WZTo1L1Nu2Q  WZTo1L3Nu  WZTo2L2Q  WZTo3LNu  WZTo2Q2Nu
 ZZ_amcatnlo    ZZTo4L  ZZTo4Q ZZTo2L2Q
 DIBOSON_amcatnlo    WW_amcatnlo WZ_amcatnlo ZZ_amcatnlo  VVTo2L2Nu
 
-ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		WJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
-OTHERBKG_ZJetPt   	ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
-ALLBKG_powhegTTBar_ZJetWJetPt		WJet_amcatnlo_ptBinned TTbar_powheg ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
+#ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		WJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
+#OTHERBKG_ZJetPt   	ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
+#ALLBKG_powhegTTBar_ZJetWJetPt		WJet_amcatnlo_ptBinned TTbar_powheg ZJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
 
-ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt_amcAtNLODiboson		WJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc ZJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+#ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt_amcAtNLODiboson		WJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc ZJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 OTHERBKG_ZJetPt_amcAtNLODiboson   	ZJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		WJet_amcatnlo_ptBinned TTbar_powheg ZJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 
