@@ -10,7 +10,7 @@ import subprocess as sp
 
 
 def eos_isdir ( path ) : 
-    command = "/afs/cern.ch/project/eos/installation/pro/bin/eos.select ls " + path
+    command = "/usr/bin/eos ls " + path
     rfdir_stdout, rfdir_stderr = sp.Popen ( command , shell=True, stdout=sp.PIPE,stderr=sp.PIPE ).communicate()
     if    "No such file or directory" in rfdir_stderr: return False
     elif  rfdir_stderr == "" : return True
@@ -24,7 +24,7 @@ def eos_isdir ( path ) :
 def eos_mkdir ( path ):
 
     if not eos_isdir ( path ) :
-        os.system ( "/afs/cern.ch/project/eos/installation/pro/bin/eos.select mkdir -p " + path ) 
+        os.system ( "/usr/bin/eos mkdir -p " + path ) 
     else : 
         print "  EOS folder already exists: " + path
 
@@ -35,7 +35,7 @@ def eos_mkdir ( path ):
     return path
     
 def eos_getsize ( path ) : 
-    nsls_stdout, nsls_stderr = sp.Popen ( "/afs/cern.ch/project/eos/installation/pro/bin/eos.select ls -l " + path ,shell=True,stdout=sp.PIPE,stderr=sp.PIPE ).communicate()
+    nsls_stdout, nsls_stderr = sp.Popen ( "/usr/bin/eos ls -l " + path ,shell=True,stdout=sp.PIPE,stderr=sp.PIPE ).communicate()
     
     if "No such file or directory" in nsls_stderr : 
         print "Error: No such file in EOS: " + path
@@ -123,6 +123,7 @@ parser.add_option("-j", "--ijobmax", dest="ijobmax",
                   help="max number of jobs, limited automatically to the number of files in inputlist",
                   metavar="IJOBMAX")
 
+#http://batchdocs.web.cern.ch/batchdocs/local/submit.html
 parser.add_option("-q", "--queue", dest="queue",
                   help="name of the queue (choose among cmst3 8nm 1nh 8nh 1nd 1nw)",
                   metavar="QUEUE")
@@ -135,6 +136,19 @@ parser.add_option("-d", "--eosDir", dest="eosDir",
                   help="the EOS directory where skims are stored",
                   metavar="EOSDIR")
 
+parser.add_option("-m", "--eosHost", dest="eosHost",
+                  help="root:// MGM URL for the eos host for the skim output",
+                  metavar="EOSHOST", default="root://eoscms.cern.ch/")
+
+parser.add_option("-e", "--exe", dest="executable",
+                  help="executable",
+                  metavar="EXECUTABLE", default="")
+
+parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
+                  help="is this a reduced skim?",
+                  metavar="REDUCEDSKIM",default=False,action="store_true")
+
+
 
 (options, args) = parser.parse_args()
 
@@ -144,16 +158,19 @@ if ( not options.inputlist
      or not options.cutfile 
      or not options.ijobmax 
      or not options.queue 
-     or not options.wait 
+     #or not options.wait 
      or not options.eosDir ) : 
     parser.print_help()
     sys.exit()
+
+# set eos mgm url
+os.environ['EOS_MGM_URL'] = options.eosHost
 
 #--------------------------------------------------------------------------------
 # Make the EOS dir
 #--------------------------------------------------------------------------------
 
-print "Making the EOS output directory..."
+print "Making the EOS output directory...",
 
 eosPath = eos_mkdir ( options.eosDir ) 
 
@@ -163,7 +180,7 @@ print "... done"
 # Make the output directory
 #--------------------------------------------------------------------------------
 
-print "Making the local output directory..."
+print "Making the local output directory...",
 
 if not os.path.isdir ( options.outputDir ) : 
     os.system ( "mkdir -p " + options.outputDir )
@@ -178,7 +195,7 @@ print "... done "
 # Look for the cut file.  If it exists, move it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the cutfile to the local output directory..."
+print "Moving the cutfile to the local output directory...",
 
 if not os.path.isfile ( options.cutfile ) : 
     print "Error: No cut file here: " + options.cutfile 
@@ -189,10 +206,25 @@ else :
 print "... done "
 
 #--------------------------------------------------------------------------------
+# Look for the exe file.  If it exists, move it to the output directory
+#--------------------------------------------------------------------------------
+
+print "Moving the exe to the local output directory...",
+
+if not os.path.isfile ( options.executable ) : 
+    print "Error: No file here: " + options.executable
+    sys.exit() 
+else : 
+    os.system ( "cp " + options.executable + " " + options.outputDir + "/" )
+
+print "... done "
+
+
+#--------------------------------------------------------------------------------
 # Look for the inputList file
 #--------------------------------------------------------------------------------
 
-print "Moving the inputlist to the local output directory..."
+print "Moving the inputlist to the local output directory...",
 
 if not os.path.isfile ( options.inputlist ) : 
     print "Error: No input list here: " + options.inputlist 
@@ -206,7 +238,7 @@ print "... done "
 # Get JSON file from cut file and copy it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the JSON file to the local output directory..."
+print "Moving the JSON file to the local output directory...",
 
 cutfile = open ( options.cutfile , "r" )
 found_json = False 
@@ -230,6 +262,7 @@ for line in cutfile:
         else :
             os.system ( "cp " + json_file + " " + options.outputDir )
             found_json = True
+            jsonFile = options.outputDir+'/'+json_file.split('/')[-1]
 
 print "... done "
                    
@@ -256,7 +289,14 @@ inputlist_file = file ( options.inputlist,"r" )
 
 total_jobs = 0
 
+failedCommands = list()
+
 for line in inputlist_file: 
+    if not len(line.strip()) > 0:
+        continue
+    if line.startswith('#'):
+        continue
+
     dataset = line.strip().split("/")[-1].split(".txt")[0]
     
     sublist = line.strip()
@@ -281,18 +321,36 @@ for line in inputlist_file:
 
     command = "./scripts/submit_batch_ForSkimToEOS.py"
     command = command + " -i " + line.strip() 
-    command = command + " -c " + options.cutfile 
+    #command = command + " -c " + options.cutfile 
+    command = command + " -c " + options.outputDir+'/'+options.cutfile.split('/')[-1]
     command = command + " -t " + options.treeName 
     command = command + " -o " + options.outputDir + "/" + code_name + "___" + dataset
     command = command + " -n " + str(jobs_to_submit)
     command = command + " -q " + options.queue
     command = command + " -d " + eosPath
+    command = command + " -e " + options.outputDir+'/'+options.executable.split('/')[-1]
+    command = command + " -m " + options.eosHost
+    command = command + " -j " + jsonFile
+    if options.reducedSkim:
+        command = command + " -r "
     
     print command
     
-    os.system  ( command ) 
-    time.sleep (  float( options.wait ) ) 
+    #os.system  ( command ) 
+    exitCode = os.WEXITSTATUS(os.system( command ))
+    if exitCode != 0:
+        print 'Failed submitting jobs for this dataset; add to failedCommands list'
+        failedCommands.append(command)
+    if options.wait is not None:
+        time.sleep (  float( options.wait ) ) 
 
 inputlist_file.close() 
 
+# FIXME this is not the correct number
 print "total jobs =", total_jobs
+
+if len(failedCommands) > 0:
+    print 'list of failed commands:'
+    for cmd in failedCommands:
+        print cmd
+
