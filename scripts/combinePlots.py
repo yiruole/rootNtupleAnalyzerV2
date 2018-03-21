@@ -84,9 +84,11 @@ def CalculateWeight(Ntot,xsection_val,intLumi,inputRootFile):
         avgTopPtWeight = sumTopPtWeights/Ntot
         tfile.Close()
 
-        if re.search('TT_',dataset_fromInputList):
-          print '\tapplying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
-          xsection_X_intLumi/=avgTopPtWeight
+        # removed 2018 March 2
+        #if re.search('TT_',dataset_fromInputList):
+        #  print '\tapplying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
+        #  xsection_X_intLumi/=avgTopPtWeight
+
         # now calculate the actual weight
         weight = 1.0
         if( Ntot == 0 ):
@@ -275,6 +277,9 @@ if not foundAllFiles:
 else:
     print '\bDone.  All root/dat files are present.'
 
+if not os.path.isdir(options.outputDir):
+  os.makedirs(options.outputDir)
+
 if not options.tablesOnly:
     outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
 
@@ -304,16 +309,24 @@ for sample,pieceList in dictSamples.iteritems():
         toBeUpdated = False
         #matchingPiece = dataset_fromInputList
         matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
-        #print 'matchingPiece=',matchingPiece
+        #print 'INFO: possible matchingPiece=',matchingPiece
         #print 'pieceList=',pieceList
         if matchingPiece in pieceList:
             toBeUpdated = True
+            #print 'INFO: matchingPiece in pieceList: toBeUpdated=True'
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
         elif matchingPiece.endswith('_reduced_skim'):
             matchingPieceNoRSK = matchingPiece[0:matchingPiece.find('_reduced_skim')]
             if matchingPieceNoRSK in pieceList:
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoRSK
+                #print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=',matchingPieceNoRSK
+        elif matchingPiece.endswith('_ext1'):
+            matchingPieceNoExt1 = matchingPiece[0:matchingPiece.find('_ext1')]
+            if matchingPieceNoExt1 in pieceList:
+                toBeUpdated = True
+                matchingPiece = matchingPieceNoExt1
+                #print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=',matchingPieceNoExt1
         if not toBeUpdated:
             continue
     
@@ -336,38 +349,8 @@ for sample,pieceList in dictSamples.iteritems():
         #this is the current cross section
         #print dataset_fromInputList,xsection_val
 
-        #---Read .dat table for current dataset
-        data={}
-        column=[]
-        lineCounter = int(0)
-
-        #print '(opening:',inputDataFile,
-        sys.stdout.flush()
-        for j,line in enumerate( open( inputDataFile ) ):
-
-            if( re.search("^###", line) ):
-                continue
-
-            line = string.strip(line,"\n")
-            #print "---> lineCounter: " , lineCounter
-            #print line
-
-            if lineCounter == 0:
-                for i,piece in enumerate(line.split()):
-                    column.append(piece)
-            else:
-                for i,piece in enumerate(line.split()):
-                    if i == 0:
-                        data[int(piece)] = {}
-                        row = int(piece)
-                    else:
-                        data[row][ column[i] ] = piece
-                        #print data[row][ column[i] ] 
-
-            lineCounter = lineCounter+1
-
-        #print 'Done reading dat file.)'
-        sys.stdout.flush()
+        ##---Read .dat table for current dataset
+        data = combineCommon.ParseDatFile(inputDataFile)
 
         # example
         Ntot = float(data[0]['N'])
@@ -444,7 +427,7 @@ for sample,pieceList in dictSamples.iteritems():
         #---Combine histograms using PYROOT
         file = TFile(inputRootFile)
         nHistos = len(file.GetListOfKeys())
-        print "\tnKeys: " , nHistos
+        #print "\tnKeys: " , nHistos
         #print 'list of keys in this rootfile:',file.GetListOfKeys()
     
         if not options.tablesOnly:
@@ -488,6 +471,24 @@ for sample,pieceList in dictSamples.iteritems():
         file.Close()
      
     # done with this sample
+    # validation of combining pieces
+    piecesAdded = dictSamplesPiecesAdded[sample]
+    if set(piecesAdded) != set(pieceList):
+      #print
+      #print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
+      #print 'are they equal?',
+      print
+      #print 'ERROR: for sample',sample,'the pieces added were:'
+      #print sorted(piecesAdded)
+      print 'ERROR: for sample',sample+', the following pieces requested in sampleListForMerging were not added:'
+      print list(set(piecesAdded).symmetric_difference(set(pieceList)))
+      print '\twhile the pieces indicated as part of the sample were:'
+      print sorted(pieceList)
+      print '\tand the pieces added were:'
+      print sorted(piecesAdded)
+      print '\tRefusing to proceed.'
+      exit(-1)
+
     # write histos
     if not options.tablesOnly:
         outputTfile.cd()
@@ -501,25 +502,6 @@ for sample,pieceList in dictSamples.iteritems():
             dictFinalHisto[sample] = {}
         print 'Done'
          
-
-# validation of combining pieces
-for sample,pieceList in dictSamples.iteritems():
-  piecesAdded = dictSamplesPiecesAdded[sample]
-  if set(piecesAdded) != set(pieceList):
-    print
-    #print 'ERROR: for sample',sample,'the pieces added were:'
-    #print sorted(piecesAdded)
-    print 'ERROR: for sample',sample+', the following pieces requested in sampleListForMerging were not added:'
-    print list(set(piecesAdded).symmetric_difference(set(pieceList)))
-    print '\twhile the pieces indicated as part of the sample were:'
-    print sorted(pieceList)
-    print '\tand the pieces added were:'
-    print sorted(piecesAdded)
-    #print '\tRefusing to proceed.'
-    #exit(-1)
-
-if not os.path.isdir(options.outputDir):
-  os.makedirs(options.outputDir)
 
 outputTableFile = open(options.outputDir + "/" + options.analysisCode + "_tables.dat",'w')
 
@@ -558,9 +540,15 @@ if options.ttbarBkg:
     ## from feb2 new skim, powheg with deltaEtaEleTrk cut
     #Rfactor = 0.478972 # Ree,emu = Nee/Nemu[TTbarMC]
     #errRfactor = 0.002991
-    # from feb13, updated muon scale factors
-    Rfactor = 0.484022 # Ree,emu = Nee/Nemu[TTbarMC]
-    errRfactor = 0.003023
+    ## from feb13, updated muon scale factors
+    #Rfactor = 0.484022 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.003023
+    # March 2, don't apply trigger at all in this calculation
+    #Rfactor = 0.429135 # Ree,emu = Nee/Nemu[TTbarMC]
+    #errRfactor = 0.002548
+    # Mar17 fixing muon pt and eta-->2.4
+    Rfactor = 0.418559 # Ree,emu = Nee/Nemu[TTbarMC]
+    errRfactor = 0.002474
     print 'TTBar data-driven: Using Rfactor =',Rfactor,'+/-',errRfactor
     print 'TTBar data-driven: Using non-ttbar background sample:',nonTTbarAMCBkgSampleName
     #print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
@@ -586,38 +574,6 @@ outputTableFile.close()
 
 
 if not options.tablesOnly:
-## write histos
-#if not options.tablesOnly:
-#    outputTfile = TFile( options.outputDir + "/" + options.analysisCode + "_plots.root","RECREATE")
-#    
-#    #if not options.ttbarBkg:
-#    # get total hists
-#    nHistos = sum(len(x) for x in dictFinalHisto.itervalues())
-#    # NB: the commented code below makes a nice progress bar but causes the dict to be undefined...
-#    #maxSteps = 50
-#    #if nHistos < maxSteps:
-#    #  steps = nHistos
-#    #else:
-#    #  steps = maxSteps
-#
-#    print 'Writing histos:'
-#    #progressString = '0% ['+' '*steps+'] 100%'
-#    #print progressString,
-#    #print '\b'*(len(progressString)-3),
-#    #sys.stdout.flush()
-#
-#    nForProgress = 0
-#    for histDict in dictFinalHisto.itervalues(): # for each sample's dict
-#        for histo in histDict.itervalues(): # for each hist contained in the sample's dict
-#            #if (nForProgress % (nHistos/steps))==0:
-#            #    print '\b.',
-#            #    sys.stdout.flush()
-#            histo.Write()
-#            nForProgress+=1
-#    
-#    #print '\b] 100%'
-
-    #else:
     if options.ttbarBkg:
         # special actions for TTBarFromData
         # subtract nonTTbarBkgMC from TTbarRaw
