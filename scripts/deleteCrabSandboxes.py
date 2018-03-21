@@ -73,6 +73,8 @@ def main():
   for x in h.filelist():
       if '.log' in x:
           continue
+      if 'dry-run' in x:
+          continue
       print 'remove', x
       h.fileremove(x)
   print 'deleteCrabSandboxes.py: main() -- done'
