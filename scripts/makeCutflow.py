@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import combineCommon
+import datFileUtils
 import os
 import sys
 import re
 import string
-from collections import OrderedDict
 import pandas as pd
 from StringIO import StringIO
 import prettytable
@@ -15,7 +14,10 @@ import prettytable
 # Config/Run
 ####################################################################################################
 #datFilePath = os.environ["LQDATA"] + '/2016analysis/eejj_psk_feb20_newSingTop/output_cutTable_lq_eejj/analysisClass_lq_eejj_tables.dat'
-datFilePath = 'test_table.dat'
+#datFilePath = os.environ["LQDATA"] + '/2016analysis/enujj_psk_mar5_removeTopPtReweight/output_cutTable_lq_enujj_MT/analysisClass_lq_enujj_MT_tables.dat'
+#datFilePath = os.environ["LQDATA"] + '/2016analysis/eejj_RSK_mar5_forCutFlow/output_cutTable_lq_eejj/analysisClass_lq_eejj_tables.dat'
+datFilePath = os.environ["LQDATA"] + '/2016ttbar/mar1_emujj_RedoRTrig/output_cutTable_lq_ttbar_emujj_correctTrig/analysisClass_lq_ttbarEst_tables.dat'
+#datFilePath = os.environ["LQDATA"] + '/2016analysis/enujj_RSK_mar5_forCutFlow/output_cutTable_lq_enujj_MT/analysisClass_lq_enujj_MT_tables.dat'
 
 #print 'Parsing dat file:',datFilePath,'...',
 #sys.stdout.flush()
@@ -23,32 +25,36 @@ datFilePath = 'test_table.dat'
 #print 'Done'
 #print data.keys()[0]
 #print data[data.keys()[0]]
+toRound = 2
 
 # transform dat file format
-modLines = []
-colNames = []
-with open(datFilePath) as datFile:
-    for j,line in enumerate(datFile):
-        line = line.strip()
-        if len(line.split())==1:
-            sample = line.split()[0]
-            lastLineForSampleReached = False
-        else:
-            if 'variableName' in line:
-                if len(colNames) < 1:
-                    colNamesFromLine = line.split()
-                    colNames = ['sample']+colNamesFromLine
-                continue
-            elif not lastLineForSampleReached:
-                splitLine = line.split()
-                if 'opt' in splitLine[0]:
-                    lastLineForSampleReached = True
-                    splitLine[0] = 'preselection'
-                #print 'line looks line:"'+line+'" with length=',len(line)
-                lineToAdd = [sample]+splitLine
-                #modLines.append(tuple(sample+'\t'+line))
-                modLines.append(tuple(x for x in lineToAdd))
-                # stop reading table for this sample after 'opt' vars
+# Here we can unscale the sample if we want
+#weight = 2.0874594 # eejj
+#weight = 1.05259252909 # enujj
+#sampleToUse = 'LQ_M1100'
+#
+#weight = 5767.4136 # eejj
+#weight = 2890.12287278 # enujj
+#sampleToUse = 'LQ_M300'
+#
+#weight = 121.23046 # eejj
+#weight = 60.867220292 # enujj
+#sampleToUse = 'LQ_M600'
+#
+#weight = 4.22762531177 # eejj
+#weight = 2.11986747085 # enujj
+#sampleToUse = 'LQ_M1000'
+#
+# backgrounds
+#sampleToUse = 'WJet_amcatnlo_ptBinned'
+#sampleToUse = 'TTbar_powheg'
+sampleToUse = 'TTBarFromDATA'
+#sampleToUse = 'ZJet_amcatnlo_ptBinned'
+toRound=4
+weight = -1
+#
+# slightly nasty since we apply the weight for one sample to the whole table; round to 2 decimal places
+modLines,colNames = datFileUtils.ReadDatFile(datFilePath,weight,rounding=toRound)
 
 #print modLines[0:9]
 #df = pd.read_csv(datFilePath,delim_whitespace=True,header=1)
@@ -71,13 +77,15 @@ df.drop(['min1','min2','max1','max2'],axis=1,inplace=True)
 #df = df.set_index('sample')
 
 sampleList = df['sample'].unique()
-sampleToUse = sampleList[0]
+#sampleToUse = sampleList[0]
 print '#'*100
 print 'Cutflow for',sampleToUse
 print '#'*100
 dfPrint = df.loc[df['sample']==sampleToUse]
-dfPrint = dfPrint.drop(['sample'],axis=1)
+dfPrint = dfPrint.drop(['sample','errEffRel','errEffAbs'],axis=1)
 #dfPrint = dfPrint.head(10)
+
+
 
 # print
 output = StringIO()
