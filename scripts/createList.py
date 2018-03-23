@@ -274,6 +274,8 @@ def main():
         parser.print_help()
         sys.exit()
 
+    if not options.eosHost.endswith('/'):
+        options.eosHost += '/'
     # set eos mgm url
     os.environ['EOS_MGM_URL'] = options.eosHost
 
