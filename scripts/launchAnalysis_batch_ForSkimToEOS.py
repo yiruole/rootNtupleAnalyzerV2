@@ -125,7 +125,7 @@ parser.add_option("-j", "--ijobmax", dest="ijobmax",
 
 #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
 parser.add_option("-q", "--queue", dest="queue",
-                  help="name of the queue (choose among cmst3 8nm 1nh 8nh 1nd 1nw)",
+                  help="name of the queue (choose among longlunch workday tomorrow etc.)",
                   metavar="QUEUE")
 
 parser.add_option("-w", "--wait", dest="wait",
