@@ -44,6 +44,7 @@ class GenParticle : public Object {
   bool PassUserID_ECALFiducial        (bool verbose);
   bool PassUserID_GenEleHardScatter   (bool verbose);
   bool PassUserID_GenNuHardScatter    (bool verbose);
+  bool PassUserID_GenMuHardScatter    (bool verbose);
 
   bool PassUserID_GenZGammaHardScatter(bool verbose);
   bool PassUserID_GenWHardScatter     (bool verbose);

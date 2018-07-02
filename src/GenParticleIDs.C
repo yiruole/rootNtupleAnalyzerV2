@@ -12,6 +12,8 @@ bool GenParticle::PassUserID (ID id, bool verbose){
   else if ( id == GEN_ELE_HARD_SCATTER    ) { return PassUserID_GenEleHardScatter(verbose); }
   else if ( id == GEN_NU_HARD_SCATTER     ) { return PassUserID_GenNuHardScatter (verbose); }
 
+  else if ( id == GEN_MU_HARD_SCATTER     ) { return PassUserID_GenMuHardScatter (verbose); }
+
   else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
   else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
   else if ( id == GEN_NU_FROM_W  	        ) { return PassUserID_GenNuFromW          (verbose); }
@@ -38,6 +40,11 @@ bool GenParticle::PassUserID_GenEleHardScatter(bool verbose){
 
 bool GenParticle::PassUserID_GenNuHardScatter(bool verbose){ 
   if ( IsHardProcess() && abs(PdgId()) == 12 ) return true;
+  return false;
+}
+
+bool GenParticle::PassUserID_GenMuHardScatter(bool verbose){ 
+  if ( IsHardProcess() && abs(PdgId()) == 13 ) return true;
   return false;
 }
 
