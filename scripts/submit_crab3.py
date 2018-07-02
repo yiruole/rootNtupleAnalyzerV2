@@ -111,6 +111,9 @@ parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
 parser.add_option("-j", "--inputFiles", dest="inputFiles",
                   metavar="inputFiles")
 
+parser.add_option("-e", "--executable", dest="executable",
+                  metavar="executable",default='main')
+
 
 
 (options, args) = parser.parse_args()
@@ -250,10 +253,10 @@ if options.isSkimTask or options.isReducedSkimTask:
   scriptfile.write('python -c "import PSet; print \'\\n\'.join(list(PSet.process.source.fileNames))" > '+inputListName+'\n')
   scriptfile.write('echo "cat '+inputListName+':"\n')
   scriptfile.write('cat '+inputListName+'\n')
-  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+  scriptfile.write("./"+options.executable+" "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 else:
   # read the inputlist we pass to crab
-  scriptfile.write("./main "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
+  scriptfile.write("./"+options.executable+" "+inputListName+" "+cutfileName+" "+options.treeName+" "+outputFilePref+" "+outputFilePref+"\n")
 #scriptfile.write("# localoutputdirectory="+workingDir+"\n")
 # define our own exit code for crab; see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Define_your_own_exit_code_and_ex
 scriptfile.write("""
@@ -299,7 +302,7 @@ config.General.transferLogs = False
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
-config.JobType.inputFiles = [cutfile,inputlist,'main']
+config.JobType.inputFiles = [cutfile,inputlist,options.executable]
 # if we gave additional input files, feed them into the sandbox as well
 # note that is read by the cutfile, which was modified in the 'launch' script to copy and then read from the input file in the working dir
 additionalInputFiles = []
@@ -406,6 +409,8 @@ else:
   print 'ok, output files will have length about:',len(storagePath),'chars'
 
 config.Site.storageSite = 'T2_CH_CERN'
+# XXX SIC Mar9
+#config.Site.storageSite = 'T3_US_FNALLPC'
 # run jobs at other sites
 config.Data.ignoreLocality = True
 # make more expansive whitelist for skims
@@ -413,14 +418,16 @@ config.Data.ignoreLocality = True
 if submitCERNT2only:
   config.Site.whitelist = ['T2_CH_CERN']
 else:
-  if options.isSkimTask or options.isReducedSkimTask:
-    config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_PT_*']
-  else:
-    config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*',]
-# default crab server blacklist
-config.Site.blacklist = ['T2_CH_CSCS', 'T2_UK_SGrid_RALPP', 'T2_FR_GRIF_LLR', 'T2_BE_UCL', 'T2_FR_IPHC', 'T2_DE_DESY', 'T2_IT_Legnaro', 'T2_CH_CERN_AI', 'T2_UK_London_Brunel', 'T2_CH_CSCS_HPC', 'T2_IT_Pisa', 'T2_GR_Ioannina', 'T2_CH_CERN_HLT', 'T2_FR_GRIF_IRFU', 'T2_IT_Bari', 'T2_IT_Rome', 'T2_FR_CCIN2P3', 'T2_ES_CIEMAT', 'T2_PL_Warsaw', 'T2_HU_Budapest', 'T2_DE_RWTH', 'T2_PT_NCG_Lisbon', 'T2_PL_Swierk']
-# my own additions based on failing jobs
-config.Site.blacklist.extend(['T2_ES_IFCA', 'T2_EE_Estonia'])
+  #if options.isSkimTask or options.isReducedSkimTask:
+  #  config.Site.whitelist = ['T2_CH_*','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_PL_*','T2_UK_*','T2_FI_*','T2_GR_*','T2_HU_*','T2_PT_*']
+  #else:
+  #  config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*','T2_US_*']
+  #XXX Mar11: Try to run everything at FNAL
+  config.Site.whitelist = ['T3_US_FNALLPC']
+## default crab server blacklist
+#config.Site.blacklist = ['T2_CH_CSCS', 'T2_UK_SGrid_RALPP', 'T2_FR_GRIF_LLR', 'T2_BE_UCL', 'T2_FR_IPHC', 'T2_DE_DESY', 'T2_IT_Legnaro', 'T2_CH_CERN_AI', 'T2_UK_London_Brunel', 'T2_CH_CSCS_HPC', 'T2_IT_Pisa', 'T2_GR_Ioannina', 'T2_CH_CERN_HLT', 'T2_FR_GRIF_IRFU', 'T2_IT_Bari', 'T2_IT_Rome', 'T2_FR_CCIN2P3', 'T2_ES_CIEMAT', 'T2_PL_Warsaw', 'T2_HU_Budapest', 'T2_DE_RWTH', 'T2_PT_NCG_Lisbon', 'T2_PL_Swierk']
+## my own additions based on failing jobs
+#config.Site.blacklist.extend(['T2_ES_IFCA', 'T2_EE_Estonia'])
 
 # some tricks
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3AdvancedTutorial#Exercise_4_user_script
