@@ -77,13 +77,19 @@ def MoveFiles(outputFilesNotMoved,taskName):
     # on lxplus, eos is mounted
     cmd = 'cp /eos/cms'+fn+' '+taskName+'/'
     ret = subprocess.call(cmd.split())
+    ## hack to support fnal
+    #cmd = 'xrdcp -s root://cmseos.fnal.gov/'+fn+' '+taskName+'/'
+    #ret = subprocess.call(cmd.split())
     #print cmd
     if ret != 0:
-      print 'did not manage to copy: /eos/cms'+fn,' to',taskName+'/','; cp had return code of',ret
+      #print 'did not manage to copy: /eos/cms'+fn,' to',taskName+'/','; cp had return code of',ret
+      print 'did not manage to copy: cmd=',cmd,'\n\thad return code of',ret
       continue
     #cmd = eos+' rm /eos/cms'+fn
     # on lxplus, eos is mounted
     cmd = 'rm /eos/cms'+fn
+    # FNAL
+    #cmd = 'xrdfs rm root://eoscms.fnal.gov/'+fn
     subprocess.call(cmd.split())
     #print cmd
     if ret == 0:
@@ -248,6 +254,11 @@ def main():
         print '      Successfully moved all files; write to cache.'
         # check again, shouldn't be necessary
         # if we moved the files, call it OK even if purge fails later
+        if not taskName in completedTasksFromCache:
+          ourCacheFile.write(taskName+'\n')
+    elif options.projDir is not None:
+      # just write it into the cache file straight away without moving files
+      for taskName in tasksCompleted:
         if not taskName in completedTasksFromCache:
           ourCacheFile.write(taskName+'\n')
     ourCacheFile.close()
