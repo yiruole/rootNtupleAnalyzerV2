@@ -27,8 +27,8 @@ Instructions:
 -------------
 
 1) Environment setup:
-   scram project CMSSW CMSSW_7_4_14
-   cd CMSSW_7_4_14/src/
+   scram project CMSSW CMSSW_8_0_11
+   cd CMSSW_8_0_11/src/
    cmsenv
 
 2) Checkout the code:
@@ -41,7 +41,7 @@ Here we insert an extra directory so that scram will ignore the source files her
 3) Generate the rootNtupleClass:
    cd rootNtupleAnalyzerV2/
    ./scripts/make_rootNtupleClass.sh
-      (you will be asked for input arguments)
+      (you will be asked for input arguments, such as an ntuple file to do MakeClass() on)
 
 4) Copy the analysis template file into your own file:
      cp -i src/analysisClass_template.C src/analysisClass_myCode.C
@@ -50,6 +50,7 @@ Here we insert an extra directory so that scram will ignore the source files her
 
    NOTE: the macro analysisClass_template.C might not be compatible with the dataformat of your ntuples
          you have to write a consistent macro.
+   NOTE2: There are many analysis classes already available in the macros repo.
 
 5) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
    make clean
@@ -57,7 +58,7 @@ Here we insert an extra directory so that scram will ignore the source files her
 Note that if you run on full RootTupleMakerV2-produced ntuples, you have to use Makefile_fullNtuple:
    make -f Makefile_fullNtuple
 
-6) Add your analysis code to the method Loop() of analysisClass_myCode.C
+6) If you are writing a new analysis class, add your analysis code to the method Loop() of analysisClass_myCode.C
 
    NOTE: to access variables use
    variable->at(i)
