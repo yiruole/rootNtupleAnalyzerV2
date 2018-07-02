@@ -649,8 +649,9 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 ###################################################################################################
 
 blinded=False
-doEEJJ=False
-doRPV=False # to do RPV, set doEEJJ and doRPV to True
+doEEJJ=True
+doRPV=True # to do RPV, set doEEJJ and doRPV to True
+forceGmNNormBkgStatUncert = True
 
 if doRPV:
   mass_points = [str(i) for i in range(200,1250,100)] # go from 200-1200 in 100 GeV steps
@@ -1092,7 +1093,6 @@ for i_signal_name, signal_name in enumerate(signal_names):
             thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgTotalEntries = d_background_unscaledRates[background_name][selectionName]
             #print '[datacard] INFO:  for selection:',selectionName,' and background:',background_name,' total unscaled events=',thisBkgTotalEntries
-            forceLogNorm = False
 
             if thisBkgEvts != 0.0: 
                 lnN_f = 1.0 + 1.0/math.sqrt(thisBkgTotalEntries+1) # Poisson becomes Gaussian, approx by logN with this kappa
@@ -1100,7 +1100,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 #if not doEEJJ and background_name=='SingleTop' and int(selectionName.replace('LQ','')) >= 650:
                 #   statErr = GetStatErrorFromDict(statErrorsSingleTop,int(selectionName.replace('LQ','')))
                 #   lnN_f = 1.0 + statErr/thisBkgEvts
-                #   forceLogNorm = True
+                #   forceLogNormBkgStatUncert = True
             else: 
                 # for small uncertainties, use gamma distribution with alpha=(factor to go to signal region from control/MC)
                 # since we can't compute evts/entries, we use it from the preselection (following LQ2)
@@ -1139,7 +1139,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 line_ln = line_ln + " -"
                 line_gm = line_gm + " -"
 
-            if thisBkgTotalEntries > 10 or forceLogNorm:
+            if thisBkgTotalEntries > 10 and not forceGmNNormBkgStatUncert:
                 card_file.write (line_ln + "\n")
             else:
                 card_file.write (line_gm + "\n")
