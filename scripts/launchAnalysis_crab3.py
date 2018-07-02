@@ -107,6 +107,9 @@ parser.add_option("-l", "--overrideOutputLength", dest="overrideOutputLength",
 parser.add_option("-f", "--cernT2Only", dest="submitCERNT2only",
                   metavar="submitCERNT2only",default=False,action="store_true")
 
+parser.add_option("-e", "--executable", dest="executable",
+                  metavar="executable",default='main')
+
 (options, args) = parser.parse_args()
 
 if ( not options.inputlist 
@@ -236,6 +239,8 @@ for i,line in enumerate(inputlist_file):
     #command = command + " -n " + str(jobs_to_submit)
     #command = command + " -q " + options.queue
     command = command + " -d " + options.eosDir
+    #FIXME not 100% implemented because of using the link name as the code name
+    command = command + " -e " + options.executable
     if options.isSkimTask:
       command+=" -s"
     elif options.isReducedSkimTask:
