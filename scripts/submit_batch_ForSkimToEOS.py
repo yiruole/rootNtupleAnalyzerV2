@@ -172,8 +172,8 @@ with open(condorFileName,'w') as condorFile:
     condorFile.write('output      = output/$(Process).out\n')
     condorFile.write('error       = error/$(Process).err\n')
     condorFile.write('log         = log/$(Process).log\n')
-    #condorFile.write('+JobFlavour = "tomorrow"\n') # 1 day
-    #condorFile.write('+JobFlavour = "longlunch"\n') # 2 hours, good for RSK
+    #condorFile.write('+JobFlavour = "longlunch"\n') # 1 day
+    #condorFile.write('+JobFlavour = "workday"\n') # 2 hours, good for RSK
     #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
     condorFile.write('+JobFlavour = "'+options.queue+'"\n')
     # make sure the job finishes with exit code 0
