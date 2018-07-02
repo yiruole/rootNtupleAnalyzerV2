@@ -297,4 +297,72 @@ The new ntuple will be created in a file named as the std output root file with 
 before the .root and the tree name will be as in the input root file.
 
 
+Quick guide to skimming code:
+------------------------------------------------------------------------------------------------------------
+1) Log into lxplus and do "cmsenv" in a CMSSW environment
 
+2)  Check out the rootNtupleAnalyzerV2 and rootNtupleMacrosV2 packages:
+cvs checkout -d rootNtupleAnalyzerV2 UserCode/Leptoquarks/rootNtupleAnalyzerV2
+cvs checkout -d rootNtupleMacrosV2 UserCode/Leptoquarks/rootNtupleMacrosV2
+
+3) Set environment variables:
+
+export LQANA=$PWD/rootNtupleAnalyzerV2
+export LQMACRO=$PWD/rootNtupleMacrosV2
+export LQDATA="some path where you can store a lot of output.  Probably a subdirectory of your afs "work" area.
+
+4) Navigate to the working directory:
+
+cd $LQANA
+
+5) Remember that to run the LQ analysis code, you need three pieces:
+- An analysisClass file, which is ready for you: $LQMACRO/src2012/analysisClass_lq1_skim.C src/analysisClass.C
+- A cut file, which is ready for you: $LQMACRO/config2012/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
+- An input list, which you must make for yourself using a script (see step 6)
+
+6) Make the inputlist for the files you want to run on:
+
+python scripts/createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
+-m root
+
+... The input list you want will be here:
+$LQANA/config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/inputListAllCurrent.txt
+
+7) Compile the analysis class you need:
+
+unlink src/analysisClass.C
+ln -s $LQMACRO/src2012/analysisClass_lq1_skim.C src/analysisClass.C
+./scripts/make_rootNtupleClass.sh -f "root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/DY2JetsToLL_M-50_scaleup_8TeV-madgraph__Summer12-START53_V7C-v1__AODSIM_9_1_lll.root" -t rootTupleTree/tree
+make -f Makefile_fullNtuple clean
+make -f Makefile_fullNtuple
+
+8) Test the code:
+
+./main config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/DY2JetsToLL_M-50_scaledown_8TeV-madgraph__Summer12-START53_V7C-v1__AODSIM.txt $LQMACRO/config2012/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt rootTupleTree/tree test test
+
+9) You can run skim jobs on crab3 (recommended) by using: scripts/launchAnalysis_crab3.py
+10) You can check the status of the jobs by using: scripts/multicrab.py
+
+9') For running locally, like for analysis on preselection skims, prepare a list of commands by editing some lines within scripts like the following:
+scripts/writeCommandsToRunOnMoreCutFiles_ForSkimToEOS_MakeSingleEleReducedSkim.sh
+
+You will need to edit:
+SUBDIR: Output summary files will be stored in "$LQDATA/$SUBDIR".  Name it whatever you want.
+FULLEOSDIR: The actual miniskims will be stored in this EOS path.  Name it whatever you want.
+INPUTLIST: This should be a path to the inputlist you make in Step 6.
+
+Everything else you should be able to leave unchanged.
+
+When you're ready, execute the script:
+./writeCommandsToRunOnMoreCutFiles_ForSkimToEOS_MakeSingleEleReducedSkim.sh
+
+10') Examine the commands you have created.
+
+The script will produce a text file called something like: 
+commandsToRunOnMoreCutFiles_MakeSingleEleReducedSkim_lxplus.txt
+
+Look at the contents of the text file.  There should be two commands in it.  The first command launches the jobs.  The second command should only be executed when all jobs are finished -- it checks to make sure all jobs are complete.
+
+11') Launch the jobs by executing the first command in the text file.
+
+12') When the jobs are done, execute the second command in the text file and follow the instructions.  If the second command prints out "All jobs successful" : you're done!
