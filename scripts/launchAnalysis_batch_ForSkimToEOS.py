@@ -160,6 +160,7 @@ if ( not options.inputlist
      or not options.queue 
      #or not options.wait 
      or not options.eosDir ) : 
+    print 'One of [outputDir,treeName,cutfile,ijobmax,queue,eosDir] not specified'
     parser.print_help()
     sys.exit()
 
