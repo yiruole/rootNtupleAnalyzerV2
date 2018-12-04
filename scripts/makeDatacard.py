@@ -651,7 +651,7 @@ def FillDicts(rootFilename,qcdRootFilename,ttbarRootFilename):
 blinded=False
 doEEJJ=True
 doRPV=True # to do RPV, set doEEJJ and doRPV to True
-forceGmNNormBkgStatUncert = True
+forceGmNNormBkgStatUncert = False
 
 if doRPV:
   mass_points = [str(i) for i in range(200,1250,100)] # go from 200-1200 in 100 GeV steps
