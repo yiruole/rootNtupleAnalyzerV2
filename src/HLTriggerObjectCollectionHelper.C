@@ -99,11 +99,7 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const 
 
     short pathIndex = IndexOfAssociatedPath(path_name, i);
     if(pathIndex > -1)
-    {
-      // if it is associated to a path, check to see if it passed an L3 filter in the path
-      if(m_data->HLTriggerObjPassedPathL3Filter->at(i).at(pathIndex))
-        matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
-    }
+      matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
 
   }
   collection->SetRawIndices(matchingHLTriggerRawIndices);

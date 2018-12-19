@@ -25,7 +25,7 @@ float & HLTriggerObject::Phi                () { return m_float_phi; }
 std::vector<int>& HLTriggerObject::ObjectIDs () { return m_collection -> GetData() -> HLTriggerObjTypeIds  -> at ( m_raw_index ) ; }
 
 // HLT
-std::vector<std::string>& HLTriggerObject::GetFilterNames() { return m_collection -> GetData() -> HLTriggerObjFilterNames  -> at ( m_raw_index ) ; }
+//std::vector<std::string>& HLTriggerObject::GetFilterNames() { return m_collection -> GetData() -> HLTriggerObjFilterNames  -> at ( m_raw_index ) ; }
 std::vector<std::string>& HLTriggerObject::GetPathNames() { return m_collection -> GetData() -> HLTriggerObjPathNames  -> at ( m_raw_index ) ; }
 std::string HLTriggerObject::GetCollectionName() { return m_collection -> GetData() -> HLTriggerObjCollectionName  -> at ( m_raw_index ) ; }
 
@@ -42,11 +42,7 @@ int HLTriggerObject::GetPathIndex(std::string pathName)
 
 bool HLTriggerObject::PassedPathL3Filter(std::string pathName)
 {
-  int index = GetPathIndex(pathName);
-  if(index >= 0)
-    return m_collection -> GetData() -> HLTriggerObjPassedPathL3Filter  -> at ( m_raw_index )[index];
-  else
-    return false;
+  return true;
 }
 
 bool HLTriggerObject::PassedPathLastFilter(std::string pathName)

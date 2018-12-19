@@ -23,7 +23,7 @@ class HLTriggerObject : public Object {
   float & Phi () ; 
 
   // HLT info
-  std::vector<std::string>& GetFilterNames();
+  //std::vector<std::string>& GetFilterNames();
   std::vector<std::string>& GetPathNames();
   bool PassedPathL3Filter(std::string pathName);
   bool PassedPathLastFilter(std::string pathName);
