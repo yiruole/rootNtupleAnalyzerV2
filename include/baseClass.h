@@ -139,10 +139,7 @@ class baseClass : public rootNtupleClass {
   void fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale=1 ) ;
   void printTriggers();
   void printFiredTriggers();
-  void getTriggers(std::string * HLTKey ,   
-		   std::vector<std::string> * names, 
-		   std::vector<bool>        * decisions,
-		   std::vector<int >        * prescales);
+  void getTriggers(Long64_t entry);
   const std::string& getInputListName() { return *inputList_;};
   const std::string getCurrentFileName() { return tree_->GetCurrentFile()->GetName();};
     
@@ -212,6 +209,8 @@ class baseClass : public rootNtupleClass {
 
   void createOptCutFile();
 
+  bool isData();
+
   PileupReweighter pileupReweighter_;
 
   TFile * output_root_;
@@ -226,6 +225,7 @@ class baseClass : public rootNtupleClass {
   //TChain * chain_; // Original TChain
   TChain * tree_; // main tree
   TTree * tree2_; // tree for globalInfo
+  Long64_t readerEntry_;
   string * cutEfficFile_;
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;

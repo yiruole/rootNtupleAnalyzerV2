@@ -45,6 +45,7 @@ class PFJet : public Object {
   //float CombinedSecondaryVertexBTag ();
   float CombinedInclusiveSecondaryVertexBTag();
   float CombinedMVABTag();
+  float DeepCSVBTag();
   
  private:
   bool PassUserID_PFJetLoose (bool verbose);

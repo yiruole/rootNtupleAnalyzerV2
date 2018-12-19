@@ -8,9 +8,9 @@ HLTriggerObject::HLTriggerObject ():
 
 HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j):
   Object        ( c,i,j, "HLTriggerObject" ),
-  m_float_pt   ( m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) ),
-  m_float_eta  ( m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) ),
-  m_float_phi  ( m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) )
+  m_float_pt   ( m_collection -> GetData() -> TrigObj_pt  [m_raw_index] ),
+  m_float_eta  ( m_collection -> GetData() -> TrigObj_eta [m_raw_index] ),
+  m_float_phi  ( m_collection -> GetData() -> TrigObj_phi [m_raw_index] )
 {}
 
 //void HLTriggerObject::WritePtEtaPhi() {
@@ -22,12 +22,12 @@ HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j)
 float & HLTriggerObject::Pt                 () { return m_float_pt ; }
 float & HLTriggerObject::Eta                () { return m_float_eta; }
 float & HLTriggerObject::Phi                () { return m_float_phi; }
-std::vector<int>& HLTriggerObject::ObjectIDs () { return m_collection -> GetData() -> HLTriggerObjTypeIds  -> at ( m_raw_index ) ; }
+std::vector<int> HLTriggerObject::ObjectIDs () { return std::vector<int>(m_collection -> GetData() -> TrigObj_id [m_raw_index] ) ; }
 
 // HLT
-std::vector<std::string>& HLTriggerObject::GetFilterNames() { return m_collection -> GetData() -> HLTriggerObjFilterNames  -> at ( m_raw_index ) ; }
-std::vector<std::string>& HLTriggerObject::GetPathNames() { return m_collection -> GetData() -> HLTriggerObjPathNames  -> at ( m_raw_index ) ; }
-std::string HLTriggerObject::GetCollectionName() { return m_collection -> GetData() -> HLTriggerObjCollectionName  -> at ( m_raw_index ) ; }
+std::vector<std::string> HLTriggerObject::GetFilterNames() { return std::vector<std::string>(); }
+std::vector<std::string> HLTriggerObject::GetPathNames() { return std::vector<std::string>(); }
+std::string HLTriggerObject::GetCollectionName() { return "undefined"; }
 
 
 int HLTriggerObject::GetPathIndex(std::string pathName)
@@ -42,20 +42,13 @@ int HLTriggerObject::GetPathIndex(std::string pathName)
 
 bool HLTriggerObject::PassedPathL3Filter(std::string pathName)
 {
-  int index = GetPathIndex(pathName);
-  if(index >= 0)
-    return m_collection -> GetData() -> HLTriggerObjPassedPathL3Filter  -> at ( m_raw_index )[index];
-  else
-    return false;
+  return true;
 }
 
 bool HLTriggerObject::PassedPathLastFilter(std::string pathName)
 {
-  int index = GetPathIndex(pathName);
-  if(index >= 0)
-    return m_collection -> GetData() -> HLTriggerObjPassedPathLastFilter  -> at ( m_raw_index )[index];
-  else
-    return false;
+  //FIXME
+  return false;
 }
 
 bool HLTriggerObject::PassUserID(ID id, bool verbose)

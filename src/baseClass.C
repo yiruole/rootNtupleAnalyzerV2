@@ -2,6 +2,7 @@
 #include "baseClass.h"
 #include <boost/lexical_cast.hpp>
 #include "TEnv.h"
+#include "TLeaf.h"
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
   PileupWeight_ ( 1.0 ),
@@ -132,6 +133,7 @@ void baseClass::init()
   h_weightSums_ = new TH1F("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
   h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
   h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
+
 }
 
 void baseClass::readInputList()
@@ -1772,27 +1774,25 @@ double baseClass::getPileupWeight ( int npileup, bool this_is_data ) {
   return PileupWeight_;
 }
 
-void baseClass::getTriggers(std::string * HLTKey ,  
-			    std::vector<std::string> * names, 
-			    std::vector<bool>        * decisions,
-			    std::vector<int>         * prescales ){
+void baseClass::getTriggers(Long64_t entry) {
   triggerDecisionMap_.clear();
-  triggerPrescaleMap_.clear();
-    
-  int ntriggers = names -> size();
-  
-  for (int i = 0; i < ntriggers; ++i){
-    triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
-    triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
-    //STDOUT("INFO: Filled trigger prescale map: name=" << (*names)[i] << " prescale=" << (*prescales)[i]);
+  //FIXME deal with prescale map
+  //triggerPrescaleMap_.clear();
+  for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
+    TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
+    std::string branchName = branch->GetName();
+    if(branchName.find("HLT_")!=std::string::npos) {
+      triggerDecisionMap_[branchName] = branch->GetLeaf(branchName.c_str())->GetTypedValue<Bool_t>();
+    }
   }
 }
 
 void baseClass::printTriggers(){
-  std::map<std::string, int>::iterator i     = triggerPrescaleMap_.begin();
-  std::map<std::string, int>::iterator i_end = triggerPrescaleMap_.end();
-  STDOUT( "Triggers include: ")
-    for (; i != i_end; ++i) STDOUT( "\t" << i -> second << "\t\"" << i -> first << "\"" );
+  std::map<std::string, bool>::iterator i     = triggerDecisionMap_.begin();
+  std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
+  STDOUT( "Triggers: ")
+    for (; i != i_end; ++i)
+      std::cout << "\tfired?" << i -> second <<"\t\"" << i -> first << "\"" << std::endl;
 }
 
 void baseClass::printFiredTriggers()
@@ -1813,7 +1813,7 @@ bool baseClass::triggerExists ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
       return true;
@@ -1833,7 +1833,7 @@ bool baseClass::triggerFired ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
       return itr->second;
@@ -1856,15 +1856,17 @@ int baseClass::triggerPrescale ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerPrescaleMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerPrescaleMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with prescale=" << itr->second);
       return itr->second;
       ++itr;
     }
-    printTriggers();
-    STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
-    exit(-1);
+    //printTriggers();
+    //STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
+    //exit(-1);
+    //FIXME
+    return 1;
   }
   else {
     //STDOUT("INFO: Found matching trigger: " << i->first << " with prescale: " << i->second);
@@ -1924,3 +1926,9 @@ void baseClass::createOptCutFile() {
   } // for (int i=0;...)
 }
 
+bool baseClass::isData() {
+  if(!tree_->GetBranch("genWeight"))
+    return true;
+  else
+  return false;
+}

@@ -16,9 +16,9 @@ class Muon : public Object {
   float & Pt                      (); // this is cocktail/TuneP, the one we want by default
   float & PtError                 (); // this is cocktail/TuneP, the one we want by default
   float & Eta                     (); // this is cocktail/TuneP, the one we want by default
-  float & EtaError                (); // this is cocktail/TuneP, the one we want by default
+  //float & EtaError                (); // this is cocktail/TuneP, the one we want by default
   float & Phi                     (); // this is cocktail/TuneP, the one we want by default
-  float & PhiError                (); // this is cocktail/TuneP, the one we want by default
+  //float & PhiError                (); // this is cocktail/TuneP, the one we want by default
 
   float & PFPt                    ();
   float & PFPtError               ();
@@ -28,9 +28,9 @@ class Muon : public Object {
   float & PFPhiError              ();
 
   float & CocktailEta             ();
-  float & CocktailEtaError        ();
+  //float & CocktailEtaError        ();
   float & CocktailPhi             ();
-  float & CocktailPhiError        ();
+  //float & CocktailPhiError        ();
   float & CocktailPt              ();
   float & CocktailPtError         ();
 

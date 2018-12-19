@@ -11,29 +11,33 @@ PFJet::PFJet (Collection& c, unsigned int i, short j ):
   Object ( c,i, "PFJet" )
 {}
                                      
-float & PFJet::Pt                       () { return m_collection -> GetData() -> PFJetPtAK4CHS                           -> at ( m_raw_index ); } 
-float & PFJet::Eta                      () { return m_collection -> GetData() -> PFJetEtaAK4CHS                          -> at ( m_raw_index ); } 
-float & PFJet::Phi                      () { return m_collection -> GetData() -> PFJetPhiAK4CHS                          -> at ( m_raw_index ); } 
-float PFJet::Energy                     () { return m_collection -> GetData() -> PFJetEnergyAK4CHS                       -> at ( m_raw_index ); }
-float PFJet::JECUnc		                  () { return m_collection -> GetData() -> PFJetJECUncAK4CHS                       -> at ( m_raw_index ); }
+float & PFJet::Pt                       () { return m_collection -> GetData() -> Jet_pt [m_raw_index]; } 
+float & PFJet::Eta                      () { return m_collection -> GetData() -> Jet_eta[m_raw_index]; } 
+float & PFJet::Phi                      () { return m_collection -> GetData() -> Jet_phi[m_raw_index]; } 
+float PFJet::Energy                     () { return -1.0; }
+//FIXME
+float PFJet::JECUnc		                  () { return -1.0; }
                                      
-float PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData() -> PFJetNeutralHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
-float PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData() -> PFJetNeutralEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
-int    PFJet::NeutralHadronMultiplicity  () { return m_collection -> GetData() -> PFJetNeutralHadronMultiplicityAK4CHS    -> at ( m_raw_index ); }
-int    PFJet::NeutralMultiplicity        () { return m_collection -> GetData() -> PFJetNeutralMultiplicityAK4CHS          -> at ( m_raw_index ); }
-int    PFJet::NConstituents              () { return m_collection -> GetData() -> PFJetNConstituentsAK4CHS                -> at ( m_raw_index ); } 
-float PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData() -> PFJetChargedHadronEnergyFractionAK4CHS  -> at ( m_raw_index ); } 
-int    PFJet::ChargedMultiplicity        () { return m_collection -> GetData() -> PFJetChargedMultiplicityAK4CHS          -> at ( m_raw_index ); } 
-float PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData() -> PFJetChargedEmEnergyFractionAK4CHS      -> at ( m_raw_index ); } 
+float PFJet::NeutralHadronEnergyFraction() { return m_collection -> GetData()  -> Jet_neHEF  [m_raw_index]; } 
+float PFJet::NeutralEmEnergyFraction    () { return m_collection -> GetData()  -> Jet_neEmEF [m_raw_index]; } 
+int    PFJet::NeutralHadronMultiplicity  () { -1; }
+int    PFJet::NeutralMultiplicity        () { -1; }
+int    PFJet::NConstituents              () { return m_collection -> GetData() -> Jet_nConstituents [m_raw_index]; } 
+float PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData()  -> Jet_chHEF         [m_raw_index]; } 
+int    PFJet::ChargedMultiplicity        () { -1; } 
+float PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData()  -> Jet_chEmEF        [m_raw_index]; } 
 
 //float PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
-float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedInclusiveSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
-float PFJet::CombinedMVABTag() { return m_collection -> GetData() -> PFJetCombinedMVABTagAK4CHS -> at ( m_raw_index ); }
+float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection -> GetData() -> Jet_btagCSVV2[m_raw_index]; }
+float PFJet::CombinedMVABTag() { return m_collection -> GetData() -> Jet_btagCMVA [m_raw_index]; }
+//FIXME or Jet_btagDeepFlavB ?
+float PFJet::DeepCSVBTag() { return m_collection -> GetData() -> Jet_btagDeepB [m_raw_index]; }
 
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 float PFJet::EnergyResScaleFactor (){ 
-  return m_collection -> GetData() -> PFJetJERResSFAK4CHS -> at ( m_raw_index );
+  return -1.0;
+  //return m_collection -> GetData() -> PFJetJERResSFAK4CHS -> at ( m_raw_index );
   //float fabs_eta = fabs ( Eta () );
   //if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 1.109;
   //else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 1.138;
@@ -74,7 +78,8 @@ float PFJet::EnergyScaleFactor (){
 }
 
 float PFJet::EnergyRes(){
-  return m_collection -> GetData() -> PFJetJERResAK4CHS -> at ( m_raw_index );
+  //return m_collection -> GetData() -> PFJetJERResAK4CHS -> at ( m_raw_index );
+  return -1.0;
 }
 
 std::ostream& operator<<(std::ostream& stream, PFJet& object) {

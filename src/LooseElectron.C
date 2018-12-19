@@ -9,7 +9,7 @@ LooseElectron::LooseElectron (Collection & c, unsigned short i, short j ):
 }
 
 float & LooseElectron::Pt(){
-  scEt = m_collection->GetData()->ElectronSCEnergy->at( m_raw_index)/cosh( m_collection->GetData()->ElectronSCEta->at( m_raw_index));
-  return scEt;
+  uncorrEt = m_collection->GetData()->Electron_pt[m_raw_index]/m_collection->GetData()->Electron_eCorr[m_raw_index];
+  return uncorrEt;
 } 
 

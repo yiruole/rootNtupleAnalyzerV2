@@ -12,7 +12,7 @@ class LooseElectron : public Electron {
   virtual float & Pt         ();
 
  private:
-  float scEt;
+  float uncorrEt;
 };
 
 #endif 

@@ -37,6 +37,7 @@ class Electron : public Object {
   bool   IsEEFiducial();
   
   // ID variables		
+  int GetNbitFromBitMap(int n, int base);
   
   float IsEB                 ();
   float IsEE                 ();

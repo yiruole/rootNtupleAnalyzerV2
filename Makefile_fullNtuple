@@ -3,7 +3,7 @@ FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 #FLAGS += -g
 FLAGS += -DSAVE_ALL_HISTOGRAMS
-FLAGS += -std=c++11
+FLAGS += -std=c++1y
 FLAGS += -DUSE_FULL_NTUPLE
 FLAGS += -O2
 ROOTLIBS = `root-config --glibs --cflags` -lMinuit -lTreePlayer
@@ -15,8 +15,8 @@ SRC= ./src
 #SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/qcdFitter.o $(SRC)/qcdFitter_V1.o  $(SRC)/likelihoodGetter.o $(SRC)/eventListHelper.o
 SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/pileupReweighter.o $(SRC)/eventListHelper.o
 COLLECTIONLIB=$(SRC)/Collection.o
-PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/LooseElectron.o $(SRC)/Muon.o $(SRC)/HighPtMuon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
-IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/HighPtMuonIDs.o $(SRC)/PFJetIDs.o
+PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/LooseElectron.o $(SRC)/Muon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
+IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/PFJetIDs.o
 TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o 
 EXE = main
 
