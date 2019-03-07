@@ -73,7 +73,7 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 	// << "Eta = "    << meta    << ", "
 	// << "Phi = "    << mphi << std::endl;
   //
-  int mother_pdg_id = m_collection -> GetData() -> GenPart_pdgId[MotherIndex()];
+  int mother_pdg_id = MotherIndex() >= 0 ? pdgIdLeaf->GetValue(MotherIndex()) : -1;
   if ( abs(mother_pdg_id) != 42 ) return false;
   return true;
 }
@@ -81,7 +81,7 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 bool GenParticle::PassUserID_FromDY(bool verbose){
   if ( !IsHardProcess() && !Status()==3 ) return false;
   if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
-  int mother_pdg_id = m_collection -> GetData() -> GenPart_pdgId[MotherIndex()];
+  int mother_pdg_id = MotherIndex() >= 0 ? pdgIdLeaf->GetValue(MotherIndex()) : -1;
   if ( abs(mother_pdg_id) != 22 && 
        abs(mother_pdg_id) != 23 ) return false;
   return true;
@@ -99,9 +99,8 @@ bool GenParticle::PassUserID_FromW(bool verbose){
       << "Phi = "    << Phi();// << std::endl;
     std::cout << ", mother index = " << MotherIndex() << std::endl;
     cout << "GenParticle::PassUserID_FromW() MotherIndex=" << MotherIndex() << endl;
-    cout << "GenParticle::PassUserID_FromW() m_collection -> GetData() -> nGenPart =" << m_collection -> GetData() -> nGenPart << endl;
   }
-  int mother_pdg_id = m_collection -> GetData() -> GenPart_pdgId[MotherIndex()];
+  int mother_pdg_id = MotherIndex() >= 0 ? pdgIdLeaf->GetValue(MotherIndex()) : -1;
   if ( abs(mother_pdg_id) != 24 ) return false;
   return true;
 }

@@ -8,7 +8,7 @@
 class PFJet : public Object { 
  public:
   PFJet ();
-  PFJet (Collection& collection, unsigned int index, short j = 0);
+  PFJet (Collection& collection, unsigned int index, short j = 0, Long64_t current_entry = 0);
 
   // Kinematic variables
   
@@ -28,6 +28,7 @@ class PFJet : public Object {
   // IDs 
   
   bool   PassUserID ( ID id, bool verbose = false );
+  int    JetID();
   
   // ID variables
   

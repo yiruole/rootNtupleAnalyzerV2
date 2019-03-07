@@ -17,28 +17,28 @@ Object::Object(const Object & o):
   m_trigObj_index ( o.m_trigObj_index )
 {}
 
-Object::Object(Collection & collection, short raw_index):
+Object::Object(Collection & collection, short raw_index, Long64_t current_entry):
   m_name ("NO_NAME"),
   m_collection ( & collection ),
   m_raw_index (raw_index),
   m_trigObj_index (-1)
 {}
 
-Object::Object(Collection & collection, short raw_index, short trigObj_index):
+Object::Object(Collection & collection, short raw_index, short trigObj_index, Long64_t current_entry):
   m_name ("NO_NAME"),
   m_collection ( & collection ),
   m_raw_index (raw_index),
   m_trigObj_index (trigObj_index)
 {}
 
-Object::Object(Collection & collection, short raw_index, const char* name):
+Object::Object(Collection & collection, short raw_index, const char* name, Long64_t current_entry):
   m_name (name),
   m_collection ( & collection ),
   m_raw_index (raw_index),
   m_trigObj_index (-1)
 {}
 
-Object::Object(Collection & collection, short raw_index, short trigObj_index, const char* name):
+Object::Object(Collection & collection, short raw_index, short trigObj_index, const char* name, Long64_t current_entry):
   m_name (name),
   m_collection ( & collection ),
   m_raw_index (raw_index),

@@ -7,7 +7,7 @@ PFJet::PFJet ():
   Object ()
 {}
 
-PFJet::PFJet (Collection& c, unsigned int i, short j ):
+PFJet::PFJet (Collection& c, unsigned int i, short j, Long64_t current_entry ):
   Object ( c,i, "PFJet" )
 {}
                                      
@@ -27,6 +27,7 @@ float PFJet::ChargedHadronEnergyFraction() { return m_collection -> GetData()  -
 int    PFJet::ChargedMultiplicity        () { -1; } 
 float PFJet::ChargedEmEnergyFraction    () { return m_collection -> GetData()  -> Jet_chEmEF        [m_raw_index]; } 
 
+int PFJet::JetID() { return m_collection -> GetData()  -> Jet_jetId        [m_raw_index]; }
 //float PFJet::CombinedSecondaryVertexBTag() { return m_collection -> GetData() -> PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
 float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection -> GetData() -> Jet_btagCSVV2[m_raw_index]; }
 float PFJet::CombinedMVABTag() { return m_collection -> GetData() -> Jet_btagCMVA [m_raw_index]; }

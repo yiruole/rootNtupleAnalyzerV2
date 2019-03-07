@@ -5,12 +5,14 @@
 #include "IDTypes.h"
 #include "Collection.h"
 
+#include <TLeaf.h>
+
 class GenParticle : public Object { 
 
  public:
 
   GenParticle();
-  GenParticle(Collection& c, unsigned short i, short j = 0);
+  GenParticle(Collection& c, unsigned short i, short j = 0, Long64_t current_entry = 0);
   
   // Kinematic variables
 
@@ -32,6 +34,7 @@ class GenParticle : public Object {
   
   bool IsHardProcess();
   bool IsFromHardProcessFinalState();
+
  private:
   
   bool PassUserID_FromLQ              (bool verbose);
@@ -56,6 +59,13 @@ class GenParticle : public Object {
   bool PassUserID_GenTop              (bool verbose);
   bool PassUserID_Status62            (bool verbose);
 
+  TLeaf* ptLeaf;
+  TLeaf* etaLeaf;
+  TLeaf* phiLeaf;
+  TLeaf* massLeaf;
+  TLeaf* pdgIdLeaf;
+  TLeaf* motherIdxLeaf;
+  TLeaf* statusLeaf;
 
 };
 

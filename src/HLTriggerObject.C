@@ -6,7 +6,7 @@ HLTriggerObject::HLTriggerObject ():
   Object()
 {}
 
-HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j):
+HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j, Long64_t current_entry):
   Object        ( c,i,j, "HLTriggerObject" ),
   m_float_pt   ( m_collection -> GetData() -> TrigObj_pt  [m_raw_index] ),
   m_float_eta  ( m_collection -> GetData() -> TrigObj_eta [m_raw_index] ),

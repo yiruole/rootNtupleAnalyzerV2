@@ -44,7 +44,8 @@ bool Electron::PassUserID_HEEP (bool verbose){
   
   bool pass_et            = bool ( PtHeep()              >  35.0 );
   bool pass_ecalDriven    = bool ( EcalDriven()        == 1    );
-  bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
+  //bool pass_deltaPhi      = bool ( fabs (DeltaPhi()) <  0.06 ); // dPhiSCTrkAtVtx
+  bool pass_deltaPhi      = bool ( PassIDCut(HEEPIDCut::GsfEleDPhiInCut));
   bool pass_missingHits   = bool ( MissingHits()     <= 1    );
   bool pass_trkIsolation  = bool ( HEEP70TrackIsolation() < 5.0 );
 
@@ -68,12 +69,14 @@ bool Electron::PassUserID_HEEP (bool verbose){
   //----------------------------------------------------------------------
   
   if ( fabs(SCEta()) < 1.4442 ){
-    pass_deltaEtaSeed      = bool ( fabs(DeltaEtaSeed() )     < 0.004 );
+    //pass_deltaEtaSeed      = bool ( fabs(DeltaEtaSeed() )     < 0.004 );
+    pass_deltaEtaSeed      = PassIDCut(HEEPIDCut::GsfEleDEtaInSeedCut);
     pass_hoe               = bool ( HoE()            < 1/SCEnergy() + 0.05 );
     pass_sigmaIEtaIEta     = true;
-    pass_shape1            = bool ( Full5x5E1x5OverE5x5()        > 0.83  );
-    pass_shape2            = bool ( Full5x5E2x5OverE5x5()        > 0.94  );
-    pass_shape             = bool ( pass_shape1 || pass_shape2    );
+    //pass_shape1            = bool ( Full5x5E1x5OverE5x5()        > 0.83  );
+    //pass_shape2            = bool ( Full5x5E2x5OverE5x5()        > 0.94  );
+    //pass_shape             = bool ( pass_shape1 || pass_shape2    );
+    pass_shape             = PassIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut);
     pass_caloIsolation     = bool ( caloIsolation < ( 2.0 + ( 0.03 * PtHeep() ) + (0.28 * RhoForHEEP() ) ) );
     pass_dxy               = bool ( fabs(LeadVtxDistXY()) < 0.02  );
   }
@@ -83,7 +86,8 @@ bool Electron::PassUserID_HEEP (bool verbose){
   //----------------------------------------------------------------------
   
   else if ( fabs(SCEta()) > 1.566 && fabs(SCEta()) < 2.5 ){ 
-    pass_deltaEtaSeed      = bool ( fabs (DeltaEtaSeed())     < 0.006 );
+    //pass_deltaEtaSeed      = bool ( fabs (DeltaEtaSeed())     < 0.006 );
+    pass_deltaEtaSeed      = PassIDCut(HEEPIDCut::GsfEleDEtaInSeedCut);
     pass_hoe               = bool ( HoE()            < 5/SCEnergy() + 0.05 );
     pass_sigmaIEtaIEta     = bool ( Full5x5SigmaIEtaIEta()       < 0.03  );
     pass_shape             = true;
@@ -490,7 +494,7 @@ bool Electron::PassUserID_MVA (bool verbose){
 }
 
 bool Electron::PassUserID_FakeRateLooseID(bool verbose){
-  bool pass_ecalDriven    = bool ( EcalDriven()    == 1    );
+  bool pass_ecalDriven    = EcalDriven();
   bool pass_missingHits   = bool ( MissingHits() <= 1    );
   bool pass_dxy           = false;
   bool pass_sigmaIEtaIEta = false;

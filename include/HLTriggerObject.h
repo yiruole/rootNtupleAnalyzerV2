@@ -10,7 +10,8 @@ class HLTriggerObject : public Object {
  public: 
   
   HLTriggerObject  ();
-  HLTriggerObject (Collection& collection, unsigned int index, int unsigned hlt_filter_index = 0);
+  HLTriggerObject (Collection& collection, unsigned int index, int unsigned hlt_filter_index = 0,
+      Long64_t current_entry = 0);
   
   // Work-around for now
   //FIXME SIC: is this really needed?

@@ -89,7 +89,8 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
 
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const char * path_name, bool verbose ){
-  CollectionPtr collection ( new Collection ( *m_data, 0));
+  //FIXME
+  CollectionPtr collection ( new Collection ( *m_data, 0, 0));
 
   //std::vector<unsigned short> matchingHLTriggerRawIndices;
   //// first, look at each object in the HLTriggerObj collection
@@ -114,7 +115,8 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const 
 
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( const char * path_name, bool verbose ){
-  CollectionPtr collection ( new Collection ( *m_data, 0));
+  //FIXME
+  CollectionPtr collection ( new Collection ( *m_data, 0, 0));
 
   //std::vector<unsigned short> matchingHLTriggerRawIndices;
   //// first, look at each object in the HLTriggerObj collection

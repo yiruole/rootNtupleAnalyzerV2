@@ -10,7 +10,7 @@ class GenJet : public Object {
  public:
 
   GenJet();
-  GenJet(Collection& c, unsigned short i, short j = 0);
+  GenJet(Collection& c, unsigned short i, short j = 0, Long64_t current_entry = 0);
   
   // Kinematic variables
 
@@ -21,6 +21,11 @@ class GenJet : public Object {
   // IDs 
 
   bool PassUserID ( ID id, bool verbose = false ); 
+
+ private:
+  TLeaf* ptLeaf;
+  TLeaf* etaLeaf;
+  TLeaf* phiLeaf;
     
 };
 

@@ -1927,7 +1927,7 @@ void baseClass::createOptCutFile() {
 }
 
 bool baseClass::isData() {
-  if(!tree_->GetBranch("genWeight"))
+  if(!tree_->GetBranch("Weight"))
     return true;
   else
   return false;

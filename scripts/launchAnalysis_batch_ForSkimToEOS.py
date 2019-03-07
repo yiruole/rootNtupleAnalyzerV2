@@ -142,7 +142,7 @@ parser.add_option("-m", "--eosHost", dest="eosHost",
 
 parser.add_option("-e", "--exe", dest="executable",
                   help="executable",
-                  metavar="EXECUTABLE", default="")
+                  metavar="EXECUTABLE", default="main")
 
 parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
                   help="is this a reduced skim?",
@@ -213,7 +213,7 @@ print "... done "
 print "Moving the exe to the local output directory...",
 
 if not os.path.isfile ( options.executable ) : 
-    print "Error: No file here: " + options.executable
+    print "Error: No file here: '" + options.executable + "'"
     sys.exit() 
 else : 
     os.system ( "cp " + options.executable + " " + options.outputDir + "/" )

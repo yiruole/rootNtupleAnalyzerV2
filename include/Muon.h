@@ -9,7 +9,7 @@ class Muon : public Object {
   
  public:
   Muon ();
-  Muon (Collection& c, unsigned int i, short j = 0);
+  Muon (Collection& c, unsigned int i, short j = 0, Long64_t current_entry = 0);
   
   // Kinematic variables         
 

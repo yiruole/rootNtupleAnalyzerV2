@@ -6,7 +6,7 @@ Muon::Muon():
   Object()
 {}
 
-Muon::Muon (Collection& c, unsigned int i, short j  ):
+Muon::Muon (Collection& c, unsigned int i, short j, Long64_t current_entry ):
   Object ( c,i, "Muon" )
 {}
 
@@ -28,7 +28,7 @@ float & Muon::PFEta                    (){ return m_collection -> GetData() -> M
 float & Muon::PFPhi                    (){ return m_collection -> GetData() -> Muon_phi              [m_raw_index]; } 
 //float & Muon::PFPhiError               (){ return -1.0; } 
 
-float & Muon::CocktailPt              (){ return m_collection -> GetData() -> Muon_pt                [m_raw_index]; } 
+float & Muon::CocktailPt              (){ return m_collection -> GetData() -> Muon_ptTuneP           [m_raw_index]; } 
 float & Muon::CocktailPtError         (){ return m_collection -> GetData() -> Muon_ptErr             [m_raw_index]; } 
 float & Muon::CocktailEta              (){ return m_collection -> GetData() -> Muon_eta              [m_raw_index]; } 
 //float & Muon::CocktailEtaError         (){ return -1.0; } 
@@ -36,8 +36,8 @@ float & Muon::CocktailPhi              (){ return m_collection -> GetData() -> M
 //float & Muon::CocktailPhiError         (){ return -1.0; } 
 // Isolation variables				   				   
 //FIXME not available?
-float Muon::TrkIso                    (){ return -1.0; } 
-float Muon::TrkIsoR03SumPt            (){ return -1.0; } 
+float Muon::TrkIso                    (){ return -999; } 
+float Muon::TrkIsoR03SumPt            (){ return -999; } 
 //float Muon::PFIsoR04ChargedHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } 
 //float Muon::PFIsoR04NeutralHadron     (){ return m_collection -> GetData() -> MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } 
 //float Muon::PFIsoR04Photon            (){ return m_collection -> GetData() -> MuonPFIsoR04Photon             -> at ( m_raw_index ); } 
@@ -48,12 +48,12 @@ float Muon::TrkIsoR03SumPt            (){ return -1.0; }
 int    Muon::IsGlobal                  (){ return false; } 
 int    Muon::IsTracker                 (){ return false; } 
 int    Muon::IsPFMuon                  (){ return m_collection -> GetData() -> Muon_isPFcand [m_raw_index]; } 
-float Muon::GlobalChi2                 (){ return -1.0; } 
-int    Muon::GlobalTrkValidHits        (){ return -1; }  
+float Muon::GlobalChi2                 (){ return -999; } 
+int    Muon::GlobalTrkValidHits        (){ return -999; }  
 int    Muon::StationMatches            (){ return m_collection -> GetData() -> Muon_nStations[m_raw_index]; } 
 float Muon::BestTrackVtxDistXY         (){ return m_collection -> GetData() -> Muon_dxy      [m_raw_index]; } 
 float Muon::BestTrackVtxDistZ          (){ return m_collection -> GetData() -> Muon_dz       [m_raw_index]; } 
-int    Muon::TrkPixelHits              (){ return -1; } 
+int    Muon::TrkPixelHits              (){ return -999; } 
 int    Muon::TrackLayersWithMeasurement(){ return m_collection -> GetData() -> Muon_nTrackerLayers [m_raw_index]; } 
 
 std::ostream& operator<<(std::ostream& stream, Muon& object) {

@@ -4,8 +4,8 @@ LooseElectron::LooseElectron ():
   Electron()
 {}
 
-LooseElectron::LooseElectron (Collection & c, unsigned short i, short j ):
-  Electron(c,i,j) {
+LooseElectron::LooseElectron (Collection & c, unsigned short i, short j, Long64_t current_entry):
+  Electron(c,i,j,current_entry) {
 }
 
 float & LooseElectron::Pt(){

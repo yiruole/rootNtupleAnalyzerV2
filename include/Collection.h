@@ -24,7 +24,7 @@ class Collection {
   // Constructors and destructors
   //-------------------------------------------------------------
   
-  Collection ( rootNtupleClass & d, size_t size );
+  Collection ( rootNtupleClass & d, Long64_t current_entry, size_t size );
   Collection ( Collection & c );
   
   //-------------------------------------------------------------
@@ -44,7 +44,7 @@ class Collection {
   //-------------------------------------------------------------
   
   template<class Object1> Object1 GetConstituent(unsigned short i) { 
-    if ( m_trigObj_index > 0 ) return Object1 (*this, m_raw_indices[i], m_trigObj_index ); 
+    if ( m_trigObj_index > 0 )    return Object1 (*this, m_raw_indices[i], m_trigObj_index, m_currentEvent ); 
     else                          return Object1 (*this, m_raw_indices[i]);
   }
   
@@ -86,7 +86,7 @@ class Collection {
 
   template<class Object1>
     CollectionPtr SkimByID( ID id, bool verbose = false ) { 
-    CollectionPtr new_collection ( new Collection(*m_data ,0 ));
+    CollectionPtr new_collection ( new Collection(*m_data , m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     new_collection -> Clear();
     unsigned short size = GetSize();
@@ -102,7 +102,7 @@ class Collection {
   
   template<class Object1>
     CollectionPtr SkimByMinPt ( double min_pt ) { 
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -117,7 +117,7 @@ class Collection {
   
   template<class Object1>
     CollectionPtr SkimByEtaRange ( double min_eta, double max_eta ) { 
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -143,7 +143,7 @@ class Collection {
     CollectionPtr SkimByVetoDRMatch ( const CollectionPtr other_collection, double min_dr ){
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -163,7 +163,7 @@ class Collection {
   template < class Object1, class Object2 > 
     CollectionPtr SkimByVetoDRMatch ( Object2 & other_object, double min_dr ){
     unsigned short this_collection_size = GetSize();
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -188,7 +188,7 @@ class Collection {
     CollectionPtr SkimByRequireDRMatch ( const CollectionPtr other_collection, double max_dr ){
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
-    CollectionPtr new_collection  ( new Collection(*m_data,0));
+    CollectionPtr new_collection  ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -229,7 +229,7 @@ class Collection {
 
   template <class Object1> 
     CollectionPtr RemoveDuplicates () { 
-    CollectionPtr new_collection  ( new Collection(*m_data,0));
+    CollectionPtr new_collection  ( new Collection(*m_data, m_currentEvent, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short this_collection_size = GetSize();
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
@@ -400,15 +400,15 @@ class Collection {
     std::cout << "N(" << name << ") = " << n_constituents << std::endl;
     for (int i = 0; i < n_constituents; ++i ){ 
       Object1 constituent = GetConstituent<Object1>(i);
-      std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent;
+      std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent << std::flush;
       if      ( id == NULL_ID  ) std::cout << std::endl;
       else {
-	if ( verbose        ) { 
-	  constituent.PassUserID ( id, verbose );
-	}
-	else {
-	  std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
-	}
+        if ( verbose        ) { 
+          constituent.PassUserID ( id, verbose );
+        }
+        else {
+          std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
+        }
       }
     }
   }
@@ -421,6 +421,7 @@ class Collection {
   short m_trigObj_index;
   std::vector<unsigned short> m_raw_indices; 
   rootNtupleClass * m_data;
+  Long64_t m_currentEvent;
   
 };
 

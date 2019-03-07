@@ -9,12 +9,12 @@ class Electron : public Object {
   
  public: 
   Electron ();
-  Electron (Collection& c, unsigned short i, short j = 0);
+  Electron (Collection& c, unsigned short i, short j = 0, Long64_t current_entry = -1);
 
   // Kinematic variables
   
   virtual float & Pt         ();
-  float & PtHeep             ();
+  float PtHeep               ();
   float & Eta                (); 
   float & Phi                (); 
   float SCEta                (); 
@@ -22,7 +22,9 @@ class Electron : public Object {
   float SCPhi                (); 
   float SCPt                 (); 
   float SCEnergy             (); 
+  float ECorr                ();
   float Charge               (); 
+  float R9                   ();
 
   // Energy resolution scale factors
 
@@ -37,8 +39,24 @@ class Electron : public Object {
   bool   IsEEFiducial();
   
   // ID variables		
-  int GetNbitFromBitMap(int n, int base);
-  
+  // EventsTree.GetBranch('Electron_vidNestedWPBitmapHEEP').Print()
+  enum class HEEPIDCut {
+    MinPtCut                             = 0,
+    GsfEleSCEtaMultiRangeCut             = 1,
+    GsfEleDEtaInSeedCut                  = 2,
+    GsfEleDPhiInCut                      = 3,
+    GsfEleFull5x5SigmaIEtaIEtaWithSatCut = 4,
+    GsfEleFull5x5E2x5OverE5x5WithSatCut  = 5,
+    GsfEleHadronicOverEMLinearCut        = 6,
+    GsfEleValueMapIsoRhoCut              = 7,
+    GsfEleEmHadD1IsoRhoCut               = 8,
+    GsfEleDxyCut                         = 9,
+    GsfEleMissingHitsCut                 = 10,
+    GsfEleEcalDrivenCut                  = 11,
+  };
+
+  bool PassIDCut(HEEPIDCut cut);
+
   float IsEB                 ();
   float IsEE                 ();
   bool   EcalSeed            ();
@@ -109,10 +127,12 @@ class Electron : public Object {
   
   
   // GEN matching
-
-  float MatchedGenParticlePt (); 
-  float MatchedGenParticleEta(); 
-  float MatchedGenParticlePhi();
+  UInt_t NumGenParticles();
+  int    MatchedGenParticleIdx();
+  bool   IsValidGenParticleIdx(int index);
+  float  MatchedGenParticlePt (); 
+  float  MatchedGenParticleEta(); 
+  float  MatchedGenParticlePhi();
 
   
   // HLT matching
@@ -140,6 +160,11 @@ class Electron : public Object {
   bool   PassUserID_ECALFiducial       (bool verbose);
   bool   PassUserID_FakeRateLooseID    (bool verbose);
 
+  TLeaf* ptLeaf;
+  TLeaf* etaLeaf;
+  TLeaf* phiLeaf;
+  TLeaf* nGenPartLeaf;
+  TLeaf* genPartIdxLeaf;
 };
 
 std::ostream& operator<< (std::ostream& stream, Electron& object);
