@@ -142,8 +142,11 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS, eosHost):
             dataset = filename[0:m.start()]
         else:
             # try to find [number(s)].root
-            m = re.search('_\d+.root', filename)
+            #print 'filename={}'.format(filename)
+            #m = re.search('_*.root', filename)
+            m = re.search('_[0-9-]+.root', filename)
             dataset = filename[0:m.start()]
+            #print 'dataset={}'.format(dataset)
         # handle root files with same name, but actually different datasets
         # get the dataset info from the full path
         if 'amcatnloFXFX' in path and not 'amcatnloFXFX' in filename:
