@@ -5,7 +5,6 @@
 #include "TLeaf.h"
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
-  PileupWeight_ ( 1.0 ),
   fillSkim_                         ( true ) ,
   fillAllPreviousCuts_              ( true ) ,
   fillAllOtherCuts_                 ( true ) ,
@@ -143,8 +142,6 @@ void baseClass::readInputList()
   char pName[500];
   skimWasMade_ = true;
   jsonFileWasUsed_ = false;
-  pileupMCFileWasUsed_ = false;
-  pileupDataFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
   sumAMCNLOWeights_ = 0;
@@ -167,7 +164,7 @@ void baseClass::readInputList()
       std::string name(pName);
       if(name.find("/store") != std::string::npos && name.find("/store")==0)
         name.insert(0,"root://eoscms//eos/cms");
-      STDOUT("Adding file: " << name);
+      //STDOUT("Adding file: " << name);
       chain->Add(name.c_str());
       NBeforeSkim = getGlobalInfoNstart(name.c_str());
       NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
@@ -232,40 +229,6 @@ void baseClass::readCutFile()
         jsonParser_.parseJSONFile ( & v[1] ) ;
         //jsonParser_.printGoodLumis();
         jsonFileWasUsed_ = true;
-        continue;
-      }
-
-      if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
-        if ( pileupDataFileWasUsed_ ) { 
-          STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
-          exit(-1);
-        }
-
-        if ( v.size() != 2 ){
-          STDOUT("ERROR: In your cutfile, PILEUP_DATA_ROOT_FILE line must have the syntax: \"PILEUP_DATA_ROOT_FILE <full pileup data file path>\"");
-        }
-
-        pileupDataFileName_ = v[1];
-        STDOUT("Getting PILEUP_DATA_ROOT_FILE:" << v[1]);
-        pileupReweighter_.readPileupDataFile ( & v[1] ) ;
-        pileupDataFileWasUsed_ = true;
-        continue;
-      }
-
-      if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
-        if ( pileupMCFileWasUsed_ ) { 
-          STDOUT("ERROR: Please specify only one PILEUP_MC_TXT_FILE in your cut file!");
-          return;
-        }
-
-        if ( v.size() != 2 ){
-          STDOUT("ERROR: In your cutfile, PILEUP_MC_TXT_FILE line must have the syntax: \"PILEUP_MC_TXT_FILE <full pileup MC file path>\"");
-        }
-
-        pileupMCFileName_ = v[1];
-        STDOUT("Getting PILEUP_MC_TXT_FILE:" << v[1]);
-        pileupReweighter_.readPileupMCFile ( & v[1] ) ;
-        pileupMCFileWasUsed_ = true;
         continue;
       }
 
@@ -406,17 +369,6 @@ void baseClass::readCutFile()
       cutName_cut_[thisCut.variableName]=thisCut;
 
     }
-    if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ) {
-      pileupReweighter_.calculatePileupWeights();
-      pileupReweighter_.printPileupWeights();
-    }
-    else if ( (!pileupMCFileWasUsed_) && pileupDataFileWasUsed_  ||
-        pileupMCFileWasUsed_  && (!pileupDataFileWasUsed_) ) { 
-      STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
-      if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
-      if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
-      exit(-3);
-    }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
   }
   else
@@ -482,8 +434,6 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       c->value = d;
       c->weight = w;
       
-// if ( pileupReweighter_.pileupWeightsCalculated() ) 
-// 	c ->weight *= PileupWeight_;
     }
   fillOptimizerWithValue(s, d);
   return;
@@ -1098,14 +1048,6 @@ bool baseClass::writeCutEfficFile()
     os << "################################## NO JSON file used at runtime ###################################################################\n";
   }
 
-  if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ){
-    os << "################################## PILEUP files used at runtime    ###################################################################\n"
-       << "### " << pileupMCFileName_ << "\n" 
-       << "### " << pileupDataFileName_ << "\n";
-  } else { 
-    os << "################################## NO PILEUP files used at runtime ###################################################################\n";
-  }
-
   os << "################################## Preliminary Cut Values ###################################################################\n"
      << "########################### variableName                        value1          value2          value3          value4          level\n"
      << preCutInfo_.str();
@@ -1316,7 +1258,7 @@ double baseClass::decodeCutValue(const string& s)
 int baseClass::getGlobalInfoNstart(const char *pName)
 {
   int NBeforeSkim = 0;
-  STDOUT(pName<<"  "<< NBeforeSkim)
+  STDOUT(pName)
   TFile *f = TFile::Open(pName);
   if(!f)
   {
@@ -1330,9 +1272,11 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
+  string s3 = "EventCounter";
   TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
   TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1340,7 +1284,8 @@ int baseClass::getGlobalInfoNstart(const char *pName)
     }
 
   if (hCount1) NBeforeSkim = (int)hCount1->GetBinContent(1);
-  else NBeforeSkim = (int)hCount2->GetBinContent(1);
+  else if (hCount2) NBeforeSkim = (int)hCount2->GetBinContent(1);
+  else NBeforeSkim = (int)hCount3->GetBinContent(1);
 
 //   STDOUT(pName<<"  "<< NBeforeSkim)
   f->Close();
@@ -1364,9 +1309,11 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
+  string s3 = "EventCounter";
   TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
   TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1374,7 +1321,8 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
     }
 
   if (hCount1) sumAMCNLOWeights = (float)hCount1->GetBinContent(3);
-  else sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
+  else if (hCount2) sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
+  else sumAMCNLOWeights = (float)hCount3->GetBinContent(3);
 
   f->Close();
 
@@ -1397,9 +1345,11 @@ float baseClass::getSumTopPtWeights(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
+  string s3 = "EventCounter";
   TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
   TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1407,7 +1357,8 @@ float baseClass::getSumTopPtWeights(const char *pName)
     }
 
   if (hCount1) sumTopPtWeights = (float)hCount1->GetBinContent(4);
-  else sumTopPtWeights = (float)hCount2->GetBinContent(4);
+  else if (hCount2) sumTopPtWeights = (float)hCount2->GetBinContent(4);
+  else sumTopPtWeights = (float)hCount3->GetBinContent(4);
 
   f->Close();
 
@@ -1698,6 +1649,7 @@ bool baseClass::writeSkimTree()
   skim_file_->cd("LJFilter/EventCount");
   int nEntRoottuple = fChain->GetEntriesFast();
   int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  //FIXME topPtWeight
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumAMCNLOWeights_);
@@ -1739,6 +1691,7 @@ bool baseClass::writeReducedSkimTree()
   reduced_skim_file_->cd("LJFilter/EventCount");
   int nEntRoottuple = fChain->GetEntriesFast();
   int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  //FIXME topPtWeight
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
@@ -1759,19 +1712,6 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
   
   return jsonParser_.isAGoodLumi ( this_run, this_lumi );
   
-}
-
-double baseClass::getPileupWeight ( int npileup, bool this_is_data ) { 
-  
-  PileupWeight_ = 1.0;
-
-  if ( this_is_data )                                     return PileupWeight_;
-  if ( ! pileupReweighter_.pileupWeightsCalculated() )    return PileupWeight_;
-  if ( npileup == -1 )                                    return PileupWeight_;
-
-  PileupWeight_ = pileupReweighter_.getPileupWeight ( npileup ) ;
-  
-  return PileupWeight_;
 }
 
 void baseClass::getTriggers(Long64_t entry) {
@@ -1927,8 +1867,12 @@ void baseClass::createOptCutFile() {
 }
 
 bool baseClass::isData() {
-  if(!tree_->GetBranch("Weight"))
-    return true;
-  else
-  return false;
+  if(tree_->GetBranch("Weight"))
+    return false;
+  else if(tree_->GetBranch("genWeight"))
+    return false;
+  else if(tree_->GetBranch("isData")->GetLeaf("isData")->GetTypedValue<Double_t>() < 1)
+    return false;
+  return true;
 }
+

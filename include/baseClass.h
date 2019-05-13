@@ -3,7 +3,6 @@
 
 #include "rootNtupleClass.h"
 #include "jsonParser.h"
-#include "pileupReweighter.h"
 #include "eventListHelper.h"
 #include <iostream>
 #include <sstream>
@@ -131,8 +130,6 @@ class baseClass : public rootNtupleClass {
   map<string, bool> combCutName_passed_;
 
   int passJSON(int run, int ls, bool isData);
-  double getPileupWeight ( int npileup, bool this_is_data );
-  void setPileupWeight ( double weight ) { PileupWeight_ = weight; } 
   bool triggerExists   ( const char* name);
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
@@ -211,8 +208,6 @@ class baseClass : public rootNtupleClass {
 
   bool isData();
 
-  PileupReweighter pileupReweighter_;
-
   TFile * output_root_;
 
   private :
@@ -252,7 +247,6 @@ class baseClass : public rootNtupleClass {
   int NBeforeSkim_;
   float sumAMCNLOWeights_;
   float sumTopPtWeights_;
-  double PileupWeight_;
 
   // JSON file stuff
   JSONParser jsonParser_;
@@ -264,13 +258,6 @@ class baseClass : public rootNtupleClass {
   std::map<std::string, bool> triggerDecisionMap_; 
   std::map<std::string, int > triggerPrescaleMap_; 
 
-  // PILEUP stuff
-
-  bool pileupMCFileWasUsed_;
-  bool pileupDataFileWasUsed_;
-  std::string pileupMCFileName_;
-  std::string pileupDataFileName_;
-  
   // Which plots to fill
   bool fillSkim_;
   bool fillAllPreviousCuts_;
