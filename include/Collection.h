@@ -113,6 +113,21 @@ class Collection {
     return new_collection;
   }
 
+  // For skimming by minimum ptHeep, for electrons
+  
+  template<class Object1>
+    CollectionPtr SkimByMinPtHeep ( double min_pt ) { 
+    CollectionPtr new_collection ( new Collection(*m_data, m_currentEvent, 0));
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
+    unsigned short size = GetSize();
+    for (unsigned short i = 0; i < size ; ++i){
+      Object1 constituent = GetConstituent<Object1> (i);
+      if ( constituent.PtHeep() >= min_pt ) 
+        new_collection -> Append ( constituent.GetRawIndex() );
+    }
+    return new_collection;
+  }
+
   // For skimming by eta range
   
   template<class Object1>
