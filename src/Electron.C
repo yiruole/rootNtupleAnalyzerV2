@@ -36,7 +36,7 @@ Electron::Electron (Collection & c, unsigned short i, short j, Long64_t current_
 float & Electron::Pt                 (){ return m_collection -> GetData() -> Electron_pt      [m_raw_index]; } 
 float & Electron::Eta                (){ return m_collection -> GetData() -> Electron_eta     [m_raw_index]; } 
 float & Electron::Phi                (){ return m_collection -> GetData() -> Electron_phi     [m_raw_index]; } 
-float   Electron::PtHeep             (){ return CaloEnergy()/cosh(Eta()); }
+float   Electron::PtHeep             (){ return CaloEnergy()/cosh(SCEta()); }
 float   Electron::SCEta              (){ return m_collection -> GetData() -> Electron_scEta     [m_raw_index]; } 
 float   Electron::SCSeedEta          (){ return -1.0; } 
 float   Electron::SCPhi              (){ return m_collection -> GetData() -> Electron_scPhi     [m_raw_index]; } 
