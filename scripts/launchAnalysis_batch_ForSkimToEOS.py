@@ -125,7 +125,7 @@ parser.add_option("-j", "--ijobmax", dest="ijobmax",
 
 #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
 parser.add_option("-q", "--queue", dest="queue",
-                  help="name of the queue (choose among longlunch workday tomorrow etc.)",
+        help="name of the queue (choose among espresso (20 min), microcentury (1 hr), longlunch (2 hrs), workday (8 hrs), etc.; see http://batchdocs.web.cern.ch/batchdocs/local/submit.html)",
                   metavar="QUEUE")
 
 parser.add_option("-w", "--wait", dest="wait",
@@ -348,7 +348,7 @@ for line in inputlist_file:
 inputlist_file.close() 
 
 # FIXME this is not the correct number
-print "total jobs =", total_jobs
+print "submitted a _maximum_ of jobs =", total_jobs
 
 if len(failedCommands) > 0:
     print 'list of failed commands:'
