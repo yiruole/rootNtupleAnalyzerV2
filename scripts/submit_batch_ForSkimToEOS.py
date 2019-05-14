@@ -10,8 +10,10 @@ from optparse import OptionParser
 def PrepareJobScript(outputname):
     with open(outputname,"w") as outputfile:
         outputfile.write("#!/bin/bash\n")
-        # hardcoded root is a bit nasty
+        # hardcoded root is a bit nasty FIXME
         outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
+        # ROOT likes HOME set
+        outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         outputfile.write('./'+execName+' '+inputfilename+" "+cutfile+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
