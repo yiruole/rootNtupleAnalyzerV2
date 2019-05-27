@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 #include "GenParticle.h"
 #include "Collection.h"
-#include "IDTypes.h"
 
 bool GenParticle::PassUserID (ID id, bool verbose){ 
   if      ( id == GEN_ELE_FROM_LQ         ) { return PassUserID_GenEleFromLQ     (verbose); }
@@ -98,7 +98,7 @@ bool GenParticle::PassUserID_FromW(bool verbose){
       << "Eta = "    << Eta()    << ", "
       << "Phi = "    << Phi();// << std::endl;
     std::cout << ", mother index = " << MotherIndex() << std::endl;
-    cout << "GenParticle::PassUserID_FromW() MotherIndex=" << MotherIndex() << endl;
+    std::cout << "GenParticle::PassUserID_FromW() MotherIndex=" << MotherIndex() << std::endl;
   }
   int mother_pdg_id = MotherIndex() >= 0 ? pdgIdLeaf->GetValue(MotherIndex()) : -1;
   if ( abs(mother_pdg_id) != 24 ) return false;

@@ -105,7 +105,7 @@ float Electron::GsfCtfScPixCharge    (){ return -999; }
 float Electron::GsfScPixCharge       (){ return -999; }
 float Electron::GsfCtfCharge         (){ return -999; }
 float Electron::Classif              (){ return -999; }
-float Electron::RhoForHEEP           (){ return m_collection -> GetData() -> fixedGridRhoFastjetAll; }
+float Electron::RhoForHEEP           (){ return *(m_collection -> GetData() -> fixedGridRhoFastjetAll); }
 float Electron::DeltaEta             (){ return m_collection -> GetData() -> Electron_deltaEtaSC[m_raw_index]; }
 					                                      					      
 // Conversion variables		      	   		      		  	  				      
