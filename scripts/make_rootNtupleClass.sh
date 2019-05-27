@@ -64,7 +64,7 @@ do
 done
 
 cat >> temporaryMacro.C <<EOF
-  c.MakeClass("rootNtupleClass");
+  c.MakeSelector("rootNtupleClass");
 }
 EOF
 
@@ -72,29 +72,15 @@ root -l -q temporaryMacro.C
 
 rm temporaryMacro.C
 
-# insert additional lines needed by rootNtupleClass.h
-sed '
-/\<TROOT\.h\>/ i\
-\/\/\/\/ Lines added by make_rootNtupleClass.sh - BEGIN \n\#include \<vector\> \nusing namespace std\; \n\/\/\/\/ Lines added by make_rootNtupleClass.sh - END \n
-' < rootNtupleClass.h > tmp.h
-#mv tmp.h rootNtupleClass.h
 mv tmp.h ${ROOTNTUPLECLASSFILENAME}.h
 
-#if [ -f "rootNtupleClass.h" ] && [ -f "rootNtupleClass.C" ]; then
 if [ -f "${ROOTNTUPLECLASSFILENAME}.h" ] && [ -f "${ROOTNTUPLECLASSFILENAME}.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
-    #mv -i rootNtupleClass.h include/
-    #mv -i rootNtupleClass.C src/
     mv -i ${ROOTNTUPLECLASSFILENAME}.h include/
     mv -i ${ROOTNTUPLECLASSFILENAME}.C src/
-    #if [ -f "include/rootNtupleClass.h" ] && [ -f "src/rootNtupleClass.C" ]; then echo "... done."; fi;
-
-    #echo "Creating src/analysisClass.C ..."
-    #cp -i src/analysisClass_template.C src/analysisClass.C
 
     echo "done";    
 else
-    #echo "Error: files rootNtupleClass.h/C have not been created."
     echo "Error: files ${ROOTNTUPLECLASSFILENAME}.h/.C have not been created."
 fi
 
