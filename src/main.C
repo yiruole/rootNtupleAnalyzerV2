@@ -1,4 +1,3 @@
-#include "rootNtupleClass.h"
 #include "analysisClass.h"
 #include <iostream>
 #include <fstream>
@@ -42,7 +41,11 @@ int main(int argc, char* argv[])
   string * cutEfficFile   = new  string(argv[5]);
 
   analysisClass analysisClass_(inputList, cutFile, treeName, outputFileName, cutEfficFile);
-  analysisClass_.Loop();
+  bool result = analysisClass_.Loop();
+  if(!result) {
+    cout << "result of analysisClass::Loop() was false; exit immediately." << endl;
+    exit(2);
+  }
 
 }
 
