@@ -1,3 +1,6 @@
+ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt
+ROOTCONFIG=$(ROOTSYS)/bin/root-config
+ROOTCINT=$(ROOTSYS)/bin/rootcint
 COMP=g++
 FLAGS =
 #FLAGS += -DUSE_EXAMPLE
@@ -6,20 +9,21 @@ FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++1y
 FLAGS += -DUSE_FULL_NTUPLE
 FLAGS += -O2
-ROOTLIBS := $(shell root-config --glibs --cflags) -lMinuit -lTreePlayer
-ROOTINC= -I$(shell root-config --incdir)
+ROOTLIBS := $(shell $(ROOTCONFIG) --glibs --cflags)
+ROOTINC= -I$(shell $(ROOTCONFIG) --incdir)
 INC= -I.. -I. -I./include  -I${CLHEP}/include ${ROOTINC}
-CMSSWLIBS = ${CMSSW_RELEASE_BASE}/external/${SCRAM_ARCH}/lib/
-LIBS= -L.  ${ROOTLIBS} -L${CMSSWLIBS} -lboost_iostreams
+LIBS= -L.  ${ROOTLIBS} -lboost_iostreams
 SRC= ./src
 HEADERS=$(wildcard include/*.h)
 TMPHEADERS := $(HEADERS)
 HEADERS = $(filter-out include/LinkDef.h, $(TMPHEADERS))
-SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/eventListHelper.o
+#SELECTIONLIB=$(SRC)/rootNtupleClass.o $(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/eventListHelper.o
+SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/eventListHelper.o
 COLLECTIONLIB=$(SRC)/Collection.o
 PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/LooseElectron.o $(SRC)/Muon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
 IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/PFJetIDs.o
-TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o 
+#TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o $(SRC)/TTreeReaderTools.o
+TOOLSLIB=$(SRC)/TTreeReaderTools.o
 EXE = main
 
 # ********** TEMPLATE *************
@@ -29,17 +33,20 @@ EXE = main
 
 all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/MyDict.cxx
-	$(COMP) $(INC) $(LIBS) $(FLAGS) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o $(SRC)/MyDict.cxx
+#main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/MyDict.cxx
+#	$(COMP) $(INC) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o $(SRC)/MyDict.cxx $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
+main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
+	$(COMP) $(INC) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
 
-$(SRC)/MyDict.cxx: include/rootNtupleClass.h include/LinkDef.h
-	rootcint -f $@ -c $(FLAGS) -p $^
-
+#$(SRC)/MyDict.cxx: include/rootNtupleClass.h include/LinkDef.h
+#	$(ROOTCINT) -f $@ -s MyDict $^
+#
 clean:
-	rm -f src/*.o *.lo core core.*
+	rm -f src/*.o *.lo src/MyDict.cxx
 	rm -f *~
 	rm -f *.exe
 	rm -f $(EXE)
+	rm -f MyDict_rdict.pcm
 
 .cpp.o:
 	$(COMP) -c $(INC) $(FLAGS) -o $@ $<

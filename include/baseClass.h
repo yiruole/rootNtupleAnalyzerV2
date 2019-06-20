@@ -1,9 +1,12 @@
 #ifndef baseClass_h
 #define baseClass_h
 
-#include "rootNtupleClass.h"
+//#include "rootNtupleClass.h"
+#include <TChain.h>
+#include <TFile.h>
 #include "jsonParser.h"
 #include "eventListHelper.h"
+#include "TTreeReaderTools.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -125,7 +128,8 @@ class Optimize {
 }; // class Optimize
 
 
-class baseClass : public rootNtupleClass {
+//class baseClass : public rootNtupleClass {
+class baseClass {
   public :
   map<string, bool> combCutName_passed_;
 
@@ -142,6 +146,7 @@ class baseClass : public rootNtupleClass {
     
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
+  void fillVariableWithValue(const std::string&, TTreeReaderValue<double>&, const double& w = 1.);
   void evaluateCuts(bool verbose = false);
   
   void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
@@ -191,15 +196,18 @@ class baseClass : public rootNtupleClass {
   void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
   void CreateUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
   void FillUserTH1D(const char*  nameAndTitle, Double_t value, Double_t weight=1);
+  void FillUserTH1D(const char*  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1);
   void CreateAndFillUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
   void CreateUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
   void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
   void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void FillUserTH2D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
   void FillUserTH2DLower(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
   void CreateAndFillUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
   void CreateUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
   void CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
   void FillUserTH3D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
+  void FillUserTH3D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
@@ -208,12 +216,18 @@ class baseClass : public rootNtupleClass {
 
   bool isData();
 
+  Long64_t GetTreeEntries() { return treeEntries_; }
+
+  void checkEntryStatus(int status);
+
   TFile * output_root_;
+
+  TTreeReaderTools* readerTools;
 
   private :
   int nOptimizerCuts_;
   string * configFile_;
-  string * outputFileName_;
+  string outputFileName_;
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
@@ -221,6 +235,7 @@ class baseClass : public rootNtupleClass {
   TChain * tree_; // main tree
   TTree * tree2_; // tree for globalInfo
   Long64_t readerEntry_;
+  Long64_t treeEntries_;
   string * cutEfficFile_;
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;
@@ -244,9 +259,11 @@ class baseClass : public rootNtupleClass {
   int getGlobalInfoNstart(const char* );
   float getSumAMCNLOWeights(const char* );
   float getSumTopPtWeights(const char* );
-  int NBeforeSkim_;
+  Long64_t NBeforeSkim_;
   float sumAMCNLOWeights_;
   float sumTopPtWeights_;
+
+  void checkOverflow(const TH1*, const double);
 
   // JSON file stuff
   JSONParser jsonParser_;
@@ -287,7 +304,7 @@ class baseClass : public rootNtupleClass {
   map<int, Optimize> optimizeName_cut_;
   TH1F* eventcuts_; // number of events passing each cut
   TH1F* h_optimizer_; // optimization histogram
-  TH1F* h_optimizer_entries_;
+  TH1I* h_optimizer_entries_;
   TH1F* h_weightSums_; // sums of various weights over all events
 
 };

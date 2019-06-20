@@ -12,15 +12,23 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   fillAllCuts_                      ( true ) ,
   oldKey_                           ( "" ) 
 {
-  //STDOUT("begins");
+  STDOUT("begins");
   nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
-  outputFileName_ = outputFileName;
+  if(outputFileName != NULL)
+  {
+    outputFileName_ = *outputFileName;
+  }
+  else
+  {
+    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
+    exit(-1);
+  }
   cutEfficFile_ = cutEfficFile;
   init();
-  //STDOUT("ends");
+  STDOUT("ends");
 }
 
 baseClass::~baseClass()
@@ -46,7 +54,9 @@ baseClass::~baseClass()
       STDOUT("ERROR: writeReducedSkimTree did not complete successfully.");
     }
   output_root_->cd();
+  checkOverflow(h_weightSums_,sumAMCNLOWeights_);
   h_weightSums_->SetBinContent(1,sumAMCNLOWeights_);
+  checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
   output_root_->Close();
@@ -58,9 +68,9 @@ void baseClass::init()
 {
   // set up prefetching
   //gEnv->SetValue("TFile.AsyncPrefetching", 1);
-  //STDOUT("begins");
   tree_ = NULL;
   readInputList();
+  tree_->LoadTree(0);
   readCutFile();
   if(tree_ == NULL){
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
@@ -69,20 +79,14 @@ void baseClass::init()
   // setup ttree caching
   Int_t cachesize = 10000000; //10 MBytes
   tree_->SetCacheSize(cachesize);
-  Init(tree_);
+  //Init(tree_);
+  readerTools = new TTreeReaderTools(tree_);
 
-  //char output_root_title[200];
-  //sprintf(output_root_title,"%s%s",&std::string(*outputFileName_)[0],".root");
-  //output_root_ = new TFile(&output_root_title[0],"RECREATE");
 
   //directly from string
-  if(*outputFileName_ != NULL)
-    output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
-  else
-  {
-    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
-    exit(-1);
-  }
+  std::string filename = outputFileName_;
+  filename+=+".root";
+  output_root_ = new TFile(filename.c_str(),"RECREATE");
 
   // Skim stuff
   produceSkim_ = false;
@@ -91,8 +95,8 @@ void baseClass::init()
   
   if(produceSkim_) {
     
-    skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
-    skim_tree_ = fChain->CloneTree(0);
+    skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE");
+    skim_tree_ = tree_->CloneTree(0);
     hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
@@ -107,7 +111,7 @@ void baseClass::init()
 
   if(produceReducedSkim_) {
 
-    reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
+    reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
     hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
@@ -185,6 +189,7 @@ void baseClass::readInputList()
     exit (-1);
   }
   is.close();
+  treeEntries_ = tree_->GetEntries();
 
 }
 
@@ -381,7 +386,7 @@ void baseClass::readCutFile()
     {
       h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
-      h_optimizer_entries_ =new TH1F("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+      h_optimizer_entries_ =new TH1I("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
     }
 
@@ -437,6 +442,10 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
     }
   fillOptimizerWithValue(s, d);
   return;
+}
+void baseClass::fillVariableWithValue(const string& s, TTreeReaderValue<double>& reader, const double& w)
+{
+  fillVariableWithValue(s, *reader, w);
 }
 
 bool baseClass::variableIsFilled(const string& s)
@@ -1036,8 +1045,7 @@ bool baseClass::writeCutEfficFile()
 
   bincounter=1;
 
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   string cutEfficFile = *cutEfficFile_ + ".dat";
   ofstream os(cutEfficFile.c_str());
 
@@ -1082,10 +1090,13 @@ bool baseClass::writeCutEfficFile()
   double effAbs;
   double effAbsErr;
 
+  checkOverflow(eventcuts_,nEntTot);
   eventcuts_->SetBinContent(bincounter,nEntTot);
   if (optimizeName_cut_.size())
   {
+    checkOverflow(h_optimizer_,nEntTot);
     h_optimizer_->SetBinContent(0, nEntTot);
+    checkOverflow(h_optimizer_entries_,nEntTot);
     h_optimizer_entries_->SetBinContent(0, nEntTot);
   }
 
@@ -1095,8 +1106,9 @@ bool baseClass::writeCutEfficFile()
   if(skimWasMade_)
     {
       ++bincounter;
-      eventcuts_->SetBinContent(bincounter, nEntRoottuple);
-      effRel = (double) nEntRoottuple / (double) NBeforeSkim_;
+      checkOverflow(eventcuts_,GetTreeEntries());
+      eventcuts_->SetBinContent(bincounter, GetTreeEntries() );
+      effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
       effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
       effAbs = effRel;
       effAbsErr = effRelErr;
@@ -1110,20 +1122,21 @@ bool baseClass::writeCutEfficFile()
 	 << setw(mainFieldWidth) << "-"
 	 << setw(mainFieldWidth) << "-"
 	 << setw(mainFieldWidth) << NBeforeSkim_
-	 << setw(mainFieldWidth) << nEntRoottuple
+	 << setw(mainFieldWidth) << GetTreeEntries()
 	 << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
 	 << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
 	 << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
 	 << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
 	 << fixed << endl;
-      nEvtPassedBeforeWeight_previousCut = nEntRoottuple;
-      nEvtPassed_previousCut = nEntRoottuple;
+      nEvtPassedBeforeWeight_previousCut = GetTreeEntries();
+      nEvtPassed_previousCut = GetTreeEntries();
     }
   for (vector<string>::iterator it = orderedCutNames_.begin();
        it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       ++bincounter;
+      checkOverflow(eventcuts_,c->nEvtPassed);
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
       effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
       double N = nEvtPassedBeforeWeight_previousCut;
@@ -1273,9 +1286,9 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   string s3 = "EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
   if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
@@ -1310,9 +1323,9 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   string s3 = "EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
   if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
@@ -1346,9 +1359,9 @@ float baseClass::getSumTopPtWeights(const char *pName)
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
   string s3 = "EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  TH1F* hCount3 = (TH1F*)f->Get(s3.c_str());
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
   if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
@@ -1408,6 +1421,10 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t 
     {
       nh_h->second->Fill(value, weight);
     }
+}
+void baseClass::FillUserTH1D(const char* nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight)
+{
+  FillUserTH1D(nameAndTitle, *reader, weight);
 }
 
 void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
@@ -1472,6 +1489,10 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
     {
       nh_h->second->Fill(value_x, value_y, weight);
     }
+}
+void baseClass::FillUserTH2D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight)
+{
+  FillUserTH2D(nameAndTitle, *xReader, *yReader, weight);
 }
 
 
@@ -1577,6 +1598,10 @@ void baseClass::FillUserTH3D(const char* nameAndTitle, Double_t value_x,  Double
       nh_h->second->Fill(value_x, value_y, value_z, weight);
     }
 }
+void baseClass::FillUserTH3D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight)
+{
+  FillUserTH3D(nameAndTitle, *xReader, *yReader, *zReader, weight);
+}
 
 
 bool baseClass::writeUserHistos()
@@ -1647,20 +1672,23 @@ bool baseClass::writeSkimTree()
   TDirectory *dir1 = skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   skim_file_->cd("LJFilter/EventCount");
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   //FIXME topPtWeight
+  checkOverflow(hCount_,nEntTot);
+  checkOverflow(hCount_,NAfterSkim_);
+  checkOverflow(hCount_,sumAMCNLOWeights_);
+  checkOverflow(hCount_,sumTopPtWeights_);
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumAMCNLOWeights_);
   hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
 
-  if ( fChain -> GetEntries() == 0 ){
+  if ( GetTreeEntries() == 0 ){
     skim_file_->cd();
     skim_file_->mkdir("rootTupleTree");
     skim_file_->cd("rootTupleTree");
-    fChain -> CloneTree(0) -> Write("tree");
+    tree_ -> CloneTree(0) -> Write("tree");
   }
   
   else { 
@@ -1689,9 +1717,12 @@ bool baseClass::writeReducedSkimTree()
   TDirectory *dir1 = reduced_skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   reduced_skim_file_->cd("LJFilter/EventCount");
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   //FIXME topPtWeight
+  checkOverflow(hReducedCount_,nEntTot);
+  checkOverflow(hReducedCount_,NAfterReducedSkim_);
+  checkOverflow(hReducedCount_,sumAMCNLOWeights_);
+  checkOverflow(hReducedCount_,sumTopPtWeights_);
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
@@ -1732,7 +1763,7 @@ void baseClass::printTriggers(){
   std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
   STDOUT( "Triggers: ")
     for (; i != i_end; ++i)
-      std::cout << "\tfired?" << i -> second <<"\t\"" << i -> first << "\"" << std::endl;
+      std::cout << "\tfired? " << i -> second <<"\t\"" << i -> first << "\"" << std::endl;
 }
 
 void baseClass::printFiredTriggers()
@@ -1871,8 +1902,46 @@ bool baseClass::isData() {
     return false;
   else if(tree_->GetBranch("genWeight"))
     return false;
-  else if(tree_->GetBranch("isData")->GetLeaf("isData")->GetTypedValue<Double_t>() < 1)
-    return false;
+  else if(tree_->GetBranch("isData")) {
+    //FIXME: possibly does not work robustly
+    if(tree_->GetBranch("isData")->GetLeaf("isData")->GetTypedValue<Double_t>() < 1)
+      return false;
+  }
   return true;
+}
+
+void baseClass::checkOverflow(const TH1* hist, const double binContent) {
+  std::ostringstream stringStream;
+  if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
+    double limit = std::numeric_limits<float>::max();
+    if(binContent>limit) {
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1F bin! Quitting.";
+      STDOUT(stringStream.str());
+      exit(-3);
+    }
+  }
+  else if(std::string(hist->ClassName()).find("TH1I") != std::string::npos) {
+    double limit = std::numeric_limits<int>::max();
+    if(binContent>limit) {
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin! Quitting.";
+      STDOUT(stringStream.str());
+      exit(-3);
+    }
+  }
+  else {
+    stringStream << "WARNING: Could not check bin content of hist:" << hist->GetName()
+      << " for overflow as it is not a TH1F or TH1I. Please implement this check.";
+    STDOUT(stringStream.str());
+  }
+}
+
+void baseClass::checkEntryStatus(int status) {
+  if(status!=0) {
+    std::ostringstream stringStream;
+    //FIXME
+    //stringStream << "ERROR: Had a problem loading entry: " << fReader.GetCurrentEntry() << " into TTreeReader. Quitting";
+    STDOUT(stringStream.str());
+    exit(-4);
+  }
 }
 
