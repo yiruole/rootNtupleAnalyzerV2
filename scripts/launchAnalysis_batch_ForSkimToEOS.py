@@ -164,7 +164,10 @@ if ( not options.inputlist
     parser.print_help()
     sys.exit()
 
+if 'eos/user' in options.eosDir:
+    options.eosHost = 'root://eosuser.cern.ch/'
 # set eos mgm url
+print 'INFO: Using',options.eosHost,'as eosHost'
 os.environ['EOS_MGM_URL'] = options.eosHost
 
 #--------------------------------------------------------------------------------
@@ -210,15 +213,15 @@ print "... done "
 # Look for the exe file.  If it exists, move it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the exe to the local output directory...",
 
-if not os.path.isfile ( options.executable ) : 
-    print "Error: No file here: '" + options.executable + "'"
-    sys.exit() 
-else : 
+if os.path.isfile ( options.executable ) : 
+    print "Moving the exe to the local output directory...",
     os.system ( "cp " + options.executable + " " + options.outputDir + "/" )
+    print "... done "
+else : 
+    print "Warning: No file here: '" + options.executable + "'" + "; proceeding anyway"
+    #sys.exit() 
 
-print "... done "
 
 
 #--------------------------------------------------------------------------------
@@ -271,12 +274,23 @@ print "... done "
 # Check if path is a link
 #--------------------------------------------------------------------------------
 
-print "Checking the link to analysisClass.C..."
+print "Checking the link to analysisClass.C...",
 
 if not os.path.islink ( "src/analysisClass.C" ) :
+    print
     print "Error: src/analysisClass.C is not a symbolic link"
     sys.exit()
 code_name = os.readlink ( "./src/analysisClass.C" ).split("/")[-1].split(".C")[0]
+
+print "... done"
+
+#--------------------------------------------------------------------------------
+# Remove tar file
+#--------------------------------------------------------------------------------
+
+print "Removing inputFiles.tar.gz...",
+
+os.system('rm -r inputFiles.tar.gz')
 
 print "... done"
 
@@ -329,9 +343,9 @@ for line in inputlist_file:
     command = command + " -n " + str(jobs_to_submit)
     command = command + " -q " + options.queue
     command = command + " -d " + eosPath
-    command = command + " -e " + options.outputDir+'/'+options.executable.split('/')[-1]
+    command = command + " -e " + os.path.realpath(options.executable)
     command = command + " -m " + options.eosHost
-    command = command + " -j " + jsonFile
+    command = command + " -j " + os.path.realpath(jsonFile)
     if options.reducedSkim:
         command = command + " -r "
     
