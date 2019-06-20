@@ -279,7 +279,10 @@ def main():
 
     if not options.eosHost.endswith('/'):
         options.eosHost += '/'
+    if 'eos/user' in options.inputDirs[0]:
+        options.eosHost = 'root://eosuser.cern.ch/'
     # set eos mgm url
+    print 'INFO: Using',options.eosHost,'as eosHost'
     os.environ['EOS_MGM_URL'] = options.eosHost
 
     filelist = {}
