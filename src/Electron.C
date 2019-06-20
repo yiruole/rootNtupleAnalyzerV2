@@ -16,11 +16,11 @@ Electron::Electron (Collection & c, unsigned short i, short j, Long64_t current_
   //			    ( m_collection -> GetData() -> ElectronSCRawEnergy  -> at ( m_raw_index ) ) / 
   //			    ( m_collection -> GetData() -> ElectronCaloEnergy   -> at ( m_raw_index ) ) );
   //}
-    ptLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_pt");
-    etaLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_eta");
-    phiLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_phi");
-    nGenPartLeaf = m_collection->GetData()->fChain->GetLeaf("nGenPart");
-    genPartIdxLeaf = m_collection->GetData()->fChain->GetLeaf("Electron_genPartIdx");
+    ptLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_pt");
+    etaLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_eta");
+    phiLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_phi");
+    nGenPartLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("nGenPart");
+    genPartIdxLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("Electron_genPartIdx");
     // load current entry
     if(current_entry >= 0) {
       ptLeaf->GetBranch()->GetEntry(current_entry);

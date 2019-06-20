@@ -8,13 +8,13 @@ GenParticle::GenParticle():
 
 GenParticle::GenParticle(Collection& c, unsigned short i, short j, Long64_t current_entry ):
   Object(c,i,"GenParticle") {
-    ptLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_pt");
-    etaLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_eta");
-    phiLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_phi");
-    massLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_mass");
-    pdgIdLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_pdgId");
-    motherIdxLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_genPartIdxMother");
-    statusLeaf = m_collection->GetData()->fChain->GetLeaf("GenPart_status");
+    ptLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_pt");
+    etaLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_eta");
+    phiLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_phi");
+    massLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_mass");
+    pdgIdLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_pdgId");
+    motherIdxLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_genPartIdxMother");
+    statusLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_status");
     // load current entry
     ptLeaf->GetBranch()->GetEntry(current_entry);
     etaLeaf->GetBranch()->GetEntry(current_entry);

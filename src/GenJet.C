@@ -9,9 +9,9 @@ GenJet::GenJet():
 
 GenJet::GenJet(Collection& c, unsigned short i, short j, Long64_t current_entry ):
   Object(c,i,"GenJet") {
-    ptLeaf  = m_collection->GetData()->fChain->GetLeaf("GenJet_pt");
-    etaLeaf = m_collection->GetData()->fChain->GetLeaf("GenJet_eta");
-    phiLeaf = m_collection->GetData()->fChain->GetLeaf("GenJet_phi");
+    ptLeaf  = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_pt");
+    etaLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_eta");
+    phiLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_phi");
     // load current entry
     ptLeaf->GetBranch()->GetEntry(current_entry);
     etaLeaf->GetBranch()->GetEntry(current_entry);

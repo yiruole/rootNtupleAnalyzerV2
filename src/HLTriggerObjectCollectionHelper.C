@@ -1,7 +1,6 @@
 #include <algorithm>
 #include "HLTriggerObjectCollectionHelper.h"
 #include "HLTriggerObject.h"
-#include "rootNtupleClass.h"
 #include "TBranchElement.h"
 
 
