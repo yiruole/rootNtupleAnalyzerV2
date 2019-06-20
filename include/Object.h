@@ -36,7 +36,8 @@ class Object {
   float DeltaR     ( Object * other_object );
   float DeltaPhi   ( Object * other_object );
   float DeltaPt    ( Object * other_object );
-  float Phi_mpi_pi ( float x ); 
+  //float Phi_mpi_pi ( float x ); 
+  template <typename T> constexpr T reduceRange(T x);
 
   bool IsGenEBFiducial() ;
   bool IsGenEEFiducial() ;
