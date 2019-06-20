@@ -14,7 +14,13 @@ def PrepareJobScript(outputname):
         outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
-        outputfile.write('./'+execName+' '+inputfilename+" "+cutfile+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
+        outputfile.write("ls -ltr\n")
+        inputList = inputfilename.split('/')[-1]
+        if options.reducedSkim:
+            outputfile.write('tar -xzf '+tarFileName+'\n')
+            outputfile.write('yes | ./scripts/make_rootNtupleClass.sh -t Events -f `head -1 '+inputList+'` \n')
+            outputfile.write('make -f Makefile_fullNtuple clean && make -f Makefile_fullNtuple\n')
+        outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
         if options.reducedSkim:
@@ -36,10 +42,20 @@ def WriteSubmitFile(condorFileName):
         # require CentOS7
         condorFile.write('requirements = (OpSysAndVer =?= "CentOS7")\n')
         # make sure the job finishes with exit code 0
-        condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
+        #condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
+        condorFile.write('max_retries = 3\n')
         condorFile.write('should_transfer_files = YES\n')
         condorFile.write('transfer_output_files = ""\n')
-        condorFile.write('transfer_input_files = '+cutfile+','+options.executable+',input/input_$(Process).list,'+options.jsonFileName+'\n')
+        #condorFile.write('stream_output = True\n')
+        #condorFile.write('stream_error = True\n')
+        exePath = os.path.dirname(os.path.abspath(options.executable))
+        if options.reducedSkim:
+            #dictFile = exePath+'/MyDict_rdict.pcm'
+            #condorFile.write('transfer_input_files = '+dictFile+','+cutfile+','+options.executable+',input/input_$(Process).list,'+options.jsonFileName+'\n')
+            condorFile.write('transfer_input_files = '+exePath+'/'+tarFileName+',input/input_$(Process).list,'+cutfile+','+options.jsonFileName+'\n')
+        else:
+            dictFile = exePath+'/MyDict_rdict.pcm'
+            condorFile.write('transfer_input_files = '+dictFile+','+cutfile+','+options.executable+',input/input_$(Process).list,'+options.jsonFileName+'\n')
         condorFile.write('queue $(N)\n')
 
 
@@ -139,6 +155,15 @@ outputeosdir = options.eosDir
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
 os.system("/usr/bin/eos mkdir -p "+outputeosdir)
 #################################################
+# make tar file
+################################################
+inputFiles=['scripts/make_rootNtupleClass.sh','Makefile_fullNtuple','include/*','src/*.C']
+tarFileName = 'inputFiles.tar.gz'
+if options.reducedSkim and not os.path.isfile(tarFileName):
+    print 'Creating tar file '+tarFileName+'...',
+    os.system('tar -czf '+tarFileName+' '+' '.join(inputFiles))
+    print '... Done.'
+################################################
 numfiles = len(file(inputlist).readlines())
 ijobmax=int(options.ijobmax)
 if ijobmax > numfiles:
