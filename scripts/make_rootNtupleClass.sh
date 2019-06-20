@@ -68,11 +68,10 @@ cat >> temporaryMacro.C <<EOF
 }
 EOF
 
-root -l -q temporaryMacro.C
+root -b -l -q temporaryMacro.C
+#ls -ltrph
 
 rm temporaryMacro.C
-
-mv tmp.h ${ROOTNTUPLECLASSFILENAME}.h
 
 if [ -f "${ROOTNTUPLECLASSFILENAME}.h" ] && [ -f "${ROOTNTUPLECLASSFILENAME}.C" ]; then
     echo "Moving rootNtupleClass.h/C to ./include/ and ./src/ directories ..."
