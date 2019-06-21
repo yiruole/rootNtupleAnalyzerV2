@@ -80,7 +80,7 @@ void baseClass::init()
   Int_t cachesize = 10000000; //10 MBytes
   tree_->SetCacheSize(cachesize);
   //Init(tree_);
-  readerTools = new TTreeReaderTools(tree_);
+  readerTools_ = std::shared_ptr<TTreeReaderTools>(new TTreeReaderTools(tree_));
 
 
   //directly from string

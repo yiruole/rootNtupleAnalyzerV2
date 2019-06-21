@@ -222,7 +222,7 @@ class baseClass {
 
   TFile * output_root_;
 
-  TTreeReaderTools* readerTools;
+  std::shared_ptr<TTreeReaderTools> readerTools_;
 
   private :
   int nOptimizerCuts_;
