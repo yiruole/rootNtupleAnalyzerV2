@@ -23,9 +23,6 @@ class GenJet : public Object {
   bool PassUserID ( ID id, bool verbose = false ); 
 
  private:
-  TLeaf* ptLeaf;
-  TLeaf* etaLeaf;
-  TLeaf* phiLeaf;
     
 };
 

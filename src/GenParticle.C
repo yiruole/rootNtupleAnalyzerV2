@@ -8,35 +8,20 @@ GenParticle::GenParticle():
 
 GenParticle::GenParticle(Collection& c, unsigned short i, short j, Long64_t current_entry ):
   Object(c,i,"GenParticle") {
-    ptLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_pt");
-    etaLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_eta");
-    phiLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_phi");
-    massLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_mass");
-    pdgIdLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_pdgId");
-    motherIdxLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_genPartIdxMother");
-    statusLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenPart_status");
-    // load current entry
-    ptLeaf->GetBranch()->GetEntry(current_entry);
-    etaLeaf->GetBranch()->GetEntry(current_entry);
-    phiLeaf->GetBranch()->GetEntry(current_entry);
-    massLeaf->GetBranch()->GetEntry(current_entry);
-    pdgIdLeaf->GetBranch()->GetEntry(current_entry);
-    motherIdxLeaf->GetBranch()->GetEntry(current_entry);
-    statusLeaf->GetBranch()->GetEntry(current_entry);
   }
 
 // Kinematic variables
 
-float & GenParticle::Pt       (){ return static_cast<float*>(ptLeaf->GetValuePointer())[m_raw_index]; }
-float & GenParticle::Eta      (){ return static_cast<float*>(etaLeaf->GetValuePointer())[m_raw_index]; } 
-float & GenParticle::Phi      (){ return static_cast<float*>(phiLeaf->GetValuePointer())[m_raw_index]; } 
-float & GenParticle::Mass     (){ return static_cast<float*>(massLeaf->GetValuePointer())[m_raw_index]; } 
+float & GenParticle::Pt       (){ return m_collection->ReadArrayBranch<Float_t>("GenPart_pt")[m_raw_index]; }
+float & GenParticle::Eta      (){ return m_collection->ReadArrayBranch<Float_t>("GenPart_eta")[m_raw_index]; } 
+float & GenParticle::Phi      (){ return m_collection->ReadArrayBranch<Float_t>("GenPart_phi")[m_raw_index]; } 
+float & GenParticle::Mass     (){ return m_collection->ReadArrayBranch<Float_t>("GenPart_mass")[m_raw_index]; } 
 
 // ID variables		                                                       
 
-int    GenParticle::PdgId       (){ return pdgIdLeaf->GetValue(m_raw_index); }
-int    GenParticle::MotherIndex (){ return motherIdxLeaf->GetValue(m_raw_index); }
-int    GenParticle::Status      (){ return statusLeaf->GetValue(m_raw_index); }
+int    GenParticle::PdgId       (){ return m_collection->ReadArrayBranch<Int_t>("GenPart_pdgId")[m_raw_index]; }
+int    GenParticle::MotherIndex (){ return m_collection->ReadArrayBranch<Int_t>("GenPart_genPartIdxMother")[m_raw_index]; }
+int    GenParticle::Status      (){ return m_collection->ReadArrayBranch<Int_t>("GenPart_status")[m_raw_index]; }
 //int    GenParticle::NumDaughters(){ return m_collection -> GetData() -> GenPartNumDaught  -> at ( m_raw_index ); }
 int    GenParticle::NumDaughters(){ return -1.0; }
 

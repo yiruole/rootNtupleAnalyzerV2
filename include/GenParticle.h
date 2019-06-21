@@ -59,14 +59,6 @@ class GenParticle : public Object {
   bool PassUserID_GenTop              (bool verbose);
   bool PassUserID_Status62            (bool verbose);
 
-  TLeaf* ptLeaf;
-  TLeaf* etaLeaf;
-  TLeaf* phiLeaf;
-  TLeaf* massLeaf;
-  TLeaf* pdgIdLeaf;
-  TLeaf* motherIdxLeaf;
-  TLeaf* statusLeaf;
-
 };
 
 std::ostream& operator<< (std::ostream& stream, GenParticle& object);

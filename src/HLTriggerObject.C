@@ -8,21 +8,21 @@ HLTriggerObject::HLTriggerObject ():
 
 HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j, Long64_t current_entry):
   Object        ( c,i,j, "HLTriggerObject" ),
-  m_float_pt   ( m_collection -> GetData() -> TrigObj_pt  [m_raw_index] ),
-  m_float_eta  ( m_collection -> GetData() -> TrigObj_eta [m_raw_index] ),
-  m_float_phi  ( m_collection -> GetData() -> TrigObj_phi [m_raw_index] )
+  m_float_pt   ( m_collection->ReadArrayBranch<Float_t>("TrigObj_pt")  [m_raw_index] ),
+  m_float_eta  ( m_collection->ReadArrayBranch<Float_t>("TrigObj_eta") [m_raw_index] ),
+  m_float_phi  ( m_collection->ReadArrayBranch<Float_t>("TrigObj_phi") [m_raw_index] )
 {}
 
 //void HLTriggerObject::WritePtEtaPhi() {
-//  m_collection -> GetData() -> HLTriggerObjPt  -> at ( m_raw_index ) = float ( m_float_pt  );
-//  m_collection -> GetData() -> HLTriggerObjEta -> at ( m_raw_index ) = float ( m_float_eta );
-//  m_collection -> GetData() -> HLTriggerObjPhi -> at ( m_raw_index ) = float ( m_float_phi );
+//  m_collection->ReadArrayBranch<Float_t>("") HLTriggerObjPt  -> at ( m_raw_index ) = float ( m_float_pt  );
+//  m_collection->ReadArrayBranch<Float_t>("") HLTriggerObjEta -> at ( m_raw_index ) = float ( m_float_eta );
+//  m_collection->ReadArrayBranch<Float_t>("") HLTriggerObjPhi -> at ( m_raw_index ) = float ( m_float_phi );
 //}
 
 float & HLTriggerObject::Pt                 () { return m_float_pt ; }
 float & HLTriggerObject::Eta                () { return m_float_eta; }
 float & HLTriggerObject::Phi                () { return m_float_phi; }
-std::vector<int> HLTriggerObject::ObjectIDs () { return std::vector<int>(m_collection -> GetData() -> TrigObj_id [m_raw_index] ) ; }
+std::vector<int> HLTriggerObject::ObjectIDs () { return std::vector<int>(m_collection->ReadArrayBranch<Int_t>("TrigObj_id") [m_raw_index] ) ; }
 
 // HLT
 std::vector<std::string> HLTriggerObject::GetFilterNames() { return std::vector<std::string>(); }

@@ -9,7 +9,7 @@ LooseElectron::LooseElectron (Collection & c, unsigned short i, short j, Long64_
 }
 
 float & LooseElectron::Pt(){
-  uncorrEt = m_collection->GetData()->Electron_pt[m_raw_index]/m_collection->GetData()->Electron_eCorr[m_raw_index];
+  uncorrEt = m_collection->ReadArrayBranch<Float_t>("Electron_pt")[m_raw_index]/m_collection->ReadArrayBranch<Float_t>("Electron_eCorr")[m_raw_index];
   return uncorrEt;
 } 
 

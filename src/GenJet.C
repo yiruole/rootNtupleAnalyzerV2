@@ -9,20 +9,13 @@ GenJet::GenJet():
 
 GenJet::GenJet(Collection& c, unsigned short i, short j, Long64_t current_entry ):
   Object(c,i,"GenJet") {
-    ptLeaf  = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_pt");
-    etaLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_eta");
-    phiLeaf = m_collection->GetData()->fReader.GetTree()->GetLeaf("GenJet_phi");
-    // load current entry
-    ptLeaf->GetBranch()->GetEntry(current_entry);
-    etaLeaf->GetBranch()->GetEntry(current_entry);
-    phiLeaf->GetBranch()->GetEntry(current_entry);
   }
 
 // Kinematic variables
 
-float & GenJet::Pt  () { return static_cast<float*>(ptLeaf->GetValuePointer())[m_raw_index]; }
-float & GenJet::Eta () { return static_cast<float*>(etaLeaf->GetValuePointer())[m_raw_index]; } 
-float & GenJet::Phi () { return static_cast<float*>(phiLeaf->GetValuePointer())[m_raw_index]; } 
+float & GenJet::Pt  () { return m_collection->ReadArrayBranch<Float_t>("GenJet_pt")[m_raw_index]; }
+float & GenJet::Eta () { return m_collection->ReadArrayBranch<Float_t>("GenJet_eta")[m_raw_index]; } 
+float & GenJet::Phi () { return m_collection->ReadArrayBranch<Float_t>("GenJet_phi")[m_raw_index]; } 
 
 std::ostream& operator<<(std::ostream& stream, GenJet& object) {
   stream << object.Name() << " " << ": "

@@ -159,12 +159,6 @@ class Electron : public Object {
   bool   PassUserID_MVA                (bool verbose);
   bool   PassUserID_ECALFiducial       (bool verbose);
   bool   PassUserID_FakeRateLooseID    (bool verbose);
-
-  TLeaf* ptLeaf;
-  TLeaf* etaLeaf;
-  TLeaf* phiLeaf;
-  TLeaf* nGenPartLeaf;
-  TLeaf* genPartIdxLeaf;
 };
 
 std::ostream& operator<< (std::ostream& stream, Electron& object);
