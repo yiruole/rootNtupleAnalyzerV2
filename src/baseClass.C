@@ -1903,8 +1903,7 @@ bool baseClass::isData() {
   else if(tree_->GetBranch("genWeight"))
     return false;
   else if(tree_->GetBranch("isData")) {
-    //FIXME: possibly does not work robustly
-    if(tree_->GetBranch("isData")->GetLeaf("isData")->GetTypedValue<Double_t>() < 1)
+    if(readerTools_->ReadValueBranch<Bool_t>("isData") < 1)
       return false;
   }
   return true;

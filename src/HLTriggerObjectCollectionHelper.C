@@ -4,15 +4,16 @@
 #include "TBranchElement.h"
 
 
-HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( rootNtupleClass & d, std::string prefix ):
+HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( analysisClass & d, std::string prefix ):
   m_data ( & d ),
   m_prefix ( prefix )
 {}
 
-std::vector<std::vector<int> >* HLTriggerObjectCollectionHelper::GetHLTriggerObjTypeIds()
-{
-  return reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fChain->GetBranch((m_prefix+"HLTriggerObjTypeIds").c_str()))->GetObject());
-}
+//std::vector<std::vector<int> >* HLTriggerObjectCollectionHelper::GetHLTriggerObjTypeIds()
+//{
+//  //return reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fChain->GetBranch((m_prefix+"HLTriggerObjTypeIds").c_str()))->GetObject());
+//  //FIXME
+//}
 
 void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 {
@@ -89,7 +90,7 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const char * path_name, bool verbose ){
   //FIXME
-  CollectionPtr collection ( new Collection ( *m_data, 0, 0));
+  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
 
   //std::vector<unsigned short> matchingHLTriggerRawIndices;
   //// first, look at each object in the HLTriggerObj collection
@@ -115,7 +116,7 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const 
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( const char * path_name, bool verbose ){
   //FIXME
-  CollectionPtr collection ( new Collection ( *m_data, 0, 0));
+  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
 
   //std::vector<unsigned short> matchingHLTriggerRawIndices;
   //// first, look at each object in the HLTriggerObj collection

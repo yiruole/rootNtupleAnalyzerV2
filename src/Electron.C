@@ -31,18 +31,18 @@ float   Electron::SCPt               (){ return SCEnergy()/cosh(SCEta()); }
 float   Electron::IsEB               (){ return fabs(Eta()) < 1.5; } 
 float   Electron::IsEE               (){ return fabs(Eta()) < 2.5; } 
 
-float   Electron::Charge             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_charge") [m_raw_index]; } 
+float   Electron::Charge             (){ return m_collection->ReadArrayBranch<Int_t>("Electron_charge") [m_raw_index]; } 
 float   Electron::R9                 (){ return m_collection->ReadArrayBranch<Float_t>("Electron_r9") [m_raw_index]; } 
 float   Electron::RawEnergy          (){ return -1.0; } 
 float   Electron::SCEnergy           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scEnergy") [m_raw_index];} 
 float   Electron::ECorr              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_eCorr") [m_raw_index];} 
 								      
 // EGamma bits													      
-int    Electron::PassEGammaIDLoose    (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased") [m_raw_index]; } 
-int    Electron::PassEGammaIDMedium   (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased") [m_raw_index]; } 
-int    Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased") [m_raw_index]; } 
-int    Electron::PassEGammaIDVeto     (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased") [m_raw_index]; } 
-int    Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased_HEEP") [m_raw_index]; } 
+int    Electron::PassEGammaIDLoose    (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased") [m_raw_index]; } 
+int    Electron::PassEGammaIDMedium   (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased") [m_raw_index]; } 
+int    Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased") [m_raw_index]; } 
+int    Electron::PassEGammaIDVeto     (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased") [m_raw_index]; } 
+int    Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP") [m_raw_index]; } 
 														      
 // ID variables			      	   		      		  	  				      
 bool Electron::PassIDCut(HEEPIDCut cut) {
@@ -84,7 +84,7 @@ float Electron::CaloEnergy           (){ return m_collection->ReadArrayBranch<Fl
 float Electron::EcalEnergy           (){ return -999; }
 float Electron::ESuperClusterOverP   (){ return -999; }
 float Electron::NBrems               (){ return -999; }
-float Electron::HasMatchedConvPhot   (){ return !(m_collection->ReadArrayBranch<Float_t>("Electron_convVeto") [m_raw_index]); }
+bool Electron::HasMatchedConvPhot    (){ return !(m_collection->ReadArrayBranch<Bool_t>("Electron_convVeto") [m_raw_index]); }
 float Electron::FBrem                (){ return -999; }
 float Electron::BeamSpotDXY          (){ return -999; }
 float Electron::BeamSpotDXYErr       (){ return -999; }

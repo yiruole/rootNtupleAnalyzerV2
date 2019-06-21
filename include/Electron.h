@@ -84,7 +84,7 @@ class Electron : public Object {
   float ESuperClusterOverP   ();
   float FBrem                ();
   float NBrems               ();
-  float HasMatchedConvPhot   ();
+  bool  HasMatchedConvPhot   ();
   float BeamSpotDXY          ();
   float BeamSpotDXYErr       ();
   float GsfCtfScPixCharge    ();
