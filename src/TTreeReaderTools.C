@@ -24,92 +24,37 @@ void TTreeReaderTools::gotoEntry(Long64_t entry, bool forceCall) {
   }
 }
 
-template <typename T> T TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+template <typename T> T TTreeReaderTools::ReadValueBranch(const std::string& branchName, std::map<std::string, TTreeReaderValue<T> >& valueReaderMap) {
   checkReaderIsClean();
-  std::string type = getTypeName(branchName);
-  if(type=="UInt_t") {
-    auto itr = m_ttreeValueUIntReaders.find(branchName);
-    if(itr != m_ttreeValueUIntReaders.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<UInt_t> ttrv = TTreeReaderValue<UInt_t>(*m_reader, branchName.c_str());
-      m_ttreeValueUIntReaders.insert(std::pair<std::string,TTreeReaderValue<UInt_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
-  else if(type=="ULong64_t") {
-    auto itr = m_ttreeValueULong64Readers.find(branchName);
-    if(itr != m_ttreeValueULong64Readers.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<ULong64_t> ttrv = TTreeReaderValue<ULong64_t>(*m_reader, branchName.c_str());
-      m_ttreeValueULong64Readers.insert(std::pair<std::string,TTreeReaderValue<ULong64_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
-  else if(type=="Float_t") {
-    auto itr = m_ttreeValueFloatReaders.find(branchName);
-    if(itr != m_ttreeValueFloatReaders.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<Float_t> ttrv = TTreeReaderValue<Float_t>(*m_reader, branchName.c_str());
-      m_ttreeValueFloatReaders.insert(std::pair<std::string,TTreeReaderValue<Float_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
-  else if(type=="Int_t") {
-    auto itr = m_ttreeValueIntReaders.find(branchName);
-    if(itr != m_ttreeValueIntReaders.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<Int_t> ttrv = TTreeReaderValue<Int_t>(*m_reader, branchName.c_str());
-      m_ttreeValueIntReaders.insert(std::pair<std::string,TTreeReaderValue<Int_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
-  else if(type=="UChar_t") {
-    auto itr = m_ttreeValueUCharReaders.find(branchName);
-    if(itr != m_ttreeValueUCharReaders.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<UChar_t> ttrv = TTreeReaderValue<UChar_t>(*m_reader, branchName.c_str());
-      m_ttreeValueUCharReaders.insert(std::pair<std::string,TTreeReaderValue<UChar_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
-  else if(type=="Bool_t") {
-    auto itr = m_ttreeValueBoolReaders.find(branchName);
-    if(itr != m_ttreeValueBoolReaders.end())
-      return *(itr->second.Get());
-    else {
-      if(!m_readerIsClean)
-        remakeAllReaders();
-      TTreeReaderValue<Bool_t> ttrv = TTreeReaderValue<Bool_t>(*m_reader, branchName.c_str());
-      m_ttreeValueBoolReaders.insert(std::pair<std::string,TTreeReaderValue<Bool_t> >(branchName,ttrv));
-      gotoEntry(m_entry,true);
-      return *(ttrv.Get());
-    }
-  }
+  auto itr = valueReaderMap.find(branchName);
+  if(itr != valueReaderMap.end())
+    return *(itr->second.Get());
   else {
-    std::cout << "ERROR: ReadValueBranch for type: " << type << " is not implemented." << std::endl;
-    exit(1);
+    if(!m_readerIsClean)
+      remakeAllReaders();
+    auto insertItr = valueReaderMap.insert(std::pair<std::string,TTreeReaderValue<T> >(branchName,TTreeReaderValue<T>(*m_reader, branchName.c_str())));
+    gotoEntry(m_entry,true);
+    return *(insertItr.first->second.Get());
   }
+}
 
+template <> UInt_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<UInt_t>(branchName, m_ttreeValueUIntReaders);
+}
+template <> ULong64_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<ULong64_t>(branchName, m_ttreeValueULong64Readers);
+}
+template <> Float_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<Float_t>(branchName, m_ttreeValueFloatReaders);
+}
+template <> Int_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<Int_t>(branchName, m_ttreeValueIntReaders);
+}
+template <> UChar_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<UChar_t>(branchName, m_ttreeValueUCharReaders);
+}
+template <> Bool_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<Bool_t>(branchName, m_ttreeValueBoolReaders);
 }
 
 template <typename T> TTreeReaderArray<T>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName, std::map<std::string, TTreeReaderArray<T> >& arrayReaderMap) {
@@ -134,6 +79,9 @@ template <> TTreeReaderArray<Int_t>& TTreeReaderTools::ReadArrayBranch(const std
 }
 template <> TTreeReaderArray<UChar_t>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName) {
   return ReadArrayBranch<UChar_t>(branchName, m_ttreeArrayUCharReaders);
+}
+template <> TTreeReaderArray<Bool_t>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName) {
+  return ReadArrayBranch<Bool_t>(branchName, m_ttreeArrayBoolReaders);
 }
 
 void TTreeReaderTools::checkReaderIsClean() {

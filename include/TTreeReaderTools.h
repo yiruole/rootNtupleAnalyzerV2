@@ -21,6 +21,7 @@ class TTreeReaderTools {
     std::string getTypeName(const std::string& branchName) const;
     void gotoEntry(Long64_t entry, bool forceCall = false);
     template <typename T> void remakeReader(T& readerMap);
+    template <typename T> T ReadValueBranch(const std::string& branchName, std::map<std::string, TTreeReaderValue<T> >& valueReaderMap);
     template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName, std::map<std::string, TTreeReaderArray<T> >& arrayReaderMap);
 
     std::map<std::string, TTreeReaderValue<UInt_t>    > m_ttreeValueUIntReaders;
