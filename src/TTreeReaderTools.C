@@ -2,9 +2,10 @@
 #include <string>
 #include "include/TTreeReaderTools.h"
 
-TTreeReaderTools::TTreeReaderTools(TTree* tree) :
-  m_tree(tree), m_readerIsClean(true), m_entry(-1) {
-    m_reader = std::unique_ptr<TTreeReader>(new TTreeReader(tree));
+TTreeReaderTools::TTreeReaderTools(std::shared_ptr<TTree> tree) :
+  m_readerIsClean(true), m_entry(-1) {
+    m_tree = tree;
+    m_reader = std::unique_ptr<TTreeReader>(new TTreeReader(tree.get()));
     m_entries = m_reader->GetEntries(false);
 }
 
@@ -113,7 +114,7 @@ template <typename T> void TTreeReaderTools::remakeReader(T& readerMap) {
 }
 
 void TTreeReaderTools::remakeAllReaders() {
-  m_reader.reset(new TTreeReader(m_tree));
+  m_reader.reset(new TTreeReader(m_tree.get()));
   m_readerIsClean = true;
   remakeReader<std::map<std::string, TTreeReaderValue<UInt_t> > >(m_ttreeValueUIntReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<ULong64_t> > >(m_ttreeValueULong64Readers);

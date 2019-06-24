@@ -10,10 +10,11 @@
 class TTreeReaderTools {
   public:
     TTreeReaderTools() = delete;
-    TTreeReaderTools(TTree* tree);
+    TTreeReaderTools(std::shared_ptr<TTree> tree);
     template <typename T> T ReadValueBranch(const std::string& branchName);
     template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName);
     void LoadEntry(Long64_t entry);
+    std::shared_ptr<TTree> GetTree() { return m_tree; }
 
   private:
     void checkReaderIsClean();
@@ -39,7 +40,7 @@ class TTreeReaderTools {
 
     bool m_readerIsClean;
     std::unique_ptr<TTreeReader> m_reader;
-    TTree* m_tree;
+    std::shared_ptr<TTree> m_tree;
     Long64_t m_entry;
     Long64_t m_entries;
 };
