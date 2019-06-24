@@ -231,8 +231,7 @@ class baseClass {
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
-  //TChain * chain_; // Original TChain
-  TChain * tree_; // main tree
+  std::shared_ptr<TChain> tree_; // main tree
   TTree * tree2_; // tree for globalInfo
   Long64_t readerEntry_;
   Long64_t treeEntries_;

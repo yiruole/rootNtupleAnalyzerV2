@@ -142,7 +142,7 @@ void baseClass::init()
 void baseClass::readInputList()
 {
 
-  TChain *chain = new TChain(treeName_->c_str());
+  std::shared_ptr<TChain> chain = std::shared_ptr<TChain>(new TChain(treeName_->c_str()));
   char pName[500];
   skimWasMade_ = true;
   jsonFileWasUsed_ = false;
