@@ -48,6 +48,9 @@ template <> ULong64_t TTreeReaderTools::ReadValueBranch(const std::string& branc
 template <> Float_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
   return ReadValueBranch<Float_t>(branchName, m_ttreeValueFloatReaders);
 }
+template <> Double_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
+  return ReadValueBranch<Double_t>(branchName, m_ttreeValueDoubleReaders);
+}
 template <> Int_t TTreeReaderTools::ReadValueBranch(const std::string& branchName) {
   return ReadValueBranch<Int_t>(branchName, m_ttreeValueIntReaders);
 }
@@ -119,6 +122,7 @@ void TTreeReaderTools::remakeAllReaders() {
   remakeReader<std::map<std::string, TTreeReaderValue<UInt_t> > >(m_ttreeValueUIntReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<ULong64_t> > >(m_ttreeValueULong64Readers);
   remakeReader<std::map<std::string, TTreeReaderValue<Float_t> > >(m_ttreeValueFloatReaders);
+  remakeReader<std::map<std::string, TTreeReaderValue<Double_t> > >(m_ttreeValueDoubleReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<Int_t> > >(m_ttreeValueIntReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<UChar_t> > >(m_ttreeValueUCharReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<Bool_t> > >(m_ttreeValueBoolReaders);
@@ -132,6 +136,7 @@ void TTreeReaderTools::remakeAllReaders() {
 template UInt_t TTreeReaderTools::ReadValueBranch<UInt_t>(const std::string& branchName);
 template ULong64_t TTreeReaderTools::ReadValueBranch<ULong64_t>(const std::string& branchName);
 template Float_t TTreeReaderTools::ReadValueBranch<Float_t>(const std::string& branchName);
+template Double_t TTreeReaderTools::ReadValueBranch<Double_t>(const std::string& branchName);
 template Int_t TTreeReaderTools::ReadValueBranch<Int_t>(const std::string& branchName);
 template UChar_t TTreeReaderTools::ReadValueBranch<UChar_t>(const std::string& branchName);
 template Bool_t TTreeReaderTools::ReadValueBranch<Bool_t>(const std::string& branchName);
