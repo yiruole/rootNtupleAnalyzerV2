@@ -218,7 +218,7 @@ class baseClass {
 
   Long64_t GetTreeEntries() { return treeEntries_; }
 
-  void checkEntryStatus(int status);
+
 
   TFile * output_root_;
 

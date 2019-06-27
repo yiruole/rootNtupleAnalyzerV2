@@ -1646,6 +1646,7 @@ void baseClass::fillSkimTree()
 {
   if(!produceSkim_) return;
 
+  tree_->GetEntry(readerTools_->GetCurrentEntry());
   skim_tree_->Fill();
   NAfterSkim_++;
 
@@ -1656,6 +1657,7 @@ void baseClass::fillReducedSkimTree()
 {
   if(!produceReducedSkim_) return;
 
+  tree_->GetEntry(readerTools_->GetCurrentEntry());
   reduced_skim_tree_->Fill();
   NAfterReducedSkim_++;
 
@@ -1931,16 +1933,6 @@ void baseClass::checkOverflow(const TH1* hist, const double binContent) {
     stringStream << "WARNING: Could not check bin content of hist:" << hist->GetName()
       << " for overflow as it is not a TH1F or TH1I. Please implement this check.";
     STDOUT(stringStream.str());
-  }
-}
-
-void baseClass::checkEntryStatus(int status) {
-  if(status!=0) {
-    std::ostringstream stringStream;
-    //FIXME
-    //stringStream << "ERROR: Had a problem loading entry: " << fReader.GetCurrentEntry() << " into TTreeReader. Quitting";
-    STDOUT(stringStream.str());
-    exit(-4);
   }
 }
 
