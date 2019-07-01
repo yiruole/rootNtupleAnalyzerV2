@@ -7,8 +7,9 @@ class HLTriggerObjectCollectionHelper{
 
  public:
   HLTriggerObjectCollectionHelper( analysisClass & d , std::string prefix = "");
-  CollectionPtr GetL3FilterObjectsByPath ( const char * path_name, bool verbose=false );
-  CollectionPtr GetLastFilterObjectsByPath ( const char * path_name, bool verbose=false );
+  // takes the bit number: use 1 for the first bit
+  CollectionPtr GetLastFilterObjectsByPath ( unsigned int bitNumber, bool verbose=false );
+  CollectionPtr GetFilterObjectsByType ( int typeId, bool verbose=false );
   
  private:
   short IndexOfAssociatedPath(const char* path_name, unsigned short trigObjIndex);

@@ -1755,7 +1755,7 @@ void baseClass::getTriggers(Long64_t entry) {
     TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
     std::string branchName = branch->GetName();
     if(branchName.find("HLT_")!=std::string::npos) {
-      triggerDecisionMap_[branchName] = branch->GetLeaf(branchName.c_str())->GetTypedValue<Bool_t>();
+      triggerDecisionMap_[branchName] = readerTools_->ReadValueBranch<Bool_t>(branchName.c_str());
     }
   }
 }

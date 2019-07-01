@@ -31,7 +31,7 @@ class Collection {
   //-------------------------------------------------------------
   
   void SetTriggerObjectIndex ( short i ) { m_trigObj_index = i; } 
-  void SetRawIndices( std::vector<unsigned short> & i ) { m_raw_indices  = i; }
+  void SetRawIndices( std::vector<unsigned short> i ) { m_raw_indices.swap(i); }
   void SetLeadNConstituents ( unsigned short n ) {
     m_raw_indices.clear();
     for (unsigned short i = 0; i < n; ++i) 

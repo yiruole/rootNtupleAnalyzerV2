@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <bitset>
 #include "HLTriggerObjectCollectionHelper.h"
 #include "HLTriggerObject.h"
 #include "TBranchElement.h"
@@ -17,37 +18,14 @@ HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( analysisClass 
 
 void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 {
-//  //std::vector<int> objIds = m_data->HLTriggerObjTypeIds->at(i);
-//  std::vector<int> objIds = GetHLTriggerObjTypeIds()->at(i);
-//  //XXX SIC TEST
-//  //std::vector<std::vector<int> >* myVec = reinterpret_cast<std::vector<std::vector<int > >* >(((TBranchElement*)m_data->fChain->GetBranch("HLTriggerObjTypeIds"))->GetObject());
-//  //std::cout << "myVec->size()=" << myVec->size() << std::endl;
-//  //std::cout << "myVec->at(i).size()=" << myVec->at(i).size() << std::endl;
-//  //std::cout << "objIds size()=" << objIds.size() << std::endl;
-//  //std::vector<int> myVecObjIds = myVec->at(i);
-//  //std::cout << "MyVec TrigObj: IDs = {";
-//  //for(std::vector<int>::const_iterator idItr = objIds.begin(); idItr != objIds.end(); ++idItr)
-//  //  if(idItr+1 < objIds.end())
-//  //    std::cout  << *idItr << ", ";
-//  //  else
-//  //    std::cout  << *idItr << "}, ";
-//  //XXX SIC TEST
-//  std::cout << "TrigObj: IDs = {";
-//  for(std::vector<int>::const_iterator idItr = objIds.begin(); idItr != objIds.end(); ++idItr)
-//    if(idItr+1 < objIds.end())
-//      std::cout  << *idItr << ", ";
-//    else
-//      std::cout  << *idItr << "}, ";
-//  std::vector<std::string> pathNamesVec = m_data->HLTriggerObjPathNames->at(i);
-//  for(std::vector<std::string>::const_iterator pathItr = pathNamesVec.begin(); pathItr != pathNamesVec.end(); ++pathItr)
-//    if(pathItr+1 < pathNamesVec.end())
-//      std::cout  << *pathItr << ", ";
-//    else
-//      std::cout  << *pathItr << "}, ";
-//
-//  std::cout << "Pt = "  << m_data->HLTriggerObjPt->at(i)       << ", "
-//    << "Eta = " << m_data->HLTriggerObjEta->at(i)       << ", "
-//    << "Phi = " << m_data->HLTriggerObjPhi->at(i) << std::endl;
+
+  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
+  std::cout << "Pt = "  << collection->ReadArrayBranch<Float_t>("TrigObj_pt")[i]       << ", "
+    << "Eta = " << collection->ReadArrayBranch<Float_t>("TrigObj_eta")[i]       << ", "
+    << "Phi = " << collection->ReadArrayBranch<Float_t>("TrigObj_phi")[i] << ", "
+    << "ID = " << collection->ReadArrayBranch<Int_t>("TrigObj_id")[i] << ", "
+    << " filterBits = " << std::bitset<32>(collection->ReadArrayBranch<Int_t>("TrigObj_filterBits")[i])
+    << std::endl;
 }
 
 
@@ -88,35 +66,20 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
 }
 
 
-CollectionPtr HLTriggerObjectCollectionHelper::GetL3FilterObjectsByPath ( const char * path_name, bool verbose ){
-  //FIXME
+CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( unsigned int bitNumber, bool verbose ){
   CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
-
-  //std::vector<unsigned short> matchingHLTriggerRawIndices;
-  //// first, look at each object in the HLTriggerObj collection
-  //for (unsigned short i = 0; i < m_data->HLTriggerObjPt->size() ; ++i)
-  //{
-  //  if(verbose)
-  //    PrintObjectInfo(i);
-
-  //  short pathIndex = IndexOfAssociatedPath(path_name, i);
-  //  if(pathIndex > -1)
-  //  {
-  //    // if it is associated to a path, check to see if it passed an L3 filter in the path
-  //    if(m_data->HLTriggerObjPassedPathL3Filter->at(i).at(pathIndex))
-  //      matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
-  //  }
-
-  //}
-  //collection->SetRawIndices(matchingHLTriggerRawIndices);
-  
-  return collection;
-}
-
-
-CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( const char * path_name, bool verbose ){
-  //FIXME
-  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
+  // 1. need to figure out which bit to use based on path name. but this is suboptimal. probably should just require the user to ask for a bit.
+  // 2. loop over trigger objects and see which have that bit enabled
+  TTreeReaderArray<Int_t>& trigObjFilterBits = collection->ReadArrayBranch<Int_t>("TrigObj_filterBits");
+  std::vector<short unsigned int> matchingObjIdxs;
+  for(unsigned int idx = 0; idx < collection->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
+    if(verbose)
+      PrintObjectInfo(idx);
+    bool passedLastFilter = (trigObjFilterBits[idx] >> (bitNumber-1)) & 0x1;
+    if(passedLastFilter)
+      matchingObjIdxs.push_back(idx);
+  }
+  collection->SetRawIndices(matchingObjIdxs);
 
   //std::vector<unsigned short> matchingHLTriggerRawIndices;
   //// first, look at each object in the HLTriggerObj collection
@@ -136,5 +99,21 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( cons
   //}
   //collection->SetRawIndices(matchingHLTriggerRawIndices);
   
+  return collection;
+}
+
+// See (for example): https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py#L52
+CollectionPtr HLTriggerObjectCollectionHelper::GetFilterObjectsByType(int typeId, bool verbose) {
+  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
+  TTreeReaderArray<Int_t>& trigObjIds = collection->ReadArrayBranch<Int_t>("TrigObj_id");
+  std::vector<short unsigned int> matchingObjIdxs;
+  for(unsigned int idx = 0; idx < collection->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
+    if(verbose)
+      PrintObjectInfo(idx); //FIXME !!!!
+    if(trigObjIds[idx]==typeId)
+      matchingObjIdxs.push_back(idx);
+  }
+  collection->SetRawIndices(matchingObjIdxs);
+
   return collection;
 }
