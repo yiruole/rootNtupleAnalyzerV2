@@ -4,10 +4,14 @@
 // Constructors and destructors
 //------------------------------------------------------------------------------------------
 
-Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, Long64_t current_entry, size_t size ):
+Collection::Collection (std::shared_ptr<TTreeReaderTools> tools):
   m_readerTools (tools),
-  m_trigObj_index ( -1 ),
-  m_currentEvent ( current_entry )
+  m_trigObj_index ( -1 )
+{} 
+
+Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, size_t size ):
+  m_readerTools (tools),
+  m_trigObj_index ( -1 )
 {
   SetLeadNConstituents ( size ) ;
 } 

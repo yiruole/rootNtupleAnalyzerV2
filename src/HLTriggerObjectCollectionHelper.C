@@ -19,12 +19,12 @@ HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( analysisClass 
 void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 {
 
-  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
-  std::cout << "Pt = "  << collection->ReadArrayBranch<Float_t>("TrigObj_pt")[i]       << ", "
-    << "Eta = " << collection->ReadArrayBranch<Float_t>("TrigObj_eta")[i]       << ", "
-    << "Phi = " << collection->ReadArrayBranch<Float_t>("TrigObj_phi")[i] << ", "
-    << "ID = " << collection->ReadArrayBranch<Int_t>("TrigObj_id")[i] << ", "
-    << " filterBits = " << std::bitset<32>(collection->ReadArrayBranch<Int_t>("TrigObj_filterBits")[i])
+  CollectionPtr collection ( new Collection ( m_data->readerTools_));
+  std::cout << "Pt = "  << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_pt")[i]       << ", "
+    << "Eta = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_eta")[i]       << ", "
+    << "Phi = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_phi")[i] << ", "
+    << "ID = " << m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id")[i] << ", "
+    << " filterBits = " << std::bitset<32>(m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_filterBits")[i])
     << std::endl;
 }
 
@@ -67,7 +67,7 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
 
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( unsigned int bitNumber, bool verbose ){
-  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
+  CollectionPtr collection ( new Collection ( m_data->readerTools_));
   // 1. need to figure out which bit to use based on path name. but this is suboptimal. probably should just require the user to ask for a bit.
   // 2. loop over trigger objects and see which have that bit enabled
   TTreeReaderArray<Int_t>& trigObjFilterBits = collection->ReadArrayBranch<Int_t>("TrigObj_filterBits");
@@ -104,10 +104,10 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( unsi
 
 // See (for example): https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py#L52
 CollectionPtr HLTriggerObjectCollectionHelper::GetFilterObjectsByType(int typeId, bool verbose) {
-  CollectionPtr collection ( new Collection ( m_data->readerTools_, 0, 0));
-  TTreeReaderArray<Int_t>& trigObjIds = collection->ReadArrayBranch<Int_t>("TrigObj_id");
+  CollectionPtr collection ( new Collection ( m_data->readerTools_));
+  TTreeReaderArray<Int_t>& trigObjIds = m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id");
   std::vector<short unsigned int> matchingObjIdxs;
-  for(unsigned int idx = 0; idx < collection->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
+  for(unsigned int idx = 0; idx < m_data->readerTools_->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
     if(verbose)
       PrintObjectInfo(idx); //FIXME !!!!
     if(trigObjIds[idx]==typeId)

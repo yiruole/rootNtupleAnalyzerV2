@@ -12,11 +12,11 @@ class Object {
  public:
   Object();
   Object( const Object & );
-  Object( Collection& collection, short raw_index, Long64_t current_entry = -1);
-  Object( Collection& collection, short raw_index, const char* name, Long64_t current_entry = -1);
+  Object( Collection& collection, short raw_index);
+  Object( Collection& collection, short raw_index, const char* name);
 
-  Object( Collection& collection, short raw_index,  short trigObj_index, Long64_t current_entry = -1);
-  Object( Collection& collection, short raw_index,  short trigObj_index, const char* name, Long64_t current_entry = -1);
+  Object( Collection& collection, short raw_index,  short trigObj_index);
+  Object( Collection& collection, short raw_index,  short trigObj_index, const char* name);
   ~Object();
   
   const char* Name() const { return m_name; }
