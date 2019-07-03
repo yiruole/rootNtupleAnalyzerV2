@@ -10,13 +10,9 @@ class GenJet : public Object {
  public:
 
   GenJet();
-  GenJet(Collection& c, unsigned short i, short j = 0, Long64_t current_entry = 0);
+  GenJet(Collection& c, unsigned short i, short j = 0);
   
   // Kinematic variables
-
-  float & Pt()  ;
-  float & Eta() ;
-  float & Phi() ;
 
   // IDs 
 

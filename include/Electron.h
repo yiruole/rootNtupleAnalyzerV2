@@ -9,14 +9,11 @@ class Electron : public Object {
   
  public: 
   Electron ();
-  Electron (Collection& c, unsigned short i, short j = 0, Long64_t current_entry = -1);
+  Electron (Collection& c, unsigned short i, short j = 0);
 
   // Kinematic variables
   
-  virtual float & Pt         ();
   float PtHeep               ();
-  float & Eta                (); 
-  float & Phi                (); 
   float SCEta                (); 
   float SCSeedEta            (); 
   float SCPhi                (); 

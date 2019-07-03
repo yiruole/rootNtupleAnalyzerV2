@@ -8,13 +8,10 @@
 class PFJet : public Object { 
  public:
   PFJet ();
-  PFJet (Collection& collection, unsigned int index, short j = 0, Long64_t current_entry = 0);
+  PFJet (Collection& collection, unsigned int index, short j = 0);
 
   // Kinematic variables
   
-  float & Pt    ();
-  float & Eta   (); 
-  float & Phi   (); 
   float Energy  ();
   float JECUnc  ();
   

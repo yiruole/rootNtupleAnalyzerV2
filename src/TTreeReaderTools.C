@@ -14,6 +14,8 @@ void TTreeReaderTools::LoadEntry(Long64_t entry) {
 }
 
 void TTreeReaderTools::gotoEntry(Long64_t entry, bool forceCall) {
+  //if(m_entry < 10)
+  //  std::cout << "INFO TTreeReaderTools::gotoEntry(" << entry << ")" << std::endl;
   m_readerIsClean = false;
   if(m_entry != entry || forceCall) {
     if(m_entry == entry-1 && entry!=0)
@@ -27,12 +29,16 @@ void TTreeReaderTools::gotoEntry(Long64_t entry, bool forceCall) {
 
 template <typename T> T TTreeReaderTools::ReadValueBranch(const std::string& branchName, std::map<std::string, TTreeReaderValue<T> >& valueReaderMap) {
   checkReaderIsClean();
+  //if(m_entry < 10)
+  //  std::cout << "INFO TTreeReaderTools::ReadValueBranch -- do find for branchName: " << branchName << std::endl;
   auto itr = valueReaderMap.find(branchName);
   if(itr != valueReaderMap.end())
     return *(itr->second.Get());
   else {
     if(!m_readerIsClean)
       remakeAllReaders();
+    //if(m_entry < 10)
+    //  std::cout << "\tINFO TTreeReaderTools::ReadValueBranch -- do insert for branchName: " << branchName << std::endl;
     auto insertItr = valueReaderMap.insert(std::pair<std::string,TTreeReaderValue<T> >(branchName,TTreeReaderValue<T>(*m_reader, branchName.c_str())));
     gotoEntry(m_entry,true);
     return *(insertItr.first->second.Get());
@@ -61,14 +67,26 @@ template <> Bool_t TTreeReaderTools::ReadValueBranch(const std::string& branchNa
   return ReadValueBranch<Bool_t>(branchName, m_ttreeValueBoolReaders);
 }
 
+template <typename T> T TTreeReaderTools::ReadArrayBranch(const std::string& branchName, unsigned int idx) {
+  TTreeReaderArray<T>& readerArray = ReadArrayBranch<T>(branchName);
+  if(readerArray.IsEmpty() || idx > readerArray.GetSize())
+    return T();
+  else
+    return readerArray[idx];
+}
+
 template <typename T> TTreeReaderArray<T>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName, std::map<std::string, TTreeReaderArray<T> >& arrayReaderMap) {
   checkReaderIsClean();
+  //if(m_entry < 10)
+  //  std::cout << "INFO TTreeReaderTools::ReadArrayBranch -- do find for branchName: " << branchName << std::endl;
   auto itr = arrayReaderMap.find(branchName);
   if(itr != arrayReaderMap.end())
     return itr->second;
   else {
     if(!m_readerIsClean)
       remakeAllReaders();
+    //if(m_entry < 10)
+    //  std::cout << "\tINFO TTreeReaderTools::ReadArrayBranch -- do insert for branchName: " << branchName << std::endl;
     auto insertItr = arrayReaderMap.insert(std::pair<std::string,TTreeReaderArray<T> >(branchName,TTreeReaderArray<T>(*m_reader, branchName.c_str())));
     gotoEntry(m_entry,true);
     return insertItr.first->second;
@@ -117,6 +135,8 @@ template <typename T> void TTreeReaderTools::remakeReader(T& readerMap) {
 }
 
 void TTreeReaderTools::remakeAllReaders() {
+  //if(m_entry < 10)
+  //  std::cout << "INFO TTreeReaderTools::remakeAllReaders begins" << std::endl;
   m_reader.reset(new TTreeReader(m_tree.get()));
   m_readerIsClean = true;
   remakeReader<std::map<std::string, TTreeReaderValue<UInt_t> > >(m_ttreeValueUIntReaders);
@@ -131,6 +151,8 @@ void TTreeReaderTools::remakeAllReaders() {
   remakeReader<std::map<std::string, TTreeReaderArray<Int_t> > >(m_ttreeArrayIntReaders);
   remakeReader<std::map<std::string, TTreeReaderArray<UChar_t> > >(m_ttreeArrayUCharReaders);
   remakeReader<std::map<std::string, TTreeReaderArray<Bool_t> > >(m_ttreeArrayBoolReaders);
+  //if(m_entry < 10)
+  //  std::cout << "INFO TTreeReaderTools::remakeAllReaders ends" << std::endl;
 }
 
 template UInt_t TTreeReaderTools::ReadValueBranch<UInt_t>(const std::string& branchName);
@@ -145,3 +167,7 @@ template TTreeReaderArray<Float_t>& TTreeReaderTools::ReadArrayBranch<Float_t>(c
 template TTreeReaderArray<Int_t>& TTreeReaderTools::ReadArrayBranch<Int_t>(const std::string& branchName);
 template TTreeReaderArray<UChar_t>& TTreeReaderTools::ReadArrayBranch<UChar_t>(const std::string& branchName);
 template TTreeReaderArray<Bool_t>& TTreeReaderTools::ReadArrayBranch<Bool_t>(const std::string& branchName);
+template Float_t TTreeReaderTools::ReadArrayBranch<Float_t>(const std::string& branchName, unsigned int idx);
+template Int_t TTreeReaderTools::ReadArrayBranch<Int_t>(const std::string& branchName, unsigned int idx);
+template UChar_t TTreeReaderTools::ReadArrayBranch<UChar_t>(const std::string& branchName, unsigned int idx);
+template Bool_t TTreeReaderTools::ReadArrayBranch<Bool_t>(const std::string& branchName, unsigned int idx);

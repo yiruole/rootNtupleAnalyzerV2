@@ -12,19 +12,23 @@ class Object {
  public:
   Object();
   Object( const Object & );
-  Object( Collection& collection, short raw_index);
+  //Object( Collection& collection, short raw_index);
   Object( Collection& collection, short raw_index, const char* name);
 
-  Object( Collection& collection, short raw_index,  short trigObj_index);
+  //Object( Collection& collection, short raw_index,  short trigObj_index);
   Object( Collection& collection, short raw_index,  short trigObj_index, const char* name);
   ~Object();
   
-  const char* Name() const { return m_name; }
+  const std::string Name() const { return m_name; }
   virtual short GetRawIndex() { return m_raw_index; }
   
-  virtual float & Pt()  = 0;
-  virtual float & Phi() = 0;
-  virtual float & Eta() = 0;
+  float Pt()  const { return m_pt;  }
+  float Phi() const { return m_eta; }
+  float Eta() const { return m_phi; }
+
+  void SetPt(float pt) { m_pt = pt; }
+  void SetEta(float eta) { m_eta = eta; }
+  void SetPhi(float phi) { m_phi = phi; }
 
   virtual float EnergyResScaleFactor() { return 1.0; }
   virtual float EnergyRes           () { return -1.0; }
@@ -36,7 +40,6 @@ class Object {
   float DeltaR     ( Object * other_object );
   float DeltaPhi   ( Object * other_object );
   float DeltaPt    ( Object * other_object );
-  //float Phi_mpi_pi ( float x ); 
   template <typename T> constexpr T reduceRange(T x);
 
   bool IsGenEBFiducial() ;
@@ -95,8 +98,12 @@ class Object {
   Collection * m_collection;
   short m_raw_index;
   short m_trigObj_index;
-  const char * m_name;
+  std::string m_name;
 
+ private:
+  void initP4();
+
+  float m_pt, m_eta, m_phi;
 };
 
 

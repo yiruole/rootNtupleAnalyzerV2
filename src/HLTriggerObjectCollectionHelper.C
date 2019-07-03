@@ -20,11 +20,11 @@ void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 {
 
   CollectionPtr collection ( new Collection ( m_data->readerTools_));
-  std::cout << "Pt = "  << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_pt")[i]       << ", "
-    << "Eta = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_eta")[i]       << ", "
-    << "Phi = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_phi")[i] << ", "
-    << "ID = " << m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id")[i] << ", "
-    << " filterBits = " << std::bitset<32>(m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_filterBits")[i])
+  std::cout << "Pt = "  << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_pt",i) << ", "
+    << "Eta = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_eta",i)        << ", "
+    << "Phi = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_phi",i)        << ", "
+    << "ID = " << m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id",i)            << ", "
+    << " filterBits = " << std::bitset<32>(m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_filterBits",i))
     << std::endl;
 }
 
@@ -68,52 +68,40 @@ short HLTriggerObjectCollectionHelper::IndexOfAssociatedPath(const char* path_na
 
 CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( unsigned int bitNumber, bool verbose ){
   CollectionPtr collection ( new Collection ( m_data->readerTools_));
-  // 1. need to figure out which bit to use based on path name. but this is suboptimal. probably should just require the user to ask for a bit.
-  // 2. loop over trigger objects and see which have that bit enabled
-  TTreeReaderArray<Int_t>& trigObjFilterBits = collection->ReadArrayBranch<Int_t>("TrigObj_filterBits");
   std::vector<short unsigned int> matchingObjIdxs;
   for(unsigned int idx = 0; idx < collection->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
     if(verbose)
       PrintObjectInfo(idx);
-    bool passedLastFilter = (trigObjFilterBits[idx] >> (bitNumber-1)) & 0x1;
+    bool passedLastFilter = (collection->ReadArrayBranch<Int_t>("TrigObj_filterBits",idx) >> (bitNumber-1)) & 0x1;
     if(passedLastFilter)
       matchingObjIdxs.push_back(idx);
   }
   collection->SetRawIndices(matchingObjIdxs);
-
-  //std::vector<unsigned short> matchingHLTriggerRawIndices;
-  //// first, look at each object in the HLTriggerObj collection
-  //for (unsigned short i = 0; i < m_data->HLTriggerObjPt->size() ; ++i)
-  //{
-  //  if(verbose)
-  //    PrintObjectInfo(i);
-
-  //  short pathIndex = IndexOfAssociatedPath(path_name, i);
-  //  if(pathIndex > -1)
-  //  {
-  //    // if it is associated to a path, check to see if it passed the last filter in the path
-  //    if(m_data->HLTriggerObjPassedPathLastFilter->at(i).at(pathIndex))
-  //      matchingHLTriggerRawIndices.push_back(i); // keep raw index of trigObj
-  //  }
-
-  //}
-  //collection->SetRawIndices(matchingHLTriggerRawIndices);
   
   return collection;
 }
 
 // See (for example): https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py#L52
 CollectionPtr HLTriggerObjectCollectionHelper::GetFilterObjectsByType(int typeId, bool verbose) {
+  if(verbose)
+    std::cout << "INFO HLTriggerObjectCollectionHelper::GetFilterObjectsByType(" << typeId << ") BEGINS" << std::endl;
   CollectionPtr collection ( new Collection ( m_data->readerTools_));
-  TTreeReaderArray<Int_t>& trigObjIds = m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id");
+  unsigned int nTrigObj = m_data->readerTools_->ReadValueBranch<UInt_t>("nTrigObj");
   std::vector<short unsigned int> matchingObjIdxs;
-  for(unsigned int idx = 0; idx < m_data->readerTools_->ReadValueBranch<UInt_t>("nTrigObj"); ++idx) {
-    if(verbose)
-      PrintObjectInfo(idx); //FIXME !!!!
-    if(trigObjIds[idx]==typeId)
-      matchingObjIdxs.push_back(idx);
+  for(unsigned int idx = 0; idx < nTrigObj; ++idx) {
+    if(verbose) {
+      PrintObjectInfo(idx);
+      std::cout << "idx=" << idx << ": nTrigObj=" << nTrigObj << "; try to check typeId=" << typeId << std::endl;
+      //std::cout << "size=" << size << "; try to check typeId=" << typeId << std::endl;
+    }
+    int id = m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id",idx);
+    if(id==typeId)
+      matchingObjIdxs.push_back(id);
   }
   collection->SetRawIndices(matchingObjIdxs);
 
+  if(verbose)
+    std::cout << "INFO HLTriggerObjectCollectionHelper::GetFilterObjectsByType(" << typeId << ") ENDS" << std::endl;
   return collection;
 }
+

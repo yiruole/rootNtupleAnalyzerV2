@@ -7,32 +7,29 @@ PFJet::PFJet ():
   Object ()
 {}
 
-PFJet::PFJet (Collection& c, unsigned int i, short j, Long64_t current_entry ):
+PFJet::PFJet (Collection& c, unsigned int i, short j):
   Object ( c,i, "PFJet" )
 {}
                                      
-float & PFJet::Pt                       () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt")  [m_raw_index]; } 
-float & PFJet::Eta                      () { return m_collection->ReadArrayBranch<Float_t>("Jet_eta") [m_raw_index]; } 
-float & PFJet::Phi                      () { return m_collection->ReadArrayBranch<Float_t>("Jet_phi") [m_raw_index]; } 
 float PFJet::Energy                     () { return -1.0; }
 //FIXME
 float PFJet::JECUnc		                  () { return -1.0; }
                                      
-float PFJet::NeutralHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_neHEF")  [m_raw_index]; } 
-float PFJet::NeutralEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_neEmEF") [m_raw_index]; } 
+float PFJet::NeutralHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_neHEF" ,m_raw_index); } 
+float PFJet::NeutralEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_neEmEF",m_raw_index); } 
 int    PFJet::NeutralHadronMultiplicity  () { -1; }
 int    PFJet::NeutralMultiplicity        () { -1; }
-int    PFJet::NConstituents              () { return m_collection->ReadArrayBranch<Int_t>("Jet_nConstituents")  [m_raw_index]; } 
-float PFJet::ChargedHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_chHEF")         [m_raw_index]; } 
+int    PFJet::NConstituents              () { return m_collection->ReadArrayBranch<Int_t>("Jet_nConstituents"  , m_raw_index); } 
+float PFJet::ChargedHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_chHEF"         , m_raw_index); } 
 int    PFJet::ChargedMultiplicity        () { -1; } 
-float PFJet::ChargedEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_chEmEF")        [m_raw_index]; } 
+float PFJet::ChargedEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_chEmEF"        , m_raw_index); } 
 
-int PFJet::JetID() { return m_collection->ReadArrayBranch<Int_t>("Jet_jetId") [m_raw_index]; }
+int PFJet::JetID() { return m_collection->ReadArrayBranch<Int_t>("Jet_jetId",m_raw_index); }
 //float PFJet::CombinedSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("") PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
-float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCSVV2") [m_raw_index]; }
-float PFJet::CombinedMVABTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCMVA") [m_raw_index]; }
+float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCSVV2",m_raw_index); }
+float PFJet::CombinedMVABTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCMVA",m_raw_index); }
 //FIXME or Jet_btagDeepFlavB ?
-float PFJet::DeepCSVBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepB") [m_raw_index]; }
+float PFJet::DeepCSVBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepB",m_raw_index); }
 
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution

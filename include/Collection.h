@@ -53,8 +53,8 @@ class Collection {
   template <typename T> T ReadValueBranch(const std::string& branchName) {
     return m_readerTools->ReadValueBranch<T>(branchName);
   }
-  template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName) {
-    return m_readerTools->ReadArrayBranch<T>(branchName);
+  template <typename T> T ReadArrayBranch(const std::string& branchName, unsigned int idx) {
+    return m_readerTools->ReadArrayBranch<T>(branchName, idx);
   }
   
   //-------------------------------------------------------------
@@ -344,9 +344,9 @@ class Collection {
         //  std::cout << "\t" << "new RECO pt          = " << v_new.Pt()               << std::endl;
         //}
 
-      this_collection_constituent.Pt() = v_new.Pt();
-      this_collection_constituent.Eta() = v_new.Eta();
-      this_collection_constituent.Phi() = v_new.Phi();
+      this_collection_constituent.SetPt(v_new.Pt());
+      this_collection_constituent.SetEta(v_new.Eta());
+      this_collection_constituent.SetPhi(v_new.Phi());
       if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
     }
 
@@ -394,7 +394,7 @@ class Collection {
       // std::cout << "\tOld - New: " << v_delta.Pt() << ", " << v_delta.Eta()                     << ", " << v_delta.Phi() << std::endl;
       // std::cout << "\tDelta(MET) = " << v_delta_met.Pt() << ", " << v_delta_met.Eta()                     << ", " << v_delta_met.Phi() << std::endl;
 
-      this_collection_constituent.Pt() = new_pt;
+      this_collection_constituent.SetPt(new_pt);
       if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
 
     }

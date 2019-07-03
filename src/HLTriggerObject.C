@@ -6,11 +6,8 @@ HLTriggerObject::HLTriggerObject ():
   Object()
 {}
 
-HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j, Long64_t current_entry):
-  Object        ( c,i,j, "HLTriggerObject" ),
-  m_float_pt   ( m_collection->ReadArrayBranch<Float_t>("TrigObj_pt")  [m_raw_index] ),
-  m_float_eta  ( m_collection->ReadArrayBranch<Float_t>("TrigObj_eta") [m_raw_index] ),
-  m_float_phi  ( m_collection->ReadArrayBranch<Float_t>("TrigObj_phi") [m_raw_index] )
+HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j):
+  Object        ( c,i,j, "HLTriggerObject" )
 {}
 
 //void HLTriggerObject::WritePtEtaPhi() {
@@ -19,10 +16,7 @@ HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j,
 //  m_collection->ReadArrayBranch<Float_t>("") HLTriggerObjPhi -> at ( m_raw_index ) = float ( m_float_phi );
 //}
 
-float & HLTriggerObject::Pt                 () { return m_float_pt ; }
-float & HLTriggerObject::Eta                () { return m_float_eta; }
-float & HLTriggerObject::Phi                () { return m_float_phi; }
-std::vector<int> HLTriggerObject::ObjectIDs () { return std::vector<int>(m_collection->ReadArrayBranch<Int_t>("TrigObj_id") [m_raw_index] ) ; }
+int HLTriggerObject::ObjectID () { return m_collection->ReadArrayBranch<Int_t>("TrigObj_id",m_raw_index); }
 
 // HLT
 std::vector<std::string> HLTriggerObject::GetFilterNames() { return std::vector<std::string>(); }
@@ -53,24 +47,15 @@ bool HLTriggerObject::PassedPathLastFilter(std::string pathName)
 
 bool HLTriggerObject::PassUserID(ID id, bool verbose)
 {
-  std::vector<int> objIds = ObjectIDs();
-  bool found = std::find( objIds.begin(), objIds.end(), id) != objIds.end();
-  return found;
+  return id==ObjectID();
 } 
 
 
 std::ostream& operator<<(std::ostream& stream, HLTriggerObject& object) {
   stream << object.Name() << " " << ": "
-	 << "IDs = {";
-  std::vector<int> objIds = object.ObjectIDs();
-  for(std::vector<int>::const_iterator idItr = objIds.begin(); idItr != objIds.end(); ++idItr)
-    if(idItr+1 < objIds.end())
-      stream  << *idItr << ", ";
-    else
-      stream  << *idItr << "}, ";
-    
-  stream << "Pt = "  << object.Pt ()       << ", "
-	 << "Eta = " << object.Eta()       << ", "
-	 << "Phi = " << object.Phi();
+    << "ID = {" << object.ObjectID() << "}, "
+    << "Pt = "  << object.Pt ()       << ", "
+    << "Eta = " << object.Eta()       << ", "
+    << "Phi = " << object.Phi();
   return stream;
 }

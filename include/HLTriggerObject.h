@@ -10,18 +10,13 @@ class HLTriggerObject : public Object {
  public: 
   
   HLTriggerObject  ();
-  HLTriggerObject (Collection& collection, unsigned int index, int unsigned hlt_filter_index = 0,
-      Long64_t current_entry = 0);
+  HLTriggerObject (Collection& collection, unsigned int index, int unsigned hlt_filter_index = 0);
   
   // Work-around for now
   //FIXME SIC: is this really needed?
   //void WritePtEtaPhi();
 
   // Kinematic variables
-  
-  float & Pt  () ;
-  float & Eta () ; 
-  float & Phi () ; 
 
   // HLT info
   std::vector<std::string> GetFilterNames();
@@ -34,12 +29,7 @@ class HLTriggerObject : public Object {
   // IDs 
 
   bool   PassUserID ( ID id, bool verbose = false );
-  std::vector<int> ObjectIDs ();
-  
- private:
-  float m_float_pt;
-  float m_float_eta;
-  float m_float_phi;
+  int ObjectID ();
 
 };
 

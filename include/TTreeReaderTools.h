@@ -3,6 +3,7 @@
 #include <memory>
 #include <typeindex>
 #include <typeinfo>
+#include <mutex>
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
 #include "TTreeReader.h"
@@ -12,7 +13,7 @@ class TTreeReaderTools {
     TTreeReaderTools() = delete;
     TTreeReaderTools(std::shared_ptr<TTree> tree);
     template <typename T> T ReadValueBranch(const std::string& branchName);
-    template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName);
+    template <typename T> T ReadArrayBranch(const std::string& branchName, unsigned int idx);
     void LoadEntry(Long64_t entry);
     std::shared_ptr<TTree> GetTree() { return m_tree; }
     Long64_t GetCurrentEntry() { return m_reader->GetCurrentEntry(); }
@@ -25,6 +26,7 @@ class TTreeReaderTools {
     template <typename T> void remakeReader(T& readerMap);
     template <typename T> T ReadValueBranch(const std::string& branchName, std::map<std::string, TTreeReaderValue<T> >& valueReaderMap);
     template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName, std::map<std::string, TTreeReaderArray<T> >& arrayReaderMap);
+    template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName);
 
     std::map<std::string, TTreeReaderValue<UInt_t>    > m_ttreeValueUIntReaders;
     std::map<std::string, TTreeReaderValue<ULong64_t> > m_ttreeValueULong64Readers;
@@ -45,5 +47,7 @@ class TTreeReaderTools {
     std::shared_ptr<TTree> m_tree;
     Long64_t m_entry;
     Long64_t m_entries;
+
+    std::mutex m_mutex;
 };
 
