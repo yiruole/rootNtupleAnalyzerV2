@@ -14,12 +14,7 @@ def PrepareJobScript(outputname):
         outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
-        outputfile.write("ls -ltr\n")
         inputList = inputfilename.split('/')[-1]
-        if options.reducedSkim:
-            outputfile.write('tar -xzf '+tarFileName+'\n')
-            outputfile.write('yes | ./scripts/make_rootNtupleClass.sh -t Events -f `head -1 '+inputList+'` \n')
-            outputfile.write('make -f Makefile_fullNtuple clean && make -f Makefile_fullNtuple\n')
         outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
@@ -34,9 +29,9 @@ def WriteSubmitFile(condorFileName):
     with open(condorFileName,'w') as condorFile:
         condorFile.write('executable  = '+outputmain+'/src/submit_$(Process).sh\n')
         condorFile.write('N = '+str(ijobmax)+'\n')
-        condorFile.write('output      = output/$(Process).out\n')
-        condorFile.write('error       = error/$(Process).err\n')
-        condorFile.write('log         = log/$(Process).log\n')
+        condorFile.write('output      = '+outputmain+'/output/$(Process).out\n')
+        condorFile.write('error       = '+outputmain+'/error/$(Process).err\n')
+        condorFile.write('log         = '+outputmain+'/log/$(Process).log\n')
         #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
         condorFile.write('+JobFlavour = "'+options.queue+'"\n')
         # require CentOS7
@@ -49,13 +44,7 @@ def WriteSubmitFile(condorFileName):
         #condorFile.write('stream_output = True\n')
         #condorFile.write('stream_error = True\n')
         exePath = os.path.dirname(os.path.abspath(options.executable))
-        if options.reducedSkim:
-            #dictFile = exePath+'/MyDict_rdict.pcm'
-            #condorFile.write('transfer_input_files = '+dictFile+','+cutfile+','+options.executable+',input/input_$(Process).list,'+options.jsonFileName+'\n')
-            condorFile.write('transfer_input_files = '+exePath+'/'+tarFileName+',input/input_$(Process).list,'+cutfile+','+options.jsonFileName+'\n')
-        else:
-            dictFile = exePath+'/MyDict_rdict.pcm'
-            condorFile.write('transfer_input_files = '+dictFile+','+cutfile+','+options.executable+',input/input_$(Process).list,'+options.jsonFileName+'\n')
+        condorFile.write('transfer_input_files = '+cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+'\n')
         condorFile.write('queue $(N)\n')
 
 
@@ -154,15 +143,6 @@ dataset = string.split(outputPrefix,"___")[-1]
 outputeosdir = options.eosDir    
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
 os.system("/usr/bin/eos mkdir -p "+outputeosdir)
-#################################################
-# make tar file
-################################################
-inputFiles=['scripts/make_rootNtupleClass.sh','Makefile_fullNtuple','include/*','src/*.C']
-tarFileName = 'inputFiles.tar.gz'
-if options.reducedSkim and not os.path.isfile(tarFileName):
-    print 'Creating tar file '+tarFileName+'...',
-    os.system('tar -czf '+tarFileName+' '+' '.join(inputFiles))
-    print '... Done.'
 ################################################
 numfiles = len(file(inputlist).readlines())
 ijobmax=int(options.ijobmax)
@@ -205,7 +185,7 @@ oldDir = os.getcwd()
 os.chdir(outputmain)
 #os.system('condor_submit '+condorFileName)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
-#print 'got exit code='+str(exitCode)
+print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
     print '\exited with '+str(exitCode)+'; try to resubmit'
     exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
