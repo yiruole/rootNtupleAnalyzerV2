@@ -1900,14 +1900,16 @@ void baseClass::createOptCutFile() {
 }
 
 bool baseClass::isData() {
-  if(tree_->GetBranch("Weight"))
-    return false;
-  else if(tree_->GetBranch("genWeight"))
-    return false;
-  else if(tree_->GetBranch("isData")) {
-    if(readerTools_->ReadValueBranch<Bool_t>("isData") < 1)
+  // if tree has isData branch, we know the answer
+  if(tree_->GetBranch("isData")) {
+    if(readerTools_->ReadValueBranch<Double_t>("isData") < 1)
       return false;
+    else
+      return true;
   }
+  // if no isData branch (like in nanoAOD output), check for Weight or genWeight branches
+  else if(tree_->GetBranch("Weight") || tree_->GetBranch("genWeight"))
+    return false;
   return true;
 }
 
