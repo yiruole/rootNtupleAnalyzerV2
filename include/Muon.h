@@ -35,7 +35,6 @@ class Muon : public Object {
 
 
   // IDs 
-
   bool   PassUserID ( ID id, bool verbose = false );
          
   // Isolation variables
@@ -49,9 +48,11 @@ class Muon : public Object {
          
   // ID variables      
          
-  int    IsGlobal                  ();
-  int    IsTracker                 ();
-  int    IsPFMuon                  ();
+  bool    PassLooseId               ();
+  bool    PassHighPtGlobalId        ();
+  bool    IsGlobal                  ();
+  bool    IsTracker                 ();
+  bool    IsPFMuon                  ();
   float GlobalChi2                 ();
   int    GlobalTrkValidHits        (); 
   int    StationMatches            ();

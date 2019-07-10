@@ -16,7 +16,7 @@ Muon::Muon (Collection& c, unsigned int i, short j, Long64_t current_entry ):
 float Muon::PtError                 (){ return CocktailPtError(); } 
 //float & Muon::EtaError                (){ return CocktailEtaError(); } 
 //float & Muon::PhiError                (){ return CocktailPhiError(); } 
-float Muon::Charge                  (){ return m_collection->ReadArrayBranch<Float_t>("Muon_charge", m_raw_index); } 
+float Muon::Charge                  (){ return m_collection->ReadArrayBranch<Int_t>("Muon_charge", m_raw_index); } 
 						   				   
 float Muon::PFPt                    (){ return m_collection->ReadArrayBranch<Float_t>("Muon_pt",     m_raw_index); } 
 float Muon::PFPtError               (){ return m_collection->ReadArrayBranch<Float_t>("Muon_ptErr",  m_raw_index); } 
@@ -34,6 +34,7 @@ float Muon::CocktailPhi              (){ return m_collection->ReadArrayBranch<Fl
 // Isolation variables				   				   
 //FIXME not available?
 float Muon::TrkIso                    (){ return -999; } 
+//float Muon::TrkIsoR03SumPt            (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_tkRelIso", m_raw_index); } 
 float Muon::TrkIsoR03SumPt            (){ return -999; } 
 //float Muon::PFIsoR04ChargedHadron     (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } 
 //float Muon::PFIsoR04NeutralHadron     (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } 
@@ -41,10 +42,12 @@ float Muon::TrkIsoR03SumPt            (){ return -999; }
 //float Muon::PFIsoR04PU                (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04PU                 -> at ( m_raw_index ); } 
 						   				   
 // ID variables					                                      
-						   				   
-int    Muon::IsGlobal                  (){ return false; } 
-int    Muon::IsTracker                 (){ return false; } 
-int    Muon::IsPFMuon                  (){ return m_collection->ReadArrayBranch<Float_t>("Muon_isPFcand", m_raw_index); } 
+
+bool    Muon::PassLooseId              (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_looseId", m_raw_index); } 
+bool    Muon::PassHighPtGlobalId       (){ return m_collection->ReadArrayBranch<UChar_t>("Muon_highPtId", m_raw_index)==2; } 
+bool    Muon::IsGlobal                 (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_isGlobal", m_raw_index); } 
+bool    Muon::IsTracker                (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_isTracker", m_raw_index); } 
+bool    Muon::IsPFMuon                 (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_isPFcand", m_raw_index); } 
 float Muon::GlobalChi2                 (){ return -999; } 
 int    Muon::GlobalTrkValidHits        (){ return -999; }  
 int    Muon::StationMatches            (){ return m_collection->ReadArrayBranch<Int_t>("Muon_nStations", m_raw_index); } 
