@@ -8,7 +8,9 @@ HLTriggerObject::HLTriggerObject ():
 
 HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j):
   Object        ( c,i,j, "HLTriggerObject" )
-{}
+{
+  //std::cout << "HLTriggerObject::HLTriggerObject -- make new object with raw_index=" << i << " and trigObj_index=" << j << std::endl;
+}
 
 //void HLTriggerObject::WritePtEtaPhi() {
 //  m_collection->ReadArrayBranch<Float_t>("") HLTriggerObjPt  -> at ( m_raw_index ) = float ( m_float_pt  );

@@ -83,25 +83,30 @@ CollectionPtr HLTriggerObjectCollectionHelper::GetLastFilterObjectsByPath ( unsi
 
 // See (for example): https://github.com/cms-sw/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py#L52
 CollectionPtr HLTriggerObjectCollectionHelper::GetFilterObjectsByType(int typeId, bool verbose) {
-  if(verbose)
-    std::cout << "INFO HLTriggerObjectCollectionHelper::GetFilterObjectsByType(" << typeId << ") BEGINS" << std::endl;
+  std::vector<int> typeIdVec {typeId};
+  return GetFilterObjectsByType(typeIdVec,verbose);
+}
+
+
+CollectionPtr HLTriggerObjectCollectionHelper::GetFilterObjectsByType(std::vector<int>& typeIdVec, bool verbose) {
   CollectionPtr collection ( new Collection ( m_data->readerTools_));
   unsigned int nTrigObj = m_data->readerTools_->ReadValueBranch<UInt_t>("nTrigObj");
   std::vector<short unsigned int> matchingObjIdxs;
   for(unsigned int idx = 0; idx < nTrigObj; ++idx) {
     if(verbose) {
+      std::cout << "GetFilterObjectsByType(): idx=" << idx << ": nTrigObj=" << nTrigObj << "; try to check typeIds={";
+      for(auto itr : typeIdVec)
+        std::cout << itr << " ";
+      std::cout << "} for object: ";// << std::endl;
       PrintObjectInfo(idx);
-      std::cout << "idx=" << idx << ": nTrigObj=" << nTrigObj << "; try to check typeId=" << typeId << std::endl;
       //std::cout << "size=" << size << "; try to check typeId=" << typeId << std::endl;
     }
     int id = m_data->readerTools_->ReadArrayBranch<Int_t>("TrigObj_id",idx);
-    if(id==typeId)
-      matchingObjIdxs.push_back(id);
+    if(find(typeIdVec.begin(),typeIdVec.end(),id) != typeIdVec.end())
+      matchingObjIdxs.push_back(idx);
   }
   collection->SetRawIndices(matchingObjIdxs);
 
-  if(verbose)
-    std::cout << "INFO HLTriggerObjectCollectionHelper::GetFilterObjectsByType(" << typeId << ") ENDS" << std::endl;
   return collection;
 }
 
