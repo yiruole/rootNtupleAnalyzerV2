@@ -236,8 +236,8 @@ class Collection {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
       double dr = this_collection_constituent.DeltaR ( & other_object );
       if ( dr < tmp_min_dr ) {
-	tmp_min_dr = dr;
-	retval = this_collection_constituent;
+        tmp_min_dr = dr;
+        retval = this_collection_constituent;
       }
     }
     return retval;

@@ -10,6 +10,7 @@ class HLTriggerObjectCollectionHelper{
   // takes the bit number: use 1 for the first bit
   CollectionPtr GetLastFilterObjectsByPath ( unsigned int bitNumber, bool verbose=false );
   CollectionPtr GetFilterObjectsByType ( int typeId, bool verbose=false );
+  CollectionPtr GetFilterObjectsByType ( std::vector<int>& typeId, bool verbose=false );
   
  private:
   short IndexOfAssociatedPath(const char* path_name, unsigned short trigObjIndex);

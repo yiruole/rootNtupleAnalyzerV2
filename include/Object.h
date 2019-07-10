@@ -23,8 +23,8 @@ class Object {
   virtual short GetRawIndex() { return m_raw_index; }
   
   float Pt()  const { return m_pt;  }
-  float Phi() const { return m_eta; }
-  float Eta() const { return m_phi; }
+  float Eta() const { return m_eta; }
+  float Phi() const { return m_phi; }
 
   void SetPt(float pt) { m_pt = pt; }
   void SetEta(float eta) { m_eta = eta; }
