@@ -286,7 +286,7 @@ class baseClass {
   int NAfterSkim_;
   double getSkimPreCutValue(const string& s);
   TFile *skim_file_;
-  std::shared_ptr<TTree> skim_tree_;
+  TTree* skim_tree_;
   TH1F* hCount_;
   bool writeSkimTree();
 

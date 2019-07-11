@@ -100,7 +100,7 @@ void baseClass::init()
   if(produceSkim_) {
     
     skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE");
-    skim_tree_ = std::shared_ptr<TTree>(tree_->CloneTree(0));
+    skim_tree_ = tree_->CloneTree(0);
     hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
