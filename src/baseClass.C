@@ -80,10 +80,6 @@ void baseClass::init()
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
     exit(1);
   }
-  // setup ttree caching
-  Int_t cachesize = 10000000; //10 MBytes
-  tree_->SetCacheSize(cachesize);
-  //Init(tree_);
   readerTools_ = std::shared_ptr<TTreeReaderTools>(new TTreeReaderTools(tree_));
 
 
@@ -123,10 +119,10 @@ void baseClass::init()
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
     hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
     for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
-      {
-	cut * c = & (cc->second);
-	if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
-      }
+    {
+      cut * c = & (cc->second);
+      if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
+    }
   }
 
   //  for (map<string, cut>::iterator it = cutName_cut_.begin();
@@ -1661,7 +1657,6 @@ void baseClass::fillReducedSkimTree()
 {
   if(!produceReducedSkim_) return;
 
-  tree_->GetEntry(readerTools_->GetCurrentEntry());
   reduced_skim_tree_->Fill();
   NAfterReducedSkim_++;
 
@@ -1696,7 +1691,6 @@ bool baseClass::writeSkimTree()
     skim_file_->cd("rootTupleTree");
     tree_ -> CloneTree(0) -> Write("tree");
   }
-  
   else { 
     skim_file_->cd();
     skim_file_->mkdir("rootTupleTree");
