@@ -1,1 +1,0 @@
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/src2015/ReducedSkims/analysisClass_lq1_skim.C
