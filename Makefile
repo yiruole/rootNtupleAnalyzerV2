@@ -5,19 +5,23 @@ COMP=g++
 FLAGS =
 #FLAGS += -DUSE_EXAMPLE
 #FLAGS += -g
-FLAGS += -DSAVE_ALL_HISTOGRAMS 
+FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -std=c++1y
+FLAGS += -DUSE_FULL_NTUPLE
 FLAGS += -O2
 ROOTLIBS := $(shell $(ROOTCONFIG) --glibs --cflags)
 ROOTINC= -I$(shell $(ROOTCONFIG) --incdir)
-INC= -I.. -I. -I./include ${ROOTINC}
-LIBS= -L.  $(ROOTLIBS) -lboost_iostreams
+INC= -I.. -I. -I./include  -I${CLHEP}/include ${ROOTINC}
+LIBS= -L.  ${ROOTLIBS} -lboost_iostreams
 SRC= ./src
 HEADERS=$(wildcard include/*.h)
 TMPHEADERS := $(HEADERS)
 HEADERS = $(filter-out include/LinkDef.h, $(TMPHEADERS))
 SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC)/eventListHelper.o $(SRC)/QCDFakeRate.o $(SRC)/TriggerEfficiency2016.o
-TOOLSLIB=$(SRC)/TTreeReaderTools.o
+COLLECTIONLIB=$(SRC)/Collection.o
+PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/LooseElectron.o $(SRC)/Muon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
+IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/PFJetIDs.o
+TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o $(SRC)/TTreeReaderTools.o
 EXE = main
 
 # ********** TEMPLATE *************
@@ -25,13 +29,10 @@ EXE = main
 #	$(COMP) $(INC) $(LIBS) $(ROOTLIBS) -o $@  $(SELECTIONLIB) $@.o
 # *********************************
 
-all: ${EXE} makeOptCutFile
+all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB) $(TOOLSLIB) 
-	$(COMP) $(INC) -o $@ $(SELECTIONLIB) $(TOOLSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
-
-makeOptCutFile: $(SRC)/makeOptCutFile.o $(SELECTIONLIB) $(TOOLSLIB) 
-	$(COMP) $(INC) -o $@ $(SELECTIONLIB) $(TOOLSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
+main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
+	$(COMP) $(INC) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
 
 clean:
 	rm -f src/*.o *.lo

@@ -1,7 +1,6 @@
 #ifndef baseClass_h
 #define baseClass_h
 
-//#include "rootNtupleClass.h"
 #include <TChain.h>
 #include <TFile.h>
 #include "jsonParser.h"
