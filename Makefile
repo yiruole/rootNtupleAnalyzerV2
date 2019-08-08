@@ -31,8 +31,8 @@ EXE = main
 
 all: ${EXE}
 
-main: $(SRC)/main.o $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB)
-	$(COMP) $(INC) -o $@  $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(TOOLSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
+main: $(SRC)/main.o $(TOOLSLIB) $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB)
+	$(COMP) $(INC) -o $@  $(TOOLSLIB) $(SELECTIONLIB) $(COLLECTIONLIB) $(PHYOBJECTSLIB) $(IDOBJECTSLIB) $(SRC)/$@.o $(LIBS) $(FLAGS) -Wl,-rpath,$(shell $(ROOTCONFIG) --libdir)
 
 clean:
 	rm -f src/*.o *.lo
