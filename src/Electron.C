@@ -174,6 +174,7 @@ std::ostream& operator<<(std::ostream& stream, Electron& object) {
 	 //<< "EcalEnergy = "          << object.EcalEnergy() << ", "
 	 << "CaloEnergy = "          << object.CaloEnergy() << ", "
 	 << "H/E = "          << object.HoE() << ", "
+	 << "dxy = "          << object.LeadVtxDistXY() << ", "
    << "ECorr = " << object.ECorr() << ", "
 	 << "Eta = "   << object.Eta()           << ", "
 	 //<< "SCEta = "   << object.SCEta()           << ", "

@@ -531,6 +531,7 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   if ( verbose ) { 
     std::cout << std::endl;
     if ( !decision ){
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
       if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) FAIL FakeRateLooseID" << std::endl; 
       else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) FAIL FakeRateLooseID" << std::endl; 
       else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) FAIL FakeRateLooseID" << std::endl; 
@@ -544,6 +545,7 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
       else std::cout << "\t\t\tfail eta(fiducial) :\t " << Eta()      << std::endl;
     }
     else { 
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
       if      ( is_barrel ) std::cout << "\t\t\tElectron #" << m_raw_index << " (barrel) PASS FakeRateLooseID" << std::endl; 
       else if ( is_endcap ) std::cout << "\t\t\tElectron #" << m_raw_index << " (endcap) PASS FakeRateLooseID" << std::endl; 
       else                  std::cout << "\t\t\tElectron #" << m_raw_index << " (nonfid) PASS FakeRateLooseID" << std::endl;  
