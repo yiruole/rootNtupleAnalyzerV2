@@ -1916,7 +1916,7 @@ void baseClass::checkOverflow(const TH1* hist, const double binContent) {
   if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
     double limit = std::numeric_limits<float>::max();
     if(binContent>limit) {
-      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1F bin! Quitting.";
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1F bin in histo: " << hist->GetName() << "! Quitting.";
       STDOUT(stringStream.str());
       exit(-3);
     }
@@ -1924,7 +1924,7 @@ void baseClass::checkOverflow(const TH1* hist, const double binContent) {
   else if(std::string(hist->ClassName()).find("TH1I") != std::string::npos) {
     double limit = std::numeric_limits<int>::max();
     if(binContent>limit) {
-      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin! Quitting.";
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin in histo: " << hist->GetName() << "! Quitting.";
       STDOUT(stringStream.str());
       exit(-3);
     }
