@@ -238,7 +238,8 @@ for lin in open( options.inputList ):
     if lin.startswith('#'):
       continue
     dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
-    xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+    dataset_fromInputList = dataset_fromInputList.replace('_tree','')
+    xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace('_tree','')),xsectionDict)
 
 #---Loop over datasets in the inputlist to check if dat/root files are there
 foundAllFiles=True
@@ -305,10 +306,11 @@ for sample,pieceList in dictSamples.iteritems():
           continue
         
         dataset_fromInputList = string.split( string.split(lin, "/" )[-1], ".")[0]
+        #dataset_fromInputList = dataset_fromInputList
     
         toBeUpdated = False
         #matchingPiece = dataset_fromInputList
-        matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
+        matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace('_tree',''))
         #print 'INFO: possible matchingPiece=',matchingPiece
         #print 'pieceList=',pieceList
         if matchingPiece in pieceList:
@@ -342,7 +344,7 @@ for sample,pieceList in dictSamples.iteritems():
         #dataset_fromInputList = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
         print 'looking up xsection...',
         sys.stdout.flush()
-        xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),xsectionDict)
+        xsection_val = combineCommon.lookupXSection(combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace('_tree','')),xsectionDict)
         print 'found',xsection_val,'pb'
         sys.stdout.flush()
         #xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
