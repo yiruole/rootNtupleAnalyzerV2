@@ -141,7 +141,7 @@ ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powh
 #OTHERBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 
 # data
-SingleElectron_2016B    /SingleElectron_Run2016B-17Jul2018_ver2-v1/MINIAOD  /SingleElectron/Run2016B-17Jul2018_ver1-v1/MINIAOD
+SingleElectron_2016B    /SingleElectron_Run2016B-17Jul2018_ver2-v1/MINIAOD
 SingleElectron_2016C    /SingleElectron_Run2016C-17Jul2018-v1/MINIAOD
 SingleElectron_2016D    /SingleElectron_Run2016D-17Jul2018-v1/MINIAOD
 SingleElectron_2016E    /SingleElectron_Run2016E-17Jul2018-v1/MINIAOD
@@ -149,7 +149,7 @@ SingleElectron_2016F    /SingleElectron_Run2016F-17Jul2018-v1/MINIAOD
 SingleElectron_2016G    /SingleElectron_Run2016G-17Jul2018-v1/MINIAOD
 SingleElectron_2016H    /SingleElectron_Run2016H-17Jul2018-v1/MINIAOD
 SingleElectron_2016_all    SingleElectron_2016B  SingleElectron_2016C  SingleElectron_2016D  SingleElectron_2016E  SingleElectron_2016F  SingleElectron_2016G SingleElectron_2016H
-SinglePhoton_2016B    /SinglePhoton_Run2016B-17Jul2018_ver2-v1/MINIAOD  /SinglePhoton/Run2016B-17Jul2018_ver1-v1/MINIAOD
+SinglePhoton_2016B    /SinglePhoton_Run2016B-17Jul2018_ver2-v1/MINIAOD
 SinglePhoton_2016C    /SinglePhoton_Run2016C-17Jul2018-v1/MINIAOD
 SinglePhoton_2016D    /SinglePhoton_Run2016D-17Jul2018-v1/MINIAOD
 SinglePhoton_2016E    /SinglePhoton_Run2016E-17Jul2018-v1/MINIAOD
