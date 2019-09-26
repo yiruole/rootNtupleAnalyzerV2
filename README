@@ -41,11 +41,6 @@ Here we insert an extra directory so that scram will ignore the source files her
 
 5) If you are writing a new analysis class, add your analysis code to the method Loop() of analysisClass_myCode.C
 
-   NOTE: to access variables use
-   variable->at(i)
-   instead of
-   variable[i]
-
 6) Compile as in 4.
 
 7) Run:
@@ -287,17 +282,18 @@ cd $LQANA
 
 6) Make the inputlist for the files you want to run on:
 
-python scripts/createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
+python createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
 -m root
 
 ... The input list you want will be here:
 $LQANA/config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/inputListAllCurrent.txt
 
+The createList script can be found in the lq1-nano repo: https://github.com/CMSLQ/lq1-nano
+
 7) Compile the analysis class you need:
 
 unlink src/analysisClass.C
 ln -s $LQMACRO/src2012/analysisClass_lq1_skim.C src/analysisClass.C
-./scripts/make_rootNtupleClass.sh -f "root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/DY2JetsToLL_M-50_scaleup_8TeV-madgraph__Summer12-START53_V7C-v1__AODSIM_9_1_lll.root" -t rootTupleTree/tree
 make clean
 make -j8
 
