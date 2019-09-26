@@ -54,15 +54,15 @@ float QCDFakeRate::GetFakeRate(const float& eta, const float& et, bool verbose)
     }
   }
   else if(et<35 && eta != 0) {
-    fr = 1.0;
+    fr = 0.99;
     if(verbose) {
-      std::cout << "INFO: Found electron with LOW et=" << etLookup << " and eta=" << eta << "; FR will be set to 1. FR=" << fr << std::endl;
+      std::cout << "INFO: Found electron with LOW et=" << etLookup << " and eta=" << eta << "; FR will be set to 0.99. FR=" << fr << std::endl;
     }
   }
   else if(et==0 && eta==0) { // uninitialized/unstored electron2 (events with only 1 loose ele)
-    fr = 1.0;
+    fr = 0.99;
     if(verbose) {
-      std::cout << "INFO: Found electron with zero et=" << etLookup << " and zero eta=" << eta << "; FR will be set to 1. FR=" << fr << std::endl;
+      std::cout << "INFO: Found electron with zero et=" << etLookup << " and zero eta=" << eta << "; FR will be set to 0.99. FR=" << fr << std::endl;
     }
   }
 
