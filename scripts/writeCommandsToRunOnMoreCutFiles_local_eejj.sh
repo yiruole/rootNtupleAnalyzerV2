@@ -13,7 +13,8 @@
 #### INPUTS HERE ####
 #------------
 # analysis - FinalSels
-files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
+#files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
 # analysis - Preselection only
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_preselOnly.txt"
 # opt
@@ -34,7 +35,8 @@ files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerReci
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=2016analysis/eejj_psk_apr3_lq650from2012
+SUBDIR=nano/2016/analysis/eejj_psk_sep20
+#SUBDIR=2016analysis/eejj_psk_apr3_lq650from2012
 #SUBDIR=2016analysis/eejj_psk_mar26_muonVetoSyst
 #SUBDIR=2016analysis/eejj_psk_mar22_muonVetoSyst
 #SUBDIR=2016analysis/eejj_psk_mar20_fixPlots
@@ -89,9 +91,10 @@ ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity 
 #ILUM=6910 # ICHEP2016 minus early runs
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
+EXE=main
 #EXE=mainEEJJ
 #EXE=mainEEJJmuonVeto
-EXE=mainEEJJ_650only
+#EXE=mainEEJJ_650only
 CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_opt
 #CODENAME=analysisClass_lq_eejj_noJets
@@ -99,7 +102,9 @@ CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_preselectionOnly #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #CODENAME=analysisClass_lq1_effiStudy
 #------------
-INPUTLIST=config/PSKeejj_mar26_v237_local_comb/inputListAllCurrent.txt
+INPUTLIST=config/2016_pskEEJJPresel_custom2016skimAll_eoscms_comb/inputListAllCurrent.txt
+#INPUTLIST=config/2016_pskEEJJ_eoscms_comb/inputListAllCurrent.txt
+#INPUTLIST=config/PSKeejj_mar26_v237_local_comb/inputListAllCurrent.txt
 #INPUTLIST=config/PSKeejj_mar16_v237_local_comb/inputListAllCurrent.txt
 #INPUTLIST=config/PSKeejj_mar16_v237_local_comb/inputList_newSingleTop.txt
 #INPUTLIST=config/RSK_SEleL_jan21_v237_eoscms/inputList_eejj.txt
@@ -113,13 +118,13 @@ INPUTLIST=config/PSKeejj_mar26_v237_local_comb/inputListAllCurrent.txt
 #INPUTLIST=config/PSKeejj_may21_SEleL_reminiAOD_v236_eoscms/inputListAllCurrent.txt
 
 #------------
-XSECTION=versionsOfAnalysis_eejj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_Mee_PAS.txt
+#XSECTION=versionsOfAnalysis_eejj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_Mee_PAS.txt
 #XSECTION=versionsOfAnalysis_eejj/jan26/unscaled/xsection_13TeV_2015_Mee_PAS.txt
 #XSECTION=versionsOfAnalysis_eejj/nov24_muonVeto35GeV/unscaled/xsection_13TeV_2015_Mee_PAS.txt
 #XSECTION=$LQANA/versionsOfAnalysis_eejj/sep29_ptEE/unscaled/xsection_13TeV_2015_Mee_PAS.txt
 #XSECTION=config/xsection_13TeV_2015eejj_DYrescale.txt
 #
-#XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
+XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj.txt
 #SAMPLELISTFORMERGING=config/sampleListForMerging_8TeV_eejj.txt
@@ -127,7 +132,7 @@ SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj.txt
 #SAMPLELISTFORMERGING=config/sampleListForMerging_8TeV_eejj_rpvStop.txt ### CHANGE TO USE RPV STOP
 #------------
 #NCORES=8 #Number of processor cores to be used to run the job
-NCORES=24 #Number of processor cores to be used to run the job
+NCORES=10 #Number of processor cores to be used to run the job
 #------------
 
 #### END OF INPUTS ####
