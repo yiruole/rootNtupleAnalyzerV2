@@ -185,7 +185,7 @@ oldDir = os.getcwd()
 os.chdir(outputmain)
 #os.system('condor_submit '+condorFileName)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
-print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
+#print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
     print '\exited with '+str(exitCode)+'; try to resubmit'
     exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
