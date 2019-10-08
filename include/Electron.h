@@ -45,7 +45,7 @@ class Electron : public Object {
     GsfEleFull5x5SigmaIEtaIEtaWithSatCut = 4,
     GsfEleFull5x5E2x5OverE5x5WithSatCut  = 5,
     GsfEleHadronicOverEMLinearCut        = 6,
-    GsfEleValueMapIsoRhoCut              = 7,
+    GsfEleTrkPtIsoCut                    = 7,
     GsfEleEmHadD1IsoRhoCut               = 8,
     GsfEleDxyCut                         = 9,
     GsfEleMissingHitsCut                 = 10,
@@ -60,7 +60,7 @@ class Electron : public Object {
   bool PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(); 
   bool PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (); 
   bool PassHEEPGsfEleHadronicOverEMLinearCut       (); 
-  bool PassHEEPGsfEleValueMapIsoRhoCut             (); 
+  bool PassHEEPGsfEleTrkPtIsoCut                   (); 
   bool PassHEEPGsfEleEmHadD1IsoRhoCut              (); 
   bool PassHEEPGsfEleDxyCut                        (); 
   bool PassHEEPGsfEleMissingHitsCut                (); 

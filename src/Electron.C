@@ -53,7 +53,7 @@ bool Electron::PassHEEPGsfEleDPhiInCut                     (){ return PassHEEPID
 bool Electron::PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut); }
 bool Electron::PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut); }
 bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut); }
-bool Electron::PassHEEPGsfEleValueMapIsoRhoCut             (){ return PassHEEPIDCut(HEEPIDCut::GsfEleValueMapIsoRhoCut); }
+bool Electron::PassHEEPGsfEleTrkPtIsoCut                   (){ return PassHEEPIDCut(HEEPIDCut::GsfEleTrkPtIsoCut); }
 bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut              (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEmHadD1IsoRhoCut); }
 bool Electron::PassHEEPGsfEleDxyCut                        (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut); }
 bool Electron::PassHEEPGsfEleMissingHitsCut                (){ return PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut); }

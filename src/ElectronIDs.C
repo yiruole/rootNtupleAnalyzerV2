@@ -47,7 +47,7 @@ bool Electron::PassUserID_HEEP (bool verbose){
   bool pass_ecalDriven    = PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut);
   bool pass_deltaPhi      = PassHEEPIDCut(HEEPIDCut::GsfEleDPhiInCut);
   bool pass_missingHits   = PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut);
-  bool pass_trkIsolation  = PassHEEPIDCut(HEEPIDCut::GsfEleValueMapIsoRhoCut);
+  bool pass_trkIsolation  = PassHEEPIDCut(HEEPIDCut::GsfEleTrkPtIsoCut);
   bool pass_deltaEtaSeed      = PassHEEPIDCut(HEEPIDCut::GsfEleDEtaInSeedCut);
   bool pass_hoe               = PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut);
   bool pass_sigmaIEtaIEta     = PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut);
