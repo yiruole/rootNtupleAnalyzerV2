@@ -21,7 +21,7 @@ Electron::Electron (Collection & c, unsigned short i, short j):
 // Kinematic variables
 
 float   Electron::PtHeep             (){ return CaloEnergy()/cosh(SCEta()); }
-float   Electron::SCEta              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scEta",m_raw_index); } 
+float   Electron::SCEta              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index)+m_collection->ReadArrayBranch<Float_t>("Electron_eta",m_raw_index); } 
 float   Electron::SCSeedEta          (){ return -1.0; } 
 float   Electron::SCPhi              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scPhi",m_raw_index); } 
 float   Electron::SCPt               (){ return SCEnergy()/cosh(SCEta()); } 
@@ -32,6 +32,7 @@ float   Electron::Charge             (){ return m_collection->ReadArrayBranch<In
 float   Electron::R9                 (){ return m_collection->ReadArrayBranch<Float_t>("Electron_r9",m_raw_index); } 
 float   Electron::RawEnergy          (){ return -1.0; } 
 float   Electron::SCEnergy           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scEnergy",m_raw_index);} 
+// ratio of the calibrated energy/miniaod energy
 float   Electron::ECorr              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_eCorr",m_raw_index);} 
 								      
 // EGamma bits													      
@@ -42,13 +43,25 @@ int    Electron::PassEGammaIDVeto     (){ return m_collection->ReadArrayBranch<B
 int    Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP",m_raw_index); } 
 														      
 // ID variables			      	   		      		  	  				      
-bool Electron::PassIDCut(HEEPIDCut cut) {
+bool Electron::PassHEEPIDCut(HEEPIDCut cut) {
   return 0x1 & (m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmapHEEP",m_raw_index) >> static_cast<int>(cut));
 }
+bool Electron::PassHEEPMinPtCut                            (){ return PassHEEPIDCut(HEEPIDCut::MinPtCut); }
+bool Electron::PassHEEPGsfEleSCEtaMultiRangeCut            (){ return PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut); }
+bool Electron::PassHEEPGsfEleDEtaInSeedCut                 (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDEtaInSeedCut); }
+bool Electron::PassHEEPGsfEleDPhiInCut                     (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDPhiInCut); }
+bool Electron::PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut); }
+bool Electron::PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut); }
+bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut); }
+bool Electron::PassHEEPGsfEleValueMapIsoRhoCut             (){ return PassHEEPIDCut(HEEPIDCut::GsfEleValueMapIsoRhoCut); }
+bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut              (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEmHadD1IsoRhoCut); }
+bool Electron::PassHEEPGsfEleDxyCut                        (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut); }
+bool Electron::PassHEEPGsfEleMissingHitsCut                (){ return PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut); }
+bool Electron::PassHEEPEcalDrivenCut                       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut); }
+
 //bool   Electron::EcalSeed             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronHasEcalDrivenSeed        -> at ( m_raw_index ); }
 //bool   Electron::EcalDriven           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronIsEcalDriven             -> at ( m_raw_index ); }
 bool   Electron::EcalSeed             (){ return false; }
-bool   Electron::EcalDriven           (){ return PassIDCut(HEEPIDCut::GsfEleEcalDrivenCut); }
 //float Electron::DeltaEtaSeed         (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronDeltaEtaTrkSeedSC        -> at ( m_raw_index ); }
 float Electron::DeltaEtaSeed          (){
   //std::cout << "Electron::DeltaEtaTrkSeedSC=" << m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronDeltaEtaTrkSeedSC            -> at ( m_raw_index )
@@ -77,7 +90,7 @@ float Electron::VtxDistZ             (){ return -999; }
 float Electron::Dist                 (){ return -999; }
 float Electron::DCotTheta            (){ return -999; }
 float Electron::ValidFrac            (){ return -999; }
-float Electron::CaloEnergy           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_caloEnergy",m_raw_index); }
+float Electron::CaloEnergy           (){ return -999; }
 float Electron::EcalEnergy           (){ return -999; }
 float Electron::ESuperClusterOverP   (){ return -999; }
 float Electron::NBrems               (){ return -999; }

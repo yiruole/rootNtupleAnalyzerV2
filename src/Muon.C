@@ -25,7 +25,7 @@ float Muon::PFEta                    (){ return m_collection->ReadArrayBranch<Fl
 float Muon::PFPhi                    (){ return m_collection->ReadArrayBranch<Float_t>("Muon_phi",   m_raw_index); } 
 //float & Muon::PFPhiError               (){ return -1.0; } 
 
-float Muon::CocktailPt              (){ return m_collection->ReadArrayBranch<Float_t>("Muon_ptTuneP", m_raw_index); } 
+float Muon::CocktailPt              (){ return m_collection->ReadArrayBranch<Float_t>("Muon_tunepRelPt", m_raw_index)*m_collection->ReadArrayBranch<Float_t>("Muon_pt", m_raw_index); } 
 float Muon::CocktailPtError         (){ return m_collection->ReadArrayBranch<Float_t>("Muon_ptErr",   m_raw_index); } 
 float Muon::CocktailEta              (){ return m_collection->ReadArrayBranch<Float_t>("Muon_eta",    m_raw_index); } 
 //float & Muon::CocktailEtaError         (){ return -1.0; } 

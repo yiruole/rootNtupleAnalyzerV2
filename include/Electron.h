@@ -52,12 +52,23 @@ class Electron : public Object {
     GsfEleEcalDrivenCut                  = 11,
   };
 
-  bool PassIDCut(HEEPIDCut cut);
+  bool PassHEEPIDCut(HEEPIDCut cut);
+  bool PassHEEPMinPtCut                            ();
+  bool PassHEEPGsfEleSCEtaMultiRangeCut            (); 
+  bool PassHEEPGsfEleDEtaInSeedCut                 (); 
+  bool PassHEEPGsfEleDPhiInCut                     (); 
+  bool PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(); 
+  bool PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (); 
+  bool PassHEEPGsfEleHadronicOverEMLinearCut       (); 
+  bool PassHEEPGsfEleValueMapIsoRhoCut             (); 
+  bool PassHEEPGsfEleEmHadD1IsoRhoCut              (); 
+  bool PassHEEPGsfEleDxyCut                        (); 
+  bool PassHEEPGsfEleMissingHitsCut                (); 
+  bool PassHEEPEcalDrivenCut                       ();
 
   float IsEB                 ();
   float IsEE                 ();
   bool   EcalSeed            ();
-  bool   EcalDriven          ();
   float DeltaEta             ();
   float DeltaEtaSeed         ();
   float DeltaPhi             ();
