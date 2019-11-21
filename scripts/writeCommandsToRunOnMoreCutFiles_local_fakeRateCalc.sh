@@ -13,7 +13,7 @@
 #### INPUTS HERE ####
 #------------
 # analysis
-files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 #SUBDIR=2016fakeRate/jan30_rereco/
@@ -27,7 +27,8 @@ OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file
 #SUBDIR=2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/
 #SUBDIR=2016fakeRate/dec19_mtPlots_tightenJetsWithMET55cut/
 #SUBDIR=2016fakeRate/jan15_addLTE1JetRegion
-SUBDIR=2016fakeRate/jan16_addLTE1JetRegion
+#SUBDIR=2016fakeRate/jan16_addLTE1JetRegion
+SUBDIR=nano/2016/qcdFakeRate/
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -35,10 +36,11 @@ SUBDIR=2016fakeRate/jan16_addLTE1JetRegion
 ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
-EXE=mainQCDFRCalc
+EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #------------
-INPUTLIST=config/RSK_QCD_jan12_v237_eoscms_comb/inputListAllCurrent.txt
+INPUTLIST=config/2016_rskQCD_eosuser/inputListAllCurrent.txt
+#INPUTLIST=config/RSK_QCD_jan12_v237_eoscms_comb/inputListAllCurrent.txt
 #INPUTLIST=config/RSK_QCD_jan12_v237_eoscms_comb/inputList_oldMCAndSinglePhoton.txt
 #INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputList_data.txt
 #INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputListAllCurrent.txt

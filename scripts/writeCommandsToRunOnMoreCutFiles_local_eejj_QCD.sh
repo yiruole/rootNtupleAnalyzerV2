@@ -21,7 +21,8 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Optimization/cutTable_lq_eejj_QCD_opt.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nano/2016/analysis/eejj_qcd_rsk_aug29
+SUBDIR=nano/2016/analysis/eejj_qcd_rsk_oct24
+#SUBDIR=nano/2016/analysis/eejj_qcd_rsk_aug29
 #SUBDIR=2016opt/eejj_QCD_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
 #SUBDIR=2016opt/eejj_QCD_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
 #SUBDIR=2016qcd/eejj_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
@@ -75,7 +76,8 @@ EXE=main
 #EXE=mainEEJJqcd_650only
 CODENAME=analysisClass_lq_eejj_QCD
 #------------
-INPUTLIST=config/2016_rskQCD_custom2016skimSinglePhotonJSON_eosuser/inputListAllCurrent.txt
+INPUTLIST=config/2016_rskQCD_eosuser_comb/inputListAllCurrent.txt
+#INPUTLIST=config/2016_rskQCD_custom2016skimSinglePhotonJSON_eosuser/inputListAllCurrent.txt
 #INPUTLIST=config/RSK_QCD_mar16_v237_local/inputList_data.txt
 #INPUTLIST=config/RSK_QCD_jan21_v237_eoscms/inputListAllCurrent.txt
 #INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputListAllCurrent.txt
