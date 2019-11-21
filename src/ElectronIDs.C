@@ -144,14 +144,29 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   bool pass_ecalDriven    = PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut);
   bool pass_missingHits   = PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut);
   bool pass_dxy           = PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut);
-  bool pass_sigmaIEtaIEta     = PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut);
-  bool pass_hoe               = PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut);
   bool pass_scEta         = PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut);
+  bool pass_sigmaIEtaIEta = false;
+  bool pass_hoe           = false;
+  bool is_barrel = false;
+  bool is_endcap = false;
 
 
-  //float hoe = HoE();
+  float hoe = HoE();
   //XXX SIC remove energy corrections
   //hoe *= (Pt()/SCPt());
+  hoe *= ECorr();
+
+  if ( fabs(SCEta()) < 1.5 ){
+    is_barrel = true;
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
+    pass_hoe              = bool ( hoe                 < 0.15  );
+  }
+
+  else if ( pass_scEta ){
+    is_endcap = true;
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.034 );
+    pass_hoe              = bool ( hoe                 < 0.10  );
+  }
 
   bool decision = ( pass_ecalDriven    && 
         pass_scEta         &&
