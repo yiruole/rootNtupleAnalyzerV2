@@ -333,7 +333,8 @@ for line in inputlist_file:
     command = command + " -n " + str(jobs_to_submit)
     command = command + " -q " + options.queue
     command = command + " -d " + eosPath
-    command = command + " -e " + os.path.realpath(options.executable)
+    #command = command + " -e " + os.path.realpath(options.executable)
+    command = command + " -e " + options.outputDir+'/'+options.executable.split('/')[-1]
     command = command + " -m " + options.eosHost
     command = command + " -j " + os.path.realpath(jsonFile)
     if options.reducedSkim:
