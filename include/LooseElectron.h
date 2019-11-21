@@ -9,6 +9,10 @@ class LooseElectron : public Electron {
   LooseElectron ();
   LooseElectron (Collection& c, unsigned short i, short j = 0);
 
+  virtual float & Pt         ();
+
+ private:
+  float scEt;
 };
 
 #endif 

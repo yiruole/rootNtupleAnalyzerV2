@@ -8,3 +8,8 @@ LooseElectron::LooseElectron (Collection & c, unsigned short i, short j):
   Electron(c,i,j) {
 }
 
+float & LooseElectron::Pt(){
+  scEt =  SCEnergy()/cosh(SCEta());
+  return scEt;
+} 
+
