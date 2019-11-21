@@ -23,6 +23,7 @@ def GetFakeRate(lowEnd,highEnd,reg,jets,histDict,verbose=False):
   jets_SB = proj_Jets.Integral(proj_Jets.GetXaxis().FindBin(10),proj_Jets.GetXaxis().FindBin(20)-1)
   jets_SR = proj_Jets.Integral(proj_Jets.GetXaxis().FindBin(0),proj_Jets.GetXaxis().FindBin(5)-1)
   if verbose:
+    print 'Considering hists:',histo2D_Electrons.GetName(),',',histo2D_Jets.GetName(),',',histo2D_Data.GetName()
     #print 'endcap1 N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
     #print 'barrel N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
     print 'nHEEPprime=',ele,'jetsSR=',jets_SR,'jetsSB=',jets_SB,'data=',data
@@ -189,7 +190,9 @@ def LoadHistosMC(histos,varName):
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec18_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+print 'Opening file:',filename
 tfile = TFile.Open(filename)
 
 writeOutput = False
@@ -228,7 +231,7 @@ muzHistEnd2ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd2_0Jets',2,2)
 muzHistEnd1ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd1_0Jets',1,1)
 muzHistBarZeroJ = muzHist2DZeroJBar.ProjectionX('projMuzBar_0Jets')
 # get Sam's hists
-tfileZPrime = TFile('/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleAnalyzerV2/versionsOfAnalysis_fakeRateCalc/dec8/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root')
+tfileZPrime = TFile('/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root')
 zprimeHistEnd2ZeroJ = tfileZPrime.Get('frHistEEHigh')
 zprimeHistEnd1ZeroJ = tfileZPrime.Get('frHistEELow')
 zprimeHistBarZeroJ = tfileZPrime.Get('frHistEB')
