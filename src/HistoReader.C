@@ -11,18 +11,16 @@ HistoReader::HistoReader()
   histoEndcap = 0;
 }
 
-HistoReader::HistoReader(std::string& filename, std::string& barrelHistName, std::string& endcapHistName,
+HistoReader::HistoReader(std::string filename, std::string barrelHistName, std::string endcapHistName,
     bool absEta, bool etIsXAxis) : isAbsEta(absEta), isEtXAxis(etIsXAxis)
 {
   TFile* myTFile = TFile::Open(filename.c_str());
   TH2F* histoB = 0;
-  //qcdTFile->GetObject("Barrel_Fake_Rate",histoB);
   myTFile->GetObject(barrelHistName.c_str(),histoB);
   assert(histoB>0);
   histoBarrel = std::unique_ptr<TH2F>(histoB);
 
   TH2F* histoE = 0;
-  //qcdTFile->GetObject("Endcap_Fake_Rate",histoE);
   myTFile->GetObject(endcapHistName.c_str(),histoE);
   assert(histoE>0);
   histoEndcap = std::unique_ptr<TH2F>(histoE);
@@ -35,7 +33,7 @@ HistoReader::~HistoReader()
 }
 
 // make sure that we don't ask for an Et that is beyond the max x range of the histogram
-int HistoReader::GetLookupBin(TH2F& histRef, bool isXaxis, float& rawValue, bool verbose)
+int HistoReader::GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose)
 {
   int lookupBin = -1;
   bool changedBin = false;
@@ -65,7 +63,8 @@ int HistoReader::GetLookupBin(TH2F& histRef, bool isXaxis, float& rawValue, bool
   }
 
   if(verbose && changedBin) {
-    std::cout << "INFO: raw value was: " << rawValue << " which is outside the bounds of the histogram: [";
+    std::cout << "INFO: raw value was: " << rawValue << " which is outside the bounds of the histogram "
+      << histRef.GetName() << " [";
     if(isXaxis)
       std::cout << histRef.GetXaxis()->GetXmax() << " - " << histRef.GetXaxis()->GetXmin() << "]; using bin-center value: " << histRef.GetXaxis()->GetBinCenter(lookupBin) << " for lookup." << std::endl;
     else
@@ -83,7 +82,6 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
   bool isBarrel = true;
   int etLookupBin = -1;
   int etaLookupBin = -1;
-  TH2F& histRef = *histoBarrel;
 
   if(et<=0 && eta==0) { // uninitialized/unstored electron2 (events with only 1 loose ele)
     value = 0.99;
@@ -95,10 +93,12 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
     if(fabs(eta) >= 1.5) { // add extra margin b/c nanoAOD and composite variable rounding; assumes eta cuts are applied upstream
       // protect against eta < 1.566  or eta < 2.5 b/c nanoAOD and composite variable rounding; assumes eta cuts are applied upstream
       isBarrel = false;
-      histRef = *histoEndcap;
     }
-    etLookupBin = GetLookupBin(histRef,isEtXAxis,etLookup);
-    etaLookupBin = GetLookupBin(histRef,!isEtXAxis,etaLookup);
+    const TH2F& histRef = isBarrel ? *histoBarrel : *histoEndcap;
+    //std::cout << "Using histRef with name: " << histRef.GetName() << " as the histRef for GetLookupBin()"
+    //  << " for electron with eta=" << eta << "; isBarrel=" << isBarrel << std::endl;
+    etLookupBin = GetLookupBin(histRef,isEtXAxis,etLookup,verbose);
+    etaLookupBin = GetLookupBin(histRef,!isEtXAxis,etaLookup,verbose);
     value = isEtXAxis ? histRef.GetBinContent(etLookupBin,etaLookupBin) : histRef.GetBinContent(etaLookupBin,etLookupBin);
     if(verbose) {
       std::cout << "INFO: Found " << (isBarrel ? "barrel" : "endcap") << " electron with et=" << et << " and eta=" << eta << "; value=" << value << std::endl;

@@ -6,7 +6,7 @@ class HistoReader {
   
  public:
   HistoReader();
-  HistoReader(std::string& filename, std::string& barrelHistName, std::string& endcapHistName, bool absEta, bool etIsXAxis);
+  HistoReader(std::string filename, std::string barrelHistName, std::string endcapHistName, bool absEta, bool etIsXAxis);
   ~HistoReader();
   
   void addHistoBarrel  ( TH2F* histo ) { histoBarrel = std::unique_ptr<TH2F>(histo); };
@@ -15,7 +15,7 @@ class HistoReader {
   float LookupValueError(const float& eta, const float& et, bool verbose=false);
 
  private:
-  int GetLookupBin(TH2F& histRef, bool isXaxis, float& rawValue, bool verbose=false);
+  int GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose=false);
 
   //FIXME
   //TFile* qcdTFile;
