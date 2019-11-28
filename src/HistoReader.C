@@ -94,6 +94,14 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
       // protect against eta < 1.566  or eta < 2.5 b/c nanoAOD and composite variable rounding; assumes eta cuts are applied upstream
       isBarrel = false;
     }
+    // handle cases where the barrel electron eta is outside the bounds of where the triggerSF hist is filled
+    // the QCD FR barrel hist currently goes from 0 to 1.4442, and only one eta bin anyway...so OK for now
+    else if(fabs(eta) < 1.5) {
+      if(etaLookup > 1.444)
+        etaLookup = 1.443;
+      else if(etaLookup < -1.444)
+        etaLookup = -1.443;
+    }
     const TH2F& histRef = isBarrel ? *histoBarrel : *histoEndcap;
     //std::cout << "Using histRef with name: " << histRef.GetName() << " as the histRef for GetLookupBin()"
     //  << " for electron with eta=" << eta << "; isBarrel=" << isBarrel << std::endl;
@@ -107,7 +115,8 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
 
   if(value<=0) {
     std::cerr << "ERROR: Found an electron with unknown value: eta=" << eta << "; eT=" << et << "; return " << value << std::endl;
-    std::cerr << "ERROR: Found " << (isBarrel ? "barrel" : "endcap") << " eta bin: " << etaLookupBin << "; found et bin: " << etaLookupBin << std::endl;
+    std::cerr << "ERROR: Used etaLookup=" << etaLookup << "; eT=" << etLookup << std::endl;
+    std::cerr << "ERROR: Found " << (isBarrel ? "barrel" : "endcap") << " eta bin: " << etaLookupBin << "; found et bin: " << etLookupBin << std::endl;
   }
   assert(value>0);
   return value;
