@@ -93,6 +93,10 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
     if(fabs(eta) >= 1.5) { // add extra margin b/c nanoAOD and composite variable rounding; assumes eta cuts are applied upstream
       // protect against eta < 1.566  or eta < 2.5 b/c nanoAOD and composite variable rounding; assumes eta cuts are applied upstream
       isBarrel = false;
+      if(etaLookup > 0 && etaLookup < 1.566)
+        etaLookup = 1.567;
+      else if(etaLookup < 0 && etaLookup > -1.566)
+        etaLookup = -1.567;
     }
     // handle cases where the barrel electron eta is outside the bounds of where the triggerSF hist is filled
     // the QCD FR barrel hist currently goes from 0 to 1.4442, and only one eta bin anyway...so OK for now
