@@ -13,13 +13,18 @@
 #### INPUTS HERE ####
 #------------
 # analysis
-files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD.txt"
+#files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD.txt"
 # analysis -- preselection only
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD_preselOnly.txt"
 # opt
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Optimization/cutTable_lq_eejj_QCD_opt.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
+SUBDIR=nano/2016/analysis/eejj_qcd_rsk_feb18
+#SUBDIR=nano/2016/analysis/eejj_qcd_rsk_nov22
+#SUBDIR=nano/2016/analysis/eejj_qcd_rsk_oct24
+#SUBDIR=nano/2016/analysis/eejj_qcd_rsk_aug29
 #SUBDIR=2016opt/eejj_QCD_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
 #SUBDIR=2016opt/eejj_QCD_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
 #SUBDIR=2016qcd/eejj_psk_nov27_finalSels_muonVeto35GeV_nEleGte2
@@ -48,7 +53,7 @@ OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file
 #SUBDIR=2016qcd/eejj_QCD_feb13_addPlot/
 #SUBDIR=2016qcd/eejj_QCD_mar16_fixMuons/
 #SUBDIR=2016qcd/eejj_QCD_mar20_fixPlots/
-SUBDIR=2016qcd/eejj_apr3_lq650from2012/
+#SUBDIR=2016qcd/eejj_apr3_lq650from2012/
 
 #SUBDIR=2016opt/eejj_QCD_psk_oct16_newFR_ptEECut/
 #SUBDIR=2016opt/eejj_QCD_psk_oct4_ptEECut/
@@ -68,11 +73,15 @@ ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity 
 #ILUM=6910 # ICHEP2016 minus early runs
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
+EXE=main
 #EXE=mainEEJJqcd
-EXE=mainEEJJqcd_650only
+#EXE=mainEEJJqcd_650only
 CODENAME=analysisClass_lq_eejj_QCD
 #------------
-INPUTLIST=config/RSK_QCD_mar16_v237_local/inputList_data.txt
+INPUTLIST=config/2016_rskQCD_eosuser_comb/inputList_data.txt
+#INPUTLIST=config/2016_rskQCD_eosuser_comb/inputListAllCurrent.txt
+#INPUTLIST=config/2016_rskQCD_custom2016skimSinglePhotonJSON_eosuser/inputListAllCurrent.txt
+#INPUTLIST=config/RSK_QCD_mar16_v237_local/inputList_data.txt
 #INPUTLIST=config/RSK_QCD_jan21_v237_eoscms/inputListAllCurrent.txt
 #INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputListAllCurrent.txt
 #INPUTLIST=config/RSK_QCD_nov5_v236_eoscms_comb/inputList_singlePhoton.txt
@@ -88,7 +97,7 @@ XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_dataDriven.txt
 #------------
 #NCORES=8 #Number of processor cores to be used to run the job
-NCORES=24 #Number of processor cores to be used to run the job
+NCORES=10 #Number of processor cores to be used to run the job
 #------------
 
 #### END OF INPUTS ####

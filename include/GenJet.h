@@ -14,13 +14,11 @@ class GenJet : public Object {
   
   // Kinematic variables
 
-  float & Pt()  ;
-  float & Eta() ;
-  float & Phi() ;
-
   // IDs 
 
   bool PassUserID ( ID id, bool verbose = false ); 
+
+ private:
     
 };
 

@@ -15,7 +15,7 @@ ROOT.FWLiteEnabler.enable()
 from DataFormats.FWLite import Handle, Events
 
 triggerBits, triggerBitLabel = Handle("edm::TriggerResults"), ("TriggerResults","","HLT")
-triggerObjects, triggerObjectLabel  = Handle("std::vector<pat::TriggerObjectStandAlone>"), "selectedPatTrigger"
+triggerObjects, triggerObjectLabel  = Handle("std::vector<pat::TriggerObjectStandAlone>"), "slimmedPatTrigger"
 triggerPrescales, triggerPrescaleLabel  = Handle("pat::PackedTriggerPrescales"), "patTrigger"
 l1Muons, l1MuonLabel  = Handle("BXVector<l1t::Muon>"), "gmtStage2Digis:Muon"
 l1EGammas, l1EGammaLabel  = Handle("BXVector<l1t::EGamma>"), "caloStage2Digis:EGamma"
@@ -44,18 +44,35 @@ for iev,event in enumerate(events):
         #if "Ele27_WPLoose_Gsf" in names.triggerName(i):
         #  print "Trigger ", names.triggerName(i), ", prescale ", triggerPrescales.product().getPrescaleForIndex(i), ": ", ("PASS" if triggerBits.product().accept(i) else "fail (or not run)") 
       # look at passing paths only
-      if triggerBits.product().accept(i):
-        print "Trigger ", names.triggerName(i), ", prescale ", triggerPrescales.product().getPrescaleForIndex(i), ": ", ("PASS" if triggerBits.product().accept(i) else "fail (or not run)") 
+      #if triggerBits.product().accept(i):
+      #  print "Trigger ", names.triggerName(i), ", prescale ", triggerPrescales.product().getPrescaleForIndex(i), ": ", ("PASS" if triggerBits.product().accept(i) else "fail (or not run)") 
+      # look at Ele115 path only
+        if "Ele115" in names.triggerName(i):
+          print "Trigger ", names.triggerName(i), ", prescale ", triggerPrescales.product().getPrescaleForIndex(i), ": ", ("PASS" if triggerBits.product().accept(i) else "fail (or not run)") 
 
-    #print "\n === TRIGGER OBJECTS ==="
-    #for j,to in enumerate(triggerObjects.product()):
-    #    to.unpackPathNames(names);
-    #    print "Trigger object pt %6.2f eta %+5.3f phi %+5.3f  " % (to.pt(),to.eta(),to.phi())
-    #    print "         collection: ", to.collection()
-    #    print "         type ids: ", ", ".join([str(f) for f in to.filterIds()])
-    #    print "         filters: ", ", ".join([str(f) for f in to.filterLabels()])
-    #    pathslast = set(to.pathNames(True))
-    #    print "         paths:   ", ", ".join([("%s*" if f in pathslast else "%s")%f for f in to.pathNames()]) 
+    print "\n === TRIGGER OBJECTS ==="
+    for j,to in enumerate(triggerObjects.product()):
+        #to.unpackPathNames(names);
+        to.unpackNamesAndLabels(event.object(), triggerBits.product());
+        #print "Trigger object pt %6.2f eta %+5.3f phi %+5.3f  " % (to.pt(),to.eta(),to.phi())
+        #print "         collection: ", to.collection()
+        #print "         type ids: ", ", ".join([str(f) for f in to.filterIds()])
+        #print "         filters: ", ", ".join([str(f) for f in to.filterLabels()])
+        #pathslast = set(to.pathNames(True))
+        #print "         paths:   ", ", ".join([("%s*" if f in pathslast else "%s")%f for f in to.pathNames()]) 
+        # look at trig objs which have this in the associated filter labels
+        #CaloIdVTGsfTrkIdTGsfDphiFilter
+        for filtName in to.filterLabels():
+            if 'CaloIdVTGsfTrkIdTGsfDphiFilter' in filtName:
+                print "Trigger object pt %6.2f eta %+5.3f phi %+5.3f  " % (to.pt(),to.eta(),to.phi())
+                print "         collection: ", to.collection()
+                print "         type ids: ", ", ".join([str(f) for f in to.filterIds()])
+                print "         filter(hltEle*CaloIdVTGsfTrkIdTGsfDphiFilter): ",to.filter('hltEle*CaloIdVTGsfTrkIdTGsfDphiFilter')
+                print "         filters: ", ", ".join([str(f) for f in to.filterLabels()])
+                pathslast = set(to.pathNames(True))
+                print "         paths:   ", ", ".join([("%s*" if f in pathslast else "%s")%f for f in to.pathNames()]) 
+                print
+                break
 
     #print "\n === BARE L1 OBJECTS ==="
     #for where, what in (l1Muons, l1MuonLabel), (l1EGammas, l1EGammaLabel), (l1Jets, l1JetLabel), (l1Taus, l1TauLabel):
@@ -74,4 +91,4 @@ for iev,event in enumerate(events):
     #            if l1obj.getType() != getattr(l1obj, "k"+shortname): continue
     #            print "%-10s  bx %+1d  pt %6.2f eta %+5.3f phi %+5.3f " % (shortname, bx, l1obj.pt(), l1obj.eta(), l1obj.phi()) 
 
-    #if iev > 100: break
+    if iev > 1: break

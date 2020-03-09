@@ -1,10 +1,11 @@
 #ifndef baseClass_h
 #define baseClass_h
 
-#include "rootNtupleClass.h"
+#include <TChain.h>
+#include <TFile.h>
 #include "jsonParser.h"
-#include "pileupReweighter.h"
 #include "eventListHelper.h"
+#include "TTreeReaderTools.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -126,28 +127,25 @@ class Optimize {
 }; // class Optimize
 
 
-class baseClass : public rootNtupleClass {
+//class baseClass : public rootNtupleClass {
+class baseClass {
   public :
   map<string, bool> combCutName_passed_;
 
   int passJSON(int run, int ls, bool isData);
-  double getPileupWeight ( int npileup, bool this_is_data );
-  void setPileupWeight ( double weight ) { PileupWeight_ = weight; } 
   bool triggerExists   ( const char* name);
   bool triggerFired    ( const char* name );
   int  triggerPrescale ( const char* name );
   void fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale=1 ) ;
   void printTriggers();
   void printFiredTriggers();
-  void getTriggers(std::string * HLTKey ,   
-		   std::vector<std::string> * names, 
-		   std::vector<bool>        * decisions,
-		   std::vector<int >        * prescales);
+  void getTriggers(Long64_t entry);
   const std::string& getInputListName() { return *inputList_;};
   const std::string getCurrentFileName() { return tree_->GetCurrentFile()->GetName();};
     
   void resetCuts(const std::string& s = "newEvent");
   void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
+  void fillVariableWithValue(const std::string&, TTreeReaderValue<double>&, const double& w = 1.);
   void evaluateCuts(bool verbose = false);
   
   void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
@@ -197,35 +195,45 @@ class baseClass : public rootNtupleClass {
   void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
   void CreateUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
   void FillUserTH1D(const char*  nameAndTitle, Double_t value, Double_t weight=1);
+  void FillUserTH1D(const char*  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1);
   void CreateAndFillUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
   void CreateUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
   void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
   void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+  void FillUserTH2D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
   void FillUserTH2DLower(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
   void CreateAndFillUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
   void CreateUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
   void CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
   void FillUserTH3D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
+  void FillUserTH3D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
 
   void createOptCutFile();
 
-  PileupReweighter pileupReweighter_;
+  bool isData();
+
+  Long64_t GetTreeEntries() { return treeEntries_; }
+
+
 
   TFile * output_root_;
+
+  std::shared_ptr<TTreeReaderTools> readerTools_;
 
   private :
   int nOptimizerCuts_;
   string * configFile_;
-  string * outputFileName_;
+  string outputFileName_;
   string * inputList_;
   string * cutFile_;
   string * treeName_; // Name of input tree objects in (.root) files
-  //TChain * chain_; // Original TChain
-  TChain * tree_; // main tree
+  std::shared_ptr<TChain> tree_; // main tree
   TTree * tree2_; // tree for globalInfo
+  Long64_t readerEntry_;
+  Long64_t treeEntries_;
   string * cutEfficFile_;
   std::stringstream preCutInfo_;
   map<string, preCut> preCutName_cut_;
@@ -249,10 +257,11 @@ class baseClass : public rootNtupleClass {
   int getGlobalInfoNstart(const char* );
   float getSumAMCNLOWeights(const char* );
   float getSumTopPtWeights(const char* );
-  int NBeforeSkim_;
+  Long64_t NBeforeSkim_;
   float sumAMCNLOWeights_;
   float sumTopPtWeights_;
-  double PileupWeight_;
+
+  void checkOverflow(const TH1*, const double);
 
   // JSON file stuff
   JSONParser jsonParser_;
@@ -264,13 +273,6 @@ class baseClass : public rootNtupleClass {
   std::map<std::string, bool> triggerDecisionMap_; 
   std::map<std::string, int > triggerPrescaleMap_; 
 
-  // PILEUP stuff
-
-  bool pileupMCFileWasUsed_;
-  bool pileupDataFileWasUsed_;
-  std::string pileupMCFileName_;
-  std::string pileupDataFileName_;
-  
   // Which plots to fill
   bool fillSkim_;
   bool fillAllPreviousCuts_;
@@ -283,7 +285,7 @@ class baseClass : public rootNtupleClass {
   int NAfterSkim_;
   double getSkimPreCutValue(const string& s);
   TFile *skim_file_;
-  TTree *skim_tree_;
+  TTree* skim_tree_;
   TH1F* hCount_;
   bool writeSkimTree();
 
@@ -300,7 +302,7 @@ class baseClass : public rootNtupleClass {
   map<int, Optimize> optimizeName_cut_;
   TH1F* eventcuts_; // number of events passing each cut
   TH1F* h_optimizer_; // optimization histogram
-  TH1F* h_optimizer_entries_;
+  TH1I* h_optimizer_entries_;
   TH1F* h_weightSums_; // sums of various weights over all events
 
 };

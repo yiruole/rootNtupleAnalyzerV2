@@ -2,9 +2,9 @@
 #include "baseClass.h"
 #include <boost/lexical_cast.hpp>
 #include "TEnv.h"
+#include "TLeaf.h"
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
-  PileupWeight_ ( 1.0 ),
   fillSkim_                         ( true ) ,
   fillAllPreviousCuts_              ( true ) ,
   fillAllOtherCuts_                 ( true ) ,
@@ -12,15 +12,23 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   fillAllCuts_                      ( true ) ,
   oldKey_                           ( "" ) 
 {
-  //STDOUT("begins");
+  STDOUT("begins");
   nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
-  outputFileName_ = outputFileName;
+  if(outputFileName != NULL)
+  {
+    outputFileName_ = *outputFileName;
+  }
+  else
+  {
+    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
+    exit(-1);
+  }
   cutEfficFile_ = cutEfficFile;
   init();
-  //STDOUT("ends");
+  STDOUT("ends");
 }
 
 baseClass::~baseClass()
@@ -46,7 +54,9 @@ baseClass::~baseClass()
       STDOUT("ERROR: writeReducedSkimTree did not complete successfully.");
     }
   output_root_->cd();
+  checkOverflow(h_weightSums_,sumAMCNLOWeights_);
   h_weightSums_->SetBinContent(1,sumAMCNLOWeights_);
+  checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
   output_root_->Close();
@@ -58,31 +68,25 @@ void baseClass::init()
 {
   // set up prefetching
   //gEnv->SetValue("TFile.AsyncPrefetching", 1);
-  //STDOUT("begins");
   tree_ = NULL;
   readInputList();
+  Long64_t ret = tree_->LoadTree(0);
+  if(ret < 0) {
+    STDOUT("baseClass::init(): Had an error of code " << ret << " when calling LoadTree(); exit");
+    exit(1);
+  }
   readCutFile();
   if(tree_ == NULL){
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
-    exit(-1);
+    exit(1);
   }
-  // setup ttree caching
-  Int_t cachesize = 10000000; //10 MBytes
-  tree_->SetCacheSize(cachesize);
-  Init(tree_);
+  readerTools_ = std::shared_ptr<TTreeReaderTools>(new TTreeReaderTools(tree_));
 
-  //char output_root_title[200];
-  //sprintf(output_root_title,"%s%s",&std::string(*outputFileName_)[0],".root");
-  //output_root_ = new TFile(&output_root_title[0],"RECREATE");
 
   //directly from string
-  if(*outputFileName_ != NULL)
-    output_root_ = new TFile((*outputFileName_ + ".root").c_str(),"RECREATE");
-  else
-  {
-    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
-    exit(-1);
-  }
+  std::string filename = outputFileName_;
+  filename+=+".root";
+  output_root_ = new TFile(filename.c_str(),"RECREATE");
 
   // Skim stuff
   produceSkim_ = false;
@@ -91,8 +95,8 @@ void baseClass::init()
   
   if(produceSkim_) {
     
-    skim_file_ = new TFile((*outputFileName_ + "_skim.root").c_str(),"RECREATE");
-    skim_tree_ = fChain->CloneTree(0);
+    skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE");
+    skim_tree_ = tree_->CloneTree(0);
     hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
@@ -107,7 +111,7 @@ void baseClass::init()
 
   if(produceReducedSkim_) {
 
-    reduced_skim_file_ = new TFile((*outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
+    reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
     hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
@@ -115,10 +119,10 @@ void baseClass::init()
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
     hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
     for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
-      {
-	cut * c = & (cc->second);
-	if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
-      }
+    {
+      cut * c = & (cc->second);
+      if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
+    }
   }
 
   //  for (map<string, cut>::iterator it = cutName_cut_.begin();
@@ -132,17 +136,16 @@ void baseClass::init()
   h_weightSums_ = new TH1F("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
   h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
   h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
+
 }
 
 void baseClass::readInputList()
 {
 
-  TChain *chain = new TChain(treeName_->c_str());
+  std::shared_ptr<TChain> chain = std::shared_ptr<TChain>(new TChain(treeName_->c_str()));
   char pName[500];
   skimWasMade_ = true;
   jsonFileWasUsed_ = false;
-  pileupMCFileWasUsed_ = false;
-  pileupDataFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
   sumAMCNLOWeights_ = 0;
@@ -165,7 +168,7 @@ void baseClass::readInputList()
       std::string name(pName);
       if(name.find("/store") != std::string::npos && name.find("/store")==0)
         name.insert(0,"root://eoscms//eos/cms");
-      STDOUT("Adding file: " << name);
+      //STDOUT("Adding file: " << name);
       chain->Add(name.c_str());
       NBeforeSkim = getGlobalInfoNstart(name.c_str());
       NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
@@ -186,6 +189,7 @@ void baseClass::readInputList()
     exit (-1);
   }
   is.close();
+  treeEntries_ = tree_->GetEntries();
 
 }
 
@@ -230,40 +234,6 @@ void baseClass::readCutFile()
         jsonParser_.parseJSONFile ( & v[1] ) ;
         //jsonParser_.printGoodLumis();
         jsonFileWasUsed_ = true;
-        continue;
-      }
-
-      if ( v[0] == "PILEUP_DATA_ROOT_FILE" ){ 
-        if ( pileupDataFileWasUsed_ ) { 
-          STDOUT("ERROR: Please specify only one PILEUP_DATA_ROOT_FILE in your cut file!");
-          exit(-1);
-        }
-
-        if ( v.size() != 2 ){
-          STDOUT("ERROR: In your cutfile, PILEUP_DATA_ROOT_FILE line must have the syntax: \"PILEUP_DATA_ROOT_FILE <full pileup data file path>\"");
-        }
-
-        pileupDataFileName_ = v[1];
-        STDOUT("Getting PILEUP_DATA_ROOT_FILE:" << v[1]);
-        pileupReweighter_.readPileupDataFile ( & v[1] ) ;
-        pileupDataFileWasUsed_ = true;
-        continue;
-      }
-
-      if ( v[0] == "PILEUP_MC_TXT_FILE" ){ 
-        if ( pileupMCFileWasUsed_ ) { 
-          STDOUT("ERROR: Please specify only one PILEUP_MC_TXT_FILE in your cut file!");
-          return;
-        }
-
-        if ( v.size() != 2 ){
-          STDOUT("ERROR: In your cutfile, PILEUP_MC_TXT_FILE line must have the syntax: \"PILEUP_MC_TXT_FILE <full pileup MC file path>\"");
-        }
-
-        pileupMCFileName_ = v[1];
-        STDOUT("Getting PILEUP_MC_TXT_FILE:" << v[1]);
-        pileupReweighter_.readPileupMCFile ( & v[1] ) ;
-        pileupMCFileWasUsed_ = true;
         continue;
       }
 
@@ -404,17 +374,6 @@ void baseClass::readCutFile()
       cutName_cut_[thisCut.variableName]=thisCut;
 
     }
-    if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ) {
-      pileupReweighter_.calculatePileupWeights();
-      pileupReweighter_.printPileupWeights();
-    }
-    else if ( (!pileupMCFileWasUsed_) && pileupDataFileWasUsed_  ||
-        pileupMCFileWasUsed_  && (!pileupDataFileWasUsed_) ) { 
-      STDOUT("ERROR: You must specify TWO pileup files in your cutfile:");
-      if ( pileupMCFileWasUsed_   ) STDOUT("   You have only specified PILEUP_MC_TXT_FILE " ) ;
-      if ( pileupDataFileWasUsed_ ) STDOUT("   You have only specified PILEUP_DATA_ROOT_FILE " ) ;
-      exit(-3);
-    }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
   }
   else
@@ -427,7 +386,7 @@ void baseClass::readCutFile()
     {
       h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
-      h_optimizer_entries_ =new TH1F("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+      h_optimizer_entries_ =new TH1I("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
 			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
     }
 
@@ -480,11 +439,13 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       c->value = d;
       c->weight = w;
       
-// if ( pileupReweighter_.pileupWeightsCalculated() ) 
-// 	c ->weight *= PileupWeight_;
     }
   fillOptimizerWithValue(s, d);
   return;
+}
+void baseClass::fillVariableWithValue(const string& s, TTreeReaderValue<double>& reader, const double& w)
+{
+  fillVariableWithValue(s, *reader, w);
 }
 
 bool baseClass::variableIsFilled(const string& s)
@@ -1084,8 +1045,7 @@ bool baseClass::writeCutEfficFile()
 
   bincounter=1;
 
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   string cutEfficFile = *cutEfficFile_ + ".dat";
   ofstream os(cutEfficFile.c_str());
 
@@ -1094,14 +1054,6 @@ bool baseClass::writeCutEfficFile()
        << "### " << jsonFileName_ << "\n";
   } else { 
     os << "################################## NO JSON file used at runtime ###################################################################\n";
-  }
-
-  if ( pileupMCFileWasUsed_ && pileupDataFileWasUsed_ ){
-    os << "################################## PILEUP files used at runtime    ###################################################################\n"
-       << "### " << pileupMCFileName_ << "\n" 
-       << "### " << pileupDataFileName_ << "\n";
-  } else { 
-    os << "################################## NO PILEUP files used at runtime ###################################################################\n";
   }
 
   os << "################################## Preliminary Cut Values ###################################################################\n"
@@ -1138,10 +1090,13 @@ bool baseClass::writeCutEfficFile()
   double effAbs;
   double effAbsErr;
 
+  checkOverflow(eventcuts_,nEntTot);
   eventcuts_->SetBinContent(bincounter,nEntTot);
   if (optimizeName_cut_.size())
   {
+    checkOverflow(h_optimizer_,nEntTot);
     h_optimizer_->SetBinContent(0, nEntTot);
+    checkOverflow(h_optimizer_entries_,nEntTot);
     h_optimizer_entries_->SetBinContent(0, nEntTot);
   }
 
@@ -1151,8 +1106,9 @@ bool baseClass::writeCutEfficFile()
   if(skimWasMade_)
     {
       ++bincounter;
-      eventcuts_->SetBinContent(bincounter, nEntRoottuple);
-      effRel = (double) nEntRoottuple / (double) NBeforeSkim_;
+      checkOverflow(eventcuts_,GetTreeEntries());
+      eventcuts_->SetBinContent(bincounter, GetTreeEntries() );
+      effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
       effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
       effAbs = effRel;
       effAbsErr = effRelErr;
@@ -1166,20 +1122,21 @@ bool baseClass::writeCutEfficFile()
 	 << setw(mainFieldWidth) << "-"
 	 << setw(mainFieldWidth) << "-"
 	 << setw(mainFieldWidth) << NBeforeSkim_
-	 << setw(mainFieldWidth) << nEntRoottuple
+	 << setw(mainFieldWidth) << GetTreeEntries()
 	 << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
 	 << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
 	 << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
 	 << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
 	 << fixed << endl;
-      nEvtPassedBeforeWeight_previousCut = nEntRoottuple;
-      nEvtPassed_previousCut = nEntRoottuple;
+      nEvtPassedBeforeWeight_previousCut = GetTreeEntries();
+      nEvtPassed_previousCut = GetTreeEntries();
     }
   for (vector<string>::iterator it = orderedCutNames_.begin();
        it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
       ++bincounter;
+      checkOverflow(eventcuts_,c->nEvtPassed);
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
       effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
       double N = nEvtPassedBeforeWeight_previousCut;
@@ -1314,7 +1271,7 @@ double baseClass::decodeCutValue(const string& s)
 int baseClass::getGlobalInfoNstart(const char *pName)
 {
   int NBeforeSkim = 0;
-  STDOUT(pName<<"  "<< NBeforeSkim)
+  STDOUT(pName)
   TFile *f = TFile::Open(pName);
   if(!f)
   {
@@ -1328,9 +1285,11 @@ int baseClass::getGlobalInfoNstart(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  string s3 = "EventCounter";
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1338,7 +1297,8 @@ int baseClass::getGlobalInfoNstart(const char *pName)
     }
 
   if (hCount1) NBeforeSkim = (int)hCount1->GetBinContent(1);
-  else NBeforeSkim = (int)hCount2->GetBinContent(1);
+  else if (hCount2) NBeforeSkim = (int)hCount2->GetBinContent(1);
+  else NBeforeSkim = (int)hCount3->GetBinContent(1);
 
 //   STDOUT(pName<<"  "<< NBeforeSkim)
   f->Close();
@@ -1362,9 +1322,11 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  string s3 = "EventCounter";
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1372,7 +1334,8 @@ float baseClass::getSumAMCNLOWeights(const char *pName)
     }
 
   if (hCount1) sumAMCNLOWeights = (float)hCount1->GetBinContent(3);
-  else sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
+  else if (hCount2) sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
+  else sumAMCNLOWeights = (float)hCount3->GetBinContent(3);
 
   f->Close();
 
@@ -1395,9 +1358,11 @@ float baseClass::getSumTopPtWeights(const char *pName)
   }
   string s1 = "LJFilter/EventCount/EventCounter";
   string s2 = "LJFilterPAT/EventCount/EventCounter";
-  TH1F* hCount1 = (TH1F*)f->Get(s1.c_str());
-  TH1F* hCount2 = (TH1F*)f->Get(s2.c_str());
-  if( !hCount1 && !hCount2 )
+  string s3 = "EventCounter";
+  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
+  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
+  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
+  if( !hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
@@ -1405,7 +1370,8 @@ float baseClass::getSumTopPtWeights(const char *pName)
     }
 
   if (hCount1) sumTopPtWeights = (float)hCount1->GetBinContent(4);
-  else sumTopPtWeights = (float)hCount2->GetBinContent(4);
+  else if (hCount2) sumTopPtWeights = (float)hCount2->GetBinContent(4);
+  else sumTopPtWeights = (float)hCount3->GetBinContent(4);
 
   f->Close();
 
@@ -1455,6 +1421,10 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t 
     {
       nh_h->second->Fill(value, weight);
     }
+}
+void baseClass::FillUserTH1D(const char* nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight)
+{
+  FillUserTH1D(nameAndTitle, *reader, weight);
 }
 
 void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
@@ -1519,6 +1489,10 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double
     {
       nh_h->second->Fill(value_x, value_y, weight);
     }
+}
+void baseClass::FillUserTH2D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight)
+{
+  FillUserTH2D(nameAndTitle, *xReader, *yReader, weight);
 }
 
 
@@ -1624,6 +1598,10 @@ void baseClass::FillUserTH3D(const char* nameAndTitle, Double_t value_x,  Double
       nh_h->second->Fill(value_x, value_y, value_z, weight);
     }
 }
+void baseClass::FillUserTH3D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight)
+{
+  FillUserTH3D(nameAndTitle, *xReader, *yReader, *zReader, weight);
+}
 
 
 bool baseClass::writeUserHistos()
@@ -1668,6 +1646,7 @@ void baseClass::fillSkimTree()
 {
   if(!produceSkim_) return;
 
+  tree_->GetEntry(readerTools_->GetCurrentEntry());
   skim_tree_->Fill();
   NAfterSkim_++;
 
@@ -1694,21 +1673,24 @@ bool baseClass::writeSkimTree()
   TDirectory *dir1 = skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   skim_file_->cd("LJFilter/EventCount");
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
+  //FIXME topPtWeight
+  checkOverflow(hCount_,nEntTot);
+  checkOverflow(hCount_,NAfterSkim_);
+  checkOverflow(hCount_,sumAMCNLOWeights_);
+  checkOverflow(hCount_,sumTopPtWeights_);
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumAMCNLOWeights_);
   hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
 
-  if ( fChain -> GetEntries() == 0 ){
+  if ( GetTreeEntries() == 0 ){
     skim_file_->cd();
     skim_file_->mkdir("rootTupleTree");
     skim_file_->cd("rootTupleTree");
-    fChain -> CloneTree(0) -> Write("tree");
+    tree_ -> CloneTree(0) -> Write("tree");
   }
-  
   else { 
     skim_file_->cd();
     skim_file_->mkdir("rootTupleTree");
@@ -1735,8 +1717,12 @@ bool baseClass::writeReducedSkimTree()
   TDirectory *dir1 = reduced_skim_file_->mkdir("LJFilter");
   TDirectory *dir2 = dir1->mkdir("EventCount");
   reduced_skim_file_->cd("LJFilter/EventCount");
-  int nEntRoottuple = fChain->GetEntriesFast();
-  int nEntTot = (skimWasMade_ ? NBeforeSkim_ : nEntRoottuple );
+  Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
+  //FIXME topPtWeight
+  checkOverflow(hReducedCount_,nEntTot);
+  checkOverflow(hReducedCount_,NAfterReducedSkim_);
+  checkOverflow(hReducedCount_,sumAMCNLOWeights_);
+  checkOverflow(hReducedCount_,sumTopPtWeights_);
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
@@ -1759,40 +1745,25 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
   
 }
 
-double baseClass::getPileupWeight ( int npileup, bool this_is_data ) { 
-  
-  PileupWeight_ = 1.0;
-
-  if ( this_is_data )                                     return PileupWeight_;
-  if ( ! pileupReweighter_.pileupWeightsCalculated() )    return PileupWeight_;
-  if ( npileup == -1 )                                    return PileupWeight_;
-
-  PileupWeight_ = pileupReweighter_.getPileupWeight ( npileup ) ;
-  
-  return PileupWeight_;
-}
-
-void baseClass::getTriggers(std::string * HLTKey ,  
-			    std::vector<std::string> * names, 
-			    std::vector<bool>        * decisions,
-			    std::vector<int>         * prescales ){
+void baseClass::getTriggers(Long64_t entry) {
   triggerDecisionMap_.clear();
-  triggerPrescaleMap_.clear();
-    
-  int ntriggers = names -> size();
-  
-  for (int i = 0; i < ntriggers; ++i){
-    triggerDecisionMap_[ (*names)[i].c_str() ] = (*decisions)[i];
-    triggerPrescaleMap_[ (*names)[i].c_str() ] = (*prescales)[i];
-    //STDOUT("INFO: Filled trigger prescale map: name=" << (*names)[i] << " prescale=" << (*prescales)[i]);
+  //FIXME deal with prescale map
+  //triggerPrescaleMap_.clear();
+  for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
+    TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
+    std::string branchName = branch->GetName();
+    if(branchName.find("HLT_")!=std::string::npos) {
+      triggerDecisionMap_[branchName] = readerTools_->ReadValueBranch<Bool_t>(branchName.c_str());
+    }
   }
 }
 
 void baseClass::printTriggers(){
-  std::map<std::string, int>::iterator i     = triggerPrescaleMap_.begin();
-  std::map<std::string, int>::iterator i_end = triggerPrescaleMap_.end();
-  STDOUT( "Triggers include: ")
-    for (; i != i_end; ++i) STDOUT( "\t" << i -> second << "\t\"" << i -> first << "\"" );
+  std::map<std::string, bool>::iterator i     = triggerDecisionMap_.begin();
+  std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
+  STDOUT( "Triggers: ")
+    for (; i != i_end; ++i)
+      std::cout << "\tfired? " << i -> second <<"\t\"" << i -> first << "\"" << std::endl;
 }
 
 void baseClass::printFiredTriggers()
@@ -1813,7 +1784,7 @@ bool baseClass::triggerExists ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
       return true;
@@ -1833,7 +1804,7 @@ bool baseClass::triggerFired ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
       return itr->second;
@@ -1856,15 +1827,17 @@ int baseClass::triggerPrescale ( const char* name ) {
   {
     // try to look by prefix of given path name
     auto itr = triggerPrescaleMap_.lower_bound( name );
-    while(itr->first.find(name)==0) // check to make sure key actually starts with name
+    while(itr!=triggerPrescaleMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with prescale=" << itr->second);
       return itr->second;
       ++itr;
     }
-    printTriggers();
-    STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
-    exit(-1);
+    //printTriggers();
+    //STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
+    //exit(-1);
+    //FIXME
+    return 1;
   }
   else {
     //STDOUT("INFO: Found matching trigger: " << i->first << " with prescale: " << i->second);
@@ -1922,5 +1895,44 @@ void baseClass::createOptCutFile() {
     //optFile <<"\t Entries = "<<h_optimizer_->GetBinContent(i+1)<<endl;
 
   } // for (int i=0;...)
+}
+
+bool baseClass::isData() {
+  // if tree has isData branch, we know the answer
+  if(tree_->GetBranch("isData")) {
+    if(readerTools_->ReadValueBranch<Double_t>("isData") < 1)
+      return false;
+    else
+      return true;
+  }
+  // if no isData branch (like in nanoAOD output), check for Weight or genWeight branches
+  else if(tree_->GetBranch("Weight") || tree_->GetBranch("genWeight"))
+    return false;
+  return true;
+}
+
+void baseClass::checkOverflow(const TH1* hist, const double binContent) {
+  std::ostringstream stringStream;
+  if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
+    double limit = std::numeric_limits<float>::max();
+    if(binContent>limit) {
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1F bin in histo: " << hist->GetName() << "! Quitting.";
+      STDOUT(stringStream.str());
+      exit(-3);
+    }
+  }
+  else if(std::string(hist->ClassName()).find("TH1I") != std::string::npos) {
+    double limit = std::numeric_limits<int>::max();
+    if(binContent>limit) {
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin in histo: " << hist->GetName() << "! Quitting.";
+      STDOUT(stringStream.str());
+      exit(-3);
+    }
+  }
+  else {
+    stringStream << "WARNING: Could not check bin content of hist:" << hist->GetName()
+      << " for overflow as it is not a TH1F or TH1I. Please implement this check.";
+    STDOUT(stringStream.str());
+  }
 }
 

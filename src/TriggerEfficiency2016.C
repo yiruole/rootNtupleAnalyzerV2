@@ -33,8 +33,9 @@ float TriggerEfficiency::GetEfficiency(const float& eta, const float& et, bool v
     etLookup = 35.0;
   // same for eta
   float etaLookup = fabs(eta);
-  if(fabs(etaLookup-1.566)<0.001) etaLookup = 1.567;
-  if(fabs(etaLookup-2.5)<0.001) etaLookup = 2.49;
+  if(fabs(etaLookup-1.4442)<0.1) etaLookup = 1.4441;
+  if(fabs(etaLookup-1.566)<0.1) etaLookup = 1.567;
+  if(fabs(etaLookup-2.5)<0.1) etaLookup = 2.49;
   if(etaLookup > histo_->GetXaxis()->GetXmax())
     etaLookup = histo_->GetBinCenter(histo_->GetXaxis()->GetNbins());
 

@@ -27,6 +27,8 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_pythia8')]
   #if '__' in dataset_fromInputList:
   #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
+  if dataset_fromInputList.endswith('_tree'):
+    dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_tree')]
   return dataset_fromInputList
 
 

@@ -9,36 +9,32 @@ class Muon : public Object {
   
  public:
   Muon ();
-  Muon (Collection& c, unsigned int i, short j = 0);
+  Muon (Collection& c, unsigned int i, short j = 0, Long64_t current_entry = 0);
   
   // Kinematic variables         
 
-  float & Pt                      (); // this is cocktail/TuneP, the one we want by default
-  float & PtError                 (); // this is cocktail/TuneP, the one we want by default
-  float & Eta                     (); // this is cocktail/TuneP, the one we want by default
-  float & EtaError                (); // this is cocktail/TuneP, the one we want by default
-  float & Phi                     (); // this is cocktail/TuneP, the one we want by default
-  float & PhiError                (); // this is cocktail/TuneP, the one we want by default
+  float PtError                 (); // this is cocktail/TuneP, the one we want by default
+  //float & EtaError                (); // this is cocktail/TuneP, the one we want by default
+  //float & PhiError                (); // this is cocktail/TuneP, the one we want by default
 
-  float & PFPt                    ();
-  float & PFPtError               ();
-  float & PFEta                   ();
-  float & PFEtaError              ();
-  float & PFPhi                   ();
-  float & PFPhiError              ();
+  float PFPt                    ();
+  float PFPtError               ();
+  float PFEta                   ();
+  float PFEtaError              ();
+  float PFPhi                   ();
+  float PFPhiError              ();
 
-  float & CocktailEta             ();
-  float & CocktailEtaError        ();
-  float & CocktailPhi             ();
-  float & CocktailPhiError        ();
-  float & CocktailPt              ();
-  float & CocktailPtError         ();
+  float CocktailEta             ();
+  //float & CocktailEtaError        ();
+  float CocktailPhi             ();
+  //float & CocktailPhiError        ();
+  float CocktailPt              ();
+  float CocktailPtError         ();
 
   float   Charge                  ();
 
 
   // IDs 
-
   bool   PassUserID ( ID id, bool verbose = false );
          
   // Isolation variables
@@ -52,9 +48,11 @@ class Muon : public Object {
          
   // ID variables      
          
-  int    IsGlobal                  ();
-  int    IsTracker                 ();
-  int    IsPFMuon                  ();
+  bool    PassLooseId               ();
+  bool    PassHighPtGlobalId        ();
+  bool    IsGlobal                  ();
+  bool    IsTracker                 ();
+  bool    IsPFMuon                  ();
   float GlobalChi2                 ();
   int    GlobalTrkValidHits        (); 
   int    StationMatches            ();

@@ -17,14 +17,10 @@ class HLTriggerObject : public Object {
   //void WritePtEtaPhi();
 
   // Kinematic variables
-  
-  float & Pt  () ;
-  float & Eta () ; 
-  float & Phi () ; 
 
   // HLT info
-  //std::vector<std::string>& GetFilterNames();
-  std::vector<std::string>& GetPathNames();
+  std::vector<std::string> GetFilterNames();
+  std::vector<std::string> GetPathNames();
   bool PassedPathL3Filter(std::string pathName);
   bool PassedPathLastFilter(std::string pathName);
   std::string GetCollectionName();
@@ -33,12 +29,7 @@ class HLTriggerObject : public Object {
   // IDs 
 
   bool   PassUserID ( ID id, bool verbose = false );
-  std::vector<int>& ObjectIDs ();
-  
- private:
-  float m_float_pt;
-  float m_float_eta;
-  float m_float_phi;
+  int ObjectID ();
 
 };
 

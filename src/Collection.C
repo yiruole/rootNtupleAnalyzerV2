@@ -4,15 +4,20 @@
 // Constructors and destructors
 //------------------------------------------------------------------------------------------
 
-Collection::Collection ( rootNtupleClass & d, size_t size ):
-  m_data ( & d ),
+Collection::Collection (std::shared_ptr<TTreeReaderTools> tools):
+  m_readerTools (tools),
+  m_trigObj_index ( -1 )
+{} 
+
+Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, size_t size ):
+  m_readerTools (tools),
   m_trigObj_index ( -1 )
 {
   SetLeadNConstituents ( size ) ;
 } 
 
 Collection::Collection ( Collection & c ): 
-  m_data ( c.m_data ),
+  m_readerTools ( c.m_readerTools ),
   m_raw_indices ( c.m_raw_indices ),
   m_trigObj_index ( -1 )
 {}

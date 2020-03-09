@@ -13,36 +13,35 @@
 #### INPUTS HERE ####
 #------------
 # analysis
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateClosureTest_cej_DataAndMC.txt
+/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateClosureTest_ccj_DataOnly.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-#SUBDIR=nano/2016/qcdFakeRate/jan9_test/
-#SUBDIR=nano/2016/qcdFakeRate/jan20_test/
-SUBDIR=nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/
+SUBDIR=nano/2016/qcdFakeRate/feb24_qcdClosureTest_applyTrigToMC
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-# integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+#ILUM=12900 # ICHEP2016
+#ILUM=6910 # ICHEP2016 minus early runs
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main
-CODENAME=analysisClass_lq_QCD_FakeRateCalculation
+CODENAME=analysisClass_lq_QCD_FakeRateClosureTest
 #------------
-INPUTLIST=config/2016_rskQCD_eosuser_comb/inputList_data.txt
+INPUTLIST=config/2016_rskQCD_eosuser_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
-#XSECTION=config/xsection_13TeV_2015_Zrescale.txt #first try at Z rescale
 #------------
-#SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_dataDriven.txt
-SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_calc.txt
+SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj.txt
 #------------
-NCORES=8 #Number of processor cores to be used to run the job
+#NCORES=8 #Number of processor cores to be used to run the job
+NCORES=10 #Number of processor cores to be used to run the job
 #------------
 
 #### END OF INPUTS ####
 
-COMMANDFILE=commandsToRunOnMoreCutFiles_fakeRateCalc_local_`hostname -s`.txt
+COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_analysis_QCDClosureTest_local_`hostname -s`.txt
 echo "" > $COMMANDFILE
 
 for file in $files
@@ -55,18 +54,19 @@ cat >> $COMMANDFILE <<EOF
 #### launch, check and combine cmds for $suffix ####
 
 time python scripts/launchAnalysis.py \
-    -e $EXE \
     -k $CODENAME \
+    -e $EXE \
     -i $INPUTLIST \
     -n rootTupleTree/tree \
     -c $file \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix  \
     -p $NCORES \
+    -k $CODENAME \
     >& launch_${suffix}_`hostname -s`.log
 
 mv launch_${suffix}_`hostname -s`.log $OUTDIRPATH/$SUBDIR/output_$suffix/
 
-time  ./scripts/combineTablesAndPlotsTemplate.py \
+time  ./scripts/combinePlots.py \
     -i $INPUTLIST \
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/output_$suffix \

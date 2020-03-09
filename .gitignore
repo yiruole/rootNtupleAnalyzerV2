@@ -10,3 +10,4 @@
 *.png
 *.ps
 main*
+src/analysisClass.C

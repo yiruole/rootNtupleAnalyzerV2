@@ -12,9 +12,6 @@ class PFJet : public Object {
 
   // Kinematic variables
   
-  float & Pt    ();
-  float & Eta   (); 
-  float & Phi   (); 
   float Energy  ();
   float JECUnc  ();
   
@@ -28,6 +25,7 @@ class PFJet : public Object {
   // IDs 
   
   bool   PassUserID ( ID id, bool verbose = false );
+  int    JetID();
   
   // ID variables
   
@@ -45,6 +43,7 @@ class PFJet : public Object {
   //float CombinedSecondaryVertexBTag ();
   float CombinedInclusiveSecondaryVertexBTag();
   float CombinedMVABTag();
+  float DeepCSVBTag();
   
  private:
   bool PassUserID_PFJetLoose (bool verbose);

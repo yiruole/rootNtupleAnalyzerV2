@@ -4,21 +4,13 @@ Introduction:
 
 This package provides a small facility to analyze one or a chain of root ntuples.
 
-A script (./scripts/make_rootNtupleClass.sh) is used to generate automatically
-(using the root command RootNtupleMaker->MakeClass) a class (include/rootNtupleClass.h
-and src/rootNtupleClass.C) with the variable definitions of a given root ntuple
-(to be provided by the user).
-
-The class baseClass (include/baseClass.h and src/baseClass.C) inherits from the
-automatically generated rootNtupleClass.
 baseClass provides the methods that are common to all analysis, such as the method
 to read a list of root files and form a chain. It will, asap, also provide a method
 to read a list of selection cuts.
 
 The class analysisClass (include/analysisClass.h and src/analysisClass.C) inherits
 from baseClass.
-The user's code should be placed in the method Loop() of analysisClass, which reimplements
-the method Loop() of rootNtupleClass.
+The user's code should be placed in the method Loop() of analysisClass.
 
 The main program (src/main.C) receives the configuration parameters (such as the input
 chain of root files and a file to provide a cut list) and executes the analysisClass code.
@@ -27,9 +19,7 @@ Instructions:
 -------------
 
 1) Environment setup:
-   scram project CMSSW CMSSW_8_0_11
-   cd CMSSW_8_0_11/src/
-   cmsenv
+/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh
 
 2) Checkout the code:
    git clone git@github.com:CMSLQ/rootNtupleAnalyzerV2 Leptoquarks/analyzer/rootNtupleAnalyzerV2
@@ -38,36 +28,22 @@ You will probably also want the macros package:
 Here we insert an extra directory so that scram will ignore the source files here 
 (in case you have other CMSSW stuff in that area).
 
-3) Generate the rootNtupleClass:
-   cd rootNtupleAnalyzerV2/
-   ./scripts/make_rootNtupleClass.sh
-      (you will be asked for input arguments, such as an ntuple file to do MakeClass() on)
-
-4) Copy the analysis template file into your own file:
+3) Copy the analysis template file into your own file:
      cp -i src/analysisClass_template.C src/analysisClass_myCode.C
    and make a symbolic link analysisClass.C by:
      ln -s analysisClass_myCode.C src/analysisClass.C
 
-   NOTE: the macro analysisClass_template.C might not be compatible with the dataformat of your ntuples
-         you have to write a consistent macro.
-   NOTE2: There are many analysis classes already available in the macros repo.
+   NOTE: There are many analysis classes already available in the macros repo.
 
-5) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
+4) Compile to test that all is OK so far (in order to compile, steps 2 and 3 need to be done first):
    make clean
-   make
-Note that if you run on full RootTupleMakerV2-produced ntuples, you have to use Makefile_fullNtuple:
-   make -f Makefile_fullNtuple
+   make -j8
 
-6) If you are writing a new analysis class, add your analysis code to the method Loop() of analysisClass_myCode.C
+5) If you are writing a new analysis class, add your analysis code to the method Loop() of analysisClass_myCode.C
 
-   NOTE: to access variables use
-   variable->at(i)
-   instead of
-   variable[i]
+6) Compile as in 4.
 
-7) Compile as in 4.
-
-8) Run:
+7) Run:
    ./main
       (you will be asked for input arguments)
 
@@ -241,26 +217,10 @@ See https://hypernews.cern.ch/HyperNews/CMS/get/exotica-lq/266.html
 
 
 
-PU reweight (Edmund Berry):
+PU reweighting
 ---------------------------
 
-See https://twiki.cern.ch/twiki/pub/CMS/Exo2011LQ1AndLQ2Analyses/PileupReweightingCode.pdf
-Some of the above is outdated.
-1) To get the PILEUP_DATA_ROOT_FILE
-Recipe is documented here: https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData#Calculating_Your_Pileup_Distribu
-And also for 2015 especially: https://twiki.cern.ch/twiki/bin/view/CMS/PileupJSONFileforData#2015_Pileup_JSON_Files
-See also: https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/2451/1/2/1/1/2/2.html
-Lumi/pileup JSON can be found here: /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt
-See https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/522.html
-Example command:
-pileupCalc.py -i ../../submitJobsWithCrabV2/runData2015D_singleElectron/v1-4-0_2015Oct25_093223/crab_SingleElectron__Run2015D-05Oct2015-v1/results/lumiSummary.json --inputLumiJSON /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt --calcMode true  --minBiasXsec 80000 --maxPileupBin 80 --numPileupBins 80  Pileup_SingleElectron__Run2015D-05Oct2015-v1.root
-2) To get the PILEUP_MC_TXT_FILE
-For 2015 MC at 25 ns, the pileup distribution used is here: SimGeneral/MixingModule/python/mix_2015_25ns_Startup_PoissonOOTPU_cfi.py
-See here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVPileUpDescription#Startup2015
-This was checked with this dataset: /DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIWinter15GS-MCRUN2_71_V1-v1/GEN-SIM
-Simply take the contents of mix.input.nbPileupEvents.probValue and put it in a file.
-For 2015 this is in github.
-
+This is done in the NanoAOD postprocessing step.
 
 
 Producing a new ntuple with a subset of cutFile variables and a subset of events (Paolo, Francesco, Edmund):
@@ -322,19 +282,20 @@ cd $LQANA
 
 6) Make the inputlist for the files you want to run on:
 
-python scripts/createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
+python createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
 -m root
 
 ... The input list you want will be here:
 $LQANA/config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/inputListAllCurrent.txt
 
+The createList script can be found in the lq1-nano repo: https://github.com/CMSLQ/lq1-nano
+
 7) Compile the analysis class you need:
 
 unlink src/analysisClass.C
 ln -s $LQMACRO/src2012/analysisClass_lq1_skim.C src/analysisClass.C
-./scripts/make_rootNtupleClass.sh -f "root://eoscms//eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/DY2JetsToLL_M-50_scaleup_8TeV-madgraph__Summer12-START53_V7C-v1__AODSIM_9_1_lll.root" -t rootTupleTree/tree
-make -f Makefile_fullNtuple clean
-make -f Makefile_fullNtuple
+make clean
+make -j8
 
 8) Test the code:
 

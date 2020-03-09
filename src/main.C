@@ -1,4 +1,3 @@
-#include "rootNtupleClass.h"
 #include "analysisClass.h"
 #include <iostream>
 #include <fstream>

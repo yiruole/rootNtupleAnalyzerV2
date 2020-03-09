@@ -1,7 +1,6 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -11,10 +10,10 @@
 #include <TRandom3.h>
 #include <TLorentzVector.h>
 #include "IDTypes.h"
-#include "rootNtupleClass.h"
+#include "analysisClass.h"
 
 class Collection;
-typedef boost::shared_ptr<Collection> CollectionPtr;
+using CollectionPtr = std::shared_ptr<Collection>;
 
 
 class Collection {
@@ -24,7 +23,8 @@ class Collection {
   // Constructors and destructors
   //-------------------------------------------------------------
   
-  Collection ( rootNtupleClass & d, size_t size );
+  Collection ( std::shared_ptr<TTreeReaderTools> tools);
+  Collection ( std::shared_ptr<TTreeReaderTools> tools, size_t size );
   Collection ( Collection & c );
   
   //-------------------------------------------------------------
@@ -32,7 +32,7 @@ class Collection {
   //-------------------------------------------------------------
   
   void SetTriggerObjectIndex ( short i ) { m_trigObj_index = i; } 
-  void SetRawIndices( std::vector<unsigned short> & i ) { m_raw_indices  = i; }
+  void SetRawIndices( std::vector<unsigned short> i ) { m_raw_indices.swap(i); }
   void SetLeadNConstituents ( unsigned short n ) {
     m_raw_indices.clear();
     for (unsigned short i = 0; i < n; ++i) 
@@ -44,13 +44,22 @@ class Collection {
   //-------------------------------------------------------------
   
   template<class Object1> Object1 GetConstituent(unsigned short i) { 
-    if ( m_trigObj_index > 0 ) return Object1 (*this, m_raw_indices[i], m_trigObj_index ); 
+    if ( m_trigObj_index > 0 )    return Object1 (*this, m_raw_indices[i], m_trigObj_index); 
     else                          return Object1 (*this, m_raw_indices[i]);
   }
   
   std::vector<unsigned short> * GetRawIndices() { return &m_raw_indices; } 
   unsigned short                GetSize()       { return  m_raw_indices.size();  } 
-  rootNtupleClass *             GetData()       { return  m_data; } 
+  template <typename T> T ReadValueBranch(const std::string& branchName) {
+    return m_readerTools->ReadValueBranch<T>(branchName);
+  }
+  template <typename T> T ReadArrayBranch(const std::string& branchName, unsigned int idx) {
+    return m_readerTools->ReadArrayBranch<T>(branchName, idx);
+  }
+
+  bool HasBranch(const std::string& branchName) {
+    return (m_readerTools->GetTree()->GetBranch(branchName.c_str())) != 0;
+  }
   
   //-------------------------------------------------------------
   // Modify collection indices
@@ -86,7 +95,7 @@ class Collection {
 
   template<class Object1>
     CollectionPtr SkimByID( ID id, bool verbose = false ) { 
-    CollectionPtr new_collection ( new Collection(*m_data ,0 ));
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     new_collection -> Clear();
     unsigned short size = GetSize();
@@ -102,7 +111,7 @@ class Collection {
   
   template<class Object1>
     CollectionPtr SkimByMinPt ( double min_pt ) { 
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -113,11 +122,26 @@ class Collection {
     return new_collection;
   }
 
+  // For skimming by minimum ptHeep, for electrons
+  
+  template<class Object1>
+    CollectionPtr SkimByMinPtHeep ( double min_pt ) { 
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
+    unsigned short size = GetSize();
+    for (unsigned short i = 0; i < size ; ++i){
+      Object1 constituent = GetConstituent<Object1> (i);
+      if ( constituent.PtHeep() >= min_pt ) 
+        new_collection -> Append ( constituent.GetRawIndex() );
+    }
+    return new_collection;
+  }
+
   // For skimming by eta range
   
   template<class Object1>
     CollectionPtr SkimByEtaRange ( double min_eta, double max_eta ) { 
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -143,7 +167,7 @@ class Collection {
     CollectionPtr SkimByVetoDRMatch ( const CollectionPtr other_collection, double min_dr ){
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -163,7 +187,7 @@ class Collection {
   template < class Object1, class Object2 > 
     CollectionPtr SkimByVetoDRMatch ( Object2 & other_object, double min_dr ){
     unsigned short this_collection_size = GetSize();
-    CollectionPtr new_collection ( new Collection(*m_data,0 ));
+    CollectionPtr new_collection ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -188,7 +212,7 @@ class Collection {
     CollectionPtr SkimByRequireDRMatch ( const CollectionPtr other_collection, double max_dr ){
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
-    CollectionPtr new_collection  ( new Collection(*m_data,0));
+    CollectionPtr new_collection  ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -216,8 +240,8 @@ class Collection {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
       double dr = this_collection_constituent.DeltaR ( & other_object );
       if ( dr < tmp_min_dr ) {
-	tmp_min_dr = dr;
-	retval = this_collection_constituent;
+        tmp_min_dr = dr;
+        retval = this_collection_constituent;
       }
     }
     return retval;
@@ -229,7 +253,7 @@ class Collection {
 
   template <class Object1> 
     CollectionPtr RemoveDuplicates () { 
-    CollectionPtr new_collection  ( new Collection(*m_data,0));
+    CollectionPtr new_collection  ( new Collection(m_readerTools, 0));
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short this_collection_size = GetSize();
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
@@ -324,9 +348,9 @@ class Collection {
         //  std::cout << "\t" << "new RECO pt          = " << v_new.Pt()               << std::endl;
         //}
 
-      this_collection_constituent.Pt() = v_new.Pt();
-      this_collection_constituent.Eta() = v_new.Eta();
-      this_collection_constituent.Phi() = v_new.Phi();
+      this_collection_constituent.SetPt(v_new.Pt());
+      this_collection_constituent.SetEta(v_new.Eta());
+      this_collection_constituent.SetPhi(v_new.Phi());
       if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
     }
 
@@ -374,7 +398,7 @@ class Collection {
       // std::cout << "\tOld - New: " << v_delta.Pt() << ", " << v_delta.Eta()                     << ", " << v_delta.Phi() << std::endl;
       // std::cout << "\tDelta(MET) = " << v_delta_met.Pt() << ", " << v_delta_met.Eta()                     << ", " << v_delta_met.Phi() << std::endl;
 
-      this_collection_constituent.Pt() = new_pt;
+      this_collection_constituent.SetPt(new_pt);
       if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
 
     }
@@ -400,15 +424,15 @@ class Collection {
     std::cout << "N(" << name << ") = " << n_constituents << std::endl;
     for (int i = 0; i < n_constituents; ++i ){ 
       Object1 constituent = GetConstituent<Object1>(i);
-      std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent;
+      std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent << std::flush;
       if      ( id == NULL_ID  ) std::cout << std::endl;
       else {
-	if ( verbose        ) { 
-	  constituent.PassUserID ( id, verbose );
-	}
-	else {
-	  std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
-	}
+        if ( verbose        ) { 
+          constituent.PassUserID ( id, verbose );
+        }
+        else {
+          std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
+        }
       }
     }
   }
@@ -420,7 +444,7 @@ class Collection {
  protected:
   short m_trigObj_index;
   std::vector<unsigned short> m_raw_indices; 
-  rootNtupleClass * m_data;
+  std::shared_ptr<TTreeReaderTools> m_readerTools;
   
 };
 

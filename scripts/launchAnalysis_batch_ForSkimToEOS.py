@@ -125,7 +125,7 @@ parser.add_option("-j", "--ijobmax", dest="ijobmax",
 
 #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
 parser.add_option("-q", "--queue", dest="queue",
-                  help="name of the queue (choose among longlunch workday tomorrow etc.)",
+        help="name of the queue (choose among espresso (20 min), microcentury (1 hr), longlunch (2 hrs), workday (8 hrs), etc.; see http://batchdocs.web.cern.ch/batchdocs/local/submit.html)",
                   metavar="QUEUE")
 
 parser.add_option("-w", "--wait", dest="wait",
@@ -142,7 +142,7 @@ parser.add_option("-m", "--eosHost", dest="eosHost",
 
 parser.add_option("-e", "--exe", dest="executable",
                   help="executable",
-                  metavar="EXECUTABLE", default="")
+                  metavar="EXECUTABLE", default="main")
 
 parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
                   help="is this a reduced skim?",
@@ -164,7 +164,10 @@ if ( not options.inputlist
     parser.print_help()
     sys.exit()
 
+if 'eos/user' in options.eosDir:
+    options.eosHost = 'root://eosuser.cern.ch/'
 # set eos mgm url
+print 'INFO: Using',options.eosHost,'as eosHost'
 os.environ['EOS_MGM_URL'] = options.eosHost
 
 #--------------------------------------------------------------------------------
@@ -210,15 +213,15 @@ print "... done "
 # Look for the exe file.  If it exists, move it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the exe to the local output directory...",
 
-if not os.path.isfile ( options.executable ) : 
-    print "Error: No file here: " + options.executable
-    sys.exit() 
-else : 
+if os.path.isfile ( options.executable ) : 
+    print "Moving the exe to the local output directory...",
     os.system ( "cp " + options.executable + " " + options.outputDir + "/" )
+    print "... done "
+else : 
+    print "Warning: No file here: '" + options.executable + "'" + "; proceeding anyway"
+    #sys.exit() 
 
-print "... done "
 
 
 #--------------------------------------------------------------------------------
@@ -271,9 +274,10 @@ print "... done "
 # Check if path is a link
 #--------------------------------------------------------------------------------
 
-print "Checking the link to analysisClass.C..."
+print "Checking the link to analysisClass.C...",
 
 if not os.path.islink ( "src/analysisClass.C" ) :
+    print
     print "Error: src/analysisClass.C is not a symbolic link"
     sys.exit()
 code_name = os.readlink ( "./src/analysisClass.C" ).split("/")[-1].split(".C")[0]
@@ -329,9 +333,10 @@ for line in inputlist_file:
     command = command + " -n " + str(jobs_to_submit)
     command = command + " -q " + options.queue
     command = command + " -d " + eosPath
+    #command = command + " -e " + os.path.realpath(options.executable)
     command = command + " -e " + options.outputDir+'/'+options.executable.split('/')[-1]
     command = command + " -m " + options.eosHost
-    command = command + " -j " + jsonFile
+    command = command + " -j " + os.path.realpath(jsonFile)
     if options.reducedSkim:
         command = command + " -r "
     
@@ -348,7 +353,7 @@ for line in inputlist_file:
 inputlist_file.close() 
 
 # FIXME this is not the correct number
-print "total jobs =", total_jobs
+print "submitted a _maximum_ of jobs =", total_jobs
 
 if len(failedCommands) > 0:
     print 'list of failed commands:'

@@ -5,6 +5,8 @@
 #include "IDTypes.h"
 #include "Collection.h"
 
+#include <TLeaf.h>
+
 class GenParticle : public Object { 
 
  public:
@@ -14,10 +16,7 @@ class GenParticle : public Object {
   
   // Kinematic variables
 
-  float & Pt() ;
-  float & Eta();
-  float & Phi();
-  float & Mass();
+  float Mass();
 
   // IDs 
 
@@ -29,9 +28,13 @@ class GenParticle : public Object {
   int MotherIndex ();
   int Status      ();
   int NumDaughters();
+
+  int StatusFlags ();
   
   bool IsHardProcess();
+  bool IsFromHardProcess();
   bool IsFromHardProcessFinalState();
+
  private:
   
   bool PassUserID_FromLQ              (bool verbose);
@@ -55,7 +58,6 @@ class GenParticle : public Object {
   bool PassUserID_GenLQ               (bool verbose);
   bool PassUserID_GenTop              (bool verbose);
   bool PassUserID_Status62            (bool verbose);
-
 
 };
 
