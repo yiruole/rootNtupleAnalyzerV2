@@ -1,7 +1,9 @@
 from ROOT import TFile,TH2F,TProfile,TCanvas,TColor,kRed,kBlue,TGraphAsymmErrors,TH1D,THStack,TLegend,kWhite,kGreen
+import ROOT
 import math
 import numpy
 import copy
+
 
 
 def GetFakeRate(lowEnd,highEnd,reg,jets,histDict,verbose=False):
@@ -69,11 +71,11 @@ def MakeFakeRatePlot(reg,jets,histDict,dataDriven=True):
   if verbose:
     print 'MakeFakeRatePlot:reg=',reg,'jets=',jets,'dataDriven=',dataDriven
   if reg=='Bar':
-    bins = [45,50,60,70,80,90,100,110,130,150,170,200,250,300,400,500,600,800,1000]
+      bins = ptBinsBarrel
   else:
-    bins = [50,75,100,125,150,200,250,300,350,500,1000]
-  histNum = TH1D('num','num',len(bins)-1,numpy.array(bins,dtype=float))
-  histDen = TH1D('den','den',len(bins)-1,numpy.array(bins,dtype=float))
+      bins = ptBinsEndcap
+  histNum = TH1D('num'+reg+jets+str(dataDriven),'num'+reg+jets+str(dataDriven),len(bins)-1,numpy.array(bins,dtype=float))
+  histDen = TH1D('den'+reg+jets+str(dataDriven),'den'+reg+jets+str(dataDriven),len(bins)-1,numpy.array(bins,dtype=float))
   for index,binLow in enumerate(bins):
     if index>=(len(bins)-1):
       break
@@ -90,15 +92,20 @@ def MakeFakeRatePlot(reg,jets,histDict,dataDriven=True):
       print 'set bin:',histNum.GetXaxis().FindBin(binLow),'to',num
       print 'bin content is:',histNum.GetBinContent(histNum.GetXaxis().FindBin(binLow))
   #c = TCanvas()
+  #c.SetName('num'+reg+jets)
+  #c.SetTitle('num'+reg+jets)
   #c.cd()
   #histNum.Draw()
   #c1 = TCanvas()
+  #c1.SetName('den'+reg+jets)
+  #c1.SetTitle('den'+reg+jets)
   #c1.cd()
   #histDen.Draw()
+
   graphFR = TGraphAsymmErrors()
   graphFR.BayesDivide(histNum,histDen)
   graphFR.SetName('fr{reg}_{jets}{dataDriven}'.format(reg=reg,jets=jets,dataDriven='template' if dataDriven else 'MCsub'))
-  return graphFR
+  return graphFR,histNum,histDen
 
 
 def MakeFRCanvas(plotList,titleList,canTitle):
@@ -146,13 +153,13 @@ def MakeFRCanvas(plotList,titleList,canTitle):
     return can,leg
 
 
-def LoadHistosData(histos,varName):
+def LoadHistosData(histos,varName,sample):
   for reg in detectorRegions:
     histos[reg] = {}
     for eType in electronTypes:
       histos[reg][eType] = {}
       for jet in jetBins:
-        hist = tfile.Get(histoBaseName.format(sample='QCDFakes_DATA',type=eType,region=reg,jets=jet,varName=varName))
+        hist = tfile.Get(histoBaseName.format(sample=sample,type=eType,region=reg,jets=jet,varName=varName))
         histos[reg][eType][jet] = hist
         #print 'added histo:',hist.GetName(),'with entries:',hist.GetEntries(),'to','['+reg+']['+eType+']['+jet+']'
 
@@ -179,6 +186,45 @@ def LoadHistosMC(histos,varName):
       histos[reg]['MC'][jet] = mcTotalHist
 
 
+def GetJetBin(histName):
+    if 'Jet' in histName:
+        return histName[histName.find('Jet')-1:histName.find('Jet')+3]
+    else:
+        return '0Jets'
+
+# make FR 2D plot from FR TGraphAsymmErrors returned from MakeFakeRatePlot (frGraph)
+# frGraph has x-axis: Pt and y-axis FR
+# so we need to know the eta region here
+def MakeFR2D(frGraph, reg):
+    if reg=='Bar':
+        bins = ptBinsBarrel
+        etaToFill = 1
+    elif reg=='End1':
+        bins = ptBinsEndcap
+        etaToFill = 1.7
+    elif reg=='End2':
+        bins = ptBinsEndcap
+        etaToFill = 2
+    else:
+        print 'ERROR: could not understand region given:',reg,'; return empty hist'
+        return
+    etaBins = [-2.5,-2.0,-1.566,-1.4442,0,1.4442,1.566,2.0,2.5]
+    frHist2d = TH2F('test','test',len(etaBins)-1,numpy.array(etaBins,dtype=float),len(bins)-1,numpy.array(bins,dtype=float))
+    #print 'consider frGraph with name {}'.format(frGraph.GetName())
+    jets = GetJetBin(frGraph.GetName())
+    name = 'fr2D_{reg}_{jets}'.format(reg=reg,jets=jets)
+    frHist2d.SetNameTitle(name,name)
+    frHist2d.GetXaxis().SetTitle('SuperCluster #eta')
+    frHist2d.GetYaxis().SetTitle('p_{T} [GeV]')
+    for iPoint in range(frGraph.GetN()):
+        x = ROOT.Double()
+        y = ROOT.Double()
+        frGraph.GetPoint(iPoint,x,y)
+        frHist2d.SetBinContent(frHist2d.GetXaxis().FindBin(etaToFill),frHist2d.GetYaxis().FindBin(x),y)
+        #TODO set error
+    return frHist2d
+
+
 ####################################################################################################
 # RUN
 ####################################################################################################
@@ -191,15 +237,25 @@ def LoadHistosMC(histos,varName):
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
 #filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+#filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+
+outputFileName = 'plots.root'
+
 print 'Opening file:',filename
 tfile = TFile.Open(filename)
 
-writeOutput = False
+ROOT.gROOT.SetBatch(True)
+writeOutput = True
+doMuz = False # do Muzamil's plots
 
 histoBaseName = 'histo2D__{sample}__{type}_{region}_{jets}{varName}'
+dataSampleName = 'QCDFakes_DATA'
 
+ptBinsBarrel = [35,40,45,50,60,70,80,90,100,110,130,150,170,200,250,300,400,500,600,800,1000]
+ptBinsEndcap = [35,50,75,100,125,150,200,250,300,350,500,1000]
 electronTypes = ['Jets','Electrons','Total']
+# probably eventually expand to BarPlus, BarMinus, etc.
 detectorRegions = ['Bar','End1','End2']
 jetBins = ['','1Jet_','2Jet_','3Jet_']
 # for MC
@@ -211,7 +267,7 @@ varNameList = ['TrkIsoHEEP7vsPt_PAS','TrkIsoHEEP7vsMTenu_PAS']
 allHistos = {}
 for varName in varNameList:
     allHistos[varName] = {}
-    LoadHistosData(allHistos[varName],varName)
+    LoadHistosData(allHistos[varName],varName,dataSampleName)
     LoadHistosMC(allHistos[varName],varName)
 
 
@@ -219,17 +275,18 @@ for varName in varNameList:
 
 myCanvases = []
 if writeOutput:
-  outputFile = TFile('plots.root','recreate')
+  outputFile = TFile(outputFileName,'recreate')
   outputFile.cd()
 #TEST end2 FR plots
-# get Muzamil's hists
-tfileMuzamilTwoJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR2D2JetScEt.root')
-tfileMuzamilZeroJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR0JET_HLT.root')
-muzHist2DZeroJ = tfileMuzamilZeroJ.Get('Endcap_Fake_Rate')
-muzHist2DZeroJBar = tfileMuzamilZeroJ.Get('Barrel_Fake_Rate')
-muzHistEnd2ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd2_0Jets',2,2)
-muzHistEnd1ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd1_0Jets',1,1)
-muzHistBarZeroJ = muzHist2DZeroJBar.ProjectionX('projMuzBar_0Jets')
+if doMuz:
+    # get Muzamil's hists
+    tfileMuzamilTwoJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR2D2JetScEt.root')
+    tfileMuzamilZeroJ = TFile('/afs/cern.ch/user/m/mbhat/work/public/Fakerate_files_2016/FR0JET_HLT.root')
+    muzHist2DZeroJ = tfileMuzamilZeroJ.Get('Endcap_Fake_Rate')
+    muzHist2DZeroJBar = tfileMuzamilZeroJ.Get('Barrel_Fake_Rate')
+    muzHistEnd2ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd2_0Jets',2,2)
+    muzHistEnd1ZeroJ = muzHist2DZeroJ.ProjectionX('projMuzEnd1_0Jets',1,1)
+    muzHistBarZeroJ = muzHist2DZeroJBar.ProjectionX('projMuzBar_0Jets')
 # get Sam's hists
 tfileZPrime = TFile('/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root')
 zprimeHistEnd2ZeroJ = tfileZPrime.Get('frHistEEHigh')
@@ -237,26 +294,62 @@ zprimeHistEnd1ZeroJ = tfileZPrime.Get('frHistEELow')
 zprimeHistBarZeroJ = tfileZPrime.Get('frHistEB')
 # my hists
 histos = allHistos['TrkIsoHEEP7vsPt_PAS']
-graphEnd2ZeroJ = MakeFakeRatePlot('End2','',histos)
-graphEnd2ZeroJMC = MakeFakeRatePlot('End2','',histos,False)
-graphEnd1ZeroJ = MakeFakeRatePlot('End1','',histos)
-graphEnd1ZeroJMC = MakeFakeRatePlot('End1','',histos,False)
-graphBarZeroJ = MakeFakeRatePlot('Bar','',histos)
-graphBarZeroJMC = MakeFakeRatePlot('Bar','',histos,False)
+graphEnd2ZeroJ,histNumEnd2ZeroJ,histDenEnd2ZeroJ = MakeFakeRatePlot('End2','',histos)
+graphEnd2ZeroJMC,histNumEnd2ZeroJMC,histDenEnd2ZeroJMC = MakeFakeRatePlot('End2','',histos,False)
+graphEnd1ZeroJ,histNumEnd1ZeroJ,histDenEnd1ZeroJ = MakeFakeRatePlot('End1','',histos)
+graphEnd1ZeroJMC,histNumEnd1ZeroJMC,histDenEnd1ZeroJMC = MakeFakeRatePlot('End1','',histos,False)
+graphBarZeroJ,histNumBarZeroJ,histDenBarZeroJ = MakeFakeRatePlot('Bar','',histos)
+graphBarZeroJMC,histNumBarZeroJMC,histDenBarZeroJMC = MakeFakeRatePlot('Bar','',histos,False)
+## for drawing num/den hists
+#numDenHistList = [histNumEnd2ZeroJ,histDenEnd2ZeroJ,histNumEnd1ZeroJ,histDenEnd1ZeroJ,histNumBarZeroJ,histDenBarZeroJ]
+#for idx,hist in enumerate(numDenHistList):
+#    if idx%2 != 0:
+#        continue
+#    if idx > len(numDenHistList)-2:
+#        break
+#    print 'consider hist:',hist.GetName(),'and',numDenHistList[idx+1].GetName()
+#    c = TCanvas()
+#    c.SetName(hist.GetName())
+#    c.SetTitle(hist.GetTitle())
+#    c.cd()
+#    c.SetLogx()
+#    c.SetLogy()
+#    c.SetGridx()
+#    c.SetGridy()
+#    numDenHistList[idx+1].SetLineWidth(2)
+#    numDenHistList[idx+1].SetLineColor(4)
+#    numDenHistList[idx+1].SetMarkerColor(4)
+#    numDenHistList[idx+1].Draw()
+#    numDenHistList[idx+1].GetYaxis().SetRangeUser(2e-1,1e12)
+#    hist.SetLineWidth(2)
+#    hist.SetLineColor(2)
+#    hist.SetMarkerColor(2)
+#    hist.Draw('sames')
+
 # for writing output
-histList = [graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ,
-    graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ,
-    graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ]
+if doMuz:
+    histList = [graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ,
+        graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ,
+        graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ]
+else:
+    histList = [graphEnd2ZeroJ,graphEnd2ZeroJMC,zprimeHistEnd2ZeroJ,
+        graphEnd1ZeroJ,graphEnd1ZeroJMC,zprimeHistEnd1ZeroJ,
+        graphBarZeroJ,graphBarZeroJMC,zprimeHistBarZeroJ]
 
+if doMuz:
+    titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})','Zprime (E_{T}^{HLT})']
+    myCanvases.append(MakeFRCanvas([graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ],titleList,'Endcap2, >=0 jets'))
+    myCanvases.append(MakeFRCanvas([graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ],titleList,'Endcap1, >=0 jets'))
+    myCanvases.append(MakeFRCanvas([graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ],titleList,'Barrel, >=0 jets'))
+else:
+    titleList = ['Seth','Seth (MCSub)','Zprime (E_{T}^{HLT})']
+    myCanvases.append(MakeFRCanvas([graphEnd2ZeroJ,graphEnd2ZeroJMC,zprimeHistEnd2ZeroJ],titleList,'Endcap2, >=0 jets'))
+    myCanvases.append(MakeFRCanvas([graphEnd1ZeroJ,graphEnd1ZeroJMC,zprimeHistEnd1ZeroJ],titleList,'Endcap1, >=0 jets'))
+    myCanvases.append(MakeFRCanvas([graphBarZeroJ,graphBarZeroJMC,zprimeHistBarZeroJ],titleList,'Barrel, >=0 jets'))
 
-titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})','Zprime (E_{T}^{HLT})']
-myCanvases.append(MakeFRCanvas([graphEnd2ZeroJ,graphEnd2ZeroJMC,muzHistEnd2ZeroJ,zprimeHistEnd2ZeroJ],titleList,'Endcap2, >=0 jets'))
-myCanvases.append(MakeFRCanvas([graphEnd1ZeroJ,graphEnd1ZeroJMC,muzHistEnd1ZeroJ,zprimeHistEnd1ZeroJ],titleList,'Endcap1, >=0 jets'))
-myCanvases.append(MakeFRCanvas([graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zprimeHistBarZeroJ],titleList,'Barrel, >=0 jets'))
-
-#for canLeg in myCanvases:
-#    canLeg[0].Draw() #canvas
-#    #canLeg[-1][1].Draw() #legend
+for canLeg in myCanvases:
+    canLeg[0].Draw() #canvas
+    #canLeg[-1][1].Draw() #legend
 
 ##################################################
 # >= 1 jet
@@ -265,12 +358,12 @@ myCanvases.append(MakeFRCanvas([graphBarZeroJ,graphBarZeroJMC,muzHistBarZeroJ,zp
 if writeOutput:
   outputFile.cd()
 # my hists
-graphEnd2OneJ = MakeFakeRatePlot('End2','1Jet_',histos)
-graphEnd2OneJMC = MakeFakeRatePlot('End2','1Jet_',histos,False)
-graphEnd1OneJ = MakeFakeRatePlot('End1','1Jet_',histos)
-graphEnd1OneJMC = MakeFakeRatePlot('End1','1Jet_',histos,False)
-graphBarOneJ = MakeFakeRatePlot('Bar','1Jet_',histos)
-graphBarOneJMC = MakeFakeRatePlot('Bar','1Jet_',histos,False)
+graphEnd2OneJ = MakeFakeRatePlot('End2','1Jet_',histos)[0]
+graphEnd2OneJMC = MakeFakeRatePlot('End2','1Jet_',histos,False)[0]
+graphEnd1OneJ = MakeFakeRatePlot('End1','1Jet_',histos)[0]
+graphEnd1OneJMC = MakeFakeRatePlot('End1','1Jet_',histos,False)[0]
+graphBarOneJ = MakeFakeRatePlot('Bar','1Jet_',histos)[0]
+graphBarOneJMC = MakeFakeRatePlot('Bar','1Jet_',histos,False)[0]
 # for writing output
 histList.extend([graphEnd2OneJ,graphEnd2OneJMC,#muzHistEnd2OneJ,zprimeHistEnd2OneJ,
     graphEnd1OneJ,graphEnd1OneJMC,#muzHistEnd1OneJ,zprimeHistEnd1OneJ,
@@ -281,36 +374,48 @@ histList.extend([graphEnd2OneJ,graphEnd2OneJMC,#muzHistEnd2OneJ,zprimeHistEnd2On
 ##################################################
 if writeOutput:
   outputFile.cd()
-# Muzamil's plots
-muzHist2DTwoJ = tfileMuzamilTwoJ.Get('Endcap_Fake_Rate')
-muzHist2DTwoJBar = tfileMuzamilTwoJ.Get('Barrel_Fake_Rate')
-muzHistEnd2TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd2_2Jets',2,2)
-muzHistEnd1TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd1_2Jets',1,1)
-muzHistBarTwoJ = muzHist2DTwoJBar.ProjectionX('projMuzBar_2Jets')
+if doMuz:
+    # Muzamil's plots
+    muzHist2DTwoJ = tfileMuzamilTwoJ.Get('Endcap_Fake_Rate')
+    muzHist2DTwoJBar = tfileMuzamilTwoJ.Get('Barrel_Fake_Rate')
+    muzHistEnd2TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd2_2Jets',2,2)
+    muzHistEnd1TwoJ = muzHist2DTwoJ.ProjectionX('projMuzEnd1_2Jets',1,1)
+    muzHistBarTwoJ = muzHist2DTwoJBar.ProjectionX('projMuzBar_2Jets')
 # my hists
-graphEnd2TwoJ = MakeFakeRatePlot('End2','2Jet_',histos)
-graphEnd2TwoJMC = MakeFakeRatePlot('End2','2Jet_',histos,False)
-graphEnd1TwoJ = MakeFakeRatePlot('End1','2Jet_',histos)
-graphEnd1TwoJMC = MakeFakeRatePlot('End1','2Jet_',histos,False)
-graphBarTwoJ = MakeFakeRatePlot('Bar','2Jet_',histos)
-graphBarTwoJMC = MakeFakeRatePlot('Bar','2Jet_',histos,False)
+graphEnd2TwoJ = MakeFakeRatePlot('End2','2Jet_',histos)[0]
+graphEnd2TwoJMC = MakeFakeRatePlot('End2','2Jet_',histos,False)[0]
+graphEnd1TwoJ = MakeFakeRatePlot('End1','2Jet_',histos)[0]
+graphEnd1TwoJMC = MakeFakeRatePlot('End1','2Jet_',histos,False)[0]
+graphBarTwoJ = MakeFakeRatePlot('Bar','2Jet_',histos)[0]
+graphBarTwoJMC = MakeFakeRatePlot('Bar','2Jet_',histos,False)[0]
 # for writing output
-histList.extend([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ,
-    graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ,
-    graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ])
+if doMuz:
+    histList.extend([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ,
+        graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ,
+        graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ])
+else:
+    histList.extend([graphEnd2TwoJ,graphEnd2TwoJMC,
+        graphEnd1TwoJ,graphEnd1TwoJMC,
+        graphBarTwoJ,graphBarTwoJMC])
 
-titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})']
-myCanvases.append(MakeFRCanvas([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ],titleList,'Endcap2, >=2 jets'))
-myCanvases.append(MakeFRCanvas([graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ],titleList,'Endcap1, >=2 jets'))
-myCanvases.append(MakeFRCanvas([graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ],titleList,'Barrel, >=2 jets'))
+if doMuz:
+    titleList = ['Seth','Seth (MCSub)','Muzamil (E_{T}^{HLT})']
+    myCanvases.append(MakeFRCanvas([graphEnd2TwoJ,graphEnd2TwoJMC,muzHistEnd2TwoJ],titleList,'Endcap2, >=2 jets'))
+    myCanvases.append(MakeFRCanvas([graphEnd1TwoJ,graphEnd1TwoJMC,muzHistEnd1TwoJ],titleList,'Endcap1, >=2 jets'))
+    myCanvases.append(MakeFRCanvas([graphBarTwoJ,graphBarTwoJMC,muzHistBarTwoJ],titleList,'Barrel, >=2 jets'))
+else:
+    titleList = ['Seth','Seth (MCSub)']
+    graphEnd2TwoJ.Print()
+    graphEnd2TwoJMC.Print()
+    myCanvases.append(MakeFRCanvas([graphEnd2TwoJ,graphEnd2TwoJMC],titleList,'Endcap2, >=2 jets'))
+    myCanvases.append(MakeFRCanvas([graphEnd1TwoJ,graphEnd1TwoJMC],titleList,'Endcap1, >=2 jets'))
+    myCanvases.append(MakeFRCanvas([graphBarTwoJ,graphBarTwoJMC],titleList,'Barrel, >=2 jets'))
 
 for canLeg in myCanvases:
     canLeg[0].Draw() #canvas
     #canLeg[-1][1].Draw() #legend
 
 
-
-exit(0)
 ##################################################
 ## make Et plot
 ##################################################
@@ -404,8 +509,39 @@ print 'ZEle=',histZ.Integral(histZ.FindBin(low),histZ.FindBin(high)-1)
 
 
 if writeOutput:
+    endcap2dHists = []
     for hist in histList:
         hist.Write()
+        if 'template' in hist.GetName():
+            hist2d = MakeFR2D(hist,hist.GetName()[2:hist.GetName().find('_')])
+            if 'End' in hist2d.GetName():
+                endcap2dHists.append(hist2d)
+            else:
+                hist2d.Write()
+    histNamesDone = []
+    for i in range(len(endcap2dHists)):
+        hist = endcap2dHists[i]
+        name = hist.GetName()
+        if name in histNamesDone:
+            continue
+        reg = name[2:name.find('_')]
+        jets = GetJetBin(name)
+        for j in range(len(endcap2dHists)):
+            hist2 = endcap2dHists[j]
+            name2 = hist2.GetName()
+            if name==name2:
+                continue
+            reg2 = name2[2:name2.find('_')]
+            jets2 = GetJetBin(name2)
+            if reg==reg2 and jets==jets2:
+                hist.Add(hist2)
+                histNamesDone.extend([name,name2])
+                name = name.replace('End1','End')
+                name = name.replace('End2','End')
+                hist.SetNameTitle(name,name)
+                hist.Write()
+                break
+            
     outputFile.Close()
 
 #histo2D_DY_zeroJ = tfile.Get('histo2D__ZJet_amcatnlo_ptBinned__Electrons_End1_TrkIsoHEEP7vsPt_PAS')
