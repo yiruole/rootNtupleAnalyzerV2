@@ -56,6 +56,10 @@ class Collection {
   template <typename T> T ReadArrayBranch(const std::string& branchName, unsigned int idx) {
     return m_readerTools->ReadArrayBranch<T>(branchName, idx);
   }
+
+  bool HasBranch(const std::string& branchName) {
+    return (m_readerTools->GetTree()->GetBranch(branchName.c_str())) != 0;
+  }
   
   //-------------------------------------------------------------
   // Modify collection indices
