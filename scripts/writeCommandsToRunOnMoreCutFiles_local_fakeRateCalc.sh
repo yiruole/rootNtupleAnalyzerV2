@@ -16,19 +16,9 @@
 files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-#SUBDIR=2016fakeRate/jan30_rereco/
-#SUBDIR=2016fakeRate/nov20_test/
-#SUBDIR=2016fakeRate/dec5_eventList/
-#SUBDIR=2016fakeRate/dec8_addPreselCuts/
-#SUBDIR=2016fakeRate/dec8_noPreselCuts/
-#SUBDIR=2016fakeRate/dec15_tightenJets/
-#SUBDIR=2016fakeRate/dec17_tightenJetsAddMET55cut/
-#SUBDIR=2016fakeRate/dec18_tightenJetsNoMET55cut/
-#SUBDIR=2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/
-#SUBDIR=2016fakeRate/dec19_mtPlots_tightenJetsWithMET55cut/
-#SUBDIR=2016fakeRate/jan15_addLTE1JetRegion
-#SUBDIR=2016fakeRate/jan16_addLTE1JetRegion
-SUBDIR=nano/2016/qcdFakeRate/
+#SUBDIR=nano/2016/qcdFakeRate/jan9_test/
+#SUBDIR=nano/2016/qcdFakeRate/jan20_test/
+SUBDIR=nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -39,13 +29,7 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #------------
-INPUTLIST=config/2016_rskQCD_eosuser/inputListAllCurrent.txt
-#INPUTLIST=config/RSK_QCD_jan12_v237_eoscms_comb/inputListAllCurrent.txt
-#INPUTLIST=config/RSK_QCD_jan12_v237_eoscms_comb/inputList_oldMCAndSinglePhoton.txt
-#INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputList_data.txt
-#INPUTLIST=config/RSK_QCD_nov14_tuplev236_eoscms_comb/inputListAllCurrent.txt
-#INPUTLIST=config/RSK_QCD_nov5_v236_eoscms_comb/inputList_singlePhotonDYW.txt
-#INPUTLIST=config/RSK_QCD_rereco_v233_fakeRate/inputListAllCurrent.txt
+INPUTLIST=config/2016_rskQCD_eosuser_comb/inputList_data.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #XSECTION=config/xsection_13TeV_2015_Zrescale.txt #first try at Z rescale
@@ -53,8 +37,7 @@ XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_dataDriven.txt
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_calc.txt
 #------------
-#NCORES=8 #Number of processor cores to be used to run the job
-NCORES=24 #Number of processor cores to be used to run the job
+NCORES=8 #Number of processor cores to be used to run the job
 #------------
 
 #### END OF INPUTS ####

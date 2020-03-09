@@ -35,7 +35,13 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nano/2016/analysis/eejj_psk_sep20
+#SUBDIR=nano/2016/analysis/eejj_trigSFSCEt_dec5
+SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
+#SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec3
+#SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec2
+#SUBDIR=nano/2016/analysis/eejj_oldTrigEff_nov29
+#SUBDIR=nano/2016/analysis/eejj_trigSF_nov28
+#SUBDIR=nano/2016/analysis/eejj_psk_sep20
 #SUBDIR=2016analysis/eejj_psk_apr3_lq650from2012
 #SUBDIR=2016analysis/eejj_psk_mar26_muonVetoSyst
 #SUBDIR=2016analysis/eejj_psk_mar22_muonVetoSyst
@@ -102,7 +108,11 @@ CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_preselectionOnly #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #CODENAME=analysisClass_lq1_effiStudy
 #------------
-INPUTLIST=config/2016_pskEEJJPresel_custom2016skimAll_eoscms_comb/inputListAllCurrent.txt
+INPUTLIST=config/2016_pskEEJJ_5dec2019/inputList_DYJIncOnly.txt
+#INPUTLIST=config/2016_pskEEJJ_5dec2019/inputListAllCurrent.txt
+#INPUTLIST=config/2016_pskEEJJ_3dec2019/inputListAllCurrent.txt
+#INPUTLIST=config/2016_rskSEleL_5nov2019/inputListAllCurrent.txt
+#INPUTLIST=config/2016_pskEEJJPresel_custom2016skimAll_eoscms_comb/inputListAllCurrent.txt
 #INPUTLIST=config/2016_pskEEJJ_eoscms_comb/inputListAllCurrent.txt
 #INPUTLIST=config/PSKeejj_mar26_v237_local_comb/inputListAllCurrent.txt
 #INPUTLIST=config/PSKeejj_mar16_v237_local_comb/inputListAllCurrent.txt
