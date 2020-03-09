@@ -9,7 +9,10 @@
 
 #ZJet_Madgraph_M-5to50         DYJetsToLL_M-5to50
 #ZJet_Madgraph_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
-#ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM
+#ZJet_amcatnlo_Inc    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7_ext2-v1/NANOAODSIM
+# hack since I renamed the nanoPostProc skim manually
+#ZJet_amcatnlo_M50    /DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+ZJet_amcatnlo_M10to50    /DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/MINIAODSIM
 #ZJet_amcatnlo    DYJetsToLL_M-100to200_ DYJetsToLL_M-200to400_ DYJetsToLL_M-400to500_ DYJetsToLL_M-500to700_ DYJetsToLL_M-700to800_ DYJetsToLL_M-800to1000_ DYJetsToLL_M-1000to1500_ DYJetsToLL_M-1500to2000_ DYJetsToLL_M-2000to3000_
 #ZJet_amcatnlo_M-100to200      DYJetsToLL_M-100to200
 #ZJet_amcatnlo_M-200to400      DYJetsToLL_M-200to400
@@ -31,6 +34,7 @@ ZJet_amcatnlo_ptBinnedFrom50    ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to25
 ZJet_amcatnlo_ptBinnedFrom100    ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 #ZJet_amcatnlo_ptBinned_noIncZ    ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 #ZJet_amcatnlo_ptBinned_IncStitch    ZJet_amcatnlo_Inc  ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
+#ZJet_amcatnlo_Inc    ZJet_amcatnlo_M10to50  ZJet_amcatnlo_M50
 
 #WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
@@ -129,6 +133,7 @@ DIBOSON_amcatnlo    WW_amcatnlo WZ_amcatnlo ZZ_amcatnlo  VVTo2L2Nu
 #ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 OTHERBKG_WJetPt_amcAtNLODiboson   	WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+#ALLBKG_powhegTTBar_ZJetIncWJetPt_amcAtNLODiboson		ZJet_amcatnlo_Inc TTbar_powheg WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 
 # Removed QCD Fakes from here
 #ALLBKG_MG_HT		ZJet_Madgraph_HT TTbar_Madgraph WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
@@ -149,6 +154,7 @@ SingleElectron_2016F    /SingleElectron_Run2016F-17Jul2018-v1/MINIAOD
 SingleElectron_2016G    /SingleElectron_Run2016G-17Jul2018-v1/MINIAOD
 SingleElectron_2016H    /SingleElectron_Run2016H-17Jul2018-v1/MINIAOD
 SingleElectron_2016_all    SingleElectron_2016B  SingleElectron_2016C  SingleElectron_2016D  SingleElectron_2016E  SingleElectron_2016F  SingleElectron_2016G SingleElectron_2016H
+SingleElectron_all    SingleElectron_2016_all
 SinglePhoton_2016B    /SinglePhoton_Run2016B-17Jul2018_ver2-v1/MINIAOD
 SinglePhoton_2016C    /SinglePhoton_Run2016C-17Jul2018-v1/MINIAOD
 SinglePhoton_2016D    /SinglePhoton_Run2016D-17Jul2018-v1/MINIAOD
@@ -157,7 +163,8 @@ SinglePhoton_2016F    /SinglePhoton_Run2016F-17Jul2018-v1/MINIAOD
 SinglePhoton_2016G    /SinglePhoton_Run2016G-17Jul2018-v1/MINIAOD
 SinglePhoton_2016H    /SinglePhoton_Run2016H-17Jul2018-v1/MINIAOD
 SinglePhoton_2016_all    SinglePhoton_2016B  SinglePhoton_2016C  SinglePhoton_2016D  SinglePhoton_2016E  SinglePhoton_2016F  SinglePhoton_2016G SinglePhoton_2016H
-DATA    SingleElectron_2016_all  SinglePhoton_2016_all
+SinglePhoton_all    SinglePhoton_2016_all
+DATA    SingleElectron_all  SinglePhoton_all
 
 LQ_M200		/LQToUE_M-200_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM 
 LQ_M250		/LQToUE_M-250_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM 
