@@ -17,11 +17,11 @@ float PFJet::JECUnc		                  () { return -1.0; }
                                      
 float PFJet::NeutralHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_neHEF" ,m_raw_index); } 
 float PFJet::NeutralEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_neEmEF",m_raw_index); } 
-int    PFJet::NeutralHadronMultiplicity  () { -1; }
-int    PFJet::NeutralMultiplicity        () { -1; }
-int    PFJet::NConstituents              () { return m_collection->ReadArrayBranch<Int_t>("Jet_nConstituents"  , m_raw_index); } 
+int    PFJet::NeutralHadronMultiplicity () { return -1; }
+int    PFJet::NeutralMultiplicity       () { return -1; }
+int    PFJet::NConstituents             () { return m_collection->ReadArrayBranch<Int_t>("Jet_nConstituents"  , m_raw_index); } 
 float PFJet::ChargedHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_chHEF"         , m_raw_index); } 
-int    PFJet::ChargedMultiplicity        () { -1; } 
+int    PFJet::ChargedMultiplicity       () { return -1; } 
 float PFJet::ChargedEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_chEmEF"        , m_raw_index); } 
 
 int PFJet::JetID() { return m_collection->ReadArrayBranch<Int_t>("Jet_jetId",m_raw_index); }
