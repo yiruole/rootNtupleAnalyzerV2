@@ -8,7 +8,6 @@ import os.path
 from ROOT import TFile, TH1F, TH2F, TH3F, gROOT
 import ROOT
 import re
-import math
 
 import combineCommon
 
@@ -17,7 +16,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
     histoName = htemp.GetName()
     # thanks Riccardo
     # init histo if needed
-    if not h in dictFinalHistoAtSample:
+    if h not in dictFinalHistoAtSample:
         if "TH2" in htemp.__repr__():
             dictFinalHistoAtSample[h] = TH2F()
             dictFinalHistoAtSample[h].SetName("histo2D__" + sample + "__" + histoName)
@@ -56,7 +55,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
             # print 'not combining classtype of',htemp.ClassName()
             return
     if toBeUpdated:
-        ##XXX DEBUG
+        #  XXX DEBUG
         # binToExamine = 33
         # if 'OptBinLQ60' in histoName:
         #  print
@@ -75,7 +74,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
             # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
             htemp.Scale(plotWeight)
             returnVal = dictFinalHistoAtSample[h].Add(htemp)
-        ##XXX DEBUG
+        #  XXX DEBUG
         # if 'OptBinLQ60' in histoName:
         #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
         #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
@@ -92,47 +91,37 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         weight = 1.0
         plotWeight = 1.0
         xsection_X_intLumi = Ntot
-        sumAMCatNLOweights = -1
+        sumWeights = -1
         print "\t[data]",
         sys.stdout.flush()
     else:
         xsection_X_intLumi = float(xsection_val) * float(intLumi)
         print "\t[MC]",
         sys.stdout.flush()
-        # for amc@NLO need to multiply by sum of weights
+        # need to multiply by sum of weights
         tfile = TFile(inputRootFile)
         sumOfWeightsHist = tfile.Get("SumOfWeights")
-        sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
+        sumWeights = sumOfWeightsHist.GetBinContent(1)
         sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
-        avgTopPtWeight = sumTopPtWeights / Ntot
         tfile.Close()
 
         # removed 2018 March 2
         # if re.search('TT_',dataset_fromInputList):
+        #  avgTopPtWeight = sumTopPtWeights / Ntot
         #  print '\tapplying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
         #  xsection_X_intLumi/=avgTopPtWeight
 
         # now calculate the actual weight
-        weight = 1.0
-        if Ntot == 0:
-            weight = float(0)
-        # if 'amcatnlo' (ignoring case) is in the dataset name, it's an amc@NLO sample
-        elif re.search("amcatnlo", dataset_fromInputList, re.IGNORECASE):
-            # if re.search('dyjetstoll',dataset_fromInputList,re.IGNORECASE):
-            #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            #  weight = xsection_X_intLumi / sumAMCatNLOweights
-            # elif re.search('wjetstolnu',dataset_fromInputList,re.IGNORECASE):
-            #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            #  weight = xsection_X_intLumi / sumAMCatNLOweights
-            # elif re.search('ttjets',dataset_fromInputList,re.IGNORECASE):
-            #  print 'applying sumAMCatNLOweights=',sumAMCatNLOweights,'to',dataset_fromInputList
-            #  weight = xsection_X_intLumi / sumAMCatNLOweights
-            print "\tapplying sumAMCatNLOweights=", sumAMCatNLOweights, "to", dataset_fromInputList
-            weight = xsection_X_intLumi / sumAMCatNLOweights
-        else:
-            weight = xsection_X_intLumi / Ntot
+        #weight = 1.0
+        #if Ntot == 0:
+        #    weight = float(0)
+        #else:
+        #    print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
+        #    weight = xsection_X_intLumi / sumWeights
+        print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
+        weight = xsection_X_intLumi / sumWeights
         plotWeight = weight / 1000.0
-    return weight, plotWeight, xsection_X_intLumi, sumAMCatNLOweights
+    return weight, plotWeight, xsection_X_intLumi, sumWeights
 
 
 doProfiling = False
@@ -143,7 +132,7 @@ if doProfiling:
 
     prof = Profile()
     prof.disable()  # i.e. don't time imports
-    import time
+    # import time
 
     prof.enable()  # profiling back on
 # for profiling
@@ -263,13 +252,13 @@ if len(sys.argv) < 14:
 # print options.analysisCode
 
 # ---Check if sampleListForMerging file exists
-if os.path.isfile(options.sampleListForMerging) == False:
+if os.path.isfile(options.sampleListForMerging) is False:
     print "ERROR: file " + options.sampleListForMerging + " not found"
     print "exiting..."
     sys.exit()
 
 # ---Check if xsection file exists
-if os.path.isfile(options.xsection) == False:
+if os.path.isfile(options.xsection) is False:
     print "ERROR: file " + options.xsection + " not found"
     print "exiting..."
     sys.exit()
@@ -288,8 +277,8 @@ if os.path.isfile(options.logFile):
             if (
                 "error" in line
                 or "ERROR" in line
-                and not "ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!"
-                in line
+                and "ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!"
+                not in line
             ):
                 print "Found error line in logfile:", line
                 foundError = True
@@ -367,11 +356,11 @@ for lin in open(options.inputList):
     )
 
     # ---Check if .root and .dat file exist
-    if os.path.isfile(inputRootFile) == False:
+    if not os.path.isfile(inputRootFile):
         print
         print "ERROR: file " + inputRootFile + " not found"
         foundAllFiles = False
-    if os.path.isfile(inputDataFile) == False:
+    if not os.path.isfile(inputDataFile):
         print
         print "ERROR: file " + inputDataFile + " not found"
         foundAllFiles = False
@@ -396,9 +385,9 @@ for sample, pieceList in dictSamples.iteritems():
     print "-->Look at sample named:", sample, "with piecelist=", pieceList
 
     # init if needed
-    if not sample in dictFinalTables:
+    if sample not in dictFinalTables:
         dictFinalTables[sample] = {}
-    if not sample in dictFinalHisto:
+    if sample not in dictFinalHisto:
         dictFinalHisto[sample] = {}
 
     # ---Loop over datasets in the inputlist
@@ -418,24 +407,24 @@ for sample, pieceList in dictSamples.iteritems():
         matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
             dataset_fromInputList.replace("_tree", "")
         )
-        # print 'INFO: possible matchingPiece=',matchingPiece
-        # print 'pieceList=',pieceList
+        # print 'INFO: possible matchingPiece from inputList=', matchingPiece
+        # print 'pieceList=', pieceList
         if matchingPiece in pieceList:
             toBeUpdated = True
             # print 'INFO: matchingPiece in pieceList: toBeUpdated=True'
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
         elif matchingPiece.endswith("_reduced_skim"):
-            matchingPieceNoRSK = matchingPiece[0 : matchingPiece.find("_reduced_skim")]
+            matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
             if matchingPieceNoRSK in pieceList:
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoRSK
-                # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=',matchingPieceNoRSK
+                # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
         elif matchingPiece.endswith("_ext1"):
-            matchingPieceNoExt1 = matchingPiece[0 : matchingPiece.find("_ext1")]
+            matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
             if matchingPieceNoExt1 in pieceList:
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoExt1
-                # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=',matchingPieceNoExt1
+                # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
         if not toBeUpdated:
             continue
 
@@ -479,7 +468,7 @@ for sample, pieceList in dictSamples.iteritems():
         # this is the current cross section
         # print dataset_fromInputList,xsection_val
 
-        ##---Read .dat table for current dataset
+        # ---Read .dat table for current dataset
         data = combineCommon.ParseDatFile(inputDataFile)
 
         # example
@@ -488,15 +477,13 @@ for sample, pieceList in dictSamples.iteritems():
 
         # ---Calculate weight
         Ntot = float(data[0]["N"])
-        weight, plotWeight, xsection_X_intLumi, sumAMCatNLOweights = CalculateWeight(
+        weight, plotWeight, xsection_X_intLumi, sumWeights = CalculateWeight(
             Ntot, xsection_val, options.intLumi, inputRootFile
         )
         # print "xsection: " + xsection_val,
         print "\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/",
         sys.stdout.flush()
-        print str(sumAMCatNLOweights) if re.search(
-            "amcatnlo", dataset_fromInputList, re.IGNORECASE
-        ) else str(Ntot)
+        print str(sumWeights)
         sys.stdout.flush()
 
         # ---Create new table using weight
@@ -782,7 +769,7 @@ print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_t
 
 # ---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
-## for profiling
+# for profiling
 if doProfiling:
     prof.disable()  # don't profile the generation of stats
     prof.dump_stats("mystats.stats")
