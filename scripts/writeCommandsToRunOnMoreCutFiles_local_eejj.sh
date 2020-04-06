@@ -13,7 +13,8 @@
 #### INPUTS HERE ####
 #------------
 # analysis - FinalSels
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_2017.txt"
+#files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
 # analysis - Preselection only
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_preselOnly.txt"
@@ -35,8 +36,10 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
+SUBDIR=nanoV6/2017/analysis/eejj_attempt_1apr
+#SUBDIR=nanoV6/2017/analysis/eejj_firstTry_17mar
 #SUBDIR=nano/2016/analysis/eejj_trigSFSCEt_dec5
-SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
+#SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec3
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec2
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEff_nov29
@@ -92,7 +95,8 @@ SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
+ILUM=41540 #FIXME: this number is just from the Egamma twiki
+#ILUM=35867 # [was 36455] ntupleV235 2016B-H rereco runs # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
 #ILUM=12900 # ICHEP2016
 #ILUM=6910 # ICHEP2016 minus early runs
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
@@ -108,7 +112,9 @@ CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_preselectionOnly #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #CODENAME=analysisClass_lq1_effiStudy
 #------------
-INPUTLIST=config/2016_pskEEJJ_5dec2019/inputList_DYJIncOnly.txt
+INPUTLIST=config/nanoV6_2017_pskEEJJ_31mar2020/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2017_pskEEJJ_16mar2020/inputListAllCurrent.txt
+#INPUTLIST=config/2016_pskEEJJ_5dec2019/inputList_DYJIncOnly.txt
 #INPUTLIST=config/2016_pskEEJJ_5dec2019/inputListAllCurrent.txt
 #INPUTLIST=config/2016_pskEEJJ_3dec2019/inputListAllCurrent.txt
 #INPUTLIST=config/2016_rskSEleL_5nov2019/inputListAllCurrent.txt
