@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ $# -ne 2 ]]; then
+    echo "Incorrect number of parameters"
+    echo "Usage: $0 localDir eosDir"
+    exit -1
+fi
+
 localdir=$1
 eosdir=$2
 
