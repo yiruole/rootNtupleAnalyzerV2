@@ -16,6 +16,11 @@ def PrepareJobScript(outputname):
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         inputList = inputfilename.split('/')[-1]
         outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
+        outputfile.write('retVal=$?\n')
+        outputfile.write('if [ $retVal -ne 0 ]; then\n')
+        outputfile.write('  echo "./main return error code=$retVal; quitting here."\n')
+        outputfile.write('  exit $retVal\n')
+        outputfile.write('fi\n')
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
         if options.reducedSkim:
