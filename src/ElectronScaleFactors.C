@@ -1,3 +1,4 @@
+#include <math.h>
 // from https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2#Efficiencies_and_scale_factors
 // and https://indico.cern.ch/event/604912/contributions/2490008/attachments/1418885/2173433/HEEP7_Moriond_GSFix_final_RW_v3.pdf [slide 17]
 
@@ -77,6 +78,25 @@ class ElectronScaleFactors2016 {
         return 0.975;
       else if(fabs(scEta)<2.5)
         return 0.983;
+      return -1.;
+    }
+
+};
+
+// see: https://twiki.cern.ch/twiki/bin/view/CMS/Egamma2017DataRecommendations#2017_Efficiency_Scale_Factors
+class ElectronScaleFactors2017 {
+
+  public:
+
+    static constexpr float zVtxSF = 0.991;
+
+    static float LookupHeepSF(float scEta)
+    {
+      if(fabs(scEta)<1.566)
+        return 0.967;
+      else if(fabs(scEta)<2.5)
+        return 0.973;
+      return -1.;
     }
 
 };
