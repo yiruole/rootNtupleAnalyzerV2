@@ -20,6 +20,10 @@
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_30jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_30jul2019 -r
 # move to tomorrow queue
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_30jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q tomorrow -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_30jul2019 -r
-SKIMNAME=rskSingleEleL_27mar2020
-INPUTLIST=config/nanoV6_2017_postProc/inputListAllCurrent.txt
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2017/$SKIMNAME -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -d /eos/user/s/scooper/LQ/NanoV6/2017/$SKIMNAME -r
+#SKIMNAME=rskSingleEleL_27mar2020
+#INPUTLIST=config/nanoV6_2017_postProc/inputListAllCurrent.txt
+#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2017/$SKIMNAME -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -d /eos/user/s/scooper/LQ/NanoV6/2017/$SKIMNAME -r
+# 2018
+SKIMNAME=rskSingleEleL_15apr2020
+INPUTLIST=config/nanoV6_2018_postProc/inputListAllCurrent.txt
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2018/$SKIMNAME -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2018/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -d /eos/user/s/scooper/LQ/NanoV6/2018/$SKIMNAME -r

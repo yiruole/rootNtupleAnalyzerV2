@@ -161,7 +161,7 @@ class Electron : public Object {
   bool   PassUserID_BuiltIn_HEEPv7p0   (bool verbose);
   bool   PassUserID_HEEPv6p1           (bool verbose);
   bool   PassUserID_HEEP               (bool verbose);
-  bool   PassUserID_HEEPv5p1           (bool verbose);
+  bool   PassUserID_HEEP_2018          (bool verbose);
   bool   PassUserID_BuiltIn_EGamma     ( ID id);
   bool   PassUserID_EGamma             ( ID id,  bool verbose);
   bool   PassUserID_MVA                (bool verbose);

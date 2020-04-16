@@ -8,7 +8,7 @@ bool Electron::PassUserID (ID id, bool verbose){
   if      ( id == HEEP61                ) return PassUserID_HEEPv6p1          (verbose);
   else if ( id == HEEP70                ) return PassUserID_BuiltIn_HEEPv7p0  (verbose);
   else if ( id == HEEP70_MANUAL         ) return PassUserID_HEEP              (verbose);
-  else if ( id == HEEP51                ) return PassUserID_HEEPv5p1          (verbose);
+  else if ( id == HEEP70_2018           ) return PassUserID_HEEP_2018         (verbose);
   else if ( id == EGAMMA_BUILTIN_TIGHT  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
   else if ( id == EGAMMA_BUILTIN_MEDIUM ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
   else if ( id == EGAMMA_BUILTIN_LOOSE  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
@@ -109,11 +109,100 @@ bool Electron::PassUserID_HEEP (bool verbose){
   return decision;
 }
 
-bool Electron::PassUserID_HEEPv6p1 (bool verbose){
-  return false;
+bool Electron::PassUserID_HEEP_2018 (bool verbose){
+
+  // See: https://twiki.cern.ch/twiki/bin/view/CMS/EgammaRunIIRecommendations#HEEPv7_0_2018Prompt
+  // apply cuts manually based on variables here
+  // this is version 7.0-2018Prompt, as of 15 Apr 2020
+
+  if ( fabs(SCEta()) < 1.5 )
+    return PassUserID_BuiltIn_HEEPv7p0(verbose);
+
+  //----------------------------------------------------------------------
+  //  Cuts that are the same
+  //----------------------------------------------------------------------
+  
+  bool pass_et            = PassHEEPIDCut(HEEPIDCut::MinPtCut);
+  bool pass_scEta         = PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut);
+  bool pass_ecalDriven    = PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut);
+  bool pass_deltaPhi      = PassHEEPIDCut(HEEPIDCut::GsfEleDPhiInCut);
+  bool pass_missingHits   = PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut);
+  bool pass_trkIsolation  = PassHEEPIDCut(HEEPIDCut::GsfEleTrkPtIsoCut);
+  bool pass_deltaEtaSeed      = PassHEEPIDCut(HEEPIDCut::GsfEleDEtaInSeedCut);
+  //bool pass_hoe               = PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut);
+  bool pass_sigmaIEtaIEta     = PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut);
+  //bool pass_caloIsolation     = PassHEEPIDCut(HEEPIDCut::GsfEleEmHadD1IsoRhoCut);
+  bool pass_dxy               = PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut);
+  bool pass_shape             = PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut);
+
+  float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
+  bool pass_hoe               = bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
+  float caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
+  bool pass_caloIsolation = false;
+
+  if   ( Pt()  < 50 ) {
+    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+					    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) ) );
+  }
+  else                { 
+    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+					    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) +
+					    ( 0.03 * (PtHeep() - 50.0 ) ) ) );
+  }
+
+  bool decision = (pass_et && 
+       pass_scEta         &&
+		   pass_ecalDriven    && 
+		   pass_deltaEtaSeed  && 
+		   pass_deltaPhi      && 
+		   pass_hoe           && 
+		   pass_sigmaIEtaIEta && 
+		   pass_shape         && 
+		   pass_dxy           && 
+		   pass_missingHits   && 
+		   pass_trkIsolation  && 
+		   pass_caloIsolation ); 
+
+  if ( verbose ) {
+    if ( decision )
+      std::cout << "Electron #" << m_raw_index << " PASS HEEPIDv7.0-2018Prompt" << std::endl;
+    else
+      std::cout << "Electron #" << m_raw_index << " FAIL HEEPIDv7.0-2018Prompt" << std::endl;
+    if ( !pass_et            ) std::cout << "\tFAIL et            :";
+    else                       std::cout << "\tpass et            :";
+    std::cout<< Pt() << std::endl;
+    if ( !pass_ecalDriven    ) std::cout << "\tFAIL ecalDriven    " << std::endl;
+    else                       std::cout << "\tpass ecalDriven    " << std::endl;
+    if ( !pass_deltaEtaSeed  ) std::cout << "\tFAIL deltaEtaSeed  " << std::endl;
+    else                       std::cout << "\tpass deltaEtaSeed  " << std::endl;
+    if ( !pass_deltaPhi      ) std::cout << "\tFAIL deltaPhi      " << std::endl;
+    else                       std::cout << "\tpass deltaPhi      " << std::endl;
+    if ( !pass_hoe           ) std::cout << "\tFAIL hoe           :";
+    else                       std::cout << "\tpass hoe           :";
+      std::cout << HoE() << std::endl;
+    if ( !pass_sigmaIEtaIEta ) std::cout << "\tFAIL sigmaIEtaIEta :";
+    else                       std::cout << "\tpass sigmaIEtaIEta :";
+    std::cout << Full5x5SigmaIEtaIEta() << std::endl;
+    if ( !pass_shape         ) std::cout << "\tFAIL shape         " << std::endl; 
+    else                       std::cout << "\tpass shape         " << std::endl; 
+    if ( !pass_dxy           ) std::cout << "\tFAIL dxy           :"; 
+    else                       std::cout << "\tpass dxy           :"; 
+    std::cout << LeadVtxDistXY() << std::endl;
+    if ( !pass_missingHits   ) std::cout << "\tFAIL missingHits   :"; 
+    else                       std::cout << "\tpass missingHits   :"; 
+    std::cout << MissingHits() << std::endl;
+    if ( !pass_trkIsolation  ) std::cout << "\tFAIL trkIsolation  :"; 
+    else                       std::cout << "\tpass trkIsolation  :"; 
+    std::cout << HEEP70TrackIsolation() << std::endl;
+    if ( !pass_caloIsolation ) std::cout << "\tFAIL caloIsolation :"; 
+    else                       std::cout << "\tpass caloIsolation :"; 
+    std::cout << HEEPCaloIsolation() << std::endl;
+  }
+  
+  return decision;
 }
 
-bool Electron::PassUserID_HEEPv5p1 (bool verbose){
+bool Electron::PassUserID_HEEPv6p1 (bool verbose){
   return false;
 }
 

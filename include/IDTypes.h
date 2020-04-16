@@ -8,7 +8,7 @@ enum ID {
   EGAMMA_TIGHT             = 3, 
   HEEP61                   = 4,
   HEEP70                   = 5,
-  HEEP51                   = 6,
+  HEEP70_2018              = 6,
   MVA                      = 7,
   ECAL_FIDUCIAL            = 8,
   		        
