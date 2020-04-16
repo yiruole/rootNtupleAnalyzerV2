@@ -1,7 +1,0 @@
-LQtoUE_M250 Exotica_LQtoUE_M250
-LQtoUE_M400 Exotica_LQtoUE_M400
-Z           Zee  ZJets-madgraph
-QCD         HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt
-TTBAR       TTJets-madgraph
-QCDTTBAR    HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph
-ALLBKG      Zee  ZJets-madgraph HerwigQCDPt  PYTHIA8PhotonJetPt  QCDDiJetPt TTJets-madgraph

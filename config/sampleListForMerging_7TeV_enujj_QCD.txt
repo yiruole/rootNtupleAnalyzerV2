@@ -1,1 +1,0 @@
-DATA                       EG__Run2010A-Nov4ReReco_v1 Photon__Run2010B-Nov4ReReco_v1
