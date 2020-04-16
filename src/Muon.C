@@ -30,6 +30,8 @@ float Muon::CocktailPt              (){
   if(m_collection->HasBranch("Muon_tunepRelPt")) {
     return m_collection->ReadArrayBranch<Float_t>("Muon_tunepRelPt", m_raw_index)*m_collection->ReadArrayBranch<Float_t>("Muon_pt", m_raw_index);
   }
+  else
+    return -1.0;
   //// custom nano branch
   //return m_collection->ReadArrayBranch<Float_t>("Muon_ptTuneP", m_raw_index);
 } 

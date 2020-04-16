@@ -644,25 +644,27 @@ bool baseClass::passedAllPreviousCuts(const string& s)
 
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
-      return false;
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
+    return false;
+  }
 
   for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+      it != orderedCutNames_.end(); it++)
+  {
+    cut * c = & (cutName_cut_.find(*it)->second);
+    if( c->variableName == s )
     {
-      cut * c = & (cutName_cut_.find(*it)->second);
-      if( c->variableName == s )
-	{
-	  return true;
-	}
-      else
-	{
-	  if( ! (c->filled && c->passed) ) return false;
-	}
+      return true;
     }
+    else
+    {
+      if( ! (c->filled && c->passed) )
+        return false;
+    }
+  }
   STDOUT("ERROR. It should never pass from here.");
+  return false;
 }
 
 bool baseClass::passedAllOtherCuts(const string& s)
@@ -728,9 +730,10 @@ double baseClass::getPreCutValue1(const string& s)
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    exit(-5);
+  }
   preCut * c = & (cc->second);
   if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   return (c->value1);
@@ -741,9 +744,10 @@ double baseClass::getPreCutValue2(const string& s)
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    exit(-5);
+  }
   preCut * c = & (cc->second);
   if(c->value2 == -99999999999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
   return (c->value2);
@@ -754,9 +758,10 @@ double baseClass::getPreCutValue3(const string& s)
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    exit(-5);
+  }
   preCut * c = & (cc->second);
   if(c->value3 == -99999999999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
   return (c->value3);
@@ -767,17 +772,14 @@ double baseClass::getPreCutValue4(const string& s)
   double ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    exit(-5);
+  }
   preCut * c = & (cc->second);
   if(c->value4 == -99999999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
   return (c->value4);
 }
-
-
-
-
 
 
 string baseClass::getPreCutString1(const string& s)
@@ -785,28 +787,13 @@ string baseClass::getPreCutString1(const string& s)
   string ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    exit(-5);
+  }
   preCut * c = & (cc->second);
   return (c->string1);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 double baseClass::getCutMinValue1(const string& s)
@@ -814,9 +801,9 @@ double baseClass::getCutMinValue1(const string& s)
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
+  }
   cut * c = & (cc->second);
   return (c->minValue1);
 }
@@ -826,9 +813,9 @@ double baseClass::getCutMaxValue1(const string& s)
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
+  }
   cut * c = & (cc->second);
   return (c->maxValue1);
 }
@@ -838,9 +825,9 @@ double baseClass::getCutMinValue2(const string& s)
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
+  }
   cut * c = & (cc->second);
   return (c->minValue2);
 }
@@ -850,12 +837,13 @@ double baseClass::getCutMaxValue2(const string& s)
   double ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
-    }
+  {
+    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
+  }
   cut * c = & (cc->second);
   return (c->maxValue2);
 }
+
 
 const TH1F& baseClass::getHisto_noCuts_or_skim(const string& s)
 {

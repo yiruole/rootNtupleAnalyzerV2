@@ -1,12 +1,11 @@
 ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt
 ROOTCONFIG=$(ROOTSYS)/bin/root-config
-ROOTCINT=$(ROOTSYS)/bin/rootcint
 COMP=g++
 FLAGS =
+FLAGS += -std=c++1y
 #FLAGS += -DUSE_EXAMPLE
 #FLAGS += -g
 FLAGS += -DSAVE_ALL_HISTOGRAMS
-FLAGS += -std=c++1y
 FLAGS += -DUSE_FULL_NTUPLE
 FLAGS += -O2
 ROOTLIBS := $(shell $(ROOTCONFIG) --glibs --cflags)

@@ -13,6 +13,7 @@ class LooseElectron : public Electron {
 
  private:
   float scEt;
+  float ptCorr;
 };
 
 #endif 

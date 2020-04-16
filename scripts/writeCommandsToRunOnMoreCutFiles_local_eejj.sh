@@ -13,7 +13,7 @@
 #### INPUTS HERE ####
 #------------
 # analysis - FinalSels
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj.txt"
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj.txt"
 # analysis - Preselection only
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_preselOnly.txt"
@@ -35,8 +35,8 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-#SUBDIR=nano/2016/analysis/eejj_trigSFSCEt_dec5
-SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
+SUBDIR=nano/2016/analysis/eejj_trigSFSCEt_dec5
+#SUBDIR=nano/2016/analysis/eejj_trigSFUncorrPt_dec3
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec3
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEffUncorrPt_dec2
 #SUBDIR=nano/2016/analysis/eejj_oldTrigEff_nov29
@@ -108,8 +108,7 @@ CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_preselectionOnly #the actual name of the code used to process the ntuples (without the suffix ".C") 
 #CODENAME=analysisClass_lq1_effiStudy
 #------------
-INPUTLIST=config/2016_pskEEJJ_5dec2019/inputList_DYJIncOnly.txt
-#INPUTLIST=config/2016_pskEEJJ_5dec2019/inputListAllCurrent.txt
+INPUTLIST=config/2016_pskEEJJ_5dec2019/inputListAllCurrent.txt
 #INPUTLIST=config/2016_pskEEJJ_3dec2019/inputListAllCurrent.txt
 #INPUTLIST=config/2016_rskSEleL_5nov2019/inputListAllCurrent.txt
 #INPUTLIST=config/2016_pskEEJJPresel_custom2016skimAll_eoscms_comb/inputListAllCurrent.txt

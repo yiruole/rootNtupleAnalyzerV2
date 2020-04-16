@@ -121,7 +121,7 @@ float Electron::PFNeutralHadronIso03 (){ return -999; }
 float Electron::PFPUIso03            (){ return -999; }
 
 // GEN matching
-UInt_t Electron::NumGenParticles() {  }
+UInt_t Electron::NumGenParticles() { return 1; } //FIXME: this is either 1 matched particle or nothing matched
 int    Electron::MatchedGenParticleIdx(){ return m_collection->ReadArrayBranch<Int_t>("Electron_genPartIdx",m_raw_index); }
 bool   Electron::IsValidGenParticleIdx(int index) {
   if(MatchedGenParticleIdx() < NumGenParticles() && MatchedGenParticleIdx() >= 0)

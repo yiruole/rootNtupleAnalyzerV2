@@ -1,0 +1,439 @@
+[
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/HLTriggerObject.o", 
+   "src/HLTriggerObject.C"
+  ], 
+  "file": "src/HLTriggerObject.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/PFJet.o", 
+   "src/PFJet.C"
+  ], 
+  "file": "src/PFJet.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/GenParticle.o", 
+   "src/GenParticle.C"
+  ], 
+  "file": "src/GenParticle.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/HistoReader.o", 
+   "src/HistoReader.C"
+  ], 
+  "file": "src/HistoReader.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/main.o", 
+   "src/main.C"
+  ], 
+  "file": "src/main.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/ElectronIDs.o", 
+   "src/ElectronIDs.C"
+  ], 
+  "file": "src/ElectronIDs.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/jsonParser.o", 
+   "src/jsonParser.C"
+  ], 
+  "file": "src/jsonParser.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/LooseElectron.o", 
+   "src/LooseElectron.C"
+  ], 
+  "file": "src/LooseElectron.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/TTreeReaderTools.o", 
+   "src/TTreeReaderTools.C"
+  ], 
+  "file": "src/TTreeReaderTools.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/HLTriggerObjectCollectionHelper.o", 
+   "src/HLTriggerObjectCollectionHelper.C"
+  ], 
+  "file": "src/HLTriggerObjectCollectionHelper.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/GenParticleIDs.o", 
+   "src/GenParticleIDs.C"
+  ], 
+  "file": "src/GenParticleIDs.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/Muon.o", 
+   "src/Muon.C"
+  ], 
+  "file": "src/Muon.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/GenJetIDs.o", 
+   "src/GenJetIDs.C"
+  ], 
+  "file": "src/GenJetIDs.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/TriggerEfficiency2016.o", 
+   "src/TriggerEfficiency2016.C"
+  ], 
+  "file": "src/TriggerEfficiency2016.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/analysisClass.o", 
+   "src/analysisClass.C"
+  ], 
+  "file": "src/analysisClass.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/eventListHelper.o", 
+   "src/eventListHelper.C"
+  ], 
+  "file": "src/eventListHelper.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/Object.o", 
+   "src/Object.C"
+  ], 
+  "file": "src/Object.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/Collection.o", 
+   "src/Collection.C"
+  ], 
+  "file": "src/Collection.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/PFJetIDs.o", 
+   "src/PFJetIDs.C"
+  ], 
+  "file": "src/PFJetIDs.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/Electron.o", 
+   "src/Electron.C"
+  ], 
+  "file": "src/Electron.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/GenJet.o", 
+   "src/GenJet.C"
+  ], 
+  "file": "src/GenJet.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/MuonIDs.o", 
+   "src/MuonIDs.C"
+  ], 
+  "file": "src/MuonIDs.C"
+ }, 
+ {
+  "directory": "/afs/cern.ch/work/s/scooper/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2", 
+  "arguments": [
+   "g++", 
+   "-c", 
+   "-I..", 
+   "-I.", 
+   "-I./include", 
+   "-I/include", 
+   "-I/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/include", 
+   "-DSAVE_ALL_HISTOGRAMS", 
+   "-DUSE_FULL_NTUPLE", 
+   "-O2", 
+   "-o", 
+   "src/baseClass.o", 
+   "src/baseClass.C"
+  ], 
+  "file": "src/baseClass.C"
+ }
+]
