@@ -472,6 +472,8 @@ for sample, pieceList in dictSamples.iteritems():
         data = combineCommon.ParseDatFile(inputDataFile)
 
         # example
+        #print 'inputDataFile='+inputDataFile
+        #print '\tdata[0]=',data[0]
         Ntot = float(data[0]["N"])
         # print 'Ntot=',Ntot
 
