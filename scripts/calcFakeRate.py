@@ -16,6 +16,7 @@ from ROOT import (
 import ROOT
 import numpy
 import copy
+import ctypes
 
 
 def GetFakeRate(lowEnd, highEnd, reg, jets, histDict, verbose=False):
@@ -196,6 +197,7 @@ def MakeFRCanvas(plotList, titleList, canTitle):
             plot.GetYaxis().SetRangeUser(0, 0.08)
             plot.GetYaxis().SetNdivisions(510)
             plot.GetYaxis().SetTitle("fake rate")
+            plot.SetTitle(canTitle)
         if "graph" not in plot.ClassName().lower():
             plot.SetStats(0)
         plot.SetMarkerColor(colorList[i])
@@ -322,11 +324,11 @@ def MakeFR2D(frGraph, reg):
     frHist2d.GetXaxis().SetTitle("SuperCluster #eta")
     frHist2d.GetYaxis().SetTitle("p_{T} [GeV]")
     for iPoint in range(frGraph.GetN()):
-        x = ROOT.Double()
-        y = ROOT.Double()
+        x = ctypes.c_double()
+        y = ctypes.c_double()
         frGraph.GetPoint(iPoint, x, y)
         frHist2d.SetBinContent(
-            frHist2d.GetXaxis().FindBin(etaToFill), frHist2d.GetYaxis().FindBin(x), y
+            frHist2d.GetXaxis().FindBin(etaToFill), frHist2d.GetYaxis().FindBin(x.value), y.value
         )
         # TODO set error
     return frHist2d
@@ -335,18 +337,21 @@ def MakeFR2D(frGraph, reg):
 ####################################################################################################
 # RUN
 ####################################################################################################
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/nov20_test/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec8_addPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec8_noPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec15_tightenJets/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec17_tightenJetsAddMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec18_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = "/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-filename = "/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2017/qcdFakeRateCalc/apr7_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+# filename = '$LQDATA/2016fakeRate/nov20_test/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec8_addPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec8_noPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec15_tightenJets/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec17_tightenJetsAddMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec18_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = '$LQDATA/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
+# filename = "$LQDATA/nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+#
+# filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/apr7_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+# filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/apr17_attempt2/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/apr17_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
 
 outputFileName = "plots.root"
 
