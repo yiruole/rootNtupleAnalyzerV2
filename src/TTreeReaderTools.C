@@ -17,11 +17,23 @@ void TTreeReaderTools::gotoEntry(Long64_t entry, bool forceCall) {
   //if(m_entry < 10)
   //  std::cout << "INFO TTreeReaderTools::gotoEntry(" << entry << ")" << std::endl;
   m_readerIsClean = false;
+  int retVal = 0;
   if(m_entry != entry || forceCall) {
     if(m_entry == entry-1 && entry!=0)
-      m_reader->Next();
+      retVal = int(!m_reader->Next()); // returns true if OK
     else {
-      m_reader->SetEntry(entry);
+      retVal = m_reader->SetEntry(entry);
+    }
+    if (retVal) {
+      std::cerr << "TTreeReaderTools::gotoEntry(" << entry << ", " << (forceCall ? "true" : "false") << "): ";
+      if(m_entry != entry || forceCall) {
+        std::cerr << "TTreeReader::Next() returned false; bailing out" << std::endl;
+      }
+      else {
+        std::cerr << "TTreeReader::SetEntry(" <<
+        entry << ") returned nonzero EEntryStatus = " << retVal << "; bailing out" << std::endl;
+      }
+      exit(-6);
     }
     m_entry = entry;
   }
