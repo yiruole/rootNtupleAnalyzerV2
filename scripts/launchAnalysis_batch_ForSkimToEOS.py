@@ -255,9 +255,24 @@ if not os.path.isdir(options.outputDir):
 
 if not os.path.isdir(options.outputDir):
     print "Error: I can't make this folder: " + options.outputDir
-    sys.exit()
+    sys.exit(-2)
 
 print "... done "
+
+# ----------------------------------------------------------------------------------------
+# For reduced skims: Check for haddnano.py.  If it exists, move it to the output directory
+# ----------------------------------------------------------------------------------------
+if options.reducedSkim:
+    haddnanoPath = "/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/scripts/haddnano.py"
+    print "Moving haddnano.py to the local output directory...",
+
+    if not os.path.isfile(haddnanoPath):
+        print "Error: No haddnano.py here: " + haddnanoPath
+        sys.exit(-1)
+    else:
+        os.system("cp " + haddnanoPath + " " + options.outputDir + "/")
+
+    print "... done "
 
 # --------------------------------------------------------------------------------
 # Look for the cut file.  If it exists, move it to the output directory
@@ -267,7 +282,7 @@ print "Moving the cutfile to the local output directory...",
 
 if not os.path.isfile(options.cutfile):
     print "Error: No cut file here: " + options.cutfile
-    sys.exit()
+    sys.exit(-1)
 else:
     os.system("cp " + options.cutfile + " " + options.outputDir + "/")
 

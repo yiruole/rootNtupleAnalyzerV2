@@ -8,13 +8,21 @@ from optparse import OptionParser
 
 
 def PrepareJobScript(outputname):
-    with open(outputname,"w") as outputfile:
+    with open(outputname, "w") as outputfile:
         outputfile.write("#!/bin/bash\n")
         # hardcoded root is a bit nasty FIXME
-        outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
+        outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.20.04/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         inputList = inputfilename.split('/')[-1]
+        # merge files if reduced skim requested
+        if options.reducedSkim:
+            with open(outputmain+"/input/"+inputList) as f:
+                outFileNames = f.read().splitlines()
+            outputfile.write("./haddnano.py inputTree.root %s\n" % (" ".join(outFileNames)))
+            # overwrite original inputList to just have inputTree.root
+            with open(inputfilename, "w") as newInputList:
+                newInputList.write("inputTree.root\n")
         outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write('retVal=$?\n')
         outputfile.write('if [ $retVal -ne 0 ]; then\n')
@@ -31,25 +39,30 @@ def PrepareJobScript(outputname):
 
 
 def WriteSubmitFile(condorFileName):
-    with open(condorFileName,'w') as condorFile:
+    with open(condorFileName, 'w') as condorFile:
         condorFile.write('executable  = '+outputmain+'/src/submit_$(Process).sh\n')
         condorFile.write('N = '+str(ijobmax)+'\n')
         condorFile.write('output      = '+outputmain+'/output/$(Process).out\n')
         condorFile.write('error       = '+outputmain+'/error/$(Process).err\n')
         condorFile.write('log         = '+outputmain+'/log/$(Process).log\n')
-        #http://batchdocs.web.cern.ch/batchdocs/local/submit.html
+        # http://batchdocs.web.cern.ch/batchdocs/local/submit.html
         condorFile.write('+JobFlavour = "'+options.queue+'"\n')
         # require CentOS7
         condorFile.write('requirements = (OpSysAndVer =?= "CentOS7")\n')
         # make sure the job finishes with exit code 0
-        #condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
+        # condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
         condorFile.write('max_retries = 3\n')
         condorFile.write('should_transfer_files = YES\n')
         condorFile.write('transfer_output_files = ""\n')
-        #condorFile.write('stream_output = True\n')
-        #condorFile.write('stream_error = True\n')
-        exePath = os.path.dirname(os.path.abspath(options.executable))
-        condorFile.write('transfer_input_files = '+cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+'\n')
+        # condorFile.write('stream_output = True\n')
+        # condorFile.write('stream_error = True\n')
+        # exePath = os.path.dirname(os.path.abspath(options.executable))
+        if options.reducedSkim:
+            parentDir = os.path.dirname(outputmain)
+            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
+        else:
+            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName
+        condorFile.write('transfer_input_files = '+filesToTransfer+'\n')
         condorFile.write('queue $(N)\n')
 
 
@@ -77,7 +90,7 @@ parser.add_option("-n", "--ijobmax", dest="ijobmax",
                   help="max number of jobs, limited automatically to the number of files in inputlist",
                   metavar="IJOBMAX")
 
-#http://batchdocs.web.cern.ch/batchdocs/local/submit.html
+# http://batchdocs.web.cern.ch/batchdocs/local/submit.html
 parser.add_option("-q", "--queue", dest="queue",
                   help="name of the queue",
                   metavar="QUEUE")
@@ -100,13 +113,12 @@ parser.add_option("-e", "--exe", dest="executable",
 
 parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
                   help="is this a reduced skim?",
-                  metavar="REDUCEDSKIM",default=False,action="store_true")
-
+                  metavar="REDUCEDSKIM", default=False, action="store_true")
 
 
 (options, args) = parser.parse_args()
 
-if len(sys.argv)<14:
+if len(sys.argv) < 14:
     print usage
     sys.exit()
 
@@ -135,29 +147,29 @@ os.system("mkdir -p "+outputmain+"/error/")
 os.system("mkdir -p "+outputmain+"/input/")
 os.system("mkdir -p "+outputmain+"/src/")
 os.system("mkdir -p "+outputmain+"/output/")
-#os.system("mkdir -p "+outputmain+"/skim/")
+# os.system("mkdir -p "+outputmain+"/skim/")
 #################################################
 # output prefix
-outputPrefix = string.split(outputmain,"/")[-1]
+outputPrefix = string.split(outputmain, "/")[-1]
 #################################################
 # dataset
-dataset = string.split(outputPrefix,"___")[-1]
+dataset = string.split(outputPrefix, "___")[-1]
 ################################################
 # create eos dir
 ################################################
-outputeosdir = options.eosDir    
+outputeosdir = options.eosDir
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
 os.system("/usr/bin/eos mkdir -p "+outputeosdir)
 ################################################
 numfiles = len(file(inputlist).readlines())
-ijobmax=int(options.ijobmax)
+ijobmax = int(options.ijobmax)
 if ijobmax > numfiles:
-    ijobmax=numfiles
+    ijobmax = numfiles
 filesperjob = int(numfiles/ijobmax)
-if numfiles%ijobmax!=0:
+if numfiles % ijobmax != 0:
     filesperjob = filesperjob+1
     ijobmax = int(numfiles/filesperjob)
-    if numfiles%filesperjob!=0:
+    if numfiles % filesperjob != 0:
         ijobmax = ijobmax+1
 #################################################
 input = open(inputlist)
@@ -165,7 +177,7 @@ input = open(inputlist)
 for ijob in range(ijobmax):
     # prepare the list file
     inputfilename = outputmain+"/input/input_"+str(ijob)+".list"
-    inputfile = open(inputfilename,"w")
+    inputfile = open(inputfilename, "w")
     for i in range(filesperjob):
         line = input.readline()
         if line != "":
@@ -184,19 +196,18 @@ condorFileName = outputmain+'/condorSubmit.sub'
 WriteSubmitFile(condorFileName)
 
 failedToSub = False
-print 'submit jobs for',options.output.rstrip("/")
-#FIXME don't cd and use absolute paths in the condor submission instead
+print 'submit jobs for', options.output.rstrip("/")
+# FIXME don't cd and use absolute paths in the condor submission instead
 oldDir = os.getcwd()
 os.chdir(outputmain)
-#os.system('condor_submit '+condorFileName)
+# os.system('condor_submit '+condorFileName)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
-#print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
+# print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
-    print '\exited with '+str(exitCode)+'; try to resubmit'
+    print '\texited with '+str(exitCode)+'; try to resubmit'
     exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
     if exitCode != 0:
         failedToSub = True
 os.chdir(oldDir)
 if failedToSub:
     exit(-1)
-

@@ -1,4 +1,5 @@
-ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.16.00/x86_64-centos7-gcc48-opt
+# NB: Also needs to be changed in submit scripts for condor
+ROOTSYS=/cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.20.04/x86_64-centos7-gcc48-opt
 ROOTCONFIG=$(ROOTSYS)/bin/root-config
 COMP=g++
 FLAGS =
