@@ -102,7 +102,7 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         tfile = TFile(inputRootFile)
         sumOfWeightsHist = tfile.Get("SumOfWeights")
         sumWeights = sumOfWeightsHist.GetBinContent(1)
-        sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
+        # sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
         tfile.Close()
 
         # removed 2018 March 2
@@ -288,7 +288,7 @@ if os.path.isfile(options.logFile):
     else:
         print "Great! Logfile was checked and was completely clean!"
 else:
-    print "WARNING: did not attempt to check logfile:'" + options.logFile + "' "
+    print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
 
 xsectionDict = combineCommon.ParseXSectionFile(options.xsection)
 # print 'Dataset      XSec'
@@ -321,6 +321,7 @@ for lin in open(options.inputList):
 
 # ---Loop over datasets in the inputlist to check if dat/root files are there
 foundAllFiles = True
+dictDatasetsFileNames = dict()
 print
 print "Checking for root/dat files from samples in inputList...",
 sys.stdout.flush()
@@ -346,24 +347,39 @@ for lin in open(options.inputList):
         + dataset_fromInputList
         + ".root"
     )
-    inputDataFile = (
-        options.inputDir
-        + "/"
-        + options.analysisCode
-        + "___"
-        + dataset_fromInputList
-        + ".dat"
-    )
+    inputDataFile = inputRootFile.replace(".root", ".dat")
 
     # ---Check if .root and .dat file exist
     if not os.path.isfile(inputRootFile):
-        print
-        print "ERROR: file " + inputRootFile + " not found"
-        foundAllFiles = False
+        initialFile = inputRootFile
+        # if not found, check if it's stored in the condor way
+        inputRootFile = (
+            options.inputDir
+            + "/"
+            + options.analysisCode
+            + "___"
+            + dataset_fromInputList
+            + "/"
+            + "output/"
+            + options.analysisCode
+            + "___"
+            + dataset_fromInputList
+            + "_0"
+            + ".root"
+        )
+        # change the inputDataFile at this point too
+        inputDataFile = inputRootFile.replace(".root", ".dat")
+        if not os.path.isfile(inputRootFile):
+            print
+            print "ERROR: file " + initialFile + " not found"
+            print "ERROR: attempt to find file " + inputRootFile + " not found"
+            foundAllFiles = False
     if not os.path.isfile(inputDataFile):
         print
         print "ERROR: file " + inputDataFile + " not found"
         foundAllFiles = False
+    dictDatasetsFileNames[dataset_fromInputList] = inputRootFile
+
 if not foundAllFiles:
     print "Some files not found. Exiting..."
     sys.exit()
@@ -391,16 +407,15 @@ for sample, pieceList in dictSamples.iteritems():
         dictFinalHisto[sample] = {}
 
     # ---Loop over datasets in the inputlist
-    # print
-    for lin in open(options.inputList):
+    for dataset_fromInputList, rootFile in dictDatasetsFileNames.iteritems():
 
-        lin = string.strip(lin, "\n")
-        # print 'lin=',lin
-        if lin.startswith("#"):
-            continue
+        # lin = string.strip(lin, "\n")
+        # # print 'lin=',lin
+        # if lin.startswith("#"):
+        #     continue
 
-        dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
-        # dataset_fromInputList = dataset_fromInputList
+        # dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
+        # # dataset_fromInputList = dataset_fromInputList
 
         toBeUpdated = False
         # matchingPiece = dataset_fromInputList
@@ -408,7 +423,6 @@ for sample, pieceList in dictSamples.iteritems():
             dataset_fromInputList.replace("_tree", "")
         )
         # print 'INFO: possible matchingPiece from inputList=', matchingPiece
-        # print 'pieceList=', pieceList
         if matchingPiece in pieceList:
             toBeUpdated = True
             # print 'INFO: matchingPiece in pieceList: toBeUpdated=True'
@@ -419,38 +433,22 @@ for sample, pieceList in dictSamples.iteritems():
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoRSK
                 # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
-        elif matchingPiece.endswith("_ext1"):
-            matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
-            if matchingPieceNoExt1 in pieceList:
-                toBeUpdated = True
-                matchingPiece = matchingPieceNoExt1
-                # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
+        # elif matchingPiece.endswith("_ext1"):
+        #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
+        #     if matchingPieceNoExt1 in pieceList:
+        #         toBeUpdated = True
+        #         matchingPiece = matchingPieceNoExt1
+        #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
         if not toBeUpdated:
             continue
 
         # prepare to combine
-        print "\tfound matching dataset:", combineCommon.SanitizeDatasetNameFromInputList(
-            dataset_fromInputList
-        ) + " ... ",
+        print "\tfound matching dataset:", matchingPiece + " ... ",
         # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
         sys.stdout.flush()
 
-        inputRootFile = (
-            options.inputDir
-            + "/"
-            + options.analysisCode
-            + "___"
-            + dataset_fromInputList
-            + ".root"
-        )
-        inputDataFile = (
-            options.inputDir
-            + "/"
-            + options.analysisCode
-            + "___"
-            + dataset_fromInputList
-            + ".dat"
-        )
+        inputRootFile = rootFile
+        inputDataFile = rootFile.replace(".root", ".dat")
 
         # ---Find xsection correspondent to the current dataset
         # dataset_fromInputList = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
@@ -472,8 +470,8 @@ for sample, pieceList in dictSamples.iteritems():
         data = combineCommon.ParseDatFile(inputDataFile)
 
         # example
-        #print 'inputDataFile='+inputDataFile
-        #print '\tdata[0]=',data[0]
+        # print 'inputDataFile='+inputDataFile
+        # print '\tdata[0]=',data[0]
         Ntot = float(data[0]["N"])
         # print 'Ntot=',Ntot
 

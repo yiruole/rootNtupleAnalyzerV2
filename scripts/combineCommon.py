@@ -14,7 +14,10 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     # if dataset_fromInputList.contains('_reduced_skim'):
     #  #dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
     #  dataset_fromInputList.replace('_reduced_skim','')
+    # print '0) SanitizeDatasetNameFromInputList() result is:'+dataset_fromInputList
     dataset_fromInputList = dataset_fromInputList.replace("_reduced_skim", "")
+    # in rare cases, replace __ by _
+    dataset_fromInputList = dataset_fromInputList.replace("__", "_")
     # XXX FIXME
     # # special hack for handling repated madgraphMLM samples
     # if dataset_fromInputList.endswith('_madgraphMLM'):
@@ -33,6 +36,12 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
         dataset_fromInputList = dataset_fromInputList[
             0: dataset_fromInputList.find("_tree")
         ]
+    # if 'ZToEE' in dataset_fromInputList:
+    #     print 'found ZToEE in dataset='+dataset_fromInputList
+    #     dataset_fromInputList = dataset_fromInputList.replace('TuneCP5_', '').replace('13TeV-', '')
+    dataset_fromInputList = dataset_fromInputList.replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "")
+    dataset_fromInputList = dataset_fromInputList.rstrip("_")
+    # print '1) SanitizeDatasetNameFromInputList() result is:'+dataset_fromInputList
     return dataset_fromInputList
 
 
@@ -52,14 +61,18 @@ def SanitizeDatasetNameFromFullDataset(dataset):
 
         # use the one with the shortest filename
         outputFile = sorted(outputFileNames, key=len)[0]
-        if "ext" in dataset:
-            extN = dataset[dataset.find("_ext") + 4]
-            outputFile = outputFile + "_ext" + extN
+        # ignore all ext files, or rather, treat them the same as non-ext
+        #if "ext" in dataset:
+        #    extN = dataset[dataset.find("_ext") + 4]
+        #    outputFile = outputFile + "_ext" + extN
         if "madgraphMLM" in dataset:
             outputFile += "_madgraphMLM"
         elif "amcatnloFXFX" in dataset or "amcnloFXFX" in dataset:
             outputFile += "_amcatnloFXFX"
-        # print 'SanitizeDatasetNameFromInputList:',dataset,'shortened to:',outputFile
+        if 'ZToEE' in dataset:
+            # print 'found ZToEE in dataset='+dataset
+            outputFile = dataset.split("/")[1].replace('TuneCP5_', '').replace('13TeV-', '')
+        # print 'SanitizeDatasetNameFromFullDataset:', dataset, 'shortened to:', outputFile
         # print 'choices were:',outputFileNames
     else:
         # outputFile = dataset[1:].replace('/','__')
@@ -95,6 +108,9 @@ def GetSamplesToCombineDict(sampleListForMerging):
         # or "LQ_M200   /LQToUE_M-200_BetaOne_TuneCUETP8M1_13TeV-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM"
 
         # the rule is that the name of each 'piece' here must match the inputList name and filename
+        if len(line.split()) < 2:
+            print "ERROR: GetSamplesToCombineDict(): cannot deal with line which does not contain at least one piece: '"+line+"'"
+            exit(-1)
         for i, piece in enumerate(line.split()):
             # print "i=", i , "  piece= " , piece
             if i == 0:
