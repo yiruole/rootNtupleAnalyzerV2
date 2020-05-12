@@ -147,7 +147,7 @@ bool Electron::PassUserID_HEEP_2018 (bool verbose){
   else                { 
     pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
 					    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) +
-					    ( 0.03 * (PtHeep() - 50.0 ) ) ) );
+					    ( 0.03 * (Pt() - 50.0 ) ) ) );
   }
 
   bool decision = (pass_et && 
