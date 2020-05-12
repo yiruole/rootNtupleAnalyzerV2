@@ -16,7 +16,7 @@
 files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2017/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nanoV6/2017/qcdFakeRateCalc/apr7_attempt1
+SUBDIR=nanoV6/2017/qcdFakeRateCalc/apr17_attempt2
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -38,7 +38,7 @@ NCORES=8 #Number of processor cores to be used to run the job
 
 #### END OF INPUTS ####
 
-COMMANDFILE=commandsToRunOnMoreCutFiles_fakeRateCalc_local_`hostname -s`.txt
+COMMANDFILE=commandsToRunOnMoreCutFiles_fakeRateCalc_2017_local_`hostname -s`.txt
 echo "" > $COMMANDFILE
 
 for file in $files
