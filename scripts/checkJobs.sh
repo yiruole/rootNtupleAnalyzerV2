@@ -9,7 +9,7 @@ fi
 localdir=$1
 eosdir=$2
 
-echo -n "Grepping error files..."
+echo "Grepping error files..."
 find $localdir -iname "*.err" -exec grep -ivH "no dict" {} \;
 echo "Done."
 #echo "submit files: `find $localdir -iname "submit*sh" | wc -l`"
