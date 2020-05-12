@@ -217,7 +217,7 @@ class baseClass {
 
   Long64_t GetTreeEntries() { return treeEntries_; }
 
-
+  bool hasBranch(const std::string& branchName) { return readerTools_->GetTree()->GetBranch(branchName.c_str()); }
 
   TFile * output_root_;
 
