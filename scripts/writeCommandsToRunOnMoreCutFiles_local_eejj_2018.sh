@@ -13,7 +13,7 @@
 #### INPUTS HERE ####
 #------------
 # analysis - FinalSels
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2017/Analysis/cutTable_lq_eejj.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2018/Analysis/cutTable_lq_eejj.txt"
 # opt
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Optimization/cutTable_lq_eejj_opt.txt"
 
@@ -32,18 +32,18 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nanoV6/2018/analysis/eejj_attempt_14apr
+SUBDIR=nanoV6/2018/analysis/eejj_5may2020/condor
 
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=59960 #FIXME: this number is just from the Egamma twiki
+ILUM=59736 #FIXME: this number is just from brilcalc
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main
 CODENAME=analysisClass_lq_eejj
 #------------
-INPUTLIST=config/nanoV6_2018_pskEEJJ_11apr2020/inputListAllCurrent.txt
+INPUTLIST=config/nanoV6_2018_pskEEJJ_5may2020_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------
