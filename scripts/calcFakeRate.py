@@ -21,6 +21,19 @@ import sys
 import math
 
 
+def GetCanvasTitle(region, jetBin):
+    titleStr = region.replace("End2", "Endcap2").replace("End1", "Endcap1").replace("Bar", "Barrel")
+    if jetBin == "":
+        titleStr += ", >= 0 jets"
+    elif jetBin == "1Jet_":
+        titleStr += ", >= 1 jets"
+    elif jetBin == "2Jet_":
+        titleStr += ", >= 2 jets"
+    else:
+        titleStr += ", "+jetBin
+    return titleStr
+
+
 def GetFakeRate(lowEnd, highEnd, reg, jets, histDict, verbose=False):
     verbose=True
     if verbose:
@@ -392,12 +405,16 @@ def MakeFR2D(frGraph, reg):
 # filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/apr17_attempt2/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
 # filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/apr17_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
 # filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/may13_heepFix/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/14may2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
+# filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/14may2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
+filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/4jun2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
 
 outputFileName = "plots.root"
 
 print "Opening file:", filename
 tfile = TFile.Open(filename)
+if not tfile or tfile.IsZombie():
+    print "ERROR: TFile is zombie. Quitting here."
+    exit(-1)
 
 gROOT.SetBatch(True)
 writeOutput = True
@@ -462,7 +479,9 @@ ptBinsBarrel = ptBinsEndcap
 electronTypes = ["Jets", "Electrons", "Total"]
 # probably eventually expand to BarPlus, BarMinus, etc.
 detectorRegions = ["Bar", "End1", "End2"]
-jetBins = ["", "1Jet_", "2Jet_", "3Jet_"]
+regTitleDict = {}
+# jetBins = ["", "1Jet_", "2Jet_", "3Jet_"]
+jetBins = ["", "1Jet_", "2Jet_"]
 # for MC
 if '2016' in filename:
     mcSamples = [
@@ -496,7 +515,7 @@ for varName in varNameList:
     LoadHistosData(allHistos[varName], varName, dataSampleName)
     LoadHistosMC(allHistos[varName], varName)
 
-
+histList = []
 myCanvases = []
 if writeOutput:
     outputFile = TFile(outputFileName, "recreate")
@@ -522,24 +541,56 @@ tfileZPrime = TFile(
 zprimeHistEnd2ZeroJ = tfileZPrime.Get("frHistEEHigh")
 zprimeHistEnd1ZeroJ = tfileZPrime.Get("frHistEELow")
 zprimeHistBarZeroJ = tfileZPrime.Get("frHistEB")
+histList.extend([zprimeHistEnd2ZeroJ, zprimeHistEnd1ZeroJ, zprimeHistBarZeroJ])
+zprimeHistDict = {}
+zprimeHistDict["End2"] = {}
+zprimeHistDict["End2"][""] = zprimeHistEnd2ZeroJ
+zprimeHistDict["End1"] = {}
+zprimeHistDict["End1"][""] = zprimeHistEnd1ZeroJ
+zprimeHistDict["Bar"] = {}
+zprimeHistDict["Bar"][""] = zprimeHistBarZeroJ
 # my hists
 histos = allHistos[varNameList[0]]
-graphEnd2ZeroJ, histNumEnd2ZeroJ, histDenEnd2ZeroJ = MakeFakeRatePlot(
-    "End2", "", histos  # , verbose=True
-)
-graphEnd2ZeroJMC, histNumEnd2ZeroJMC, histDenEnd2ZeroJMC = MakeFakeRatePlot(
-    "End2", "", histos, dataDriven=False
-)
-graphEnd1ZeroJ, histNumEnd1ZeroJ, histDenEnd1ZeroJ = MakeFakeRatePlot(
-    "End1", "", histos
-)
-graphEnd1ZeroJMC, histNumEnd1ZeroJMC, histDenEnd1ZeroJMC = MakeFakeRatePlot(
-    "End1", "", histos, dataDriven=False
-)
-graphBarZeroJ, histNumBarZeroJ, histDenBarZeroJ = MakeFakeRatePlot("Bar", "", histos)
-graphBarZeroJMC, histNumBarZeroJMC, histDenBarZeroJMC = MakeFakeRatePlot(
-    "Bar", "", histos, dataDriven=False
-)
+
+histDict = {}
+numerHistDict = {}
+denomHistDict = {}
+for reg in detectorRegions:
+    histDict[reg] = {}
+    numerHistDict[reg] = {}
+    denomHistDict[reg] = {}
+    for jetBin in jetBins:
+        histDict[reg][jetBin] = {}
+        numerHistDict[reg][jetBin] = {}
+        denomHistDict[reg][jetBin] = {}
+        histFR, histNum, histDen = MakeFakeRatePlot(
+                reg, jetBin, histos
+        )
+        histDict[reg][jetBin]["data"] = histFR
+        numerHistDict[reg][jetBin]["data"] = histNum
+        denomHistDict[reg][jetBin]["data"] = histDen
+        histFRMC, histNumMC, histDenMC = MakeFakeRatePlot(
+                reg, jetBin, histos, dataDriven=False
+        )
+        histDict[reg][jetBin]["mc"] = histFRMC
+        numerHistDict[reg][jetBin]["mc"] = histNumMC
+        denomHistDict[reg][jetBin]["mc"] = histDenMC
+
+for reg in detectorRegions:
+    for jetBin in jetBins:
+        histList = [histDict[reg][jetBin]["data"], histDict[reg][jetBin]["mc"]]
+        titleList = ["Data-driven", "MCSub"]
+        if jetBin == "":
+            histList.append(zprimeHistDict[reg][jetBin])
+            titleList.append("2016 Zprime (E_{T}^{HLT})")
+        myCanvases.append(
+            MakeFRCanvas(
+                histList,
+                titleList,
+                GetCanvasTitle(reg, jetBin)
+            )
+        )
+
 # # for drawing num/den hists
 # numDenHistList = [histNumEnd2ZeroJ,histDenEnd2ZeroJ,histNumEnd1ZeroJ,histDenEnd1ZeroJ,histNumBarZeroJ,histDenBarZeroJ]
 # for idx,hist in enumerate(numDenHistList):
@@ -565,205 +616,6 @@ graphBarZeroJMC, histNumBarZeroJMC, histDenBarZeroJMC = MakeFakeRatePlot(
 #    hist.SetLineColor(2)
 #    hist.SetMarkerColor(2)
 #    hist.Draw('sames')
-
-# for writing output
-if doMuz:
-    histList = [
-        graphEnd2ZeroJ,
-        graphEnd2ZeroJMC,
-        muzHistEnd2ZeroJ,
-        zprimeHistEnd2ZeroJ,
-        graphEnd1ZeroJ,
-        graphEnd1ZeroJMC,
-        muzHistEnd1ZeroJ,
-        zprimeHistEnd1ZeroJ,
-        graphBarZeroJ,
-        graphBarZeroJMC,
-        muzHistBarZeroJ,
-        zprimeHistBarZeroJ,
-    ]
-else:
-    histList = [
-        graphEnd2ZeroJ,
-        graphEnd2ZeroJMC,
-        zprimeHistEnd2ZeroJ,
-        graphEnd1ZeroJ,
-        graphEnd1ZeroJMC,
-        zprimeHistEnd1ZeroJ,
-        graphBarZeroJ,
-        graphBarZeroJMC,
-        zprimeHistBarZeroJ,
-    ]
-
-if doMuz:
-    titleList = [
-        "Data-driven",
-        "MCSub",
-        "Muzamil (E_{T}^{HLT})",
-        "2016 Zprime (E_{T}^{HLT})",
-    ]
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd2ZeroJ, graphEnd2ZeroJMC, muzHistEnd2ZeroJ, zprimeHistEnd2ZeroJ],
-            titleList,
-            "Endcap2, >=0 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd1ZeroJ, graphEnd1ZeroJMC, muzHistEnd1ZeroJ, zprimeHistEnd1ZeroJ],
-            titleList,
-            "Endcap1, >=0 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphBarZeroJ, graphBarZeroJMC, muzHistBarZeroJ, zprimeHistBarZeroJ],
-            titleList,
-            "Barrel, >=0 jets",
-        )
-    )
-else:
-    titleList = ["Data-driven", "MCSub", "2016 Zprime (E_{T}^{HLT})"]
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd2ZeroJ, graphEnd2ZeroJMC, zprimeHistEnd2ZeroJ],
-            titleList,
-            "Endcap2, >=0 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd1ZeroJ, graphEnd1ZeroJMC, zprimeHistEnd1ZeroJ],
-            titleList,
-            "Endcap1, >=0 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphBarZeroJ, graphBarZeroJMC, zprimeHistBarZeroJ],
-            titleList,
-            "Barrel, >=0 jets",
-        )
-    )
-
-if writeOutput:
-    outputFile.cd()
-for canLeg in myCanvases:
-    canv = canLeg[0]
-    canv.Draw()  # canvas
-    # canLeg[-1][1].Draw() #legend
-    if writeOutput:
-        canv.Write()
-        canv.Print(canv.GetName()+".pdf")
-
-##################################################
-# >= 1 jet
-##################################################
-##################################################
-if writeOutput:
-    outputFile.cd()
-# my hists
-graphEnd2OneJ = MakeFakeRatePlot("End2", "1Jet_", histos)[0]
-graphEnd2OneJMC = MakeFakeRatePlot("End2", "1Jet_", histos, dataDriven=False)[0]
-graphEnd1OneJ = MakeFakeRatePlot("End1", "1Jet_", histos)[0]
-graphEnd1OneJMC = MakeFakeRatePlot("End1", "1Jet_", histos, dataDriven=False)[0]
-graphBarOneJ = MakeFakeRatePlot("Bar", "1Jet_", histos)[0]
-graphBarOneJMC = MakeFakeRatePlot("Bar", "1Jet_", histos, dataDriven=False)[0]
-# for writing output
-histList.extend(
-    [
-        graphEnd2OneJ,
-        graphEnd2OneJMC,  # muzHistEnd2OneJ,zprimeHistEnd2OneJ,
-        graphEnd1OneJ,
-        graphEnd1OneJMC,  # muzHistEnd1OneJ,zprimeHistEnd1OneJ,
-        graphBarOneJ,
-        graphBarOneJMC,
-    ]
-)  # ,muzHistBarOneJ,zprimeHistBarOneJ])
-
-##################################################
-# >= 2 jet
-##################################################
-if writeOutput:
-    outputFile.cd()
-if doMuz:
-    # Muzamil's plots
-    muzHist2DTwoJ = tfileMuzamilTwoJ.Get("Endcap_Fake_Rate")
-    muzHist2DTwoJBar = tfileMuzamilTwoJ.Get("Barrel_Fake_Rate")
-    muzHistEnd2TwoJ = muzHist2DTwoJ.ProjectionX("projMuzEnd2_2Jets", 2, 2)
-    muzHistEnd1TwoJ = muzHist2DTwoJ.ProjectionX("projMuzEnd1_2Jets", 1, 1)
-    muzHistBarTwoJ = muzHist2DTwoJBar.ProjectionX("projMuzBar_2Jets")
-# my hists
-graphEnd2TwoJ = MakeFakeRatePlot("End2", "2Jet_", histos)[0]
-graphEnd2TwoJMC = MakeFakeRatePlot("End2", "2Jet_", histos, dataDriven=False)[0]
-graphEnd1TwoJ = MakeFakeRatePlot("End1", "2Jet_", histos)[0]
-graphEnd1TwoJMC = MakeFakeRatePlot("End1", "2Jet_", histos, dataDriven=False)[0]
-graphBarTwoJ = MakeFakeRatePlot("Bar", "2Jet_", histos)[0]
-graphBarTwoJMC = MakeFakeRatePlot("Bar", "2Jet_", histos, dataDriven=False)[0]
-# for writing output
-if doMuz:
-    histList.extend(
-        [
-            graphEnd2TwoJ,
-            graphEnd2TwoJMC,
-            muzHistEnd2TwoJ,
-            graphEnd1TwoJ,
-            graphEnd1TwoJMC,
-            muzHistEnd1TwoJ,
-            graphBarTwoJ,
-            graphBarTwoJMC,
-            muzHistBarTwoJ,
-        ]
-    )
-else:
-    histList.extend(
-        [
-            graphEnd2TwoJ,
-            graphEnd2TwoJMC,
-            graphEnd1TwoJ,
-            graphEnd1TwoJMC,
-            graphBarTwoJ,
-            graphBarTwoJMC,
-        ]
-    )
-
-if doMuz:
-    titleList = ["Data-driven", "MCSub", "Muzamil (E_{T}^{HLT})"]
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd2TwoJ, graphEnd2TwoJMC, muzHistEnd2TwoJ],
-            titleList,
-            "Endcap2, >=2 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphEnd1TwoJ, graphEnd1TwoJMC, muzHistEnd1TwoJ],
-            titleList,
-            "Endcap1, >=2 jets",
-        )
-    )
-    myCanvases.append(
-        MakeFRCanvas(
-            [graphBarTwoJ, graphBarTwoJMC, muzHistBarTwoJ],
-            titleList,
-            "Barrel, >=2 jets",
-        )
-    )
-else:
-    titleList = ["Data-driven", "MCSub"]
-    graphEnd2TwoJ.Print()
-    graphEnd2TwoJMC.Print()
-    myCanvases.append(
-        MakeFRCanvas([graphEnd2TwoJ, graphEnd2TwoJMC], titleList, "Endcap2, >=2 jets")
-    )
-    myCanvases.append(
-        MakeFRCanvas([graphEnd1TwoJ, graphEnd1TwoJMC], titleList, "Endcap1, >=2 jets")
-    )
-    myCanvases.append(
-        MakeFRCanvas([graphBarTwoJ, graphBarTwoJMC], titleList, "Barrel, >=2 jets")
-    )
 
 if writeOutput:
     outputFile.cd()
