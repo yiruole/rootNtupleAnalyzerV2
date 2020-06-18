@@ -135,20 +135,22 @@ bool Electron::PassUserID_HEEP_2018 (bool verbose){
   bool pass_dxy               = PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut);
   bool pass_shape             = PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut);
 
-  float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
-  bool pass_hoe               = bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
-  float caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
-  bool pass_caloIsolation = false;
+  //float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
+  //bool pass_hoe               = bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
+  bool pass_hoe = PassHEEPGsfEleHadronicOverEMLinearCut2018();
+  //float caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
+  //bool pass_caloIsolation = false;
 
-  if   ( Pt()  < 50 ) {
-    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
-					    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) ) );
-  }
-  else                { 
-    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
-					    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) +
-					    ( 0.03 * (Pt() - 50.0 ) ) ) );
-  }
+  //if   ( Pt()  < 50 ) {
+  //  pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+	//				    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) ) );
+  //}
+  //else                { 
+  //  pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+	//				    ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) +
+	//				    ( 0.03 * (Pt() - 50.0 ) ) ) );
+  //}
+  bool pass_caloIsolation = PassHEEPGsfEleEmHadD1IsoRhoCut2018();
 
   bool decision = (pass_et && 
        pass_scEta         &&

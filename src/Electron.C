@@ -58,6 +58,25 @@ bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut              (){ return PassHEEPID
 bool Electron::PassHEEPGsfEleDxyCut                        (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut); }
 bool Electron::PassHEEPGsfEleMissingHitsCut                (){ return PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut); }
 bool Electron::PassHEEPEcalDrivenCut                       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut); }
+bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut2018   () {
+  float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
+  return bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
+}
+bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut2018          () {
+  float caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
+  bool pass_caloIsolation = false;
+
+  if   ( Pt()  < 50 ) {
+    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+          ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) ) );
+  }
+  else                { 
+    pass_caloIsolation = bool ( caloIsolation < ( 2.5 + 
+          ( (0.15+0.07*fabs(SCEta())) * RhoForHEEP() ) +
+          ( 0.03 * (Pt() - 50.0 ) ) ) );
+  }
+  return pass_caloIsolation;
+}
 
 //bool   Electron::EcalSeed             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronHasEcalDrivenSeed        -> at ( m_raw_index ); }
 //bool   Electron::EcalDriven           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronIsEcalDriven             -> at ( m_raw_index ); }

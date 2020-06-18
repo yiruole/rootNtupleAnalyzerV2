@@ -65,6 +65,8 @@ class Electron : public Object {
   bool PassHEEPGsfEleDxyCut                        (); 
   bool PassHEEPGsfEleMissingHitsCut                (); 
   bool PassHEEPEcalDrivenCut                       ();
+  bool PassHEEPGsfEleHadronicOverEMLinearCut2018   ();
+  bool PassHEEPGsfEleEmHadD1IsoRhoCut2018          ();
 
   float IsEB                 ();
   float IsEE                 ();
