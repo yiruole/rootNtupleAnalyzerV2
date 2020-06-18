@@ -14,24 +14,33 @@ from ROOT import (
     kWhite,
     kGreen,
 )
-import numpy
+import numpy as np
 import copy
 import ctypes
 import sys
+import os
 import math
 
 
+def GetXBinsFromGraph(graph):
+    bins = []
+    nPoints = graph.GetN()
+    for i in xrange(nPoints):
+        bins.append(graph.GetPointX(i)-graph.GetErrorXlow(i))
+    bins.append(graph.GetPointX(nPoints-1)+graph.GetErrorXhigh(nPoints-1))
+    return bins
+
+
 def GetCanvasTitle(varName, region, jetBin):
-    # "TrkIsoHEEP7vsHLTPt_noHEM_post319077"
     titleStr = str(analysisYear)+" FR,"
     if "post" in varName.lower():
         titleStr += " Run >= "+varName[varName.lower().find("post")+4:]+","
     elif "pre" in varName.lower():
-        titleStr += " Run < "+varName[varName.lower().find("pre")+4:]+","
+        titleStr += " Run < "+varName[varName.lower().find("pre")+3:]+","
     varNameSplit = varName.split("_")
     for token in varNameSplit:
         if "hem" in token.lower():
-            titleStr += " "+token+","
+            titleStr += " "+token.replace("HEM", "HEM15/16")+","
     titleStr += " "+region.replace("End2", "Endcap2").replace("End1", "Endcap1").replace("Bar", "Barrel")
     if jetBin == "":
         titleStr += ", >= 0 jets"
@@ -41,7 +50,7 @@ def GetCanvasTitle(varName, region, jetBin):
         titleStr += ", >= 2 jets"
     else:
         titleStr += ", "+jetBin
-    print "Created canvas title:", titleStr, "from var=", varName, "region=", reg, "jets=", jetBin
+    # print "Created canvas title:", titleStr, "from var=", varName, "region=", reg, "jets=", jetBin
     return titleStr
 
 
@@ -203,25 +212,25 @@ def GetFakeRateMCSub(lowEnd, highEnd, reg, jets, histDict, verbose=False):
     return numerator, numeratorErr, data, dataErr.value
 
 
-def MakeFakeRatePlot(varName, reg, jets, histDict, verbose=False, dataDriven=True):
+def MakeFakeRatePlot(varName, reg, jets, bins, histDict, verbose=False, dataDriven=True):
     if verbose:
         print "MakeFakeRatePlot:varName=", varName, "reg=", reg, "jets=", jets, "dataDriven=", dataDriven
         sys.stdout.flush()
-    if reg == "Bar":
-        bins = ptBinsBarrel
-    else:
-        bins = ptBinsEndcap
+    # if reg == "Bar":
+    #     bins = ptBinsBarrel
+    # else:
+    #     bins = ptBinsEndcap
     histNum = TH1D(
         varName+"_num_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
         varName+"_num_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
         len(bins) - 1,
-        numpy.array(bins, dtype=float),
+        np.array(bins, dtype=float),
     )
     histDen = TH1D(
         varName+"_den_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
         varName+"_den_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
         len(bins) - 1,
-        numpy.array(bins, dtype=float),
+        np.array(bins, dtype=float),
     )
     for index, binLow in enumerate(bins):
         if index >= (len(bins) - 1):
@@ -258,28 +267,39 @@ def MakeFakeRatePlot(varName, reg, jets, histDict, verbose=False, dataDriven=Tru
 
     graphFR = TGraphAsymmErrors()
     graphFR.BayesDivide(histNum, histDen)
-    graphFR.SetName(
-        "fr{reg}_{jets}{dataDriven}".format(
-            reg=reg, jets=jets, dataDriven="template" if dataDriven else "MCsub"
+    if analysisYear != 2018:
+        graphFR.SetName(
+            "fr{reg}_{jets}{dataDriven}".format(
+                reg=reg, jets=jets, dataDriven="template" if dataDriven else "MCsub"
+            )
         )
-    )
+    else:
+        # a bit nasty to hardcode the varName in the below
+        graphFR.SetName(
+            "fr{reg}_{var}_{jets}{dataDriven}".format(
+                reg=reg, var=varName.replace("TrkIsoHEEP7vsHLTPt_", ""),
+                jets=jets, dataDriven="template" if dataDriven else "MCsub"
+            )
+        )
     return graphFR, histNum, histDen
 
 
 def MakeFRCanvas(plotList, titleList, canTitle):
+    if len(titleList) != len(plotList):
+        print "ERROR: titleList and plotList passed into MakeFRCanvas are different lengths!"
     can = TCanvas()
     can.cd()
     can.SetGridy()
     can.SetTitle(canTitle)
-    can.SetName(canTitle.lower().replace(',', '').replace(' ', '_').replace('>=', 'gte').replace('<', 'lt'))
+    can.SetName("y"+canTitle.lower().replace(',', '').replace(' ', '_').replace('>=', 'gte').replace('<', 'lt'))
     colorList = [1, kSpring-1, kAzure+1, kBlue, kGreen]
     markerStyleList = [8, 25, 23, 22]
     for i, plot in enumerate(plotList):
         if i == 0:
-            plot.Draw("ap")
+            plot.Draw("ap0")
             plot.GetXaxis().SetRangeUser(0, 1000)
             plot.GetXaxis().SetTitle("E_{T} [GeV]")
-            plot.GetYaxis().SetRangeUser(0, 0.08)
+            plot.GetYaxis().SetRangeUser(0, 0.1)
             plot.GetYaxis().SetNdivisions(510)
             plot.GetYaxis().SetTitle("fake rate")
             plot.SetTitle(canTitle)
@@ -290,27 +310,26 @@ def MakeFRCanvas(plotList, titleList, canTitle):
         plot.SetMarkerStyle(markerStyleList[i])
         plot.SetMarkerSize(0.9)
         if i == 0:
-            plot.Draw("ap")
+            plot.Draw("ap0")
         else:
-            plot.Draw("psame")
+            plot.Draw("psame0")
     # hsize=0.20
     # vsize=0.35
     # leg = TLegend(0.19,0.18,0.44,0.35)
     leg = TLegend(0.38, 0.71, 0.63, 0.88)
-    leg.SetFillColor(kWhite)
-    leg.SetFillStyle(1001)
-    leg.SetBorderSize(0)
-    leg.SetShadowColor(10)
-    leg.SetMargin(0.2)
-    leg.SetTextFont(132)
-    if len(titleList) != len(plotList):
-        print "ERROR: titleList and plotList passed into MakeFRCanvas are different lengths!"
-    for i, title in enumerate(titleList):
-        leg.AddEntry(plotList[i], title, "lp")
-        # print "For canvas titled:", canTitle, ", added entry in legend for plot:", plotList[
-        #     i
-        # ].GetName(), "setting title to:", title
-    leg.Draw()
+    if len(plotList) > 1:
+        leg.SetFillColor(kWhite)
+        leg.SetFillStyle(1001)
+        leg.SetBorderSize(0)
+        leg.SetShadowColor(10)
+        leg.SetMargin(0.2)
+        leg.SetTextFont(132)
+        for i, title in enumerate(titleList):
+            leg.AddEntry(plotList[i], title, "lp")
+            # print "For canvas titled:", canTitle, ", added entry in legend for plot:", plotList[
+            #     i
+            # ].GetName(), "setting title to:", title
+        leg.Draw()
     can.Modified()
     can.Update()
     return can, leg
@@ -380,15 +399,15 @@ def GetJetBin(histName):
 # make FR 2D plot from FR TGraphAsymmErrors returned from MakeFakeRatePlot (frGraph)
 # frGraph has x-axis: Pt and y-axis FR
 # so we need to know the eta region here
-def MakeFR2D(frGraph, reg):
+def MakeFR2D(frGraph, reg, bins):
     if reg == "Bar":
-        bins = ptBinsBarrel
+        # bins = ptBinsBarrel
         etaToFill = 1
     elif reg == "End1":
-        bins = ptBinsEndcap
+        # bins = ptBinsEndcap
         etaToFill = 1.7
     elif reg == "End2":
-        bins = ptBinsEndcap
+        # bins = ptBinsEndcap
         etaToFill = 2
     else:
         print "ERROR: could not understand region given:", reg, "; return empty hist"
@@ -398,9 +417,9 @@ def MakeFR2D(frGraph, reg):
         "test",
         "test",
         len(etaBins) - 1,
-        numpy.array(etaBins, dtype=float),
+        np.array(etaBins, dtype=float),
         len(bins) - 1,
-        numpy.array(bins, dtype=float),
+        np.array(bins, dtype=float),
     )
     # print 'consider frGraph with name {}'.format(frGraph.GetName())
     jets = GetJetBin(frGraph.GetName())
@@ -442,17 +461,11 @@ def MakeFR2D(frGraph, reg):
 # filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/14may2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
 filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/5jun2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
 
-outputFileName = "plots.root"
-
 print "Opening file:", filename
 tfile = TFile.Open(filename)
 if not tfile or tfile.IsZombie():
     print "ERROR: TFile is zombie. Quitting here."
     exit(-1)
-
-gROOT.SetBatch(True)
-writeOutput = True
-doMuz = False  # do Muzamil's plots
 
 if '2016' in filename:
     analysisYear = 2016
@@ -460,6 +473,55 @@ elif '2017' in filename:
     analysisYear = 2017
 elif '2018' in filename:
     analysisYear = 2018
+
+outputFileName = "plots.root"
+pdf_folder = "pdf"
+
+gROOT.SetBatch(True)
+writeOutput = True
+doMuz = False  # do Muzamil's plots
+doMCSubFR = False
+
+histoBaseName = "histo2D__{sample}__{type}_{region}_{jets}{varName}"
+dataSampleName = "QCDFakes_DATA"
+electronTypes = ["Jets", "Electrons", "Total"]
+# probably eventually expand to BarPlus, BarMinus, etc.
+detectorRegions = ["Bar", "End1", "End2"]
+regTitleDict = {}
+# jetBins = ["", "1Jet_", "2Jet_", "3Jet_"]
+jetBins = ["", "1Jet_", "2Jet_"]
+# for MC
+if '2016' in filename:
+    mcSamples = [
+        "ZJet_amcatnlo_ptBinned",
+        # "ZJet_amcatnlo_Inc",
+        # "WJet_amcatnlo_ptBinned",
+        # "WJet_Madgraph_Inc",
+        "WJet_amcatnlo_Inc",
+        "TTbar_powheg",
+        "SingleTop",
+        "PhotonJets_Madgraph",
+        # "DIBOSON",
+        "DIBOSON_amcatnlo",
+    ]
+else:
+    mcSamples = [
+        "ZJet_amcatnlo_Inc",
+        "WJet_Madgraph_Inc",
+        "TTbar_powheg",
+        "SingleTop",
+        "PhotonJets_Madgraph",
+        "DIBOSON",
+    ]
+mcNames = ["ZJets", "WJets", "TTBar", "ST", "GJets", "Diboson"]
+
+# varNameList = ["TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsMTenu_PAS"]
+if analysisYear != 2018:
+    varNameList = ["TrkIsoHEEP7vsHLTPt_PAS"]
+else:
+    varNameList = [
+            "TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsHLTPt_pre319077", "TrkIsoHEEP7vsHLTPt_post319077",
+            "TrkIsoHEEP7vsHLTPt_noHEM_post319077", "TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]
 
 # ptBinsBarrel = [
 # #    35,
@@ -513,48 +575,16 @@ if analysisYear == 2016:
     ptBinsEndcap = [36, 50, 75, 90, 120, 140, 175, 200, 225, 250, 300, 350, 400, 500, 600, 1000]
 else:
     ptBinsEndcap = [36, 50, 75, 90, 120, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 1000]
-ptBinsBarrel = ptBinsEndcap
-
-histoBaseName = "histo2D__{sample}__{type}_{region}_{jets}{varName}"
-dataSampleName = "QCDFakes_DATA"
-electronTypes = ["Jets", "Electrons", "Total"]
-# probably eventually expand to BarPlus, BarMinus, etc.
-detectorRegions = ["Bar", "End1", "End2"]
-regTitleDict = {}
-# jetBins = ["", "1Jet_", "2Jet_", "3Jet_"]
-jetBins = ["", "1Jet_", "2Jet_"]
-# for MC
-if '2016' in filename:
-    mcSamples = [
-        "ZJet_amcatnlo_ptBinned",
-        # "ZJet_amcatnlo_Inc",
-        # "WJet_amcatnlo_ptBinned",
-        # "WJet_Madgraph_Inc",
-        "WJet_amcatnlo_Inc",
-        "TTbar_powheg",
-        "SingleTop",
-        "PhotonJets_Madgraph",
-        # "DIBOSON",
-        "DIBOSON_amcatnlo",
-    ]
-else:
-    mcSamples = [
-        "ZJet_amcatnlo_Inc",
-        "WJet_Madgraph_Inc",
-        "TTbar_powheg",
-        "SingleTop",
-        "PhotonJets_Madgraph",
-        "DIBOSON",
-    ]
-mcNames = ["ZJets", "WJets", "TTBar", "ST", "GJets", "Diboson"]
-
-# varNameList = ["TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsMTenu_PAS"]
-if analysisYear != 2018:
-    varNameList = ["TrkIsoHEEP7vsHLTPt_PAS"]
-else:
-    varNameList = [
-            "TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsHLTPt_pre319077", "TrkIsoHEEP7vsHLTPt_post319077",
-            "TrkIsoHEEP7vsHLTPt_noHEM_post319077", "TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]
+# 2018
+ptBinsEndcapHEM1516Only = [36, 50, 75, 90, 120, 150, 175, 200, 225, 250, 300, 350, 400, 500, 1000]
+# ptBinsBarrel = ptBinsEndcap
+ptBinsDict = {}
+for varName in varNameList:
+    ptBinsDict[varName] = {}
+    for reg in detectorRegions:
+        ptBinsDict[varName][reg] = ptBinsEndcap
+ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End1"] = ptBinsEndcapHEM1516Only
+ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End2"] = ptBinsEndcapHEM1516Only
 
 allHistos = {}
 for varName in varNameList:
@@ -615,38 +645,44 @@ for varName in allHistos:
         histDict[varName][reg] = {}
         numerHistDict[varName][reg] = {}
         denomHistDict[varName][reg] = {}
+        bins = ptBinsDict[varName][reg]
         for jetBin in jetBins:
             histDict[varName][reg][jetBin] = {}
             numerHistDict[varName][reg][jetBin] = {}
             denomHistDict[varName][reg][jetBin] = {}
             histFR, histNum, histDen = MakeFakeRatePlot(
-                    varName, reg, jetBin, histos
+                    varName, reg, jetBin, bins, histos
             )
             histDict[varName][reg][jetBin]["data"] = histFR
             numerHistDict[varName][reg][jetBin]["data"] = histNum
             denomHistDict[varName][reg][jetBin]["data"] = histDen
-            histFRMC, histNumMC, histDenMC = MakeFakeRatePlot(
-                    varName, reg, jetBin, histos, dataDriven=False
-            )
-            histDict[varName][reg][jetBin]["mc"] = histFRMC
-            numerHistDict[varName][reg][jetBin]["mc"] = histNumMC
-            denomHistDict[varName][reg][jetBin]["mc"] = histDenMC
+            if doMCSubFR:
+                histFRMC, histNumMC, histDenMC = MakeFakeRatePlot(
+                        varName, reg, jetBin, bins, histos, dataDriven=False
+                )
+                histDict[varName][reg][jetBin]["mc"] = histFRMC
+                numerHistDict[varName][reg][jetBin]["mc"] = histNumMC
+                denomHistDict[varName][reg][jetBin]["mc"] = histDenMC
 
 for varName in allHistos:
     for reg in detectorRegions:
         for jetBin in jetBins:
-            histList = [histDict[varName][reg][jetBin]["data"], histDict[varName][reg][jetBin]["mc"]]
-            titleList = ["Data-driven", "MCSub"]
+            varRegJetHistList = [histDict[varName][reg][jetBin]["data"]]
+            titleList = ["Data-driven"]
+            if doMCSubFR:
+                varRegJetHistList.append(histDict[varName][reg][jetBin]["mc"])
+                titleList.append("MCSub")
             if jetBin == "" and varName == "TrkIsoHEEP7vsHLTPt_PAS":
-                histList.append(zprimeHistDict[reg][jetBin])
+                varRegJetHistList.append(zprimeHistDict[reg][jetBin])
                 titleList.append("2016 Zprime (E_{T}^{HLT})")
             myCanvases.append(
                 MakeFRCanvas(
-                    histList,
+                    varRegJetHistList,
                     titleList,
                     GetCanvasTitle(varName, reg, jetBin)
                 )
             )
+            histList.extend(varRegJetHistList)
 
 # # for drawing num/den hists
 # numDenHistList = [histNumEnd2ZeroJ,histDenEnd2ZeroJ,histNumEnd1ZeroJ,histDenEnd1ZeroJ,histNumBarZeroJ,histDenBarZeroJ]
@@ -676,13 +712,16 @@ for varName in allHistos:
 
 if writeOutput:
     outputFile.cd()
+    if not os.path.isdir(pdf_folder) and pdf_folder != "":
+        "Making directory", pdf_folder
+        os.mkdir(pdf_folder)
 for canLeg in myCanvases:
     canv = canLeg[0]
     canv.Draw()  # canvas
     # canLeg[-1][1].Draw() #legend
     if writeOutput:
         canv.Write()
-        canv.Print(canv.GetName()+".pdf")
+        canv.Print(pdf_folder + "/" + canv.GetName()+".pdf")
 
 
 ##################################################
@@ -800,7 +839,9 @@ if writeOutput:
     for hist in histList:
         hist.Write()
         if "template" in hist.GetName():
-            hist2d = MakeFR2D(hist, hist.GetName()[2: hist.GetName().find("_")])
+            reg = hist.GetName()[2: hist.GetName().find("_")]
+            bins = GetXBinsFromGraph(hist)
+            hist2d = MakeFR2D(hist, reg, bins)
             if "End" in hist2d.GetName():
                 endcap2dHists.append(hist2d)
             else:
