@@ -32,10 +32,13 @@ def PrepareJobScript(outputname):
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
         outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
         if options.reducedSkim:
-            outputfile.write("xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_reduced_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_rsk.root\"\n")
+            outputfile.write("if [ -f "+outputPrefix+"_"+str(ijob)+"_reduced_skim.root ]; then\n")
+            outputfile.write("    xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_reduced_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_rsk.root\"\n")
         else:
             # flat skim
-            outputfile.write("xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_sk.root\"\n")
+            outputfile.write("if [ -f "+outputPrefix+"_"+str(ijob)+"_skim.root ]; then\n")
+            outputfile.write("    xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_sk.root\"\n")
+        outputfile.write("fi\n")
 
 
 def WriteSubmitFile(condorFileName):
