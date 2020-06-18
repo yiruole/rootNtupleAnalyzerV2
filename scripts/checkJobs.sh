@@ -1,8 +1,9 @@
 #!/bin/bash
 
-if [[ $# -ne 2 ]]; then
+#if [[ $# -ne 2 ]]; then
+if [[ $# -gt 2 ]]; then
     echo "Incorrect number of parameters"
-    echo "Usage: $0 localDir eosDir"
+    echo "Usage: $0 localDir [outputFileDir]"
     exit -1
 fi
 
@@ -12,6 +13,11 @@ eosdir=$2
 echo "Grepping error files..."
 find $localdir -iname "*.err" -exec grep -ivH "no dict" {} \;
 echo "Done."
+
+if [[ -z "$eosdir" ]]; then
+  exit 0
+fi
+
 #echo "submit files: `find $localdir -iname "submit*sh" | wc -l`"
 #echo "files on eos: `EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir | grep -v '.sys.v#.' | wc -l`"
 dirlist=`find $localdir -maxdepth 1 -type d | tail -n +2`
@@ -20,20 +26,26 @@ declare -i numOKDatasets=0
 declare -i numBadDatasets=0
 declare -i numDatasets=0
 echo
-echo -n "Checking files on eos..."
+echo -n "Checking for output files..."
 txtOut="dataset    submitFiles    filesOnEOS    status    \n"
 for dir in $dirlist
 do
   #echo $dir
+  #echo "eos find -f $eosdir/${dir##*___}"
   #echo "dataset=${dir##*/}  submit files: `find $localdir -iname \"submit*sh\" | wc -l` files on eos: `EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir | grep -v '.sys.v#.' | wc -l`"
   # works
   #txtOut=$txtOut"${dir##*___} `find $dir -iname \"submit*sh\" | wc -l` `EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`\n"
   numDatasets+=1
   numSubmitFiles=`find $dir -iname "submit*sh" | wc | awk '{print $1}'`
-  numEosFiles=`EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`
+  if [[ $eosdir == *"eos"* ]]; then
+    numOutputFiles=`EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`
+  else
+    #echo "find $eosdir/${dir##*/}/output -type f -iname '*.root' | grep -v '.sys.' | wc -l"
+    numOutputFiles=`find $eosdir/${dir##*/}/output -type f -iname "*.root" | grep -v '.sys.' | wc -l`
+  fi
   dataset=${dir##*___}
-  if [ "$numSubmitFiles" != "$numEosFiles" ]; then
-    txtOut=$txtOut"$dataset $numSubmitFiles $numEosFiles BAD\n"
+  if [ "$numSubmitFiles" != "$numOutputFiles" ]; then
+    txtOut=$txtOut"$dataset $numSubmitFiles $numOutputFiles BAD\n"
     #echo "numSubmitFiles=$numSubmitFiles"
     #echo "numEosFiles=$numEosFiles"
     numBadDatasets+=1
