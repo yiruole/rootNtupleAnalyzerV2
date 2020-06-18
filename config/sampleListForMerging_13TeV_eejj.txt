@@ -36,7 +36,7 @@ ZJet_amcatnlo_ptBinnedFrom100    ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to
 #ZJet_amcatnlo_ptBinned_IncStitch    ZJet_amcatnlo_Inc  ZJet_amcatnlo_pt50to100  ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to400  ZJet_amcatnlo_pt400to650  ZJet_amcatnlo_pt650toInf
 #ZJet_amcatnlo_Inc    ZJet_amcatnlo_M10to50  ZJet_amcatnlo_M50
 
-#WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
+WJet_amcatnlo_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WJet_Madgraph_Inc    /WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM
 #WJet_Madgraph_HT100to200    /WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
 #WJet_Madgraph_HT200to400    /WJetsToLNu_HT-200To400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM 
@@ -47,13 +47,18 @@ ZJet_amcatnlo_ptBinnedFrom100    ZJet_amcatnlo_pt100to250  ZJet_amcatnlo_pt250to
 #WJet_Madgraph_HT2500toInf   /WJetsToLNu_HT-2500ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/MINIAODSIM
 #WJet_Madgraph_HT    WJet_Madgraph_HT100to200 WJet_Madgraph_HT200to400 WJet_Madgraph_HT400to600 WJet_Madgraph_HT600to800 WJet_Madgraph_HT800to1200 WJet_Madgraph_HT1200to2500 WJet_Madgraph_HT2500toInf 
 WJet_amcatnlo_pt0to50       /WJetsToLNu_Wpt-0To50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
-WJet_amcatnlo_pt50to100     /WJetsToLNu_Wpt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+#WJet_amcatnlo_pt50to100     /WJetsToLNu_Wpt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WJet_amcatnlo_pt100to250    /WJetsToLNu_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt250to400    /WJetsToLNu_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt400to600    /WJetsToLNu_Pt-400To600_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 WJet_amcatnlo_pt600toInf    /WJetsToLNu_Pt-600ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
-WJet_amcatnlo_ptBinned    WJet_amcatnlo_pt0to50  WJet_amcatnlo_pt50to100  WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+#WJet_amcatnlo_ptBinned    WJet_amcatnlo_pt0to50  WJet_amcatnlo_pt50to100  WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
 #WJet_amcatnlo_ptBinned_noIncW    WJet_amcatnlo_pt100to250    WJet_amcatnlo_pt250to400    WJet_amcatnlo_pt400to600    WJet_amcatnlo_pt600toInf
+
+WJet_amcatnlo_0Jets    /WToLNu_0J_13TeV-amcatnloFXFX-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7_ext1-v1/NANOAODSIM
+WJet_amcatnlo_1Jet     /WToLNu_1J_13TeV-amcatnloFXFX-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_backup_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WJet_amcatnlo_2Jets    /WToLNu_2J_13TeV-amcatnloFXFX-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7_ext1-v1/NANOAODSIM
+WJet_amcatnlo_jetBinned    WJet_amcatnlo_0Jets  WJet_amcatnlo_1Jet  WJet_amcatnlo_2Jets  
 
 #TTJets_DiLept                /TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #TTJets_SingleLeptFromT       /TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
@@ -85,18 +90,14 @@ GJets_HT-400To600   /GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Ru
 GJets_HT-600ToInf   /GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM 
 PhotonJets_Madgraph  GJets_HT-40To100 GJets_HT-100To200 GJets_HT-200To400 GJets_HT-400To600 GJets_HT-600ToInf
 
-#QCD_Pt-20to30_EMEnriched      /QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
-#QCD_Pt-30to50_EMEnriched      /QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    
-#QCD_Pt-50to80_EMEnriched      /QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
-#QCD_Pt-80to120_EMEnriched     /QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM        
-#QCD_Pt-120to170_EMEnriched    /QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-#QCD_Pt-170to300_EMEnriched    /QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-#QCD_Pt-300toInf_EMEnriched    /QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-#QCD_EMEnriched    QCD_Pt-20to30_EMEnriched QCD_Pt-30to50_EMEnriched QCD_Pt-50to80_EMEnriched QCD_Pt-80to120_EMEnriched QCD_Pt-120to170_EMEnriched QCD_Pt-170to300_EMEnriched QCD_Pt-300toInf_EMEnriched
-
-#QCDFakes_SingleElectron_2015D-05Oct2015        /SingleElectron/Run2015D-05Oct2015-v1_forDataDrivenQCD/MINIAOD
-#QCDFakes_SingleElectron_2015D-PromptReco-v4    /SingleElectron/Run2015D-PromptReco-v4_forDataDrivenQCD/MINIAOD
-#QCDFakes_DATA    QCDFakes_SingleElectron_2015D-05Oct2015    QCDFakes_SingleElectron_2015D-PromptReco-v4
+QCD_Pt-20to30_EMEnriched      /QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
+QCD_Pt-30to50_EMEnriched      /QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    
+QCD_Pt-50to80_EMEnriched      /QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
+QCD_Pt-80to120_EMEnriched     /QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM        
+QCD_Pt-120to170_EMEnriched    /QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+QCD_Pt-170to300_EMEnriched    /QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+QCD_Pt-300toInf_EMEnriched    /QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+QCD_EMEnriched    QCD_Pt-20to30_EMEnriched QCD_Pt-30to50_EMEnriched QCD_Pt-50to80_EMEnriched QCD_Pt-80to120_EMEnriched QCD_Pt-120to170_EMEnriched QCD_Pt-170to300_EMEnriched QCD_Pt-300toInf_EMEnriched
 
 #WW    /WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WZ    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
@@ -105,11 +106,6 @@ PhotonJets_Madgraph  GJets_HT-40To100 GJets_HT-100To200 GJets_HT-200To400 GJets_
 
 WWTo1L1Nu2Q  /WWTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WWTo4Q       /WWTo4Q_4f_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
-WZTo1L1Nu2Q  /WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM
-WZTo1L3Nu    /WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
-WZTo2L2Q     /WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
-WZTo3LNu     /WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
-WZTo2Q2Nu    /WZTo2Q2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 ZZTo2Q2Nu    /ZZTo2Q2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 ZZTo4L       /ZZTo4L_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM
 ZZTo4Q       /ZZTo4Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
@@ -117,9 +113,35 @@ ZZTo2L2Q     /ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2
 # VV has WW->2L2Nu and ZZ->2L2Nu
 VVTo2L2Nu    /VVTo2L2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
 WW_amcatnlo    WWTo1L1Nu2Q  WWTo4Q
-WZ_amcatnlo    WZTo1L1Nu2Q  WZTo1L3Nu  WZTo2L2Q  WZTo3LNu  WZTo2Q2Nu  
-ZZ_amcatnlo    ZZTo4L  ZZTo4Q  ZZTo2L2Q
+ZZ_amcatnlo    ZZTo4L  ZZTo4Q  ZZTo2L2Q  ZZTo2Q2Nu
+#ZZ_amcatnlo    ZZTo4L  ZZTo4Q  ZZTo2L2Q
+WZTo1L3Nu    /WZTo1L3Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+WZTo3LNu     /WZTo3LNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+WZTo1L1Nu2Q  /WZTo1L1Nu2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3/MINIAODSIM
+WZTo2L2Q     /WZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+WZ_amcatnlo  WZTo1L3Nu  WZTo3LNu  WZTo1L1Nu2Q  WZTo2L2Q
 DIBOSON_amcatnlo    WW_amcatnlo WZ_amcatnlo ZZ_amcatnlo  VVTo2L2Nu
+
+WWTo4Q       /WWTo4Q_13TeV-powheg/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WWToLNuQQ    /WWToLNuQQ_13TeV-powheg/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WWTo2L2Nu    /WWTo2L2Nu_13TeV-powheg/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WW_powheg    WWTo4Q  WWToLNuQQ  WWTo2L2Nu
+ZZTo2L2Q     /ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+ZZTo4L       /ZZTo4L_13TeV_powheg_pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+ZZTo2Q2Nu    /ZZTo2Q2Nu_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM
+ZZTo2L2Nu    /ZZTo2L2Nu_13TeV_powheg_pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+ZZ_nlo       ZZTo2L2Q  ZZTo4L  ZZTo2Q2Nu  ZZTo2L2Nu
+DIBOSON_nlo  WW_powheg  ZZ_nlo  WZ_amcatnlo
+
+WWW    /WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WWZ    /WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+WZZ    /WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+ZZZ    /ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+TRIBOSON  WWW  WWZ  WZZ ZZZ
+TTWJetsToLNu    /TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7_ext1-v1/NANOAODSIM  /TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7_ext2-v1/NANOAODSIM
+TTWJetsToQQ     /TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
+TTW    TTWJetsToLNu  TTWJetsToQQ
+TTZ    /ttZJets_13TeV_madgraphMLM-pythia8/RunIISummer16NanoAODv6-PUMoriond17_Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM  /ttZJets_13TeV_madgraphMLM/RunIISummer16NanoAODv6-Nano25Oct2019_102X_mcRun2_asymptotic_v7-v1/NANOAODSIM
 
 #ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
 #OTHERBKG_WJetPt	   WJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
@@ -131,9 +153,18 @@ DIBOSON_amcatnlo    WW_amcatnlo WZ_amcatnlo ZZ_amcatnlo  VVTo2L2Nu
 #ALLBKG_noTTBar_ZJetIncStitchWJetPt		    ZJet_amcatnlo_ptBinned_IncStitch WJet_amcatnlo_ptBinned SingleTop DIBOSON PhotonJets_Madgraph
 
 #ALLBKG_amcAtNLOIncTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_amcatnlo_Inc WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
-OTHERBKG_WJetPt_amcAtNLODiboson   	WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
-ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+#OTHERBKG_WJetPt_amcAtNLODiboson   	WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+#ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
 #ALLBKG_powhegTTBar_ZJetIncWJetPt_amcAtNLODiboson		ZJet_amcatnlo_Inc TTbar_powheg WJet_amcatnlo_ptBinned SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+
+OTHERBKG_WJetAMCInc_amcAtNLODiboson   	WJet_amcatnlo_Inc SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+ALLBKG_powhegTTBar_ZJetPtWJetInc_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_Inc SingleTop DIBOSON_amcatnlo PhotonJets_Madgraph
+
+OTHERBKG_WJetAMCInc_dibosonNLO_triboson   	WJet_amcatnlo_Inc SingleTop DIBOSON_nlo TRIBOSON TTW TTZ PhotonJets_Madgraph
+ALLBKG_powhegTTBar_ZJetPtWJetInc_NLODiboson_triboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_Inc SingleTop DIBOSON_nlo TRIBOSON TTW TTZ PhotonJets_Madgraph
+
+OTHERBKG_WJetAMCJetBinned_dibosonNLO_triboson   	WJet_amcatnlo_jetBinned SingleTop DIBOSON_nlo TRIBOSON TTW TTZ PhotonJets_Madgraph
+ALLBKG_powhegTTBar_ZJetPtWJetAMCJetBinned_NLODiboson_triboson		ZJet_amcatnlo_ptBinned TTbar_powheg WJet_amcatnlo_jetBinned SingleTop DIBOSON_nlo TRIBOSON TTW TTZ PhotonJets_Madgraph
 
 # Removed QCD Fakes from here
 #ALLBKG_MG_HT		ZJet_Madgraph_HT TTbar_Madgraph WJet_Madgraph_HT SingleTop PhotonJets_Madgraph DIBOSON
@@ -146,22 +177,22 @@ ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson		ZJet_amcatnlo_ptBinned TTbar_powh
 #OTHERBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 
 # data
-SingleElectron_2016B    /SingleElectron_Run2016B-17Jul2018_ver2-v1/MINIAOD
-SingleElectron_2016C    /SingleElectron_Run2016C-17Jul2018-v1/MINIAOD
-SingleElectron_2016D    /SingleElectron_Run2016D-17Jul2018-v1/MINIAOD
-SingleElectron_2016E    /SingleElectron_Run2016E-17Jul2018-v1/MINIAOD
-SingleElectron_2016F    /SingleElectron_Run2016F-17Jul2018-v1/MINIAOD
-SingleElectron_2016G    /SingleElectron_Run2016G-17Jul2018-v1/MINIAOD
-SingleElectron_2016H    /SingleElectron_Run2016H-17Jul2018-v1/MINIAOD
+SingleElectron_2016B   /SingleElectron/Run2016B_ver2-Nano25Oct2019_ver2-v1/NANOAOD
+SingleElectron_2016C   /SingleElectron/Run2016C-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016D   /SingleElectron/Run2016D-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016E   /SingleElectron/Run2016E-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016F   /SingleElectron/Run2016F-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016G   /SingleElectron/Run2016G-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016H   /SingleElectron/Run2016H-Nano25Oct2019-v1/NANOAOD
 SingleElectron_2016_all    SingleElectron_2016B  SingleElectron_2016C  SingleElectron_2016D  SingleElectron_2016E  SingleElectron_2016F  SingleElectron_2016G SingleElectron_2016H
 SingleElectron_all    SingleElectron_2016_all
-SinglePhoton_2016B    /SinglePhoton_Run2016B-17Jul2018_ver2-v1/MINIAOD
-SinglePhoton_2016C    /SinglePhoton_Run2016C-17Jul2018-v1/MINIAOD
-SinglePhoton_2016D    /SinglePhoton_Run2016D-17Jul2018-v1/MINIAOD
-SinglePhoton_2016E    /SinglePhoton_Run2016E-17Jul2018-v1/MINIAOD
-SinglePhoton_2016F    /SinglePhoton_Run2016F-17Jul2018-v1/MINIAOD
-SinglePhoton_2016G    /SinglePhoton_Run2016G-17Jul2018-v1/MINIAOD
-SinglePhoton_2016H    /SinglePhoton_Run2016H-17Jul2018-v1/MINIAOD
+SinglePhoton_2016B   /SinglePhoton/Run2016B_ver2-Nano25Oct2019_ver2-v1/NANOAOD
+SinglePhoton_2016C   /SinglePhoton/Run2016C-Nano25Oct2019-v1/NANOAOD
+SinglePhoton_2016D   /SinglePhoton/Run2016D-Nano25Oct2019-v1/NANOAOD
+SinglePhoton_2016E   /SinglePhoton/Run2016E-Nano25Oct2019-v1/NANOAOD
+SinglePhoton_2016F   /SinglePhoton/Run2016F-Nano25Oct2019-v1/NANOAOD
+SinglePhoton_2016G   /SinglePhoton/Run2016G-Nano25Oct2019-v1/NANOAOD 
+SinglePhoton_2016H   /SinglePhoton/Run2016H-Nano25Oct2019-v1/NANOAOD 
 SinglePhoton_2016_all    SinglePhoton_2016B  SinglePhoton_2016C  SinglePhoton_2016D  SinglePhoton_2016E  SinglePhoton_2016F  SinglePhoton_2016G SinglePhoton_2016H
 SinglePhoton_all    SinglePhoton_2016_all
 DATA    SingleElectron_all  SinglePhoton_all
