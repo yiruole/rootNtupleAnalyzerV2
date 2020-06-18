@@ -37,41 +37,64 @@ parser.add_option(
     "-d",
     "--datasets",
     dest="datasets",
-    help="datasets to check",
+    help="datasets to check (comma-separated list)",
     metavar="DATASETS",
+    default=None,
+)
+parser.add_option(
+    "-f",
+    "--file",
+    dest="filename",
+    help="filename containing datasets to check",
+    metavar="FILENAME",
     default=None,
 )
 
 (options, args) = parser.parse_args()
 
-if options.datasets is None:
-    print 'ERROR: must specify dataset with -d or --dataset'
+if options.datasets is None and options.filename is None:
+    print 'ERROR: must specify dataset with -d or --dataset or filename with -f or --file'
     exit(-1)
 
-datasetpath = options.datasets
-#print datasetpath
-if ',' in datasetpath:
-    datasetList = datasetpath.split(',')
+if options.datasets is not None:
+    datasetpath = options.datasets
+    #print datasetpath
+    if ',' in datasetpath:
+        datasetList = datasetpath.split(',')
+    else:
+        datasetList = [datasetpath]
 else:
-    datasetList = [datasetpath]
+    datasetList = []
+    with open(options.filename,"r") as theFile:
+        for line in theFile:
+            split = line.split()
+            if len(split) <= 0:
+                continue
+            if "#" in split[0]:  # skip comments
+                # print 'found comment:',line
+                continue
+            dataset = split[0]
+            datasetList.append(dataset)
 
 for dataset in datasetList:
-    print 'Examining dataset:',dataset
+    # print 'Examining dataset:',dataset,
+    print dataset,
     parents = GetParents(dataset)
     if not CheckForMultipleParents(parents):
         continue
     
     parentDataset = parents[0]['parent_dataset']
-    print '\tparent dataset='+parentDataset
+    # print '\tparent dataset='+parentDataset
     
     nextParents = GetParents(parentDataset)
     if not CheckForMultipleParents(nextParents):
         continue
     
     parentOfParent = nextParents[0]['parent_dataset']
-    print '\tparent of parent dataset=',parentOfParent
+    # print '\tparent of parent dataset=',parentOfParent
     
     if 'PU2017' in parentOfParent:
-        print '\tPU is OK'
+        print '\tPU OK'
     else:
         print '\tWrong PU was used in AOD dataset!'
+
