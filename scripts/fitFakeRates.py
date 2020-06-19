@@ -1,5 +1,7 @@
 import os
-from ROOT import gMinuit, gStyle, gPad, TFile, TF1, TCanvas, TLegend, kSpring, kAzure, kRed, kOrange
+from ROOT import gROOT, gMinuit, gStyle, gPad, TFile, TF1, TCanvas, TLegend, kSpring, kAzure, kRed, kOrange
+
+gROOT.SetBatch(True)
 
 outputFileName = "fitResults.root"
 pdf_folder = "pdf"
@@ -10,7 +12,7 @@ fitColors = [kSpring-1, kRed+1, kAzure+1, kOrange+8]
 fitStyles = [1, 2]
 
 # years = [2016, 2017, 2018]
-years = [2017]
+years = [2016]
 
 fileNames = {}
 fileNames[2016] = "$LQANA/versionsOfFakeRate/2016/may25/plots.root"
@@ -41,6 +43,25 @@ fitRanges[2018]["Bar_HEMonly_post319077_2Jet"] = [[0, 225], [150, 1000]]
 fitRanges[2018]["End1_HEMonly_post319077_2Jet"] = [[0, 175], [150, 1000]]
 fitRanges[2018]["End2_HEMonly_post319077_2Jet"] = [[0, 175], [150, 1000]]
 
+# use this after we've determined the function selection to write the combined function to the file
+# number of functions has to match number of specified fit ranges/regions
+# list: [functionType1, functionType2, splitPoint, functionType2, functionType3, splitPoint, etc.]
+selectedFits = {}
+selectedFits[2016] = {}
+for year in years:
+    for reg in regionsDict[year]:
+        selectedFits[year][reg] = {}
+selectedFits[2016]["Bar_2Jet"]["funcs"] = ["pol2", "pol1", 150]
+selectedFits[2016]["End1_2Jet"]["funcs"] = ["pol2", "pol2", 140]
+selectedFits[2016]["End2_2Jet"]["funcs"] = ["pol2", "pol2", 160]
+selectedFits[2016]["Bar_2Jet"]["splits"] = [150]
+selectedFits[2016]["End1_2Jet"]["splits"] = [140]
+selectedFits[2016]["End2_2Jet"]["splits"] = [160]
+if len(selectedFits) > 0:
+    writeFitResults = True
+else:
+    writeFitResults = False
+
 graphName = "fr{}_template"
 
 tfiles = {}
@@ -58,7 +79,7 @@ for year in years:
     for region in regionsDict[year]:
         fitResults[year][region] = {}
         graph = thisFile.Get(graphName.format(region))
-        canName = str(year)+"_"+region
+        canName = "y"+str(year)+"_"+region
         canvas = TCanvas(canName, canName)
         canvas.cd()
         leg = TLegend(0.38, 0.71, 0.63, 0.88)
@@ -75,7 +96,7 @@ for year in years:
             fitRangeStr = "to".join(str(fr) for fr in fitRange)
             fitResults[year][region][fitRangeStr] = {}
             for funcIndex, funcType in enumerate(funcTypes):
-                func = TF1("y"+canName+"_"+fitRangeStr+"_"+funcType, funcType)
+                func = TF1(canName+"_"+fitRangeStr+"_"+funcType, funcType)
                 func.SetLineColor(fitColors[funcIndex])
                 func.SetRange(float(fitRange[0]), float(fitRange[1]))
                 func.SetLineStyle(fitStyles[frIndex])
@@ -146,7 +167,45 @@ for can in canvases:
     can.Print(pdf_folder + "/" + can.GetName() + "_fit.pdf")
 for func in functions:
     func.Write()
+
+# write manually-selected full functions
+if writeFitResults:
+    for year in years:
+        for region in regionsDict[year]:
+            selectedFitList = selectedFits[year][region]["funcs"]
+            selectedFitSplitList = selectedFits[year][region]["splits"]
+            canName = "y"+str(year)+"_"+region
+            selectedFitFuncs = []
+            selectedFuncTypes = []
+            for frIndex, fitRange in enumerate(fitRanges[year][region]):
+                funcType = selectedFitList[frIndex]
+                fitRangeStr = "to".join(str(fr) for fr in fitRange)
+                funcName = canName+"_"+fitRangeStr+"_"+funcType
+                for func in functions:
+                    if funcName == func.GetName():
+                        break
+                selectedFitFuncs.append(func)
+                selectedFuncTypes.append(funcType)
+            paramIndex = 0
+            params = []
+            formula = ""
+            for i, func in enumerate(selectedFitFuncs):
+                formula += selectedFuncTypes[i]+"("+str(paramIndex)+")"
+                if i < len(selectedFitFuncs)-1:
+                    splitPoint = str(selectedFitSplitList[i])
+                    formula += "*(x<"+str(splitPoint)+")+(x>="+str(splitPoint)+")*"
+                paramIndex += func.GetNpar()
+                params.extend([func.GetParameter(j) for j in range(0, func.GetNpar())])
+            # nParams = sum([func.GetNpar() for func in selectedFitFuncs])
+            print "Create TF1 with combined formula: '{}'".format(formula)
+            combinedFitFunc = TF1(canName+"_combinedFit", formula)
+            combinedFitFunc.SetRange(0, 5000)
+            for i, param in enumerate(params):
+                combinedFitFunc.SetParameter(i, param)
+            combinedFitFunc.Write()
+
+
 outputTFile.Close()
 
-#for f in tfiles:
-#    f.Close()
+for f in tfiles.values():
+    f.Close()
