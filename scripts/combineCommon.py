@@ -39,7 +39,11 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     # if 'ZToEE' in dataset_fromInputList:
     #     print 'found ZToEE in dataset='+dataset_fromInputList
     #     dataset_fromInputList = dataset_fromInputList.replace('TuneCP5_', '').replace('13TeV-', '')
-    dataset_fromInputList = dataset_fromInputList.replace("ext2_", "").replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "").replace("backup_","")
+    # dataset_fromInputList = dataset_fromInputList.replace("ext2_", "").replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "")
+    dataset_fromInputList = re.sub("ext[0-9_]*", "", dataset_fromInputList)
+    dataset_fromInputList = dataset_fromInputList.replace("backup_", "")
+    dataset_fromInputList = re.sub("newPMX[_]*", "", dataset_fromInputList)
+    # dataset_fromInputList = re.sub("NNPDF[0-9_]*", "", dataset_fromInputList)
     dataset_fromInputList = dataset_fromInputList.rstrip("_")
     # print '1) SanitizeDatasetNameFromInputList() result is:'+dataset_fromInputList
     return dataset_fromInputList
