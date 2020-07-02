@@ -21,7 +21,7 @@ SELECTIONLIB=$(SRC)/baseClass.o $(SRC)/analysisClass.o $(SRC)/jsonParser.o $(SRC
 COLLECTIONLIB=$(SRC)/Collection.o
 PHYOBJECTSLIB=$(SRC)/Object.o $(SRC)/GenParticle.o $(SRC)/GenJet.o $(SRC)/Electron.o $(SRC)/LooseElectron.o $(SRC)/Muon.o $(SRC)/PFJet.o $(SRC)/HLTriggerObject.o
 IDOBJECTSLIB=$(SRC)/GenParticleIDs.o $(SRC)/GenJetIDs.o $(SRC)/ElectronIDs.o $(SRC)/MuonIDs.o $(SRC)/PFJetIDs.o
-TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o $(SRC)/TTreeReaderTools.o
+TOOLSLIB=$(SRC)/HLTriggerObjectCollectionHelper.o $(SRC)/TTreeReaderTools.o $(SRC)/QCDFakeRate.o
 EXE = main
 
 # ********** TEMPLATE *************
