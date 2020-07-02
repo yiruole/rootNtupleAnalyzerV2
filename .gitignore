@@ -10,4 +10,5 @@
 *.png
 *.ps
 main*
+makeOptCutFile
 src/analysisClass.C
