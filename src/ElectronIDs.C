@@ -20,6 +20,7 @@ bool Electron::PassUserID (ID id, bool verbose){
   else if ( id == MVA                   ) return PassUserID_MVA               (verbose);
   else if ( id == ECAL_FIDUCIAL         ) return PassUserID_ECALFiducial      (verbose);
   else if ( id == FAKE_RATE_HEEP_LOOSE  ) return PassUserID_FakeRateLooseID(verbose);
+  else if ( id == FAKE_RATE_VERY_LOOSE  ) return PassUserID_FakeRateVeryLooseID(verbose);
   else return false;
 }
 
@@ -286,4 +287,34 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
   
   return decision;
 
+}
+
+bool Electron::PassUserID_FakeRateVeryLooseID(bool verbose){
+  bool pass_ecalDriven    = PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut);
+
+  float hoe = HoE();
+  //XXX SIC remove energy corrections
+  //hoe *= (Pt()/SCPt());
+  hoe *= ECorr();
+
+  bool pass_hoe              = bool ( hoe                 < 0.15  );
+
+  bool decision = ( pass_ecalDriven    && 
+		    pass_hoe           );
+  
+  
+  if ( verbose ) { 
+    std::cout << std::endl;
+    if ( !decision ){
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " FAIL FakeRateVeryLooseID" << std::endl; 
+      if ( !pass_ecalDriven    ) std::cout << "\t\t\tfail ecalDriven    " << std::endl;
+      if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+    }
+    else { 
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " PASS FakeRateVeryLooseID" << std::endl; 
+    }
+  }
+  return decision;
 }
