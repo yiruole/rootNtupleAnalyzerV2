@@ -14,6 +14,10 @@ echo "Grepping error files..."
 find $localdir -iname "*.err" -exec grep -ivH "no dict" {} \;
 echo "Done."
 
+echo "Checking .out files..."
+find $localdir -iname "*.out" -exec grep -iH "error" {} \;
+echo "Done."
+
 if [[ -z "$eosdir" ]]; then
   exit 0
 fi
