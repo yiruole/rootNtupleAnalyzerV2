@@ -339,46 +339,47 @@ for lin in open(options.inputList):
     # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
     # sys.stdout.flush()
 
-    inputRootFile = (
+    rootFileName1 = (
+        options.analysisCode
+        + "___"
+        + dataset_fromInputList
+        + ".root"
+    )
+    rootFileName2 = rootFileName1.replace(".root", "_0.root")
+    fullPath1 = options.inputDir
+    fullPath2 = (
         options.inputDir
         + "/"
         + options.analysisCode
         + "___"
         + dataset_fromInputList
-        + ".root"
+        + "/"
+        + "output"
     )
-    inputDataFile = inputRootFile.replace(".root", ".dat")
-
-    # ---Check if .root and .dat file exist
-    if not os.path.isfile(inputRootFile):
-        initialFile = inputRootFile
-        # if not found, check if it's stored in the condor way
-        inputRootFile = (
-            options.inputDir
-            + "/"
-            + options.analysisCode
-            + "___"
-            + dataset_fromInputList
-            + "/"
-            + "output/"
-            + options.analysisCode
-            + "___"
-            + dataset_fromInputList
-            + "_0"
-            + ".root"
-        )
-        # change the inputDataFile at this point too
-        inputDataFile = inputRootFile.replace(".root", ".dat")
-        if not os.path.isfile(inputRootFile):
+    foundFile = False
+    completeNamesTried = []
+    # fullpath1 is condor style, probably most frequent, so check that first
+    for path in [fullPath1, fullPath2]:
+        if not foundFile:
+            for filename in [rootFileName2, rootFileName1]:
+                completeName = path+"/"+filename
+                completeNamesTried.append(completeName)
+                if os.path.isfile(completeName):
+                    dictDatasetsFileNames[dataset_fromInputList] = completeName
+                    foundFile = True
+                    break
+    if foundFile:
+        inputDataFile = completeName.replace(".root", ".dat")
+        if not os.path.isfile(inputDataFile):
             print
-            print "ERROR: file " + initialFile + " not found"
-            print "ERROR: attempt to find file " + inputRootFile + " not found"
+            print "ERROR: file " + inputDataFile + " not found"
             foundAllFiles = False
-    if not os.path.isfile(inputDataFile):
+    else:
         print
-        print "ERROR: file " + inputDataFile + " not found"
+        print "ERROR: could not find root file for dataset:", dataset_fromInputList
+        print "ERROR: tried these full paths:", completeNamesTried
         foundAllFiles = False
-    dictDatasetsFileNames[dataset_fromInputList] = inputRootFile
+
 
 if not foundAllFiles:
     print "Some files not found. Exiting..."
