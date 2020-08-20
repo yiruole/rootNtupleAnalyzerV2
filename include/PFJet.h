@@ -40,10 +40,14 @@ class PFJet : public Object {
   
   // BTag variables
   
-  //float CombinedSecondaryVertexBTag ();
   float CombinedInclusiveSecondaryVertexBTag();
   float CombinedMVABTag();
   float DeepCSVBTag();
+  float DeepCSVBTagSFLoose();
+  float DeepCSVBTagSFMedium();
+  float DeepJetBTag();
+  float DeepJetBTagSFLoose();
+  float DeepJetBTagSFMedium();
   
  private:
   bool PassUserID_PFJetLoose (bool verbose);

@@ -25,11 +25,14 @@ int    PFJet::ChargedMultiplicity       () { return -1; }
 float PFJet::ChargedEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_chEmEF"        , m_raw_index); } 
 
 int PFJet::JetID() { return m_collection->ReadArrayBranch<Int_t>("Jet_jetId",m_raw_index); }
-//float PFJet::CombinedSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("") PFJetCombinedSecondaryVertexBTagAK4CHS  -> at ( m_raw_index ); }
 float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCSVV2",m_raw_index); }
 float PFJet::CombinedMVABTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCMVA",m_raw_index); }
-//FIXME or Jet_btagDeepFlavB ?
 float PFJet::DeepCSVBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepB",m_raw_index); }
+float PFJet::DeepCSVBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepcsv_L",m_raw_index); }
+float PFJet::DeepCSVBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepcsv_M",m_raw_index); }
+float PFJet::DeepJetBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepFlavB",m_raw_index); }
+float PFJet::DeepJetBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L",m_raw_index); }
+float PFJet::DeepJetBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_M",m_raw_index); }
 
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
