@@ -40,7 +40,7 @@ def GetCanvasTitle(varName, region, jetBin):
     varNameSplit = varName.split("_")
     for token in varNameSplit:
         if "hem" in token.lower():
-            titleStr += " "+token.replace("HEM", "HEM15/16")+","
+            titleStr += " "+token.replace("HEM", "HEM15and16")+","
     titleStr += " "+region.replace("End2", "Endcap2").replace("End1", "Endcap1").replace("Bar", "Barrel")
     if jetBin == "":
         titleStr += ", >= 0 jets"
@@ -55,7 +55,7 @@ def GetCanvasTitle(varName, region, jetBin):
 
 
 def GetFakeRate(lowEnd, highEnd, reg, jets, histDict, verbose=False):
-    verbose=True
+    verbose = True
     histo2D_Electrons = histDict[reg]["Electrons"][jets]
     histo2D_Jets = histDict[reg]["Jets"][jets]
     histo2D_Data = histDict[reg]["Total"][jets]
@@ -209,6 +209,19 @@ def GetFakeRateMCSub(lowEnd, highEnd, reg, jets, histDict, verbose=False):
             print "histo2D_Electrons has name:", histo2D_Electrons.GetName()
             print "histo2D_Electrons has entries:", histo2D_Electrons.GetEntries()
         print "\t\t\tFR=", numerator / data
+    # make TrkIso for DY MC
+    histo2D_DYElectrons = histDict[reg]["ZJets"][jets]
+    proj_DYElectrons = histo2D_DYElectrons.ProjectionY(
+        "DYElesTrkIso",
+        histo2D_MC.GetXaxis().FindBin(lowEnd),
+        histo2D_MC.GetXaxis().FindBin(highEnd) - 1,
+    )
+    if writeOutput:
+        suffix = "_"+reg+"_"+jets+"Pt"+str(lowEnd)+"To"+str(highEnd)
+        if not outputFile.cd("TrkIso_DYElectrons"):
+            outputFile.mkdir("TrkIso_DYElectrons").cd()
+        proj_DYElectrons.SetName(proj_DYElectrons.GetName()+suffix)
+        proj_DYElectrons.Write()
     return numerator, numeratorErr, data, dataErr.value
 
 
@@ -441,25 +454,9 @@ def MakeFR2D(frGraph, reg, bins):
 ####################################################################################################
 # RUN
 ####################################################################################################
-# filename = '$LQDATA/2016fakeRate/nov20_test/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec8_addPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec8_noPreselCuts/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec15_tightenJets/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec17_tightenJetsAddMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec18_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/dec19_mtPlots_tightenJetsNoMET55cut/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/jan15_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/2016fakeRate/jan16_addLTE1JetRegion/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = '$LQDATA/nano/2016/qcdFakeRate//output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root'
-# filename = "$LQDATA/nano/2016/qcdFakeRate/jan30_fixEnd2DenBug/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-#
-# filename = "$LQDATA/nanoV6/2016/qcdFakeRateCalc/22may2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-# filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/apr7_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-# filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/apr17_attempt2/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-# filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/apr17_attempt1/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-# filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/may13_heepFix/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-# filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/14may2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
-filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/5jun2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
+# filename = "$LQDATA/nanoV6/2016/qcdFakeRateCalc/17jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+#filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
 
 print "Opening file:", filename
 tfile = TFile.Open(filename)
@@ -480,7 +477,7 @@ pdf_folder = "pdf"
 gROOT.SetBatch(True)
 writeOutput = True
 doMuz = False  # do Muzamil's plots
-doMCSubFR = False
+doMCSubFR = True
 
 histoBaseName = "histo2D__{sample}__{type}_{region}_{jets}{varName}"
 dataSampleName = "QCDFakes_DATA"
@@ -493,25 +490,24 @@ jetBins = ["", "1Jet_", "2Jet_"]
 # for MC
 if '2016' in filename:
     mcSamples = [
-        "ZJet_amcatnlo_ptBinned",
-        # "ZJet_amcatnlo_Inc",
-        # "WJet_amcatnlo_ptBinned",
-        # "WJet_Madgraph_Inc",
-        "WJet_amcatnlo_Inc",
-        "TTbar_powheg",
-        "SingleTop",
-        "PhotonJets_Madgraph",
-        # "DIBOSON",
-        "DIBOSON_amcatnlo",
+         "ZJet_amcatnlo_ptBinned",
+         # "ZJet_amcatnlo_Inc",
+         # "WJet_amcatnlo_ptBinned",
+         # "WJet_Madgraph_Inc",
+         "WJet_amcatnlo_Inc",
+         "TTbar_powheg",
+         "SingleTop",
+         "PhotonJets_Madgraph",
+         "DIBOSON_nlo",
     ]
 else:
     mcSamples = [
-        "ZJet_amcatnlo_Inc",
-        "WJet_Madgraph_Inc",
+        "ZJet_jetAndPtBinned",
+        "WJet_amcatnlo_jetBinned",
         "TTbar_powheg",
         "SingleTop",
         "PhotonJets_Madgraph",
-        "DIBOSON",
+        "DIBOSON_nlo",
     ]
 mcNames = ["ZJets", "WJets", "TTBar", "ST", "GJets", "Diboson"]
 
@@ -583,8 +579,9 @@ for varName in varNameList:
     ptBinsDict[varName] = {}
     for reg in detectorRegions:
         ptBinsDict[varName][reg] = ptBinsEndcap
-ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End1"] = ptBinsEndcapHEM1516Only
-ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End2"] = ptBinsEndcapHEM1516Only
+if analysisYear == 2018:
+    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End1"] = ptBinsEndcapHEM1516Only
+    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End2"] = ptBinsEndcapHEM1516Only
 
 allHistos = {}
 for varName in varNameList:
@@ -613,8 +610,11 @@ if writeOutput:
 #     muzHistBarZeroJ = muzHist2DZeroJBar.ProjectionX("projMuzBar_0Jets")
 # get Sam's hists
 tfileZPrime = TFile(
-    "/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root"
+    "/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/QCDFakeRate/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root"
 )
+if tfileZPrime.IsZombie():
+    print "ERROR: zprime tfile is zombie:", tfileZPrime.GetName()
+    exit(-1)
 zprimeHistEnd2ZeroJ = tfileZPrime.Get("frHistEEHigh")
 zprimeHistEnd1ZeroJ = tfileZPrime.Get("frHistEELow")
 zprimeHistBarZeroJ = tfileZPrime.Get("frHistEB")
@@ -626,6 +626,7 @@ zprimeHistDict["End1"] = {}
 zprimeHistDict["End1"][""] = zprimeHistEnd1ZeroJ
 zprimeHistDict["Bar"] = {}
 zprimeHistDict["Bar"][""] = zprimeHistBarZeroJ
+print zprimeHistBarZeroJ.GetEntries()
 
 # make list of histos to use for FR
 # histos = [allHistos[varNameList[0]]]
@@ -636,7 +637,6 @@ histDict = {}
 numerHistDict = {}
 denomHistDict = {}
 for varName in allHistos:
-    print "Considering variable:", varName
     histos = allHistos[varName]
     histDict[varName] = {}
     numerHistDict[varName] = {}
@@ -740,21 +740,21 @@ for reg in detectorRegions:
     histosPt[reg]["DataElectrons"] = {}
     for jet in jetBins:
         # histo2D_MC = tfile.Get(histoNameZ.format(region=reg,jets=jet))
-        histo2D_MC = histos[reg]["ZJets"][jet]
-        proj_MC = histo2D_MC.ProjectionX(
-            "EtZ",
-            histo2D_MC.GetYaxis().FindBin(0),
-            histo2D_MC.GetYaxis().FindBin(5) - 1,
-        )
-        histosPt[reg]["ZElectrons"][jet] = proj_MC
-        # histo2D_MC = tfile.Get(histoNameW.format(region=reg,jets=jet))
-        histo2D_MC = histos[reg]["WJets"][jet]
-        proj_MC = histo2D_MC.ProjectionX(
-            "EtW",
-            histo2D_MC.GetYaxis().FindBin(0),
-            histo2D_MC.GetYaxis().FindBin(5) - 1,
-        )
-        histosPt[reg]["WElectrons"][jet] = proj_MC
+        # histo2D_MC = histos[reg]["ZJets"][jet]
+        # proj_MC = histo2D_MC.ProjectionX(
+        #     "EtZ",
+        #     histo2D_MC.GetYaxis().FindBin(0),
+        #     histo2D_MC.GetYaxis().FindBin(5) - 1,
+        # )
+        # histosPt[reg]["ZElectrons"][jet] = proj_MC
+        # # histo2D_MC = tfile.Get(histoNameW.format(region=reg,jets=jet))
+        # histo2D_MC = histos[reg]["WJets"][jet]
+        # proj_MC = histo2D_MC.ProjectionX(
+        #     "EtW",
+        #     histo2D_MC.GetYaxis().FindBin(0),
+        #     histo2D_MC.GetYaxis().FindBin(5) - 1,
+        # )
+        # histosPt[reg]["WElectrons"][jet] = proj_MC
         histo2D_data = tfile.Get(histoNameDataLoose.format(region=reg, jets=jet))
         proj_data = histo2D_data.ProjectionX(
             "EtDataLoose",
@@ -786,27 +786,27 @@ histDataLoose.SetMarkerColor(kRed)
 histDataLoose.SetLineColor(kRed)
 histDataLoose.SetLineStyle(2)
 #
-stack = THStack()
-histZ = histosPt[reg]["ZElectrons"][jets]
-histZ.Rebin(rebinFactor)
-histZ.SetLineColor(7)
-histZ.SetLineWidth(2)
-histZ.SetFillColor(7)
-histZ.SetMarkerColor(7)
-stack.Add(histZ)
-histW = histosPt[reg]["WElectrons"][jets]
-# print 'W entries:',histW.GetEntries()
-histW.Rebin(rebinFactor)
-histW.SetLineColor(kBlue)
-histW.SetLineWidth(2)
-histW.SetFillColor(kBlue)
-histW.SetMarkerColor(kBlue)
-stack.Add(histW)
-stack.Draw("hist")
-stack.SetMaximum(1.2 * histData.GetMaximum())
-stack.SetMinimum(1e-1)
-stack.GetXaxis().SetTitle("Et [GeV]")
-stack.Draw("hist")
+# stack = THStack()
+# histZ = histosPt[reg]["ZElectrons"][jets]
+# histZ.Rebin(rebinFactor)
+# histZ.SetLineColor(7)
+# histZ.SetLineWidth(2)
+# histZ.SetFillColor(7)
+# histZ.SetMarkerColor(7)
+# stack.Add(histZ)
+# histW = histosPt[reg]["WElectrons"][jets]
+# # print 'W entries:',histW.GetEntries()
+# histW.Rebin(rebinFactor)
+# histW.SetLineColor(kBlue)
+# histW.SetLineWidth(2)
+# histW.SetFillColor(kBlue)
+# histW.SetMarkerColor(kBlue)
+# stack.Add(histW)
+# stack.Draw("hist")
+# stack.SetMaximum(1.2 * histData.GetMaximum())
+# stack.SetMinimum(1e-1)
+# stack.GetXaxis().SetTitle("Et [GeV]")
+# stack.Draw("hist")
 histData.Draw("psame")
 histDataLoose.Draw("psame")
 legEt = TLegend(0.38, 0.71, 0.63, 0.88)
@@ -816,8 +816,8 @@ legEt.SetBorderSize(0)
 legEt.SetShadowColor(10)
 legEt.SetMargin(0.2)
 legEt.SetTextFont(132)
-legEt.AddEntry(histZ, "ZJets", "lp")
-legEt.AddEntry(histW, "WJets", "lp")
+# legEt.AddEntry(histZ, "ZJets", "lp")
+# legEt.AddEntry(histW, "WJets", "lp")
 legEt.AddEntry(histData, "Data", "lp")
 legEt.AddEntry(histDataLoose, "Data (loose e)", "lp")
 legEt.Draw()
@@ -830,8 +830,8 @@ print "dataLoose=", histDataLoose.Integral(
     histDataLoose.FindBin(low), histDataLoose.FindBin(high) - 1
 )
 print "dataEle=", histData.Integral(histData.FindBin(low), histData.FindBin(high) - 1)
-print "WEle=", histW.Integral(histW.FindBin(low), histW.FindBin(high) - 1)
-print "ZEle=", histZ.Integral(histZ.FindBin(low), histZ.FindBin(high) - 1)
+# print "WEle=", histW.Integral(histW.FindBin(low), histW.FindBin(high) - 1)
+# print "ZEle=", histZ.Integral(histZ.FindBin(low), histZ.FindBin(high) - 1)
 
 
 if writeOutput:
