@@ -187,8 +187,9 @@ bool GenParticle::PassUserID_MuonFiducial(bool verbose){
 
 bool GenParticle::PassUserID_GenLQ(bool verbose)
 {
-  if ( abs(PdgId())  != 42         ) return false;
-  return true;
+  if ( abs(PdgId())  == 42         ) return true;
+  if ( abs(PdgId())  == 9000007    ) return true; // for LQ toolbox [https://arxiv.org/abs/1801.07641]; ID depends on model. this is S3m43
+  return false;
 }
 
 bool GenParticle::PassUserID_GenTop(bool verbose)
