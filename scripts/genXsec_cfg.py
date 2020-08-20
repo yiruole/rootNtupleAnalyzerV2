@@ -1,7 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
-from dbs.apis.dbsClient import DbsApi
-from dbs.exceptions.dbsClientException import dbsClientException
+try:
+    import CRABClient
+    from dbs.apis.dbsClient import DbsApi
+    from dbs.exceptions.dbsClientException import dbsClientException
+except ImportError:
+    print
+    print "ERROR: Could not load dbs APIs.  Please source the crab3 setup:"
+    # print "source /cvmfs/cms.cern.ch/crab3/crab.sh"
+    print("source /cvmfs/cms.cern.ch/common/crab-setup.sh")
+    exit(-1)
 
 options = VarParsing ('analysis')
 options.register ('dataset',
@@ -24,30 +32,32 @@ if datasetpath=='test':
     doQuery = False
 
 if doQuery:
-    print 'DBS: query for parent of dataset='+datasetpath+'...',
-    
-    try:
-        api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader/')
-        parents = api.listDatasetParents(dataset=datasetpath)
-    except dbsClientException, ex:
-        print
-        print "Caught API Exception %s: %s "  % (ex.name,ex)
-        exit(-1)
-    
-    #for parent in parents:
-    #    print parent
-    if len(parents) > 1:
-        print
-        print 'ERROR: got multiple parents for dataset:'
-        for parent in parents:
-            print parent['parent_dataset']
-        print 'ERROR: not sure how to continue.'
-        exit(-2)
-    
-    print 'Done'
-    parentDataset = parents[0]['parent_dataset']
-    print 'DBS: Found parent dataset='+parentDataset
-    print 'DBS: query for files dataset...',
+    if 'MINIAOD' not in datasetpath:
+        print 'DBS: query for parent of dataset='+datasetpath+'...',
+        
+        try:
+            api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader/')
+            parents = api.listDatasetParents(dataset=datasetpath)
+        except dbsClientException, ex:
+            print
+            print "Caught API Exception %s: %s "  % (ex.name,ex)
+            exit(-1)
+        
+        #for parent in parents:
+        #    print parent
+        if len(parents) > 1:
+            print
+            print 'ERROR: got multiple parents for dataset:'
+            for parent in parents:
+                print parent['parent_dataset']
+            print 'ERROR: not sure how to continue.'
+            exit(-2)
+        print 'Done'
+        parentDataset = parents[0]['parent_dataset']
+        print 'DBS: Found parent dataset='+parentDataset
+    else:
+        parentDataset = datasetpath
+    print 'DBS: query for files in dataset...',
     
     try:
         api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader/')
@@ -62,7 +72,7 @@ if doQuery:
     #for dbsFile in dbsFiles:
     #    print dbsFile['logical_file_name']
     # get first N LFNs
-    filesToUse = 200
+    filesToUse = 100
     firstNFiles = [dbsFile['logical_file_name'] for dbsFile in dbsFiles]
     if len(firstNFiles) > filesToUse:
         firstNFiles = firstNFiles[-1*filesToUse:]
