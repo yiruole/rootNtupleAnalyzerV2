@@ -86,7 +86,7 @@ void baseClass::init()
   //directly from string
   std::string filename = outputFileName_;
   filename+=+".root";
-  output_root_ = new TFile(filename.c_str(),"RECREATE");
+  output_root_ = new TFile(filename.c_str(),"RECREATE", "", 207);
 
   // Skim stuff
   produceSkim_ = false;
@@ -95,7 +95,7 @@ void baseClass::init()
   
   if(produceSkim_) {
     
-    skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE");
+    skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE", "", 207);
     skim_tree_ = tree_->CloneTree(0);
     hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
@@ -111,7 +111,7 @@ void baseClass::init()
 
   if(produceReducedSkim_) {
 
-    reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE");
+    reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE", "", 207);
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
     hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
