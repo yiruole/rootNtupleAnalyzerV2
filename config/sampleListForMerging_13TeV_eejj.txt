@@ -94,14 +94,14 @@ GJets_HT-400To600   /GJets_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Ru
 GJets_HT-600ToInf   /GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM 
 PhotonJets_Madgraph  GJets_HT-40To100 GJets_HT-100To200 GJets_HT-200To400 GJets_HT-400To600 GJets_HT-600ToInf
 
-QCD_Pt-20to30_EMEnriched      /QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
-QCD_Pt-30to50_EMEnriched      /QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    
-QCD_Pt-50to80_EMEnriched      /QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
-QCD_Pt-80to120_EMEnriched     /QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM        
-QCD_Pt-120to170_EMEnriched    /QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-QCD_Pt-170to300_EMEnriched    /QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-QCD_Pt-300toInf_EMEnriched    /QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
-QCD_EMEnriched    QCD_Pt-20to30_EMEnriched QCD_Pt-30to50_EMEnriched QCD_Pt-50to80_EMEnriched QCD_Pt-80to120_EMEnriched QCD_Pt-120to170_EMEnriched QCD_Pt-170to300_EMEnriched QCD_Pt-300toInf_EMEnriched
+#QCD_Pt-20to30_EMEnriched      /QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
+#QCD_Pt-30to50_EMEnriched      /QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM    
+#QCD_Pt-50to80_EMEnriched      /QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM         
+#QCD_Pt-80to120_EMEnriched     /QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM        
+#QCD_Pt-120to170_EMEnriched    /QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+#QCD_Pt-170to300_EMEnriched    /QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+#QCD_Pt-300toInf_EMEnriched    /QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM       
+#QCD_EMEnriched    QCD_Pt-20to30_EMEnriched QCD_Pt-30to50_EMEnriched QCD_Pt-50to80_EMEnriched QCD_Pt-80to120_EMEnriched QCD_Pt-120to170_EMEnriched QCD_Pt-170to300_EMEnriched QCD_Pt-300toInf_EMEnriched
 
 #WW    /WW_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
 #WZ    /WZ_TuneCUETP8M1_13TeV-pythia8/RunIISpring16MiniAODv2-PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM
@@ -181,22 +181,22 @@ ALLBKG_powhegTTBar_ZJetPtWJetAMCJetBinned_NLODiboson_triboson		ZJet_amcatnlo_ptB
 #OTHERBKG_amcAtNLOIncTTBar_ZJetNoIncZWJetPt	WJet_amcatnlo_ptBinned SingleTop DIBOSON
 
 # data
-SingleElectron_2016B   /SingleElectron/Run2016B_ver2-Nano25Oct2019_ver2-v1/NANOAOD
-SingleElectron_2016C   /SingleElectron/Run2016C-Nano25Oct2019-v1/NANOAOD
-SingleElectron_2016D   /SingleElectron/Run2016D-Nano25Oct2019-v1/NANOAOD
-SingleElectron_2016E   /SingleElectron/Run2016E-Nano25Oct2019-v1/NANOAOD
-SingleElectron_2016F   /SingleElectron/Run2016F-Nano25Oct2019-v1/NANOAOD
-SingleElectron_2016G   /SingleElectron/Run2016G-Nano25Oct2019-v1/NANOAOD
-SingleElectron_2016H   /SingleElectron/Run2016H-Nano25Oct2019-v1/NANOAOD
+SingleElectron_2016B   /SingleElectron/Run2016B-02Apr2020_ver2-v1/NANOAOD
+SingleElectron_2016C   /SingleElectron/Run2016C-02Apr2020-v1/NANOAOD
+SingleElectron_2016D   /SingleElectron/Run2016D-02Apr2020-v1/NANOAOD
+SingleElectron_2016E   /SingleElectron/Run2016E-02Apr2020-v1/NANOAOD
+SingleElectron_2016F   /SingleElectron/Run2016F-02Apr2020-v1/NANOAOD
+SingleElectron_2016G   /SingleElectron/Run2016G-02Apr2020-v1/NANOAOD
+SingleElectron_2016H   /SingleElectron/Run2016H-02Apr2020-v1/NANOAOD
 SingleElectron_2016_all    SingleElectron_2016B  SingleElectron_2016C  SingleElectron_2016D  SingleElectron_2016E  SingleElectron_2016F  SingleElectron_2016G SingleElectron_2016H
 SingleElectron_all    SingleElectron_2016_all
-SinglePhoton_2016B   /SinglePhoton/Run2016B_ver2-Nano25Oct2019_ver2-v1/NANOAOD
-SinglePhoton_2016C   /SinglePhoton/Run2016C-Nano25Oct2019-v1/NANOAOD
-SinglePhoton_2016D   /SinglePhoton/Run2016D-Nano25Oct2019-v1/NANOAOD
-SinglePhoton_2016E   /SinglePhoton/Run2016E-Nano25Oct2019-v1/NANOAOD
-SinglePhoton_2016F   /SinglePhoton/Run2016F-Nano25Oct2019-v1/NANOAOD
-SinglePhoton_2016G   /SinglePhoton/Run2016G-Nano25Oct2019-v1/NANOAOD 
-SinglePhoton_2016H   /SinglePhoton/Run2016H-Nano25Oct2019-v1/NANOAOD 
+SinglePhoton_2016B   /SinglePhoton/Run2016B-02Apr2020_ver2-v1/NANOAOD
+SinglePhoton_2016C   /SinglePhoton/Run2016C-02Apr2020-v1/NANOAOD
+SinglePhoton_2016D   /SinglePhoton/Run2016D-02Apr2020-v1/NANOAOD
+SinglePhoton_2016E   /SinglePhoton/Run2016E-02Apr2020-v1/NANOAOD
+SinglePhoton_2016F   /SinglePhoton/Run2016F-02Apr2020-v1/NANOAOD
+SinglePhoton_2016G   /SinglePhoton/Run2016G-02Apr2020-v1/NANOAOD 
+SinglePhoton_2016H   /SinglePhoton/Run2016H-02Apr2020-v1/NANOAOD 
 SinglePhoton_2016_all    SinglePhoton_2016B  SinglePhoton_2016C  SinglePhoton_2016D  SinglePhoton_2016E  SinglePhoton_2016F  SinglePhoton_2016G SinglePhoton_2016H
 SinglePhoton_all    SinglePhoton_2016_all
 DATA    SingleElectron_all  SinglePhoton_all
