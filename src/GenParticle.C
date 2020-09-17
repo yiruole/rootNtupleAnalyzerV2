@@ -36,7 +36,7 @@ std::ostream& operator<<(std::ostream& stream, GenParticle& object) {
 	 << "MotherIndex = "    << object.MotherIndex () << ", "
 	 //<< "Num. daughters = " << object.NumDaughters () << ", "
 	 << "Status = " << object.Status () << ", "
-   //<< "StatusFlags = " << std::bitset<32>(object.StatusFlags()) << ", "
+   << "StatusFlags = " << std::bitset<8*sizeof(object.StatusFlags())>(object.StatusFlags()) << ", "
    << "IsHardProcess = " << object.IsHardProcess() << ", "
    << "IsFromHardProcess = " << object.IsFromHardProcess() << ", "
    << "IsFromHardProcessFinalState = " << object.IsFromHardProcessFinalState() << ", "

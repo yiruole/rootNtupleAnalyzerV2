@@ -14,11 +14,11 @@ bool GenParticle::PassUserID (ID id, bool verbose){
 
   else if ( id == GEN_MU_HARD_SCATTER     ) { return PassUserID_GenMuHardScatter (verbose); }
 
-  else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
-  else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
+  //else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
+  //else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
   else if ( id == GEN_NU_FROM_W  	        ) { return PassUserID_GenNuFromW          (verbose); }
-  else if ( id == GEN_ELE_FROM_W  	      ) { return PassUserID_GenEleFromW         (verbose); }
-  else if ( id == GEN_ELE_FROM_DY  	      ) { return PassUserID_GenEleFromDY        (verbose); }
+  //else if ( id == GEN_ELE_FROM_W  	      ) { return PassUserID_GenEleFromW         (verbose); }
+  else if ( id == GEN_ELE_HARDPROCESS_FINALSTATE  	      ) { return PassUserID_GenEleHardProcessFinalState(verbose); }
 
   else if ( id == GEN_ELE_FIDUCIAL        ) { return PassUserID_ECALFiducial        (verbose); } 
 
@@ -201,5 +201,12 @@ bool GenParticle::PassUserID_GenTop(bool verbose)
 bool GenParticle::PassUserID_Status62(bool verbose)
 {
   if ( Status()  != 62         ) return false;
+  return true;
+}
+
+bool GenParticle::PassUserID_GenEleHardProcessFinalState(bool verbose)
+{
+  if ( abs(PdgId()) != 11         ) return false;
+  if ( !IsFromHardProcessFinalState() ) return false;
   return true;
 }
