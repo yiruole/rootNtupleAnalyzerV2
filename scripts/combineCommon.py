@@ -2,9 +2,11 @@
 
 # ---Import
 import sys
+import os
 import string
 import math
 import re
+import fnmatch
 
 
 def SanitizeDatasetNameFromInputList(dataset_fromInputList):
@@ -137,7 +139,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
 def ParseXSectionFile(xsectionFile):
     xsectionDict = {}
 
-    for line in open(xsectionFile):
+    for line in open(os.path.expandvars(xsectionFile)):
 
         # ignore comments
         if line.startswith("#"):
@@ -544,3 +546,36 @@ def WriteTable(table, name, file):
         ###
 
     return
+
+
+def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
+    if len(ttBarUnscaledRawSampleName) <= 0:
+        unscaledEvtsHist = unscaledRootFile.Get("EventsPassingCuts")
+        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
+    else:
+        # scaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
+        unscaledEvtsHist = unscaledRootFile.Get(
+            "histo1D__" + ttBarUnscaledRawSampleName + "__EventsPassingCuts"
+        )
+        # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
+        # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
+        # print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
+        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
+    return unscaledTotalEvts
+
+
+def FindUnscaledRootFile(filepath, sampleName):
+    filepath = os.path.expandvars(filepath.rstrip("/"))
+    filepath = filepath[:filepath.rfind("/")]
+    for root, dirs, files in os.walk(filepath):
+        for name in files:
+            # print "check against file:", name
+            noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
+            noExtBackupName = noExtName.replace("backup_", "")
+            # print "compare", noExtBackupName, " to *"+sampleName+"*.root"
+            if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
+                return os.path.join(root, name)
+    print "ERROR:  could not find unscaled root file for sample", sampleName
+    print "Looked in:", filepath
+    print "Exiting..."
+    exit(-1)

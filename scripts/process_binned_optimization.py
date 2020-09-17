@@ -6,6 +6,8 @@ import numpy
 from ROOT import TFile, TH1F, TF1, TGraph, TCanvas, gROOT
 from prettytable import PrettyTable
 
+from combineCommon import ParseXSectionFile, lookupXSection, GetUnscaledTotalEvents, FindUnscaledRootFile
+
 gROOT.SetBatch(True)
 
 
@@ -310,26 +312,34 @@ def bins_to_string(cut_bins):
 ####################################################################################################
 # Configurables
 ####################################################################################################
-# intLumi = 35867.0  # in pb
-# intLumi = 41540.0  # 2017
-intLumi = 59736.0  # 2018
+xsectionFile = "$LQANA/config/xsection_13TeV_2015.txt"
 # these have rescaling applied
 mc_filepath = (
     # "$LQDATA/nanoV6/2016/opt/eejj_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
     # "$LQDATA/nanoV6/2017/opt/eejj_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
     # "$LQDATA/nanoV6/2018/opt/eejj_2jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
-    "$LQDATA/nanoV6/2018/opt/eejj_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV6/2018/opt/eejj_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # nanoV7
+    "$LQDATA/nanoV7/2016/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2017/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2018/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
 )
 qcd_data_filepath = (
     # "$LQDATA//nanoV6/2016/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
     # "$LQDATA/nanoV6/2017/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
-    "$LQDATA/nanoV6/2018/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV6/2018/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # nanoV7
+    "$LQDATA/nanoV7/2016/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2017/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2018/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
 )
 txt_file_path_eejj = (
-    "$LQDATA/nanoV6/2016/opt/eejj_10jul2020/condor/optimizationCuts.txt"
+    # "$LQDATA/nanoV6/2016/opt/eejj_10jul2020/condor/optimizationCuts.txt"
     # "$LQDATA/nanoV6/2016/opt/prefire_2jul2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
     # "$LQDATA/nanoV6/2017/opt/prefire_2jul2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
     # "$LQDATA/nanoV6/2018/opt/eejj_2jul2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
+    # nanoV7
+    "$LQDATA/nanoV7/2016/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
 )
 # # for eejj only
 # ttbar_data_filepath = (
@@ -360,7 +370,14 @@ if "2016" in mc_filepath:
     # wjet = "WJet_amcatnlo_Inc"
     wjet = "WJet_amcatnlo_jetBinned"
     zjet = "ZJet_amcatnlo_ptBinned"
-else:
+    # 1/pb
+    intLumi = 35867.0  # 2016
+elif "2017" in mc_filepath:
+    intLumi = 41540.0  # 2017
+    wjet = "WJet_amcatnlo_jetBinned"
+    zjet = "ZJet_jetAndPtBinned"
+elif "2018" in mc_filepath:
+    intLumi = 59736.0  # 2018
     wjet = "WJet_amcatnlo_jetBinned"
     zjet = "ZJet_jetAndPtBinned"
 diboson = "DIBOSON_nlo"
@@ -471,45 +488,45 @@ d_enujj_signal_filepaths_list = [
     {"2000": ["LQ_M2000", mc_filepath_enujj, 1.0]},
 ]
 
-# XXX FIXME: add hist to the analysis to count total events
+searchDir = os.path.dirname(mc_filepath)
 d_eejj_signal_totalEvents = {
-    "LQ_M200": 50000,
-    "LQ_M250": 50000,
-    "LQ_M300": 50000,
-    "LQ_M350": 50000,
-    "LQ_M400": 50000,
-    "LQ_M450": 49721,
-    "LQ_M500": 50000,
-    "LQ_M550": 50000,
-    "LQ_M600": 50000,
-    "LQ_M650": 49815,
-    "LQ_M700": 50000,
-    "LQ_M750": 50000,
-    "LQ_M800": 50000,
-    "LQ_M850": 49242,
-    "LQ_M900": 50000,
-    "LQ_M950": 49834,
-    "LQ_M1000": 49716,
-    "LQ_M1050": 49782,
-    "LQ_M1100": 50000,
-    "LQ_M1150": 49909,
-    "LQ_M1200": 50000,
-    "LQ_M1250": 49841,
-    "LQ_M1300": 50000,
-    "LQ_M1350": 49808,
-    "LQ_M1400": 49835,
-    "LQ_M1450": 50000,
-    "LQ_M1500": 50000,
-    "LQ_M1550": 50000,
-    "LQ_M1600": 50000,
-    "LQ_M1650": 50000,
-    "LQ_M1700": 50000,
-    "LQ_M1750": 49416,
-    "LQ_M1800": 50000,
-    "LQ_M1850": 50000,
-    "LQ_M1900": 49111,
-    "LQ_M1950": 49871,
-    "LQ_M2000": 49881,
+    "LQ_M200":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-200"))),
+    "LQ_M250":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-250"))),
+    "LQ_M300":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-300"))),
+    "LQ_M350":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-350"))),
+    "LQ_M400":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-400"))),
+    "LQ_M450":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-450"))),
+    "LQ_M500":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-500"))),
+    "LQ_M550":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-550"))),
+    "LQ_M600":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-600"))),
+    "LQ_M650":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-650"))),
+    "LQ_M700":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-700"))),
+    "LQ_M750":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-750"))),
+    "LQ_M800":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-800"))),
+    "LQ_M850":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-850"))),
+    "LQ_M900":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-900"))),
+    "LQ_M950":  GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-950"))),
+    "LQ_M1000": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1000"))),
+    "LQ_M1050": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1050"))),
+    "LQ_M1100": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1100"))),
+    "LQ_M1150": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1150"))),
+    "LQ_M1200": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1200"))),
+    "LQ_M1250": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1250"))),
+    "LQ_M1300": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1300"))),
+    "LQ_M1350": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1350"))),
+    "LQ_M1400": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1400"))),
+    "LQ_M1450": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1450"))),
+    "LQ_M1500": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1500"))),
+    "LQ_M1550": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1550"))),
+    "LQ_M1600": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1600"))),
+    "LQ_M1650": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1650"))),
+    "LQ_M1700": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1700"))),
+    "LQ_M1750": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1750"))),
+    "LQ_M1800": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1800"))),
+    "LQ_M1850": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1850"))),
+    "LQ_M1900": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1900"))),
+    "LQ_M1950": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-1950"))),
+    "LQ_M2000": GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, "LQToUE_M-2000"))),
 }
 d_enujj_signal_totalEvents = {
     "LQ_M200": 49745,
@@ -550,45 +567,45 @@ d_enujj_signal_totalEvents = {
     "LQ_M1950": 49843,
     "LQ_M2000": 49284,
 }
-# FIXME: Take this by parsing the cross section file...
+xsectionDict = ParseXSectionFile(xsectionFile)
 d_eejj_signal_crossSections = {
-    "LQ_M200": 6.06e01,
-    "LQ_M250": 2.03e01,
-    "LQ_M300": 8.04e00,
-    "LQ_M350": 3.59e00,
-    "LQ_M400": 1.74e00,
-    "LQ_M450": 9.06e-01,
-    "LQ_M500": 4.96e-01,
-    "LQ_M550": 2.84e-01,
-    "LQ_M600": 1.69e-01,
-    "LQ_M650": 1.03e-01,
-    "LQ_M700": 6.48e-02,
-    "LQ_M750": 4.16e-02,
-    "LQ_M800": 2.73e-02,
-    "LQ_M850": 1.82e-02,
-    "LQ_M900": 1.23e-02,
-    "LQ_M950": 8.45e-03,
-    "LQ_M1000": 5.86e-03,
-    "LQ_M1050": 4.11e-03,
-    "LQ_M1100": 2.91e-03,
-    "LQ_M1150": 2.08e-03,
-    "LQ_M1200": 1.50e-03,
-    "LQ_M1250": 1.09e-03,
-    "LQ_M1300": 7.95e-04,
-    "LQ_M1350": 5.85e-04,
-    "LQ_M1400": 4.33e-04,
-    "LQ_M1450": 3.21e-04,
-    "LQ_M1500": 2.40e-04,
-    "LQ_M1550": 1.80e-04,
-    "LQ_M1600": 1.35e-04,
-    "LQ_M1650": 1.02e-04,
-    "LQ_M1700": 7.74e-05,
-    "LQ_M1750": 5.88e-05,
-    "LQ_M1800": 4.48e-05,
-    "LQ_M1850": 3.43e-05,
-    "LQ_M1900": 2.62e-05,
-    "LQ_M1950": 2.01e-05,
-    "LQ_M2000": 1.55e-05,
+    "LQ_M200":  float(lookupXSection("LQToUE_M-200_BetaOne", xsectionDict)),
+    "LQ_M250":  float(lookupXSection("LQToUE_M-250_BetaOne", xsectionDict)),
+    "LQ_M300":  float(lookupXSection("LQToUE_M-300_BetaOne", xsectionDict)),
+    "LQ_M350":  float(lookupXSection("LQToUE_M-350_BetaOne", xsectionDict)),
+    "LQ_M400":  float(lookupXSection("LQToUE_M-400_BetaOne", xsectionDict)),
+    "LQ_M450":  float(lookupXSection("LQToUE_M-450_BetaOne", xsectionDict)),
+    "LQ_M500":  float(lookupXSection("LQToUE_M-500_BetaOne", xsectionDict)),
+    "LQ_M550":  float(lookupXSection("LQToUE_M-550_BetaOne", xsectionDict)),
+    "LQ_M600":  float(lookupXSection("LQToUE_M-600_BetaOne", xsectionDict)),
+    "LQ_M650":  float(lookupXSection("LQToUE_M-650_BetaOne", xsectionDict)),
+    "LQ_M700":  float(lookupXSection("LQToUE_M-700_BetaOne", xsectionDict)),
+    "LQ_M750":  float(lookupXSection("LQToUE_M-750_BetaOne", xsectionDict)),
+    "LQ_M800":  float(lookupXSection("LQToUE_M-800_BetaOne", xsectionDict)),
+    "LQ_M850":  float(lookupXSection("LQToUE_M-850_BetaOne", xsectionDict)),
+    "LQ_M900":  float(lookupXSection("LQToUE_M-900_BetaOne", xsectionDict)),
+    "LQ_M950":  float(lookupXSection("LQToUE_M-950_BetaOne", xsectionDict)),
+    "LQ_M1000": float(lookupXSection("LQToUE_M-1000_BetaOne", xsectionDict)),
+    "LQ_M1050": float(lookupXSection("LQToUE_M-1050_BetaOne", xsectionDict)),
+    "LQ_M1100": float(lookupXSection("LQToUE_M-1100_BetaOne", xsectionDict)),
+    "LQ_M1150": float(lookupXSection("LQToUE_M-1150_BetaOne", xsectionDict)),
+    "LQ_M1200": float(lookupXSection("LQToUE_M-1200_BetaOne", xsectionDict)),
+    "LQ_M1250": float(lookupXSection("LQToUE_M-1250_BetaOne", xsectionDict)),
+    "LQ_M1300": float(lookupXSection("LQToUE_M-1300_BetaOne", xsectionDict)),
+    "LQ_M1350": float(lookupXSection("LQToUE_M-1350_BetaOne", xsectionDict)),
+    "LQ_M1400": float(lookupXSection("LQToUE_M-1400_BetaOne", xsectionDict)),
+    "LQ_M1450": float(lookupXSection("LQToUE_M-1450_BetaOne", xsectionDict)),
+    "LQ_M1500": float(lookupXSection("LQToUE_M-1500_BetaOne", xsectionDict)),
+    "LQ_M1550": float(lookupXSection("LQToUE_M-1550_BetaOne", xsectionDict)),
+    "LQ_M1600": float(lookupXSection("LQToUE_M-1600_BetaOne", xsectionDict)),
+    "LQ_M1650": float(lookupXSection("LQToUE_M-1650_BetaOne", xsectionDict)),
+    "LQ_M1700": float(lookupXSection("LQToUE_M-1700_BetaOne", xsectionDict)),
+    "LQ_M1750": float(lookupXSection("LQToUE_M-1750_BetaOne", xsectionDict)),
+    "LQ_M1800": float(lookupXSection("LQToUE_M-1800_BetaOne", xsectionDict)),
+    "LQ_M1850": float(lookupXSection("LQToUE_M-1850_BetaOne", xsectionDict)),
+    "LQ_M1900": float(lookupXSection("LQToUE_M-1900_BetaOne", xsectionDict)),
+    "LQ_M1950": float(lookupXSection("LQToUE_M-1950_BetaOne", xsectionDict)),
+    "LQ_M2000": float(lookupXSection("LQToUE_M-2000_BetaOne", xsectionDict)),
 }
 d_enujj_signal_crossSections = {
     "LQ_M200": 30.3,

@@ -3,12 +3,10 @@
 import os
 import sys
 import math
-import re
 import string
-import fnmatch
 from prettytable import PrettyTable
-from ROOT import TFile, Double, Math
-from combineCommon import lookupXSection, ParseXSectionFile, GetSamplesToCombineDict, SanitizeDatasetNameFromInputList
+from ROOT import TFile, Math
+from combineCommon import lookupXSection, ParseXSectionFile, GetSamplesToCombineDict, SanitizeDatasetNameFromInputList, GetUnscaledTotalEvents, FindUnscaledRootFile
 
 
 def GetFullSignalName(signal_name, mass_point):
@@ -335,37 +333,27 @@ def CalculateScaledRateError(
     return scaledRateError
 
 
-def FindUnscaledSampleRootFile(sampleName, bkgType=""):
-    if sampleName in d_unscaledRootFiles.keys():
-        return d_unscaledRootFiles[sampleName]
-    # print 'FindUnscaledSampleRootFile('+sampleName+','+bkgType+')'
-    if bkgType == "QCD":
-        filepath = qcdFilePath
-        # if doEEJJ:
-        #     analysisCode = "analysisClass_lq_eejj_QCD"
-        # else:
-        #     analysisCode = "analysisClass_lq_enujj_QCD"
-    elif bkgType == "TTData":
-        return ttbar_data_filepath
-    else:
-        filepath = filePath
-        # if doEEJJ:
-        #     analysisCode = "analysisClass_lq_eejj"
-        # else:
-        #     analysisCode = "analysisClass_lq_enujj_MT"
-    filepath = filepath.rstrip("/")
-    filepath = filepath[:filepath.rfind("/")]
-    for root, dirs, files in os.walk(filepath):
-        for name in files:
-            # print "check against file:",name
-            noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
-            noExtBackupName = noExtName.replace("backup_", "")
-            if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
-                return os.path.join(root, name)
-    print "ERROR:  could not find unscaled root file for sample=", sampleName
-    print "Looked in:", filepath
-    print "Exiting..."
-    exit(-1)
+def GetUnscaledSampleRootFile(sampleName, bkgType=""):
+    # print 'GetUnscaledSampleRootFile('+sampleName+','+bkgType+')'
+    if bkgType not in d_unscaledRootFiles.keys():
+        d_unscaledRootFiles[bkgType] = {}
+    if sampleName not in d_unscaledRootFiles[bkgType].keys():
+        if bkgType == "QCD":
+            filepath = qcdFilePath
+            # if doEEJJ:
+            #     analysisCode = "analysisClass_lq_eejj_QCD"
+            # else:
+            #     analysisCode = "analysisClass_lq_enujj_QCD"
+        elif bkgType == "TTData":
+            return ttbar_data_filepath
+        else:
+            filepath = filePath
+            # if doEEJJ:
+            #     analysisCode = "analysisClass_lq_eejj"
+            # else:
+            #     analysisCode = "analysisClass_lq_enujj_MT"
+        d_unscaledRootFiles[bkgType][sampleName] = FindUnscaledRootFile(filepath, sampleName)
+    return d_unscaledRootFiles[bkgType][sampleName]
 
 
 def GetRatesAndErrors(
@@ -483,22 +471,6 @@ def GetRatesAndErrors(
     return rate, rateErr, unscaledRate
 
 
-def GetUnscaledTotalEvents(unscaledRootFile, isTTBarData=False):
-    if not isTTBarData:
-        unscaledEvtsHist = unscaledRootFile.Get("EventsPassingCuts")
-        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
-    else:
-        # scaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
-        unscaledEvtsHist = unscaledRootFile.Get(
-            "histo1D__" + ttBarUnscaledRawSampleName + "__EventsPassingCuts"
-        )
-        # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
-        # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
-        # print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
-        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
-    return unscaledTotalEvts
-
-
 def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
     if len(ttbarRootFilename) > 0:
         ttbarFile = TFile(ttbarRootFilename)
@@ -512,7 +484,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         if "TT" in bkg_name and "data" in bkg_name.lower():
             scaledRootFile = ttbarFile
             bkgType = "TTData"
-        elif "QCD" in bkg_name or "SinglePhoton" in bkg_name:
+        elif "QCD" in bkg_name:  #  or "SinglePhoton" in bkg_name:
             scaledRootFile = qcdTFile
             bkgType = "QCD"
         else:
@@ -526,14 +498,17 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         # print 'backgroundType=',bkgType
         # print 'sampleList['+bkg_name+']=',sampleList
         for bkgSample in sampleList:
-            bkgUnscaledRootFilename = FindUnscaledSampleRootFile(bkgSample, bkgType)
+            bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample, bkgType)
             bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
             if not bkgUnscaledRootFile:
                 print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
                 exit(-1)
-            unscaledTotalEvts = GetUnscaledTotalEvents(
-                bkgUnscaledRootFile, bkgType == "TTData"
-            )
+            unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+            # SIC removed Jul 2020
+            # if bkgType == "TTData":
+            #     unscaledTotalEvts = GetUnscaledTotalEvents(
+            #         bkgUnscaledRootFile, ttBarUnscaledRawSampleName
+            #     )
             sampleUnscaledTotalEvts += unscaledTotalEvts
             # preselection
             # print 'PRESELECTION ------>Call GetRatesAndErrors for sampleName=',bkgSample
@@ -579,16 +554,19 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 sampleUnscaledRate = 0
                 # print selectionName,'bkg_name=',bkg_name
                 for bkgSample in sampleList:
-                    bkgUnscaledRootFilename = FindUnscaledSampleRootFile(
+                    bkgUnscaledRootFilename = GetUnscaledSampleRootFile(
                         bkgSample, bkgType
                     )
                     bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
                     if not bkgUnscaledRootFile:
                         print "ERROR: file not found:", bkgUnscaledRootFilename
                         exit(-1)
-                    unscaledTotalEvts = GetUnscaledTotalEvents(
-                        bkgUnscaledRootFile, bkgType == "TTData"
-                    )
+                    unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+                    # SIC removed Jul 2020
+                    # if bkgType == "TTData":
+                    #     unscaledTotalEvts = GetUnscaledTotalEvents(
+                    #         bkgUnscaledRootFile, ttBarUnscaledRawSampleName
+                    #     )
                     sampleUnscaledTotalEvts += unscaledTotalEvts
                     rate, rateErr, unscaledRate = GetRatesAndErrors(
                         bkgUnscaledRootFile,
@@ -647,7 +625,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 # print 'use selection name=',selectionName
                 doMassPointLoop = False
             # print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
-            unscaledRootFilename = FindUnscaledSampleRootFile(signalNameForFile)
+            unscaledRootFilename = GetUnscaledSampleRootFile(signalNameForFile)
             unscaledRootFile = TFile.Open(unscaledRootFilename)
             unscaledTotalEvts = GetUnscaledTotalEvents(unscaledRootFile)
             # preselection
@@ -701,7 +679,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
     isQCD = False
     isData = True
     for bkgSample in sampleList:
-        bkgUnscaledRootFilename = FindUnscaledSampleRootFile(bkgSample)
+        bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample)
         bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
         if not bkgUnscaledRootFile:
             print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
@@ -742,7 +720,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             sampleUnscaledRate = 0
             # print selectionName,'bkg_bame=',bkg_name
             for bkgSample in sampleList:
-                bkgUnscaledRootFilename = FindUnscaledSampleRootFile(bkgSample)
+                bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample)
                 bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
                 if not bkgUnscaledRootFile:
                     print "ERROR: file not found:", bkgUnscaledRootFilename
@@ -985,7 +963,8 @@ if doEEJJ:
 
     inputList = (
         os.environ["LQANA"]
-        + "/config/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
+        # + "/config/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
+        + "/config/oldInputLists/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
     )
     qcdFilePath = (
         os.environ["LQDATA"]
