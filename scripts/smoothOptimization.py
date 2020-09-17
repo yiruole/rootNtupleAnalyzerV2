@@ -23,13 +23,16 @@ gROOT.SetBatch(True)
 # XXX must modify this by hand
 isEEJJ = True
 if isEEJJ:
-    # maxMassPointToUse = 1150  # 2016 eejj, last point where nB > 1
-    # maxMassPointToUse = 1250  # 2017 eejj, last point where nB > 1
+    # maxMassPointToUse = 1200  # 2016/2017 eejj, last point where nB > 1
     maxMassPointToUse = 1150  # 2018 eejj, last point where nB > 1
     optimizationFileName = (
         # "$LQANA/versionsOfOptimization/2016/eejj_10jul2020/optimization.root"
         # "$LQANA/versionsOfOptimization/2017/eejj_10jul/optimization.root"
-        "$LQANA/versionsOfOptimization/2018/eejj_10jul2020/optimization.root"
+        # "$LQANA/versionsOfOptimization/2018/eejj_10jul2020/optimization.root"
+        # nanoV7
+        # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_14sep/optimization.root"
+        # "$LQANA/versionsOfOptimization/nanoV7/2017/eejj_14sep/optimization.root"
+        "$LQANA/versionsOfOptimization/nanoV7/2018/eejj_14sep/optimization.root"
     )
 else:
     # maxMassPointToUse = 900 # enujj
@@ -67,10 +70,8 @@ for key in gDirectory.GetListOfKeys():
                 fitFunction = graph.GetFunction(func.GetName())  # using pol2
                 # print 'got fitFunction:',fitFunction.Print()
                 pars = fitFunction.GetParameters()
-                pars.SetSize(fitFunction.GetNpar())
                 # print list(pars)
                 xValues = graph.GetX()
-                xValues.SetSize(graph.GetN())
                 # round to nearest 5 GeV
                 funcYvalues = [
                     5 * round(float(fitFunction.Eval(x)) / 5)
@@ -79,7 +80,6 @@ for key in gDirectory.GetListOfKeys():
                     for x in xValues
                 ]
                 yValues = graph.GetY()
-                yValues.SetSize(graph.GetN())
                 t = PrettyTable([str(xVal) for xVal in xValues])
                 t.float_format = "4.3"
                 # t.align['VarName'] = 'l'
