@@ -769,6 +769,134 @@ doEEJJ = True
 doRPV = False  # to do RPV, set doEEJJ and doRPV to True
 forceGmNNormBkgStatUncert = False
 
+if doEEJJ:
+    sampleListForMerging = (
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj.txt"
+        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj_2017.txt"
+    )
+    sampleListForMergingQCD = (
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
+        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
+    )
+    # SIC 6 Jul 2020 remove
+    # sampleListForMergingTTBar = (
+    #     os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_ttbarBkg_emujj.txt"
+    # )
+
+    inputList = (
+        os.environ["LQANA"]
+        # + "/config/oldInputLists/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
+        # nanoV7
+        + "/config/nanoV7_2016_pskEEJJ_3sep2020/inputListAllCurrent.txt"
+        # + "/config/nanoV7_2017_pskEEJJ_3sep2020/inputListAllCurrent.txt"
+    )
+    qcdFilePath = (
+        os.environ["LQDATA"]
+        # + "/nanoV6/2016/analysis/qcdYield_optFinalSels_13jul2020/output_cutTable_lq_eejj_QCD/"
+        # nanoV7
+        + "/nanoV7/2016/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+        # + "/nanoV7/2017/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+    )
+    filePath = (
+        os.environ["LQDATA"]
+        # + "/nanoV6/2016/analysis/prefire_optFinalSels_13jul2020/output_cutTable_lq_eejj/"
+        # nanoV7
+        + "/nanoV7/2016/analysis/eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
+        # + "/nanoV7/2017/analysis/prefire_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
+    )
+    xsection = (
+        os.environ["LQANA"]
+        # + "/versionsOfAnalysis/2016/eejj/jun4/unscaled/extendTTbarRange/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+        # nanov&
+        + "/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+        # + "/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+    )
+    # ttbarFilePath = (
+    #     os.environ["LQDATA"]
+    #     + "/2016ttbar/mar17_emujj_fixMuons/output_cutTable_lq_ttbar_emujj_correctTrig/"
+    # )
+    # # calculated with fitForStatErrs.py script. mass, stat. uncert.
+    # # statErrorsSingleTop = { 800: 1.10, 850: 0.85, 900: 0.67, 950: 0.53, 1000: 0.42, 1050: 0.33 }
+    # # here we increased the fit range
+    # statErrorsPhotonJets = {
+    #     400: 0.23,
+    #     450: 0.33,
+    #     500: 0.36,
+    #     550: 0.35,
+    #     600: 0.32,
+    #     650: 0.28,
+    #     700: 0.24,
+    #     750: 0.21,
+    #     800: 0.17,
+    #     850: 0.14,
+    #     900: 0.12,
+    #     950: 0.095,
+    #     1000: 0.077,
+    #     1050: 0.062,
+    # }
+else:
+    sampleListForMerging = (
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_enujj.txt"
+    )
+    sampleListForMergingQCD = (
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
+    )
+    # inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
+    inputList = (
+        os.environ["LQANA"]
+        + "/config/PSKenujj_mar16_v237_local_comb/inputListAllCurrent.txt"
+    )
+    filePath = (
+        os.environ["LQDATA"]
+        + "/2016analysis/enujj_psk_mar16_fixMuons/output_cutTable_lq_enujj_MT/"
+    )
+    xsection = (
+        os.environ["LQANA"]
+        + "/versionsOfAnalysis_enujj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt"
+    )
+    qcdFilePath = (
+        os.environ["LQDATA"]
+        + "/2016qcd/enujj_mar16_fixMuons/output_cutTable_lq_enujj_MT_QCD/"
+    )
+    # # calculated with fitForStatErrs.py script. mass, stat. uncert.
+    # statErrorsSingleTop = { 650:0.213, 700:0.330, 750:0.399, 800:0.431, 850:0.442, 900:0.438, 950:0.425, 1000:0.407, 1050:0.385, 1100:0.363, 1150:0.342, 1200:0.321 }
+
+# this has the TopPtReweight+updatedSF and the Z+jets St corrections at final selections
+# filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_zJetsStCorrectionFinalSelections_21jul/output_cutTable_lq_eejj/'
+
+dataMC_filepath = filePath + (
+    "analysisClass_lq_eejj_plots.root"
+    if doEEJJ
+    else "analysisClass_lq_enujj_MT_plots.root"
+)
+qcd_data_filepath = qcdFilePath + (
+    "analysisClass_lq_eejj_QCD_plots.root"
+    if doEEJJ
+    else "analysisClass_lq_enujj_QCD_plots.root"
+)
+if doEEJJ:
+    # ttbar_data_filepath = ttbarFilePath + "analysisClass_lq_ttbarEst_plots.root"
+    # SIC 6 Jul 2020 remove
+    ttbar_data_filepath = ""
+else:
+    ttbar_data_filepath = ""
+    # ttbarFilePath = filePath
+
+do2016 = False
+do2017 = False
+do2018 = False
+if '2016' in dataMC_filepath:
+    do2016 = True
+    intLumi = 35867.0
+elif '2017' in dataMC_filepath:
+    do2017 = True
+    intLumi = 41540.0
+elif '2018' in dataMC_filepath:
+    do2018 = True
+    intLumi = 59399.0
+else:
+    print "ERROR: could not find one of 2017/2017/2018 in inputfile path. cannot do year-specific customizations. quitting."
+    exit(-1)
 if doRPV:
     mass_points = [
         str(i) for i in range(200, 1250, 100)
@@ -778,6 +906,7 @@ else:
     mass_points = [
         str(i) for i in range(200, 2050, 50)
     ]  # go from 200-2000 in 50 GeV steps
+
 if doEEJJ:
     if doRPV:
         signal_names = [
@@ -808,7 +937,7 @@ if doEEJJ:
     ]
     # background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
     background_names = [
-        "ZJet_amcatnlo_ptBinned",
+        "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
         "QCDFakes_DATA",
         # "TTBarFromDATA",
         "TTbar_powheg",
@@ -925,8 +1054,10 @@ else:
 n_background = len(background_names)
 # all bkg systematics, plus stat 'systs' for all bkg plus signal plus 3 backNormSysts
 # W/Z norm is part of the txt systs now, so only 2 extra norm systs (QCD, ttbar)
+# update July/Sep 2020: no more data-driven TBar, so only 1 extra syst for eejj
 if doEEJJ:
-    n_systematics = len(systematicsNamesBackground) + n_background + 1 + 2
+    # n_systematics = len(systematicsNamesBackground) + n_background + 1 + 2
+    n_systematics = len(systematicsNamesBackground) + n_background + 1 + 1
 else:
     n_systematics = (
         len(systematicsNamesBackground) + n_background + 1 + 1
@@ -947,107 +1078,7 @@ d_data_unscaledRates = {}
 d_data_totalEvents = {}
 d_unscaledRootFiles = {}
 
-intLumi = 35867.0
 
-if doEEJJ:
-    sampleListForMerging = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj.txt"
-    )
-    sampleListForMergingQCD = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
-    )
-    # SIC 6 Jul 2020 remove
-    # sampleListForMergingTTBar = (
-    #     os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_ttbarBkg_emujj.txt"
-    # )
-
-    inputList = (
-        os.environ["LQANA"]
-        # + "/config/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
-        + "/config/oldInputLists/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
-    )
-    qcdFilePath = (
-        os.environ["LQDATA"]
-        + "/nanoV6/2016/analysis/qcdYield_optFinalSels_13jul2020/output_cutTable_lq_eejj_QCD/"
-    )
-    filePath = (
-        os.environ["LQDATA"]
-        + "/nanoV6/2016/analysis/prefire_optFinalSels_13jul2020/output_cutTable_lq_eejj/"
-    )
-    xsection = (
-        os.environ["LQANA"]
-        + "/versionsOfAnalysis/2016/eejj/jun4/unscaled/extendTTbarRange/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-    )
-    # ttbarFilePath = (
-    #     os.environ["LQDATA"]
-    #     + "/2016ttbar/mar17_emujj_fixMuons/output_cutTable_lq_ttbar_emujj_correctTrig/"
-    # )
-    # # calculated with fitForStatErrs.py script. mass, stat. uncert.
-    # # statErrorsSingleTop = { 800: 1.10, 850: 0.85, 900: 0.67, 950: 0.53, 1000: 0.42, 1050: 0.33 }
-    # # here we increased the fit range
-    # statErrorsPhotonJets = {
-    #     400: 0.23,
-    #     450: 0.33,
-    #     500: 0.36,
-    #     550: 0.35,
-    #     600: 0.32,
-    #     650: 0.28,
-    #     700: 0.24,
-    #     750: 0.21,
-    #     800: 0.17,
-    #     850: 0.14,
-    #     900: 0.12,
-    #     950: 0.095,
-    #     1000: 0.077,
-    #     1050: 0.062,
-    # }
-else:
-    sampleListForMerging = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_enujj.txt"
-    )
-    sampleListForMergingQCD = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
-    )
-    # inputList = os.environ["LQANA"]+'/config/PSKenujj_oct2_SEleL_reminiaod_v236_eoscms/inputListAllCurrent.txt'
-    inputList = (
-        os.environ["LQANA"]
-        + "/config/PSKenujj_mar16_v237_local_comb/inputListAllCurrent.txt"
-    )
-    filePath = (
-        os.environ["LQDATA"]
-        + "/2016analysis/enujj_psk_mar16_fixMuons/output_cutTable_lq_enujj_MT/"
-    )
-    xsection = (
-        os.environ["LQANA"]
-        + "/versionsOfAnalysis_enujj/mar17/unscaled/newSingleTop/xsection_13TeV_2015_MTenu_50_110_gteOneBtaggedJet_TTbar_MTenu_50_110_noBtaggedJets_WJets.txt"
-    )
-    qcdFilePath = (
-        os.environ["LQDATA"]
-        + "/2016qcd/enujj_mar16_fixMuons/output_cutTable_lq_enujj_MT_QCD/"
-    )
-    # # calculated with fitForStatErrs.py script. mass, stat. uncert.
-    # statErrorsSingleTop = { 650:0.213, 700:0.330, 750:0.399, 800:0.431, 850:0.442, 900:0.438, 950:0.425, 1000:0.407, 1050:0.385, 1100:0.363, 1150:0.342, 1200:0.321 }
-
-# this has the TopPtReweight+updatedSF and the Z+jets St corrections at final selections
-# filePath = os.environ["LQDATA"] + '/RunII/eejj_analysis_zJetsStCorrectionFinalSelections_21jul/output_cutTable_lq_eejj/'
-
-dataMC_filepath = filePath + (
-    "analysisClass_lq_eejj_plots.root"
-    if doEEJJ
-    else "analysisClass_lq_enujj_MT_plots.root"
-)
-qcd_data_filepath = qcdFilePath + (
-    "analysisClass_lq_eejj_QCD_plots.root"
-    if doEEJJ
-    else "analysisClass_lq_enujj_QCD_plots.root"
-)
-if doEEJJ:
-    # ttbar_data_filepath = ttbarFilePath + "analysisClass_lq_ttbarEst_plots.root"
-    # SIC 6 Jul 2020 remove
-    ttbar_data_filepath = ""
-else:
-    ttbar_data_filepath = ""
-    # ttbarFilePath = filePath
 systematics_filepaths_background = dict()
 systematics_filepaths_signal = dict()
 systematics_filepaths_ctau1 = dict()
@@ -1737,6 +1768,11 @@ for i_signal_name, signal_name in enumerate(signal_names):
                         backgroundEvts["ZJet_amcatnlo_ptBinned"],
                         backgroundEvtsErrUp["ZJet_amcatnlo_ptBinned"],
                         backgroundEvtsErrDown["ZJet_amcatnlo_ptBinned"],
+                    ) if do2016 else
+                    GetTableEntryStr(
+                        backgroundEvts["ZJet_jetAndPtBinned"],
+                        backgroundEvtsErrUp["ZJet_jetAndPtBinned"],
+                        backgroundEvtsErrDown["ZJet_jetAndPtBinned"],
                     ),
                     GetTableEntryStr(
                         # backgroundEvts["TTBarFromDATA"],
@@ -1846,6 +1882,12 @@ for i_signal_name, signal_name in enumerate(signal_names):
                         backgroundEvts["ZJet_amcatnlo_ptBinned"],
                         backgroundEvtsErrUp["ZJet_amcatnlo_ptBinned"],
                         backgroundEvtsErrDown["ZJet_amcatnlo_ptBinned"],
+                        latex=True,
+                    ) if do2016 else
+                    GetTableEntryStr(
+                        backgroundEvts["ZJet_jetAndPtBinned"],
+                        backgroundEvtsErrUp["ZJet_jetAndPtBinned"],
+                        backgroundEvtsErrDown["ZJet_jetAndPtBinned"],
                         latex=True,
                     ),
                     GetTableEntryStr(
