@@ -1,30 +1,33 @@
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_customNanoSkim_eosuser/inputListAllCurrent.txt -o rskSingleEleL_28may2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 500 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_28may2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eosuser/inputListAllCurrent.txt -o rskSingleEleL_31may2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 500 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_31may2019 -r
-# this one worked aside from ntuple format issue...
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o rskSingleEleL_7jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 100 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_7jun2019 -r
-# now use different binaries
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainMGMC -i config/2016_nanoPostProc_eoscms/inputList_mgMC.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainPythiaMC -i config/2016_nanoPostProc_eoscms/inputList_pythiaMC.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainData -i config/2016_nanoPostProc_eoscms/inputList_data.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-## increase queue time
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainMGMC -i config/2016_nanoPostProc_eoscms/inputList_mgMC.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q tomorrow -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainPythiaMC -i config/2016_nanoPostProc_eoscms/inputList_pythiaMC.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q tomorrow -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainData -i config/2016_nanoPostProc_eoscms/inputList_data.txt -o rskSingleEleL_10jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 80 -q tomorrow -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_10jun2019 -r
-# but don't need longer queue
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainMGMC -i config/2016_nanoPostProc_eoscms_comb/inputList_mgMC.txt -o rskSingleEleL_14jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q longlunch -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_14jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainPythiaMC -i config/2016_nanoPostProc_eoscms_comb/inputList_pythiaMC.txt -o rskSingleEleL_14jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q longlunch -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_14jun2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -e mainData -i config/2016_nanoPostProc_eoscms_comb/inputList_data.txt -o rskSingleEleL_14jun2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q longlunch -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_14jun2019 -r
-# with ttreereadertools!
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms_comb/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_3jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q longlunch -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_3jul2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_9jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q longlunch -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_9jul2019 -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_30jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q workday -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_30jul2019 -r
-# move to tomorrow queue
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_nanoPostProc_eoscms/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/rskSingleEleL_30jul2019 -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -j 10 -q tomorrow -d /eos/user/s/scooper/LQ/Nano/rskSingleEleL_30jul2019 -r
-# 2017
-SKIMNAME=rskSingleEleL_7may2020
-INPUTLIST=config/nanoV6_2017_postProc/inputListAllCurrent.txt
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2017/skims/$SKIMNAME -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -d /eos/user/s/scooper/LQ/NanoV6/2017/skims/$SKIMNAME -r
-# 2018
-#SKIMNAME=rskSingleEleL_4may2020
-#INPUTLIST=config/nanoV6_2018_postProc/inputListAllCurrent.txt
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV6/2018/skims/$SKIMNAME -n Events -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2018/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt -d /eos/user/s/scooper/LQ/NanoV6/2018/skims/$SKIMNAME -r
+#!/bin/bash
+
+YEAR=$1
+
+if [ "$YEAR" = "2016" ]; then
+  echo "Doing 2016!"
+  SKIMNAME=rskSingleEleL_2sep2020
+  #INPUTLIST=config/nanoV7_2016_postProc/inputListAllCurrent.txt
+  INPUTLIST=config/nanoV7_2016_postProc/inputList_LQToBEle.txt
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
+elif [ "$YEAR" = "2017" ]; then
+  SKIMNAME=rskSingleEleL_2sep2020
+  #INPUTLIST=config/nanoV7_2017_postProc/inputListAllCurrent.txt
+  INPUTLIST=config/nanoV7_2017_postProc/inputList_LQToDEle.txt
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
+elif [ "$YEAR" = "2018" ]; then
+  SKIMNAME=rskSingleEleL_2sep2020
+  #INPUTLIST=config/nanoV7_2018_postProc/inputListAllCurrent.txt
+  #INPUTLIST=config/nanoV7_2018_postProc/inputList_LQToBEle.txt
+  INPUTLIST=config/nanoV7_2018_postProc/inputList_LQToDEle.txt
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2018/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
+else
+  echo "ERROR: did not understand given year of '$YEAR' which is not one of 2016, 2017, 2018"
+  echo "Usage: $0 [2016 | 2017 | 2018]"
+  exit -1
+fi
+
+#EOSDIR=/eos/user/s/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
+#EOSDIR=/eos/cms/store/user/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
+EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/NanoV7/skims/${YEAR}/$SKIMNAME
+OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV7/skims/${YEAR}/$SKIMNAME
+
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r

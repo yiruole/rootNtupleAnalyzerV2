@@ -1,15 +1,35 @@
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_rskSEleL_eoscms_comb/inputListAllCurrent.txt -o pskEEJJPresel_18jun2019/ -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt -q microcentury -d /eos/user/s/scooper/LQ/Nano/pskEEJJPresel_18jun2019 -j 10 -n rootTupleTree/tree
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_rskSingleEleL_eoscms_comb/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/pskEEJJPresel_12jul2019/ -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt -q microcentury -d /eos/user/s/scooper/LQ/Nano/pskEEJJPresel_12jul2019 -j 5 -n rootTupleTree/tree
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i config/2016_rskSingleEleL_30jul2019/inputListAllCurrent.txt -o /afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nano/2016/pskEEJJPresel_31jul2019/ -c /afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt -q microcentury -d /eos/user/s/scooper/LQ/Nano/pskEEJJPresel_31jul2019 -j 5 -n rootTupleTree/tree
-#
-# 2017
-#INPUTLIST=config/nanoV6_2017_rskSingleEleL_21apr2020/inputListAllCurrent.txt
-INPUTLIST=config/nanoV6_2017_rskSingleEleL_7may2020/inputListAllCurrent.txt
-SKIMNAME=pskEEJJ_8may2020
-CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $LQDATA/nanoV6/2017/skims/$SKIMNAME -c $CUTFILE -q microcentury -d /eos/user/s/scooper/LQ/NanoV6/2017/skims/$SKIMNAME -j 5 -n rootTupleTree/tree
-# 2018
-#INPUTLIST=config/nanoV6_2018_rskSingleEleL_4may2020/inputListAllCurrent.txt
-#SKIMNAME=pskEEJJ_5may2020
-#CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $LQDATA/nanoV6/2018/skims/$SKIMNAME -c $CUTFILE -q microcentury -d /eos/user/s/scooper/LQ/NanoV6/2018/skims/$SKIMNAME -j 5 -n rootTupleTree/tree
+
+#!/bin/bash
+
+YEAR=$1
+
+if [ "$YEAR" = "2016" ]; then
+  echo "Doing 2016!"
+  #INPUTLIST=config/nanoV7_2016_rskSingleEleL_2sep2020/inputListAllCurrent.txt
+  INPUTLIST=config/nanoV7_2016_rskSingleEleL_2sep2020/inputList_LQToBEle.txt
+  SKIMNAME=pskEEJJ_3sep2020
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt
+elif [ "$YEAR" = "2017" ]; then
+  #INPUTLIST=config/nanoV7_2017_rskSingleEleL_2sep2020/inputListAllCurrent.txt
+  INPUTLIST=config/nanoV7_2017_rskSingleEleL_2sep2020/inputList_LQToDEle.txt
+  SKIMNAME=pskEEJJ_3sep2020
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2017/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt
+elif [ "$YEAR" = "2018" ]; then
+  #INPUTLIST=config/nanoV7_2018_rskSingleEleL_2sep2020/inputListAllCurrent.txt
+  #INPUTLIST=config/nanoV7_2018_rskSingleEleL_2sep2020/inputList_LQToBEle.txt
+  INPUTLIST=config/nanoV7_2018_rskSingleEleL_2sep2020/inputList_LQToDEle.txt
+  SKIMNAME=pskEEJJ_3sep2020
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2017/FlatNTupleSkims/cutTable_lq_eejjPreselection_skim.txt
+else
+  echo "ERROR: did not understand given year of '$YEAR' which is not one of 2016, 2017, 2018"
+  echo "Usage: $0 [2016 | 2017 | 2018]"
+  exit -1
+fi
+
+#EOSDIR=/eos/cms/store/user/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
+#EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoV7/skims/${YEAR}/$SKIMNAME
+EOSDIR=/eos/user/s/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
+OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV7/skims/${YEAR}/$SKIMNAME
+
+#python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTPUTDIR -c $CUTFILE -q microcentury -d $EOSDIR -j 5 -n rootTupleTree/tree
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTPUTDIR -c $CUTFILE -q longlunch -d $EOSDIR -j 5 -n rootTupleTree/tree
