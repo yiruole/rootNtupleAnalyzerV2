@@ -571,7 +571,7 @@ def FindUnscaledRootFile(filepath, sampleName):
         for name in files:
             # print "check against file:", name
             noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
-            noExtBackupName = noExtName.replace("backup_", "")
+            noExtBackupName = noExtName.replace("backup_", "").replace("newPMX_", "")
             # print "compare", noExtBackupName, " to *"+sampleName+"*.root"
             if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
                 return os.path.join(root, name)
