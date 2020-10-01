@@ -366,6 +366,7 @@ for lin in open(options.inputList):
                 completeNamesTried.append(completeName)
                 if os.path.isfile(completeName):
                     dictDatasetsFileNames[dataset_fromInputList] = completeName
+                    # print "Found file:", completeName, "for dataset=", dataset_fromInputList
                     foundFile = True
                     break
     if foundFile:
@@ -392,7 +393,7 @@ if not os.path.isdir(options.outputDir):
 
 if not options.tablesOnly:
     outputTfile = TFile(
-        options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE"
+        options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE", "", 207
     )
 
 # loop over samples defined in sampleListForMerging
