@@ -27,16 +27,19 @@
 using namespace std;
 
 struct cut {
+  const static size_t MAX_ARRAY_SIZE = 200;
   string variableName;
-  double minValue1;
-  double maxValue1;
-  double minValue2;
-  double maxValue2;
+  float minValue1;
+  float maxValue1;
+  float minValue2;
+  float maxValue2;
   int level_int;
   string level_str;
   int histoNBins;
-  double histoMin;
-  double histoMax;
+  float histoMin;
+  float histoMax;
+  bool saveVariableInReducedSkim;
+  bool saveVariableArrayInReducedSkim;
   // Not filled from file
   int id;
   TH1F histo1;
@@ -46,15 +49,16 @@ struct cut {
   TH1F histo5;
   // Filled event by event
   bool filled;
-  double value;
-  double weight;
+  float value;
+  unsigned int arraySize;
+  float weight;
   bool passed;
-  double nEvtInput;
-  double nEvtPassedBeforeWeight;
-  double nEvtPassed;
-  double nEvtPassedErr2;
+  float nEvtInput;
+  float nEvtPassedBeforeWeight;
+  float nEvtPassed;
+  float nEvtPassedErr2;
   bool nEvtPassedBeforeWeight_alreadyFilled;
-  bool saveVariableInReducedSkim;
+
 };
 
 struct preCut {
@@ -63,10 +67,10 @@ struct preCut {
   string string2;
   string string3;
   string string4;
-  double value1;
-  double value2;
-  double value3;
-  double value4;
+  float value1;
+  float value2;
+  float value3;
+  float value4;
   int level_int;
   string level_str;
 };
@@ -75,7 +79,7 @@ struct preCut {
 class Optimize {
  public:
   Optimize(){count=0; variableName=""; minvalue=0; maxvalue=0; testgreater=false; level_int=-10;};
-  Optimize(int x0, string x1, double x2, double x3, bool x4, int x5, int x6)
+  Optimize(int x0, string x1, float x2, float x3, bool x4, int x5, int x6)
     {
       count=x0;
       variableName=x1;
@@ -98,12 +102,12 @@ class Optimize {
   int nCuts;
   int count; // store number for ordering of optimization cuts
   string variableName; // store name of variable
-  double minvalue; // minimum threshold value to test
-  double maxvalue; // maximum threshold to test
-  double increment; // max-min, divided into 10 parts
+  float minvalue; // minimum threshold value to test
+  float maxvalue; // maximum threshold to test
+  float increment; // max-min, divided into 10 parts
   bool testgreater; // tests whether value should be greater or less than threshold
   int level_int; // cut level -- not used?
-  double value;  // value to check against threshold
+  float value;  // value to check against threshold
 
   bool Compare(int counter)
     {
@@ -113,13 +117,13 @@ class Optimize {
       bool passed=false;
       if (testgreater)
         {
-          double thresh=minvalue+increment*counter; // convert counter # to physical threshold
+          float thresh=minvalue+increment*counter; // convert counter # to physical threshold
           value > thresh ? passed=true: passed=false;
         }
       // if testing that value is less than threshold, start with largest threshold first.  This keep the number of \events "monotonically decreasing" over a series of 10 cuts.
       else
         {
-          double thresh=maxvalue-increment*counter;
+          float thresh=maxvalue-increment*counter;
           value < thresh ? passed=true : passed = false;
         }
       return passed;
@@ -144,8 +148,10 @@ class baseClass {
   const std::string getCurrentFileName() { return tree_->GetCurrentFile()->GetName();};
     
   void resetCuts(const std::string& s = "newEvent");
-  void fillVariableWithValue(const std::string&, const double&, const double& w = 1.);
-  void fillVariableWithValue(const std::string&, TTreeReaderValue<double>&, const double& w = 1.);
+  void fillVariableWithValue(const std::string&, const float&, const float& w = 1.);
+  void fillVariableWithValue(const std::string&, TTreeReaderValue<float>&, const float& w = 1.);
+  void fillArrayVariableWithValue(const std::string&, float*);
+  template <typename T> void fillArrayVariableWithValue(const string& s, TTreeReaderArray<T>& reader);
   void evaluateCuts(bool verbose = false);
   
   void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
@@ -161,19 +167,19 @@ class baseClass {
   bool variableIsFilled(const string& s);
   bool isOptimizationEnabled() { return optimizeName_cut_.size()>0; }
   bool hasCut(const string& s);
-  double getVariableValue(const string& s);
-  double getPreCutValue1(const string& s);
-  double getPreCutValue2(const string& s);
-  double getPreCutValue3(const string& s);
-  double getPreCutValue4(const string& s);
+  float getVariableValue(const string& s);
+  float getPreCutValue1(const string& s);
+  float getPreCutValue2(const string& s);
+  float getPreCutValue3(const string& s);
+  float getPreCutValue4(const string& s);
   string getPreCutString1(const string& s);
   string getPreCutString2(const string& s);
   string getPreCutString3(const string& s);
   string getPreCutString4(const string& s);
-  double getCutMinValue1(const string& s);
-  double getCutMaxValue1(const string& s);
-  double getCutMinValue2(const string& s);
-  double getCutMaxValue2(const string& s);
+  float getCutMinValue1(const string& s);
+  float getCutMaxValue1(const string& s);
+  float getCutMinValue2(const string& s);
+  float getCutMaxValue2(const string& s);
 
   const TH1F& getHisto_noCuts_or_skim(const string& s);
   const TH1F& getHisto_allPreviousCuts(const string& s);
@@ -182,14 +188,14 @@ class baseClass {
   const TH1F& getHisto_allCuts(const string& s);
 
   int    getHistoNBins(const string& s);
-  double getHistoMin(const string& s);
-  double getHistoMax(const string& s);
+  float getHistoMin(const string& s);
+  float getHistoMax(const string& s);
 
   baseClass(string * inputList, string * cutFile, string * treeName, string *outputFileName=0, string * cutEfficFile=0);
   virtual ~baseClass();
 
   // Optimization stuff
-  void fillOptimizerWithValue(const string& s, const double& d);
+  void fillOptimizerWithValue(const string& s, const float& d);
   void runOptimizer();
 
   void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
@@ -252,7 +258,7 @@ class baseClass {
   bool writeCutEfficFile();
   bool sortCuts(const cut&, const cut&);
   vector<string> split(const string& s);
-  double decodeCutValue(const string& s);
+  float decodeCutValue(const string& s);
   bool skimWasMade_;
   int getGlobalInfoNstart(const char* );
   float getSumAMCNLOWeights(const char* );
@@ -261,7 +267,7 @@ class baseClass {
   float sumAMCNLOWeights_;
   float sumTopPtWeights_;
 
-  void checkOverflow(const TH1*, const double);
+  void checkOverflow(const TH1*, const float);
 
   // JSON file stuff
   JSONParser jsonParser_;
@@ -283,7 +289,7 @@ class baseClass {
   // Skim stuff
   bool produceSkim_;
   int NAfterSkim_;
-  double getSkimPreCutValue(const string& s);
+  float getSkimPreCutValue(const string& s);
   TFile *skim_file_;
   TTree* skim_tree_;
   TH1F* hCount_;
@@ -292,7 +298,7 @@ class baseClass {
   //Reduced Skim stuff
   bool produceReducedSkim_;
   int NAfterReducedSkim_;
-  double getReducedSkimPreCutValue(const string& s);
+  float getReducedSkimPreCutValue(const string& s);
   TFile *reduced_skim_file_;
   TTree *reduced_skim_tree_;
   TH1F* hReducedCount_;

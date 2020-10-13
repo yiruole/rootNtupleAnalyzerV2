@@ -4,6 +4,8 @@
 #include "TEnv.h"
 #include "TLeaf.h"
 
+template void baseClass::fillArrayVariableWithValue(const string& s, TTreeReaderArray<Float_t>& reader);
+
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
   fillSkim_                         ( true ) ,
   fillAllPreviousCuts_              ( true ) ,
@@ -121,7 +123,25 @@ void baseClass::init()
     for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
     {
       cut * c = & (cc->second);
-      if(c->saveVariableInReducedSkim)    reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/D").c_str());
+      if(c->saveVariableInReducedSkim) {
+        if (reduced_skim_tree_->FindBranch(c->variableName.c_str()) != nullptr) {
+          STDOUT("ERROR: found branch named: '" << c->variableName << "' already specified in cutfile and saved. Please remove it from the cut file. (This could be a size branch for an array variable: if so, it will be saved automatically.) Exiting here.");
+          exit(-5);
+        }
+        reduced_skim_tree_->Branch(c->variableName.c_str(),&c->value,(c->variableName+"/F").c_str());
+      }
+      else if(c->saveVariableArrayInReducedSkim) {
+        std::stringstream branchFormat;
+        branchFormat << c->variableName;
+        std::string arraySizeVar = "n" + c->variableName; // FIXME TODO handle manually-specified size branch name?
+        if (reduced_skim_tree_->FindBranch(arraySizeVar.c_str()) != nullptr) {
+          STDOUT("ERROR: found branch named: '" << arraySizeVar << "' specified in cutfile and saved. This is a size branch for an array variable, so it will be saved automatically and shouldn't be saved manually. Exiting here.");
+          exit(-5);
+        }
+        reduced_skim_tree_->Branch(arraySizeVar.c_str(),&c->arraySize,(arraySizeVar+"/i").c_str());
+          branchFormat << "[" << arraySizeVar << "]";
+          reduced_skim_tree_->Branch(c->variableName.c_str(),(void*)nullptr,(branchFormat.str()+"/F").c_str());
+      }
     }
   }
 
@@ -195,7 +215,7 @@ void baseClass::readInputList()
 
 bool is_number(const std::string& s) {
   try {
-    double number = boost::lexical_cast<double>(s);
+    float number = boost::lexical_cast<float>(s);
   } catch(boost::bad_lexical_cast& e) {
     return false;
   }
@@ -259,8 +279,8 @@ void baseClass::readCutFile()
         int level_int = atoi(v[5].c_str());
         bool greaterthan=true;
         if (v[2]=="<") greaterthan=false;
-        double minval=atof(v[3].c_str());
-        double maxval=atof(v[4].c_str());
+        float minval=atof(v[3].c_str());
+        float maxval=atof(v[4].c_str());
         Optimize opt(optimize_count,v[0],minval, maxval, greaterthan, level_int, nOptimizerCuts_ );
         optimizeName_cut_[optimize_count]=opt; // order cuts by cut #, rather than name, so that optimization histogram is consistently ordered
         ++optimize_count;
@@ -334,6 +354,7 @@ void baseClass::readCutFile()
       thisCut.histoMin   = atof( v[7].c_str() );
       thisCut.histoMax   = atof( v[8].c_str() );
       thisCut.saveVariableInReducedSkim = ( v.size()==10 && v[9]=="SAVE" ) ? true : false;
+      thisCut.saveVariableArrayInReducedSkim = ( v.size()>9 && v[9]=="SAVEARRAY" ) ? true : false;
 
       // Not filled from file
       thisCut.id=++id;
@@ -423,14 +444,13 @@ void baseClass::resetCuts(const string& s)
   return;
 }
 
-void baseClass::fillVariableWithValue(const string& s, const double& d, const double& w)
+void baseClass::fillVariableWithValue(const string& s, const float& d, const float& w)
 {
-
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
     {
-      STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Returning");
-      return;
+      STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Exiting.");
+      exit(-5);
     }
   else
     {
@@ -438,12 +458,12 @@ void baseClass::fillVariableWithValue(const string& s, const double& d, const do
       c->filled = true;
       c->value = d;
       c->weight = w;
-      
     }
   fillOptimizerWithValue(s, d);
   return;
 }
-void baseClass::fillVariableWithValue(const string& s, TTreeReaderValue<double>& reader, const double& w)
+
+void baseClass::fillVariableWithValue(const string& s, TTreeReaderValue<float>& reader, const float& w)
 {
   fillVariableWithValue(s, *reader, w);
 }
@@ -459,7 +479,31 @@ bool baseClass::variableIsFilled(const string& s)
   return (c->filled);
 }
 
-double baseClass::getVariableValue(const string& s)
+template <typename T> void baseClass::fillArrayVariableWithValue(const string& s, TTreeReaderArray<T>& reader)
+{
+  map<string, cut>::iterator cc = cutName_cut_.find(s);
+  if( cc == cutName_cut_.end() )
+    {
+      STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Exiting.");
+      exit(-5);
+    }
+  else
+    {
+      cut * c = & (cc->second);
+      c->filled = true;
+      if(reader.GetSize() > cut::MAX_ARRAY_SIZE)
+      {
+        STDOUT("WARNING: truncated array size from" << reader.GetSize() << " to MAX_ARRAY_SIZE=" << cut::MAX_ARRAY_SIZE << " in this event.");
+        c->arraySize = cut::MAX_ARRAY_SIZE;
+      }
+      else
+        c->arraySize = reader.GetSize();
+      reduced_skim_tree_->FindBranch(s.c_str())->SetAddress(const_cast<void*>(reader.GetAddress()));
+    }
+  return;
+}
+
+float baseClass::getVariableValue(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -474,7 +518,7 @@ double baseClass::getVariableValue(const string& s)
   return (c->value);
 }
 
-void baseClass::fillOptimizerWithValue(const string& s, const double& d)
+void baseClass::fillOptimizerWithValue(const string& s, const float& d)
 {
   for (int i=0;i<optimizeName_cut_.size();++i)
   {
@@ -725,9 +769,9 @@ bool baseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
   return ret;
 }
 
-double baseClass::getPreCutValue1(const string& s)
+float baseClass::getPreCutValue1(const string& s)
 {
-  double ret;
+  float ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
@@ -739,9 +783,9 @@ double baseClass::getPreCutValue1(const string& s)
   return (c->value1);
 }
 
-double baseClass::getPreCutValue2(const string& s)
+float baseClass::getPreCutValue2(const string& s)
 {
-  double ret;
+  float ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
@@ -753,9 +797,9 @@ double baseClass::getPreCutValue2(const string& s)
   return (c->value2);
 }
 
-double baseClass::getPreCutValue3(const string& s)
+float baseClass::getPreCutValue3(const string& s)
 {
-  double ret;
+  float ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
@@ -767,9 +811,9 @@ double baseClass::getPreCutValue3(const string& s)
   return (c->value3);
 }
 
-double baseClass::getPreCutValue4(const string& s)
+float baseClass::getPreCutValue4(const string& s)
 {
-  double ret;
+  float ret;
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
@@ -796,9 +840,9 @@ string baseClass::getPreCutString1(const string& s)
 }
 
 
-double baseClass::getCutMinValue1(const string& s)
+float baseClass::getCutMinValue1(const string& s)
 {
-  double ret;
+  float ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
   {
@@ -808,9 +852,9 @@ double baseClass::getCutMinValue1(const string& s)
   return (c->minValue1);
 }
 
-double baseClass::getCutMaxValue1(const string& s)
+float baseClass::getCutMaxValue1(const string& s)
 {
-  double ret;
+  float ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
   {
@@ -820,9 +864,9 @@ double baseClass::getCutMaxValue1(const string& s)
   return (c->maxValue1);
 }
 
-double baseClass::getCutMinValue2(const string& s)
+float baseClass::getCutMinValue2(const string& s)
 {
-  double ret;
+  float ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
   {
@@ -832,9 +876,9 @@ double baseClass::getCutMinValue2(const string& s)
   return (c->minValue2);
 }
 
-double baseClass::getCutMaxValue2(const string& s)
+float baseClass::getCutMaxValue2(const string& s)
 {
-  double ret;
+  float ret;
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
   {
@@ -916,7 +960,7 @@ int baseClass::getHistoNBins(const string& s)
   return (c->histoNBins);
 }
 
-double baseClass::getHistoMin(const string& s)
+float baseClass::getHistoMin(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -927,7 +971,7 @@ double baseClass::getHistoMin(const string& s)
   return (c->histoMin);
 }
 
-double baseClass::getHistoMax(const string& s)
+float baseClass::getHistoMax(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1049,7 +1093,7 @@ bool baseClass::writeCutEfficFile()
      << preCutInfo_.str();
 
   int cutIdPed=0;
-  double minForFixed = 0.1;
+  float minForFixed = 0.1;
   int precision = 4;
   int mainFieldWidth=20;
   os.precision(precision);
@@ -1073,10 +1117,10 @@ bool baseClass::writeCutEfficFile()
      << setw(mainFieldWidth) << 0. //errEffAbs
      << endl;
 
-  double effRel;
-  double effRelErr;
-  double effAbs;
-  double effAbsErr;
+  float effRel;
+  float effRelErr;
+  float effAbs;
+  float effAbsErr;
 
   checkOverflow(eventcuts_,nEntTot);
   eventcuts_->SetBinContent(bincounter,nEntTot);
@@ -1088,16 +1132,16 @@ bool baseClass::writeCutEfficFile()
     h_optimizer_entries_->SetBinContent(0, nEntTot);
   }
 
-  double nEvtPassedBeforeWeight_previousCut = nEntTot;
-  double nEvtPassed_previousCut = nEntTot;
+  float nEvtPassedBeforeWeight_previousCut = nEntTot;
+  float nEvtPassed_previousCut = nEntTot;
 
   if(skimWasMade_)
     {
       ++bincounter;
       checkOverflow(eventcuts_,GetTreeEntries());
       eventcuts_->SetBinContent(bincounter, GetTreeEntries() );
-      effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
-      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
+      effRel = (float) GetTreeEntries() / (float) NBeforeSkim_;
+      effRelErr = sqrt( (float) effRel * (1.0 - (float) effRel) / (float) NBeforeSkim_ );
       effAbs = effRel;
       effAbsErr = effRelErr;
       os << fixed
@@ -1126,14 +1170,14 @@ bool baseClass::writeCutEfficFile()
       ++bincounter;
       checkOverflow(eventcuts_,c->nEvtPassed);
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
-      effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
-      double N = nEvtPassedBeforeWeight_previousCut;
-      double Np = c->nEvtPassedBeforeWeight;
-      double p = Np / N;
-      double q = 1-p;
-      double w = c->nEvtPassed / c->nEvtPassedBeforeWeight;
+      effRel = (float) c->nEvtPassed / nEvtPassed_previousCut;
+      float N = nEvtPassedBeforeWeight_previousCut;
+      float Np = c->nEvtPassedBeforeWeight;
+      float p = Np / N;
+      float q = 1-p;
+      float w = c->nEvtPassed / c->nEvtPassedBeforeWeight;
       effRelErr = sqrt(p*q/N)*w;
-      effAbs = (double) c->nEvtPassed / (double) nEntTot;
+      effAbs = (float) c->nEvtPassed / (float) nEntTot;
       N = nEntTot;
       p = Np / N;
       q = 1-p;
@@ -1237,10 +1281,10 @@ vector<string> baseClass::split(const string& s)
   return ret;
 }
 
-double baseClass::decodeCutValue(const string& s)
+float baseClass::decodeCutValue(const string& s)
 {
   //STDOUT("s = "<<s);
-  double ret;
+  float ret;
   if( s == "inf" || s == "+inf" )
     {
        ret = 99999999999;
@@ -1502,16 +1546,16 @@ void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  D
       
       for ( int i_bin_x = 1; i_bin_x <= n_bins_x; ++i_bin_x ){
 	
-	double x_min  = x_axis -> GetBinLowEdge( i_bin_x );
-	double x_max  = x_axis -> GetBinUpEdge ( i_bin_x );
-	double x_mean = x_axis -> GetBinCenter ( i_bin_x );
+	float x_min  = x_axis -> GetBinLowEdge( i_bin_x );
+	float x_max  = x_axis -> GetBinUpEdge ( i_bin_x );
+	float x_mean = x_axis -> GetBinCenter ( i_bin_x );
 
 	if ( value_x <= x_min ) continue;
 	
 	for ( int i_bin_y = 1; i_bin_y <= n_bins_y; ++i_bin_y ){
 	  
-	  double y_min  = y_axis -> GetBinLowEdge( i_bin_y );
-	  double y_mean = y_axis -> GetBinCenter ( i_bin_y );
+	  float y_min  = y_axis -> GetBinLowEdge( i_bin_y );
+	  float y_mean = y_axis -> GetBinCenter ( i_bin_y );
 	  
 	  if ( value_y <= y_min ) continue;
 	  
@@ -1618,7 +1662,7 @@ bool baseClass::writeUserHistos()
   return ret;
 }
 
-double baseClass::getSkimPreCutValue(const string& s)
+float baseClass::getSkimPreCutValue(const string& s)
 {
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
@@ -1888,7 +1932,7 @@ void baseClass::createOptCutFile() {
 bool baseClass::isData() {
   // if tree has isData branch, we know the answer
   if(tree_->GetBranch("isData")) {
-    if(readerTools_->ReadValueBranch<Double_t>("isData") < 1)
+    if(readerTools_->ReadValueBranch<Float_t>("isData") < 1)
       return false;
     else
       return true;
@@ -1899,10 +1943,10 @@ bool baseClass::isData() {
   return true;
 }
 
-void baseClass::checkOverflow(const TH1* hist, const double binContent) {
+void baseClass::checkOverflow(const TH1* hist, const float binContent) {
   std::ostringstream stringStream;
   if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
-    double limit = std::numeric_limits<float>::max();
+    float limit = std::numeric_limits<float>::max();
     if(binContent>limit) {
       stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1F bin in histo: " << hist->GetName() << "! Quitting.";
       STDOUT(stringStream.str());
@@ -1910,7 +1954,7 @@ void baseClass::checkOverflow(const TH1* hist, const double binContent) {
     }
   }
   else if(std::string(hist->ClassName()).find("TH1I") != std::string::npos) {
-    double limit = std::numeric_limits<int>::max();
+    float limit = std::numeric_limits<int>::max();
     if(binContent>limit) {
       stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin in histo: " << hist->GetName() << "! Quitting.";
       STDOUT(stringStream.str());
