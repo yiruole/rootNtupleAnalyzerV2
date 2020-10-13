@@ -17,6 +17,7 @@ class TTreeReaderTools {
     void LoadEntry(Long64_t entry);
     std::shared_ptr<TTree> GetTree() { return m_tree; }
     Long64_t GetCurrentEntry() { return m_reader->GetCurrentEntry(); }
+    template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName);
 
   private:
     void checkReaderIsClean();
@@ -26,7 +27,6 @@ class TTreeReaderTools {
     template <typename T> void remakeReader(T& readerMap);
     template <typename T> T ReadValueBranch(const std::string& branchName, std::map<std::string, TTreeReaderValue<T> >& valueReaderMap);
     template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName, std::map<std::string, TTreeReaderArray<T> >& arrayReaderMap);
-    template <typename T> TTreeReaderArray<T>& ReadArrayBranch(const std::string& branchName);
 
     std::map<std::string, TTreeReaderValue<UInt_t>    > m_ttreeValueUIntReaders;
     std::map<std::string, TTreeReaderValue<ULong64_t> > m_ttreeValueULong64Readers;
