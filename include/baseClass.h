@@ -28,51 +28,51 @@ using namespace std;
 
 struct cut {
   const static size_t MAX_ARRAY_SIZE = 200;
-  string variableName;
-  float minValue1;
-  float maxValue1;
-  float minValue2;
-  float maxValue2;
-  int level_int;
-  string level_str;
-  int histoNBins;
-  float histoMin;
-  float histoMax;
-  bool saveVariableInReducedSkim;
-  bool saveVariableArrayInReducedSkim;
+  string variableName = "";
+  float minValue1 = -1;
+  float maxValue1 = -1;
+  float minValue2 = -1;
+  float maxValue2 = -1;
+  int level_int = -1;
+  string level_str = "";
+  int histoNBins = -1;
+  float histoMin = -1;
+  float histoMax = -1;
+  bool saveVariableInReducedSkim = false;
+  bool saveVariableArrayInReducedSkim = false;
   // Not filled from file
-  int id;
+  int id = -1;
   TH1F histo1;
   TH1F histo2;
   TH1F histo3;
   TH1F histo4;
   TH1F histo5;
   // Filled event by event
-  bool filled;
-  float value;
-  unsigned int arraySize;
-  float weight;
-  bool passed;
-  float nEvtInput;
-  float nEvtPassedBeforeWeight;
-  float nEvtPassed;
-  float nEvtPassedErr2;
-  bool nEvtPassedBeforeWeight_alreadyFilled;
+  bool filled = false;
+  float value = -1;
+  unsigned int arraySize = 0;
+  float weight = 1;
+  bool passed = false;
+  float nEvtInput = -1;
+  float nEvtPassedBeforeWeight = -1;
+  float nEvtPassed = -1;
+  float nEvtPassedErr2 = -1;
+  bool nEvtPassedBeforeWeight_alreadyFilled = -1;
 
 };
 
 struct preCut {
-  string variableName;
-  string string1;
-  string string2;
-  string string3;
-  string string4;
-  float value1;
-  float value2;
-  float value3;
-  float value4;
-  int level_int;
-  string level_str;
+  string variableName = "";
+  string string1 = "";
+  string string2 = "";
+  string string3 = "";
+  string string4 = "";
+  float value1 = -1;
+  float value2 = -1;
+  float value3 = -1;
+  float value4 = -1;
+  int level_int = -1;
+  string level_str = "";
 };
 
 // Create structure to hold

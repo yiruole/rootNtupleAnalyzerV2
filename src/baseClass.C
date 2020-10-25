@@ -4,6 +4,8 @@
 #include "TEnv.h"
 #include "TLeaf.h"
 
+static_assert(std::numeric_limits<float>::is_iec559, "IEEE 754 required");
+
 template void baseClass::fillArrayVariableWithValue(const string& s, TTreeReaderArray<Float_t>& reader);
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
@@ -133,7 +135,7 @@ void baseClass::init()
       else if(c->saveVariableArrayInReducedSkim) {
         std::stringstream branchFormat;
         branchFormat << c->variableName;
-        std::string arraySizeVar = "n" + c->variableName; // FIXME TODO handle manually-specified size branch name?
+        std::string arraySizeVar = "n" + c->variableName;
         if (reduced_skim_tree_->FindBranch(arraySizeVar.c_str()) != nullptr) {
           STDOUT("ERROR: found branch named: '" << arraySizeVar << "' specified in cutfile and saved. This is a size branch for an array variable, so it will be saved automatically and shouldn't be saved manually. Exiting here.");
           exit(-5);
@@ -491,6 +493,8 @@ template <typename T> void baseClass::fillArrayVariableWithValue(const string& s
     {
       cut * c = & (cc->second);
       c->filled = true;
+      c->value = 0.;
+      c->weight = 1.;
       if(reader.GetSize() > cut::MAX_ARRAY_SIZE)
       {
         STDOUT("WARNING: truncated array size from" << reader.GetSize() << " to MAX_ARRAY_SIZE=" << cut::MAX_ARRAY_SIZE << " in this event.");
@@ -1186,7 +1190,7 @@ bool baseClass::writeCutEfficFile()
       std::stringstream ssm1, ssM1, ssm2,ssM2;
       ssm1 << fixed << setprecision(4) << c->minValue1;
       ssM1 << fixed << setprecision(4) << c->maxValue1;
-      if(c->minValue2 == -99999999999)
+      if(c->minValue2 == std::numeric_limits<float>::lowest())
 	{
 	  ssm2 << "-inf";
 	}
@@ -1194,7 +1198,7 @@ bool baseClass::writeCutEfficFile()
 	{
 	  ssm2 << fixed << setprecision(4) << c->minValue2;
 	}
-      if(c->maxValue2 ==  99999999999)
+      if(c->maxValue2 == std::numeric_limits<float>::max())
 	{
 	  ssM2 << "+inf";
 	}
@@ -1206,8 +1210,8 @@ bool baseClass::writeCutEfficFile()
 	 << setw(35) << c->variableName
 	 << setprecision(precision)
 	 << fixed
-	 << setw(mainFieldWidth) << ( ( c->minValue1 == -99999999999.0 ) ? "-inf" : ssm1.str() )
-	 << setw(mainFieldWidth) << ( ( c->maxValue1 ==  99999999999.0 ) ? "+inf" : ssM1.str() )
+	 << setw(mainFieldWidth) << ( ( c->minValue1 == std::numeric_limits<float>::lowest() ) ? "-inf" : ssm1.str() )
+	 << setw(mainFieldWidth) << ( ( c->maxValue1 == std::numeric_limits<float>::max() ) ? "+inf" : ssM1.str() )
 	 << setw(mainFieldWidth) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssm2.str() )
 	 << setw(mainFieldWidth) << ( ( c->minValue2 > c->maxValue2 ) ? "-" : ssM2.str() )
 	 << setw(mainFieldWidth) << c->level_int
@@ -1287,11 +1291,11 @@ float baseClass::decodeCutValue(const string& s)
   float ret;
   if( s == "inf" || s == "+inf" )
     {
-       ret = 99999999999;
+       ret = std::numeric_limits<float>::max();
     }
   else if ( s == "-inf" || s == "-" )
     {
-       ret = -99999999999;
+       ret = std::numeric_limits<float>::lowest();
     }
   else
     {
