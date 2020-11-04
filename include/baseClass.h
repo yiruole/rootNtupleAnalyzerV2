@@ -260,9 +260,13 @@ class baseClass {
   vector<string> split(const string& s);
   float decodeCutValue(const string& s);
   bool skimWasMade_;
-  int getGlobalInfoNstart(const char* );
-  float getSumAMCNLOWeights(const char* );
-  float getSumTopPtWeights(const char* );
+  float getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
+  float getGlobalInfoNstart(const std::string& fileName);
+  float getSumAMCNLOWeights(const std::string& fileName);
+  float getSumTopPtWeights(const std::string& fileName);
+  float getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
+  std::vector<float> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch);
+  void saveLHEPdfSumw(const std::string& fileName);
   Long64_t NBeforeSkim_;
   float sumAMCNLOWeights_;
   float sumTopPtWeights_;
@@ -309,7 +313,10 @@ class baseClass {
   TH1F* eventcuts_; // number of events passing each cut
   TH1F* h_optimizer_; // optimization histogram
   TH1I* h_optimizer_entries_;
+
+  // Other stuff
   TH1F* h_weightSums_; // sums of various weights over all events
+  std::vector<std::shared_ptr<TH1F> > histsToSave_; // various histograms to save, like LHEPdfWeightSumHist
 
 };
 

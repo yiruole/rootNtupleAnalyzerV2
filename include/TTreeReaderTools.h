@@ -12,6 +12,7 @@ class TTreeReaderTools {
   public:
     TTreeReaderTools() = delete;
     TTreeReaderTools(std::shared_ptr<TTree> tree);
+    TTreeReaderTools(TTree* tree);
     template <typename T> T ReadValueBranch(const std::string& branchName);
     template <typename T> T ReadArrayBranch(const std::string& branchName, unsigned int idx);
     void LoadEntry(Long64_t entry);
@@ -36,6 +37,7 @@ class TTreeReaderTools {
     std::map<std::string, TTreeReaderValue<UChar_t>   > m_ttreeValueUCharReaders;
     std::map<std::string, TTreeReaderValue<Bool_t>    > m_ttreeValueBoolReaders;
 
+    std::map<std::string, TTreeReaderArray<Double_t> > m_ttreeArrayDoubleReaders;
     std::map<std::string, TTreeReaderArray<Float_t> > m_ttreeArrayFloatReaders;
     std::map<std::string, TTreeReaderArray<Int_t>   > m_ttreeArrayIntReaders;
     std::map<std::string, TTreeReaderArray<UChar_t> > m_ttreeArrayUCharReaders;

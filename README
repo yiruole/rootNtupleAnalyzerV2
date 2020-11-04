@@ -244,6 +244,7 @@ nEleFinal	      1		   +inf			-		-		0	11 -0.5 10.5
 pT1stEle              85           +inf                 -               -               1       100 0 1000        SAVE
 pT2ndEle	      30	   +inf			-	        -	        1	100 0 1000        SAVE
 invMass_ee	      0		   80			100	        +inf	        1	120 0 1200
+LHEPdfWeight	   		-inf	     +inf		-		-		1	16 -0.5 15.5	      SAVEARRAY
 
 (do not put anything for those variables that do not need to be saved, such as for  nEleFinaland invMass_ee)
 

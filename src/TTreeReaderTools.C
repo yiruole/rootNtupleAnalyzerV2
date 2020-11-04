@@ -9,6 +9,13 @@ TTreeReaderTools::TTreeReaderTools(std::shared_ptr<TTree> tree) :
     m_entries = m_reader->GetEntries(false);
 }
 
+TTreeReaderTools::TTreeReaderTools(TTree* tree) :
+  m_readerIsClean(true), m_entry(-1) {
+    m_tree.reset(tree);
+    m_reader = std::unique_ptr<TTreeReader>(new TTreeReader(m_tree.get()));
+    m_entries = m_reader->GetEntries(false);
+}
+
 void TTreeReaderTools::LoadEntry(Long64_t entry) {
   gotoEntry(entry);
 }
@@ -105,6 +112,9 @@ template <typename T> TTreeReaderArray<T>& TTreeReaderTools::ReadArrayBranch(con
   }
 }
 
+template <> TTreeReaderArray<Double_t>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName) {
+  return ReadArrayBranch<Double_t>(branchName, m_ttreeArrayDoubleReaders);
+}
 template <> TTreeReaderArray<Float_t>& TTreeReaderTools::ReadArrayBranch(const std::string& branchName) {
   return ReadArrayBranch<Float_t>(branchName, m_ttreeArrayFloatReaders);
 }
@@ -159,6 +169,7 @@ void TTreeReaderTools::remakeAllReaders() {
   remakeReader<std::map<std::string, TTreeReaderValue<UChar_t> > >(m_ttreeValueUCharReaders);
   remakeReader<std::map<std::string, TTreeReaderValue<Bool_t> > >(m_ttreeValueBoolReaders);
   // array readers
+  remakeReader<std::map<std::string, TTreeReaderArray<Double_t> > >(m_ttreeArrayDoubleReaders);
   remakeReader<std::map<std::string, TTreeReaderArray<Float_t> > >(m_ttreeArrayFloatReaders);
   remakeReader<std::map<std::string, TTreeReaderArray<Int_t> > >(m_ttreeArrayIntReaders);
   remakeReader<std::map<std::string, TTreeReaderArray<UChar_t> > >(m_ttreeArrayUCharReaders);
@@ -175,10 +186,12 @@ template Int_t TTreeReaderTools::ReadValueBranch<Int_t>(const std::string& branc
 template UChar_t TTreeReaderTools::ReadValueBranch<UChar_t>(const std::string& branchName);
 template Bool_t TTreeReaderTools::ReadValueBranch<Bool_t>(const std::string& branchName);
 //
+template TTreeReaderArray<Double_t>& TTreeReaderTools::ReadArrayBranch<Double_t>(const std::string& branchName);
 template TTreeReaderArray<Float_t>& TTreeReaderTools::ReadArrayBranch<Float_t>(const std::string& branchName);
 template TTreeReaderArray<Int_t>& TTreeReaderTools::ReadArrayBranch<Int_t>(const std::string& branchName);
 template TTreeReaderArray<UChar_t>& TTreeReaderTools::ReadArrayBranch<UChar_t>(const std::string& branchName);
 template TTreeReaderArray<Bool_t>& TTreeReaderTools::ReadArrayBranch<Bool_t>(const std::string& branchName);
+template Double_t TTreeReaderTools::ReadArrayBranch<Double_t>(const std::string& branchName, unsigned int idx);
 template Float_t TTreeReaderTools::ReadArrayBranch<Float_t>(const std::string& branchName, unsigned int idx);
 template Int_t TTreeReaderTools::ReadArrayBranch<Int_t>(const std::string& branchName, unsigned int idx);
 template UChar_t TTreeReaderTools::ReadArrayBranch<UChar_t>(const std::string& branchName, unsigned int idx);

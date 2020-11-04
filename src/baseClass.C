@@ -63,6 +63,8 @@ baseClass::~baseClass()
   checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
+  for(auto& hist : histsToSave_)
+    hist->Write();
   output_root_->Close();
   if(produceSkim_) skim_file_->Close();
   if(produceReducedSkim_) reduced_skim_file_->Close();
@@ -192,15 +194,16 @@ void baseClass::readInputList()
         name.insert(0,"root://eoscms//eos/cms");
       //STDOUT("Adding file: " << name);
       chain->Add(name.c_str());
-      NBeforeSkim = getGlobalInfoNstart(name.c_str());
+      NBeforeSkim = getGlobalInfoNstart(name);
       NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
       STDOUT("Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
-      tmpSumAMCNLOWeights = getSumAMCNLOWeights(name.c_str());
+      tmpSumAMCNLOWeights = getSumAMCNLOWeights(name);
       sumAMCNLOWeights_ += tmpSumAMCNLOWeights;
       STDOUT("amc@NLO weight sum (current,total): = "<<tmpSumAMCNLOWeights<<", "<<sumAMCNLOWeights_);
-      tmpSumTopPtWeights = getSumTopPtWeights(name.c_str());
+      tmpSumTopPtWeights = getSumTopPtWeights(name);
       sumTopPtWeights_ += tmpSumTopPtWeights;
-      STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
+      //STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
+      saveLHEPdfSumw(name);
     }
     tree_ = chain;
     STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
@@ -1304,14 +1307,14 @@ float baseClass::decodeCutValue(const string& s)
   return ret;
 }
 
-int baseClass::getGlobalInfoNstart(const char *pName)
+float baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin)
 {
-  int NBeforeSkim = 0;
-  STDOUT(pName)
-  TFile *f = TFile::Open(pName);
+  float NBeforeSkim = 0;
+
+  auto f = std::unique_ptr<TFile>(TFile::Open(fileName.c_str()));
   if(!f)
   {
-    STDOUT("File pointer for "<< pName << " came back null. Quitting");
+    STDOUT("File pointer for "<< fileName << " came back null. Quitting");
     exit(-1);
   }
   if(!f->IsOpen())
@@ -1319,72 +1322,113 @@ int baseClass::getGlobalInfoNstart(const char *pName)
     STDOUT("File didn't open! Quitting");
     exit(-1);
   }
-  string s1 = "LJFilter/EventCount/EventCounter";
-  string s2 = "LJFilterPAT/EventCount/EventCounter";
-  string s3 = "EventCounter";
-  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
-  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
-  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
-  if( !hCount1 && !hCount2 && !hCount3)
+
+  if(histName=="EventCounter")
+  {
+    string s1 = "LJFilter/EventCount/EventCounter";
+    string s2 = "LJFilterPAT/EventCount/EventCounter";
+    string s3 = "EventCounter";
+    auto hCount1 = f->Get<TH1F>(s1.c_str());
+    auto hCount2 = f->Get<TH1F>(s2.c_str());
+    auto hCount3 = f->Get<TH1F>(s3.c_str());
+    if(!hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
       return NBeforeSkim;
     }
-
-  if (hCount1) NBeforeSkim = (int)hCount1->GetBinContent(1);
-  else if (hCount2) NBeforeSkim = (int)hCount2->GetBinContent(1);
-  else NBeforeSkim = (int)hCount3->GetBinContent(1);
-
-//   STDOUT(pName<<"  "<< NBeforeSkim)
-  f->Close();
+    if (hCount1) NBeforeSkim = hCount1->GetBinContent(bin);
+    else if (hCount2) NBeforeSkim = hCount2->GetBinContent(bin);
+    else NBeforeSkim = hCount3->GetBinContent(bin);
+  }
+  else
+  {
+    auto hCount = f->Get<TH1F>(histName.c_str());
+    if(!hCount)
+    {
+      STDOUT("ERROR: Did not find specified hist named: '" << histName << "'. Cannot extract info. Quitting");
+      exit(-1);
+    }
+    NBeforeSkim = hCount->GetBinContent(bin);
+  }
 
   return NBeforeSkim;
 }
 
-float baseClass::getSumAMCNLOWeights(const char *pName)
+float baseClass::getGlobalInfoNstart(const std::string& fileName)
 {
-  float sumAMCNLOWeights = 0.0;
-  TFile *f = TFile::Open(pName);
-  if(!f)
-  {
-    STDOUT("File pointer for "<< pName << " came back null. Quitting");
-    exit(-1);
-  }
-  if(!f->IsOpen())
-  {
-    STDOUT("File didn't open! Quitting");
-    exit(-1);
-  }
-  string s1 = "LJFilter/EventCount/EventCounter";
-  string s2 = "LJFilterPAT/EventCount/EventCounter";
-  string s3 = "EventCounter";
-  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
-  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
-  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
-  if( !hCount1 && !hCount2 && !hCount3)
-    {
-      STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
-      skimWasMade_ = false;
-      return sumAMCNLOWeights;
-    }
-
-  if (hCount1) sumAMCNLOWeights = (float)hCount1->GetBinContent(3);
-  else if (hCount2) sumAMCNLOWeights = (float)hCount2->GetBinContent(3);
-  else sumAMCNLOWeights = (float)hCount3->GetBinContent(3);
-
-  f->Close();
-
-  return sumAMCNLOWeights;
+  STDOUT(fileName);
+  return getInfoFromHist(fileName, "EventCounter", 1);
 }
 
-float baseClass::getSumTopPtWeights(const char *pName)
+float baseClass::getSumAMCNLOWeights(const std::string& fileName)
 {
-  float sumTopPtWeights = 0.0;
-  TFile *f = TFile::Open(pName);
+  return getInfoFromHist(fileName, "EventCounter", 3);
+}
+
+float baseClass::getSumTopPtWeights(const std::string& fileName)
+{
+  return getInfoFromHist(fileName, "EventCounter", 4);
+}
+
+float baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::string& weightName, int index)
+{
+  if(index < 0)
+    return getSumArrayFromRunsTree(fName, weightName, false)[0];
+  else
+    return getSumArrayFromRunsTree(fName, weightName, true)[index];
+}
+
+std::vector<float> baseClass::getSumArrayFromRunsTree(const std::string& fName, const std::string& weightName, bool isArrayBranch)
+{
+  std::vector<float> sumWeightArray(1);
+
+  auto chain = std::shared_ptr<TChain>(new TChain("Runs"));
+  chain->Add(fName.c_str());
+  if(chain.get() == nullptr)
+  {
+    STDOUT("ERROR: Something went wrong. Could not find TTree 'Runs' in the inputfile '" << fName << "'. Quit here.");
+    exit(-2);
+  }
+
+  auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
+  if(readerTools->GetTree()->GetBranch(weightName.c_str()))
+  {
+    for(Long64_t entry = 0; entry < chain->GetEntries(); ++entry)
+    {
+      readerTools->LoadEntry(entry);
+      if(isArrayBranch)
+      {
+        unsigned int arraySize = readerTools->ReadArrayBranch<Double_t>(weightName).GetSize();
+        if(arraySize > 0 && arraySize != sumWeightArray.size())
+        {
+          if(entry == 0)
+            sumWeightArray.resize(arraySize);
+          else
+          {
+            STDOUT("ERROR: array '" << weightName << "' changed size between runs. The indices of the array are inconsistent. Refusing to proceed.");
+            exit(-2);
+          }
+        }
+        for(unsigned int index = 0; index < arraySize; ++index)
+          sumWeightArray[index]+=readerTools->ReadArrayBranch<Double_t>(weightName, index);
+      }
+      else
+        sumWeightArray[0]+=readerTools->ReadValueBranch<Double_t>(weightName);
+    }
+  }
+
+  return sumWeightArray;
+}
+
+void baseClass::saveLHEPdfSumw(const std::string& fileName)
+{
+  STDOUT("saveLHEPdfSumw");
+  std::vector<float> lhePdfSumwArr;
+  auto f = std::unique_ptr<TFile>(TFile::Open(fileName.c_str()));
   if(!f)
   {
-    STDOUT("File pointer for "<< pName << " came back null. Quitting");
+    STDOUT("File pointer for "<< fileName << " came back null. Quitting");
     exit(-1);
   }
   if(!f->IsOpen())
@@ -1392,26 +1436,36 @@ float baseClass::getSumTopPtWeights(const char *pName)
     STDOUT("File didn't open! Quitting");
     exit(-1);
   }
-  string s1 = "LJFilter/EventCount/EventCounter";
-  string s2 = "LJFilterPAT/EventCount/EventCounter";
-  string s3 = "EventCounter";
-  TH1I* hCount1 = (TH1I*)f->Get(s1.c_str());
-  TH1I* hCount2 = (TH1I*)f->Get(s2.c_str());
-  TH1I* hCount3 = (TH1I*)f->Get(s3.c_str());
-  if( !hCount1 && !hCount2 && !hCount3)
-    {
-      STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
-      skimWasMade_ = false;
-      return sumTopPtWeights;
-    }
+  auto histFromFile = f->Get<TH1F>("LHEPdfSumw");
+  if(histFromFile)
+  {
+    lhePdfSumwArr.resize(histFromFile->GetNbinsX());
+    for(unsigned int bin = 1; bin < histFromFile->GetNbinsX(); ++bin)
+      lhePdfSumwArr[bin-1] = histFromFile->GetBinContent(bin);
+  }
+  else
+  {
+    lhePdfSumwArr = getSumArrayFromRunsTree(fileName, "LHEPdfSumw", true);
+  }
 
-  if (hCount1) sumTopPtWeights = (float)hCount1->GetBinContent(4);
-  else if (hCount2) sumTopPtWeights = (float)hCount2->GetBinContent(4);
-  else sumTopPtWeights = (float)hCount3->GetBinContent(4);
-
-  f->Close();
-
-  return sumTopPtWeights;
+  std::shared_ptr<TH1F> lhePdfSumwHist = nullptr;
+  for(auto& hist : histsToSave_)
+  {
+    if(std::string(hist->GetName()) == "LHEPdfSumw")
+      lhePdfSumwHist = hist;
+  }
+  if(!lhePdfSumwHist)
+  {
+    gDirectory->cd();
+    histsToSave_.push_back(std::shared_ptr<TH1F>(new TH1F("LHEPdfSumw", "LHEPdfSumw", lhePdfSumwArr.size(), 0, lhePdfSumwArr.size())));
+    lhePdfSumwHist = histsToSave_.back();
+    lhePdfSumwHist->SetDirectory(0);
+  }
+  for(unsigned int index = 0; index < lhePdfSumwArr.size(); ++index) {
+    float totalToFill = lhePdfSumwArr[index]+lhePdfSumwHist->GetBinContent(index+1);
+    checkOverflow(lhePdfSumwHist.get(), totalToFill);
+    lhePdfSumwHist->SetBinContent(index+1, totalToFill);
+  }
 }
 
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
