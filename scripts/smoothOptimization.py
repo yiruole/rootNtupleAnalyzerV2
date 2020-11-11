@@ -23,8 +23,9 @@ gROOT.SetBatch(True)
 # XXX must modify this by hand
 isEEJJ = True
 if isEEJJ:
-    # maxMassPointToUse = 1200  # 2016/2017 eejj, last point where nB > 1
-    maxMassPointToUse = 1150  # 2018 eejj, last point where nB > 1
+    # maxMassPointToUse = 1200  # 2016 eejj, last point where nB > 1
+    maxMassPointToUse = 1100  # 2017 eejj, last point where nB > 1
+    # maxMassPointToUse = 1150  # 2018 eejj, last point where nB > 1
     optimizationFileName = (
         # "$LQANA/versionsOfOptimization/2016/eejj_10jul2020/optimization.root"
         # "$LQANA/versionsOfOptimization/2017/eejj_10jul/optimization.root"
@@ -32,7 +33,10 @@ if isEEJJ:
         # nanoV7
         # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_14sep/optimization.root"
         # "$LQANA/versionsOfOptimization/nanoV7/2017/eejj_14sep/optimization.root"
-        "$LQANA/versionsOfOptimization/nanoV7/2018/eejj_14sep/optimization.root"
+        # "$LQANA/versionsOfOptimization/nanoV7/2018/eejj_14sep/optimization.root"
+        # LQToDEle
+        # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_16oct/optimization.root"
+        "$LQANA/versionsOfOptimization/nanoV7/2017/eejj_22oct/optimization.root"
     )
 else:
     # maxMassPointToUse = 900 # enujj
@@ -80,6 +84,10 @@ for key in gDirectory.GetListOfKeys():
                     for x in xValues
                 ]
                 yValues = graph.GetY()
+                graphYvalues = [5 * round(y / 5) for y in yValues]
+                print "funcYvalues=",funcYvalues
+                print "funcOrigValues=",[fitFunction.Eval(x) for x in xValues]
+                print "xValues=",xValues
                 t = PrettyTable([str(xVal) for xVal in xValues])
                 t.float_format = "4.3"
                 # t.align['VarName'] = 'l'
@@ -87,15 +95,15 @@ for key in gDirectory.GetListOfKeys():
                 t.add_row([str(y) for y in funcYvalues])
                 print t
                 print
-                # make sure no y values are less than yMin
-                yMin = min(yValues)
+                # make sure no y values come out less than any raw cut threshold
+                yMin = min(graphYvalues)
                 # make sure y values are monotonically increasing
                 for idx, yVal in enumerate(funcYvalues):
                     if yVal < yMin:
-                        funcYvalues[idx] = yMin
                         print "INFO: adjusting yVal=", yVal, " at", xValues[idx], "from", funcYvalues[
                             idx
                         ], "to", yMin
+                        funcYvalues[idx] = yMin
                     if idx == 0:
                         continue
                     if yVal < funcYvalues[idx - 1]:
