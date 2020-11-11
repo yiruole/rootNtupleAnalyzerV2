@@ -103,21 +103,29 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         sumOfWeightsHist = tfile.Get("SumOfWeights")
         sumWeights = sumOfWeightsHist.GetBinContent(1)
         # sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
+        lhePdfWeightsHist = tfile.Get("LHEPdfSumw")
+        lhePdfWeightSumw = lhePdfWeightsHist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
         tfile.Close()
 
         # removed 2018 March 2
+        # XXX: This is incorrect anyway.
         # if re.search('TT_',dataset_fromInputList):
         #  avgTopPtWeight = sumTopPtWeights / Ntot
         #  print '\tapplying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
         #  xsection_X_intLumi/=avgTopPtWeight
 
+        if "2016" in inputRootFile:
+            if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
+                print "\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights)
+                sumWeights = lhePdfWeightSumw
+
         # now calculate the actual weight
-        #weight = 1.0
-        #if Ntot == 0:
-        #    weight = float(0)
-        #else:
-        #    print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
-        #    weight = xsection_X_intLumi / sumWeights
+        # weight = 1.0
+        # if Ntot == 0:
+        #     weight = float(0)
+        # else:
+        #     print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
+        #     weight = xsection_X_intLumi / sumWeights
         print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
         weight = xsection_X_intLumi / sumWeights
         plotWeight = weight / 1000.0
@@ -483,7 +491,7 @@ for sample, pieceList in dictSamples.iteritems():
             Ntot, xsection_val, options.intLumi, inputRootFile
         )
         # print "xsection: " + xsection_val,
-        print "\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi) + "/",
+        print "\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/",
         sys.stdout.flush()
         print str(sumWeights)
         sys.stdout.flush()
