@@ -9,6 +9,7 @@ FLAGS += -std=c++1y
 FLAGS += -DSAVE_ALL_HISTOGRAMS
 FLAGS += -DUSE_FULL_NTUPLE
 FLAGS += -O2
+FLAGS += ${USER_CXXFLAGS}
 ROOTLIBS := $(shell $(ROOTCONFIG) --glibs --cflags)
 ROOTINC= -I$(shell $(ROOTCONFIG) --incdir)
 INC= -I.. -I. -I./include  -I${CLHEP}/include ${ROOTINC}
