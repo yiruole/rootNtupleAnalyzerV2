@@ -260,18 +260,18 @@ class baseClass {
   vector<string> split(const string& s);
   float decodeCutValue(const string& s);
   bool skimWasMade_;
-  float getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
-  float getGlobalInfoNstart(const std::string& fileName);
-  float getSumAMCNLOWeights(const std::string& fileName);
-  float getSumTopPtWeights(const std::string& fileName);
-  float getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
-  std::vector<float> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch);
+  double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
+  double getGlobalInfoNstart(const std::string& fileName);
+  double getSumAMCNLOWeights(const std::string& fileName);
+  double getSumTopPtWeights(const std::string& fileName);
+  double getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
+  std::vector<double> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch);
   void saveLHEPdfSumw(const std::string& fileName);
   Long64_t NBeforeSkim_;
-  float sumAMCNLOWeights_;
+  double sumAMCNLOWeights_;
   float sumTopPtWeights_;
 
-  void checkOverflow(const TH1*, const float);
+  template <typename T> void checkOverflow(const TH1*, const T);
 
   // JSON file stuff
   JSONParser jsonParser_;
@@ -316,7 +316,7 @@ class baseClass {
 
   // Other stuff
   TH1F* h_weightSums_; // sums of various weights over all events
-  std::vector<std::shared_ptr<TH1F> > histsToSave_; // various histograms to save, like LHEPdfWeightSumHist
+  std::vector<std::shared_ptr<TH1> > histsToSave_; // various histograms to save, like LHEPdfWeightSumHist
 
 };
 

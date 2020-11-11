@@ -66,8 +66,18 @@ baseClass::~baseClass()
   for(auto& hist : histsToSave_)
     hist->Write();
   output_root_->Close();
-  if(produceSkim_) skim_file_->Close();
-  if(produceReducedSkim_) reduced_skim_file_->Close();
+  if(produceSkim_)
+  {
+    skim_file_->cd("savedHists");
+    h_weightSums_->Write();
+    skim_file_->Close();
+  }
+  if(produceReducedSkim_)
+  {
+    reduced_skim_file_->cd("savedHists");
+    h_weightSums_->Write();
+    reduced_skim_file_->Close();
+  }
 }
 
 void baseClass::init()
@@ -1307,9 +1317,9 @@ float baseClass::decodeCutValue(const string& s)
   return ret;
 }
 
-float baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin)
+double baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin)
 {
-  float NBeforeSkim = 0;
+  double NBeforeSkim = 0;
 
   auto f = std::unique_ptr<TFile>(TFile::Open(fileName.c_str()));
   if(!f)
@@ -1326,7 +1336,7 @@ float baseClass::getInfoFromHist(const std::string& fileName, const std::string&
   if(histName=="EventCounter")
   {
     string s1 = "LJFilter/EventCount/EventCounter";
-    string s2 = "LJFilterPAT/EventCount/EventCounter";
+    string s2 = "savedHists/EventCounter";
     string s3 = "EventCounter";
     auto hCount1 = f->Get<TH1F>(s1.c_str());
     auto hCount2 = f->Get<TH1F>(s2.c_str());
@@ -1355,23 +1365,23 @@ float baseClass::getInfoFromHist(const std::string& fileName, const std::string&
   return NBeforeSkim;
 }
 
-float baseClass::getGlobalInfoNstart(const std::string& fileName)
+double baseClass::getGlobalInfoNstart(const std::string& fileName)
 {
   STDOUT(fileName);
   return getInfoFromHist(fileName, "EventCounter", 1);
 }
 
-float baseClass::getSumAMCNLOWeights(const std::string& fileName)
+double baseClass::getSumAMCNLOWeights(const std::string& fileName)
 {
   return getInfoFromHist(fileName, "EventCounter", 3);
 }
 
-float baseClass::getSumTopPtWeights(const std::string& fileName)
+double baseClass::getSumTopPtWeights(const std::string& fileName)
 {
   return getInfoFromHist(fileName, "EventCounter", 4);
 }
 
-float baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::string& weightName, int index)
+double baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::string& weightName, int index)
 {
   if(index < 0)
     return getSumArrayFromRunsTree(fName, weightName, false)[0];
@@ -1379,20 +1389,20 @@ float baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::s
     return getSumArrayFromRunsTree(fName, weightName, true)[index];
 }
 
-std::vector<float> baseClass::getSumArrayFromRunsTree(const std::string& fName, const std::string& weightName, bool isArrayBranch)
+std::vector<double> baseClass::getSumArrayFromRunsTree(const std::string& fName, const std::string& weightName, bool isArrayBranch)
 {
-  std::vector<float> sumWeightArray(1);
+  std::vector<double> sumWeightArray(1);
 
   auto chain = std::shared_ptr<TChain>(new TChain("Runs"));
-  chain->Add(fName.c_str());
-  if(chain.get() == nullptr)
+  int retVal = chain->AddFile(fName.c_str(), -1);
+  if(!retVal)
   {
     STDOUT("ERROR: Something went wrong. Could not find TTree 'Runs' in the inputfile '" << fName << "'. Quit here.");
     exit(-2);
   }
 
   auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
-  if(readerTools->GetTree()->GetBranch(weightName.c_str()))
+  if(readerTools->GetTree()->GetBranch(weightName.c_str())) // data may not have the branch we want
   {
     for(Long64_t entry = 0; entry < chain->GetEntries(); ++entry)
     {
@@ -1410,8 +1420,12 @@ std::vector<float> baseClass::getSumArrayFromRunsTree(const std::string& fName, 
             exit(-2);
           }
         }
-        for(unsigned int index = 0; index < arraySize; ++index)
-          sumWeightArray[index]+=readerTools->ReadArrayBranch<Double_t>(weightName, index);
+        for(unsigned int index = 0; index < arraySize; ++index) {
+          double toAdd = readerTools->ReadArrayBranch<Double_t>(weightName, index);
+          if(weightName == "LHEPdfSumw")
+            toAdd*=readerTools->ReadValueBranch<Double_t>("genEventSumw");
+          sumWeightArray[index]+=toAdd;
+        }
       }
       else
         sumWeightArray[0]+=readerTools->ReadValueBranch<Double_t>(weightName);
@@ -1424,7 +1438,7 @@ std::vector<float> baseClass::getSumArrayFromRunsTree(const std::string& fName, 
 void baseClass::saveLHEPdfSumw(const std::string& fileName)
 {
   STDOUT("saveLHEPdfSumw");
-  std::vector<float> lhePdfSumwArr;
+  std::vector<double> lhePdfSumwArr;
   auto f = std::unique_ptr<TFile>(TFile::Open(fileName.c_str()));
   if(!f)
   {
@@ -1436,7 +1450,8 @@ void baseClass::saveLHEPdfSumw(const std::string& fileName)
     STDOUT("File didn't open! Quitting");
     exit(-1);
   }
-  auto histFromFile = f->Get<TH1F>("LHEPdfSumw");
+  // we have to have the histogram or the Runs tree available
+  auto histFromFile = f->Get<TH1D>("savedHists/LHEPdfSumw");
   if(histFromFile)
   {
     lhePdfSumwArr.resize(histFromFile->GetNbinsX());
@@ -1444,25 +1459,23 @@ void baseClass::saveLHEPdfSumw(const std::string& fileName)
       lhePdfSumwArr[bin-1] = histFromFile->GetBinContent(bin);
   }
   else
-  {
     lhePdfSumwArr = getSumArrayFromRunsTree(fileName, "LHEPdfSumw", true);
-  }
 
-  std::shared_ptr<TH1F> lhePdfSumwHist = nullptr;
+  std::shared_ptr<TH1D> lhePdfSumwHist = nullptr;
   for(auto& hist : histsToSave_)
   {
     if(std::string(hist->GetName()) == "LHEPdfSumw")
-      lhePdfSumwHist = hist;
+      lhePdfSumwHist = dynamic_pointer_cast<TH1D>(hist);
   }
   if(!lhePdfSumwHist)
   {
     gDirectory->cd();
-    histsToSave_.push_back(std::shared_ptr<TH1F>(new TH1F("LHEPdfSumw", "LHEPdfSumw", lhePdfSumwArr.size(), 0, lhePdfSumwArr.size())));
-    lhePdfSumwHist = histsToSave_.back();
-    lhePdfSumwHist->SetDirectory(0);
+    histsToSave_.push_back(std::shared_ptr<TH1D>(new TH1D("LHEPdfSumw", "LHEPdfSumw", lhePdfSumwArr.size(), 0, lhePdfSumwArr.size())));
+    lhePdfSumwHist = dynamic_pointer_cast<TH1D>(histsToSave_.back());
+    lhePdfSumwHist->SetDirectory(0); // very important
   }
   for(unsigned int index = 0; index < lhePdfSumwArr.size(); ++index) {
-    float totalToFill = lhePdfSumwArr[index]+lhePdfSumwHist->GetBinContent(index+1);
+    double totalToFill = lhePdfSumwArr[index]+lhePdfSumwHist->GetBinContent(index+1);
     checkOverflow(lhePdfSumwHist.get(), totalToFill);
     lhePdfSumwHist->SetBinContent(index+1, totalToFill);
   }
@@ -1760,9 +1773,8 @@ bool baseClass::writeSkimTree()
   if(!produceSkim_) return ret;
   
   skim_file_->cd();
-  TDirectory *dir1 = skim_file_->mkdir("LJFilter");
-  TDirectory *dir2 = dir1->mkdir("EventCount");
-  skim_file_->cd("LJFilter/EventCount");
+  TDirectory *dir1 = skim_file_->mkdir("savedHists");
+  skim_file_->cd("savedHists");
   Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   //FIXME topPtWeight
   checkOverflow(hCount_,nEntTot);
@@ -1774,6 +1786,8 @@ bool baseClass::writeSkimTree()
   hCount_->SetBinContent(3,sumAMCNLOWeights_);
   hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
+  for(auto& hist : histsToSave_)
+    hist->Write();
 
   if ( GetTreeEntries() == 0 ){
     skim_file_->cd();
@@ -1804,9 +1818,8 @@ bool baseClass::writeReducedSkimTree()
   reduced_skim_tree_->Write();
 
   reduced_skim_file_->cd();
-  TDirectory *dir1 = reduced_skim_file_->mkdir("LJFilter");
-  TDirectory *dir2 = dir1->mkdir("EventCount");
-  reduced_skim_file_->cd("LJFilter/EventCount");
+  TDirectory *dir1 = reduced_skim_file_->mkdir("savedHists");
+  reduced_skim_file_->cd("savedHists");
   Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
   //FIXME topPtWeight
   checkOverflow(hReducedCount_,nEntTot);
@@ -1818,6 +1831,8 @@ bool baseClass::writeReducedSkimTree()
   hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
   hReducedCount_->SetBinContent(4,sumTopPtWeights_);
   hReducedCount_->Write();
+  for(auto& hist : histsToSave_)
+    hist->Write();
 
   // Any failure mode to implement?
   return ret;
@@ -2001,7 +2016,7 @@ bool baseClass::isData() {
   return true;
 }
 
-void baseClass::checkOverflow(const TH1* hist, const float binContent) {
+template <typename T> void baseClass::checkOverflow(const TH1* hist, const T binContent) {
   std::ostringstream stringStream;
   if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
     float limit = std::numeric_limits<float>::max();
@@ -2019,10 +2034,17 @@ void baseClass::checkOverflow(const TH1* hist, const float binContent) {
       exit(-3);
     }
   }
+  else if(std::string(hist->ClassName()).find("TH1D") != std::string::npos) {
+    double limit = std::numeric_limits<double>::max();
+    if(binContent>limit) {
+      stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1D bin in histo: " << hist->GetName() << "! Quitting.";
+      STDOUT(stringStream.str());
+      exit(-3);
+    }
+  }
   else {
     stringStream << "WARNING: Could not check bin content of hist:" << hist->GetName()
-      << " for overflow as it is not a TH1F or TH1I. Please implement this check.";
+      << " for overflow as it is not a TH1F, TH1I, or TH1D. Please implement this check.";
     STDOUT(stringStream.str());
   }
 }
-
