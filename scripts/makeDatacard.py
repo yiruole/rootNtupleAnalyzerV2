@@ -17,7 +17,7 @@ def GetFullSignalName(signal_name, mass_point):
     if "BetaHalf" in signal_name:
         signalNameForFile = "LQToUE_ENuJJFilter_M-" + mass_point + "_BetaHalf"
     elif "LQ" in signal_name:
-        signalNameForFile = "LQToUE_M-" + mass_point + "_BetaOne"
+        signalNameForFile = signalNameTemplate.format(mass_point)
     elif "Stop" in signal_name:
         ctau = signal_name[signal_name.find("CTau") + 4:]
         # print 'found ctau=',ctau,'in signal_name:',signal_name,'mass point:',mass_point
@@ -768,15 +768,17 @@ blinded = True
 doEEJJ = True
 doRPV = False  # to do RPV, set doEEJJ and doRPV to True
 forceGmNNormBkgStatUncert = False
+#signalNameTemplate = "LQToUE_M-{}_BetaOne"
+signalNameTemplate = "LQToDEle_M-{}_pair"
 
 if doEEJJ:
     sampleListForMerging = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj.txt"
-        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj_2017.txt"
+        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj.txt"
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj_2017.txt"
     )
     sampleListForMergingQCD = (
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
-        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
+        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
+        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
     )
     # SIC 6 Jul 2020 remove
     # sampleListForMergingTTBar = (
@@ -787,29 +789,38 @@ if doEEJJ:
         os.environ["LQANA"]
         # + "/config/oldInputLists/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
         # nanoV7
-        + "/config/nanoV7_2016_pskEEJJ_3sep2020/inputListAllCurrent.txt"
-        # + "/config/nanoV7_2017_pskEEJJ_3sep2020/inputListAllCurrent.txt"
+        # + "/config/nanoV7_2016_pskEEJJ_3sep2020/inputListAllCurrent.txt"
+        # + "/config/nanoV7_2017_pskEEJJ_3sep2020_comb/inputListAllCurrent.txt"
+        #
+        # + "/config/nanoV7_2016_pskEEJJ_16oct2020_comb/inputListAllCurrent.txt"
+        + "/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
     )
     qcdFilePath = (
         os.environ["LQDATA"]
         # + "/nanoV6/2016/analysis/qcdYield_optFinalSels_13jul2020/output_cutTable_lq_eejj_QCD/"
         # nanoV7
-        + "/nanoV7/2016/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
-        # + "/nanoV7/2017/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+        # + "/nanoV7/2016/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+        # + "/nanoV7/2017/analysis/qcdYield_eejj_8oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+        #
+        # + "/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+        + "/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
     )
     filePath = (
         os.environ["LQDATA"]
         # + "/nanoV6/2016/analysis/prefire_optFinalSels_13jul2020/output_cutTable_lq_eejj/"
         # nanoV7
-        + "/nanoV7/2016/analysis/eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
-        # + "/nanoV7/2017/analysis/prefire_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
+        # + "/nanoV7/2016/analysis/eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
+        # + "/nanoV7/2017/analysis/prefire_eejj_6oct2020_optFinalSels//output_cutTable_lq_eejj/"
+        #
+        # + "/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
+        + "/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj/"
     )
     xsection = (
         os.environ["LQANA"]
         # + "/versionsOfAnalysis/2016/eejj/jun4/unscaled/extendTTbarRange/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-        # nanov&
-        + "/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-        # + "/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+        # nanov7
+        # + "/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+        + "/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
     )
     # ttbarFilePath = (
     #     os.environ["LQDATA"]
@@ -904,8 +915,11 @@ if doRPV:
 else:
     # LQ case
     mass_points = [
-        str(i) for i in range(200, 2050, 50)
-    ]  # go from 200-2000 in 50 GeV steps
+        str(i) for i in range(300, 3100, 100)
+    ]  # go from 300-2000 in 100 GeV steps
+    # mass_points.extend(["3500", "4000"])
+    # mass_points.remove("2500")  # FIXME 2016
+    mass_points.remove("3000")  # FIXME 2017
 
 if doEEJJ:
     if doRPV:
@@ -919,6 +933,7 @@ if doEEJJ:
         # put in some more signals that don't fit the general pattern
         # signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
     else:
+        # TODO FIXME: use the signal name template signalNameTemplate
         signal_names = ["LQ_M[masspoint]"]
     systematicsNamesBackground = [
         # "Trigger",
