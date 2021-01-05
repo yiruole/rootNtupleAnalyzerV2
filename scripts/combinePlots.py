@@ -28,6 +28,8 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
                 htemp.GetYaxis().GetBinLowEdge(1),
                 htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()),
             )
+            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
+            htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
             # continue
         elif "TH1" in htemp.ClassName():
             dictFinalHistoAtSample[h] = TH1F()
@@ -37,6 +39,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
                 htemp.GetXaxis().GetXmin(),
                 htemp.GetXaxis().GetXmax(),
             )
+            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
         elif "TH3" in htemp.ClassName():
             dictFinalHistoAtSample[h] = TH3F()
             dictFinalHistoAtSample[h].SetName("histo3D__" + sample + "__" + histoName)
@@ -51,6 +54,9 @@ def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
                 htemp.GetZaxis().GetBinLowEdge(1),
                 htemp.GetZaxis().GetBinUpEdge(htemp.GetNbinsZ()),
             )
+            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
+            htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
+            htemp.GetZaxis().Copy(dictFinalHistoAtSample[h].GetZaxis())
         else:
             # print 'not combining classtype of',htemp.ClassName()
             return
