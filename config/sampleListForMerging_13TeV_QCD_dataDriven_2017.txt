@@ -1,0 +1,7 @@
+QCDFakes_SinglePhoton_2017B      /SinglePhoton/Run2017B-02Apr2020-v1/NANOAOD 
+QCDFakes_SinglePhoton_2017C      /SinglePhoton/Run2017C-02Apr2020-v1/NANOAOD 
+QCDFakes_SinglePhoton_2017D      /SinglePhoton/Run2017D-02Apr2020-v1/NANOAOD 
+QCDFakes_SinglePhoton_2017E      /SinglePhoton/Run2017E-02Apr2020-v1/NANOAOD 
+QCDFakes_SinglePhoton_2017F      /SinglePhoton/Run2017F-02Apr2020-v1/NANOAOD 
+QCDFakes_SinglePhoton_2017_all    QCDFakes_SinglePhoton_2017B  QCDFakes_SinglePhoton_2017C  QCDFakes_SinglePhoton_2017D  QCDFakes_SinglePhoton_2017E  QCDFakes_SinglePhoton_2017F
+QCDFakes_DATA    QCDFakes_SinglePhoton_2017_all

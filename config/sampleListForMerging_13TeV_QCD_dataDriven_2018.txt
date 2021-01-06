@@ -1,0 +1,6 @@
+QCDFakes_EGamma_2018D   /EGamma/Run2018D-02Apr2020-v1/NANOAOD 
+QCDFakes_EGamma_2018C   /EGamma/Run2018C-02Apr2020-v1/NANOAOD 
+QCDFakes_EGamma_2018B   /EGamma/Run2018B-02Apr2020-v1/NANOAOD 
+QCDFakes_EGamma_2018A   /EGamma/Run2018A-02Apr2020-v1/NANOAOD 
+QCDFakes_EGamma_2018_all    QCDFakes_EGamma_2018A  QCDFakes_EGamma_2018B  QCDFakes_EGamma_2018C  QCDFakes_EGamma_2018D
+QCDFakes_DATA    QCDFakes_EGamma_2018_all

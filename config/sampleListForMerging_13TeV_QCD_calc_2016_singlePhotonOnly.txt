@@ -1,0 +1,9 @@
+# NanoAOD data
+QCDFakes_SinglePhoton_2016B    /SinglePhoton/Run2016B_ver2-Nano25Oct2019_ver2-v1/NANOAOD
+QCDFakes_SinglePhoton_2016C    /SinglePhoton/Run2016C-Nano25Oct2019-v1/NANOAOD
+QCDFakes_SinglePhoton_2016D    /SinglePhoton/Run2016D-Nano25Oct2019-v1/NANOAOD
+QCDFakes_SinglePhoton_2016E    /SinglePhoton/Run2016E-Nano25Oct2019-v1/NANOAOD
+QCDFakes_SinglePhoton_2016F    /SinglePhoton/Run2016F-Nano25Oct2019-v1/NANOAOD
+QCDFakes_SinglePhoton_2016G    /SinglePhoton/Run2016G-Nano25Oct2019-v1/NANOAOD
+QCDFakes_SinglePhoton_2016H    /SinglePhoton/Run2016H-Nano25Oct2019-v1/NANOAOD
+QCDFakes_DATA    QCDFakes_SinglePhoton_2016B  QCDFakes_SinglePhoton_2016C  QCDFakes_SinglePhoton_2016D  QCDFakes_SinglePhoton_2016E  QCDFakes_SinglePhoton_2016F  QCDFakes_SinglePhoton_2016G  QCDFakes_SinglePhoton_2016H
