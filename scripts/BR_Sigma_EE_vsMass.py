@@ -154,7 +154,7 @@ def BR_Sigma_EE_vsMass():
     xsTh_vs_m_log = TGraph(nTH, numpy.array(mTh, dtype="f"), numpy.array(xsTh_logY, dtype="f"))
     xsData_vs_m_expected_log = TGraph(massPoints, numpy.array(mData, dtype="f"), numpy.array(xsUp_expected_logY, dtype="f"))
 
-    xsTh_vs_m_tgraph = TGraph(221, numpy.array(mTh, dtype="f"), numpy.array(xsTh, dtype="f"))
+    # xsTh_vs_m_tgraph = TGraph(221, numpy.array(mTh, dtype="f"), numpy.array(xsTh, dtype="f"))
 
     obslim = 0.0
     exlim = 0.0
