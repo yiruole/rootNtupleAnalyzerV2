@@ -1,7 +1,8 @@
 # ignore all .o
 *.o
 *.so
-*.txt
+#*.txt
+commandsToRunOnMoreCutFiles*.txt
 *.png
 *.root
 *.list
