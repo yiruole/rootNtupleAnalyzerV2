@@ -12,8 +12,11 @@ PFJet::PFJet (Collection& c, unsigned int i, short j):
 {}
                                      
 float PFJet::Energy                     () { return -1.0; }
-//FIXME
-float PFJet::JECUnc		                  () { return -1.0; }
+
+float PFJet::PtJESTotalUp   () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jesTotalUp" ,m_raw_index); }
+float PFJet::PtJESTotalDown () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jesTotalDown" ,m_raw_index); }
+float PFJet::PtJERUp   () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jerUp" ,m_raw_index); }
+float PFJet::PtJERDown () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jerDown" ,m_raw_index); }
                                      
 float PFJet::NeutralHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_neHEF" ,m_raw_index); } 
 float PFJet::NeutralEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_neEmEF",m_raw_index); } 
@@ -32,6 +35,8 @@ float PFJet::DeepCSVBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t
 float PFJet::DeepCSVBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepcsv_M",m_raw_index); }
 float PFJet::DeepJetBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepFlavB",m_raw_index); }
 float PFJet::DeepJetBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L",m_raw_index); }
+float PFJet::DeepJetBTagSFLooseUp() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_up",m_raw_index); }
+float PFJet::DeepJetBTagSFLooseDown() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_down",m_raw_index); }
 float PFJet::DeepJetBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_M",m_raw_index); }
 
 // Energy resolution scale factors
@@ -75,7 +80,7 @@ float PFJet::EnergyResScaleError  (){
 
 // JES uncertainties already in the ntuple
 float PFJet::EnergyScaleFactor (){ 
-  return JECUnc();
+  return -1.0;
 }
 
 float PFJet::EnergyRes(){

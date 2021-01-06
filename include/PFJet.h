@@ -13,10 +13,14 @@ class PFJet : public Object {
   // Kinematic variables
   
   float Energy  ();
-  float JECUnc  ();
   
-  // Energy resolution scale factors
+  // JER/JES
+  float PtJESTotalUp   ();
+  float PtJESTotalDown ();
+  float PtJERUp   ();
+  float PtJERDown ();
 
+  // Energy resolution scale factors
   float EnergyRes            ();
   float EnergyResScaleFactor ();
   float EnergyResScaleError  ();
@@ -47,6 +51,8 @@ class PFJet : public Object {
   float DeepCSVBTagSFMedium();
   float DeepJetBTag();
   float DeepJetBTagSFLoose();
+  float DeepJetBTagSFLooseUp();
+  float DeepJetBTagSFLooseDown();
   float DeepJetBTagSFMedium();
   
  private:
