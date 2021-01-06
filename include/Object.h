@@ -93,6 +93,8 @@ class Object {
       return match;
     }
 
+  bool operator==(const Object& rhs) const { return this->m_raw_index == rhs.m_raw_index; }
+
  protected:
 
   Collection * m_collection;

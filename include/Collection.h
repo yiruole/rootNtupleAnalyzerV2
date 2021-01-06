@@ -9,8 +9,29 @@
 #include <typeinfo>
 #include <TRandom3.h>
 #include <TLorentzVector.h>
+
 #include "IDTypes.h"
 #include "analysisClass.h"
+
+template<class Object1>
+  void examineVec ( std::vector<Object1> objVec, const char * name, ID id = NULL_ID, bool verbose = false ){
+  int n_constituents = objVec.size();
+  std::cout << "N(" << name << ") = " << n_constituents << std::endl;
+  for (int i = 0; i < n_constituents; ++i ){ 
+    Object1 constituent = objVec.at(i);
+    std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent << std::flush;
+    if      ( id == NULL_ID  ) std::cout << std::endl;
+    else {
+      if ( verbose        ) { 
+        constituent.PassUserID ( id, verbose );
+      }
+      else {
+        std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
+      }
+    }
+  }
+}
+
 
 class Collection;
 using CollectionPtr = std::shared_ptr<Collection>;
@@ -274,22 +295,21 @@ class Collection {
   //------------------------------------------------------------------------------------------
 
   template <class Object1, class Object2>
-    void MatchAndSmearEnergy ( const CollectionPtr matching_collection, double max_dr, TRandom3 * engine, TLorentzVector & v_delta_met ){
+    std::vector<Object1> MatchAndSmearEnergy ( const CollectionPtr matching_collection, double max_dr, TRandom3 * engine, TLorentzVector & v_delta_met, bool verbose=false){
     unsigned short this_collection_size = GetSize();
+    std::vector<Object1> smearedObjVec;
+    smearedObjVec.reserve(this_collection_size);
     TLorentzVector v_old, v_new, v_delta;
     double smearFactor = 1;
-    std::vector<short> indices_of_zero_pt_constituents;
-    for (unsigned short i = 0; i < this_collection_size ; ++i) {    
+    for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent = GetConstituent<Object1>(i);
+      if(verbose)
+        std::cout << "MatchAndSmearEnergy(): Obj " << this_collection_constituent.Name() << " constituent #" << i << "/" << this_collection_size << ":" << std::endl;
       Object2 matched_object;
-      double jet_resolution = this_collection_constituent.EnergyRes();
-      double scale_factor   = this_collection_constituent.EnergyResScaleFactor();
+      double resolution = this_collection_constituent.EnergyRes();
+      double res_scale_factor   = this_collection_constituent.EnergyResScaleFactor();
       double old_pt = this_collection_constituent.Pt();
-      bool matched = false;
-      if(std::string(this_collection_constituent.Name())=="PFJet")
-        matched = this_collection_constituent.template MatchByDRAndDPt < Object2 > ( matching_collection, matched_object, max_dr, 3*jet_resolution*old_pt );
-      else
-        matched = this_collection_constituent.template MatchByDR < Object2 > ( matching_collection, matched_object, max_dr );
+      bool matched = this_collection_constituent.template MatchByDRAndDPt < Object2 > ( matching_collection, matched_object, max_dr, 3*resolution*old_pt );
       double new_pt = -1.0;
       if ( matched ) { 
         double matched_pt           = matched_object.Pt();
@@ -300,24 +320,26 @@ class Collection {
         //double delta_pt             = smeared_scale_factor * ( old_pt - matched_pt );
         //new_pt               = std::max ( double (0.0), matched_pt + delta_pt ) ;
         double delta_pt = old_pt - matched_pt;
-        smearFactor = 1 + (scale_factor - 1.) * delta_pt / old_pt;
+        smearFactor = 1 + (res_scale_factor - 1.) * delta_pt / old_pt;
         
         //if(std::string(this_collection_constituent.Name())=="PFJet") {
-        //  std::cout << "Matched Jet " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
-        //  std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
-        //  std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
-        //  std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
-        //  //std::cout << "\t" << "smearing             = " << smearing             << std::endl;
-        //  std::cout << "\t" << "smeared scale factor = " << smearFactor << std::endl;
-        //  std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
-        //  //std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
-        //}
+        if(verbose) {
+          std::cout << "\tMatched obj " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
+          std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
+          std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
+          std::cout << "\t" << "res. scale factor    = " << res_scale_factor     << std::endl;
+          //std::cout << "\t" << "smearing             = " << smearing             << std::endl;
+          std::cout << "\t" << "smeared scale factor = " << smearFactor          << std::endl;
+          std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
+          std::cout << "\t" << "max DPt for matching = " << 3*resolution*old_pt  << std::endl;
+          std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
+        }
         
       }
-      else if(std::string(this_collection_constituent.Name())=="PFJet") {
-        // not well-matched to GenJet
+      else {
+        // not well-matched to GenParticle
         double scale_factor = this_collection_constituent.EnergyResScaleFactor();
-        double sigma = jet_resolution * std::sqrt(scale_factor * scale_factor - 1);
+        double sigma = resolution * std::sqrt(scale_factor * scale_factor - 1);
         smearFactor = 1. + engine->Gaus(0.0, sigma);
         //std::cout << "Not well-matched jet" << std::endl;
         //std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
@@ -337,32 +359,23 @@ class Collection {
       new_pt = v_new.Pt();
       v_delta = v_old - v_new;
       v_delta_met = v_delta_met + v_delta;
-        //if(std::string(this_collection_constituent.Name())=="PFJet") {
-        //  //std::cout << "Matched Jet " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
-        //  std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
-        //  //std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
-        //  //std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
-        //  //std::cout << "\t" << "smearing             = " << smearing             << std::endl;
-        //  std::cout << "\t" << "smeared scale factor = " << smearFactor << std::endl;
-        //  std::cout << "\t" << "delta pt             = " << v_delta.Pt()             << std::endl;
-        //  std::cout << "\t" << "new RECO pt          = " << v_new.Pt()               << std::endl;
-        //}
 
       this_collection_constituent.SetPt(v_new.Pt());
       this_collection_constituent.SetEta(v_new.Eta());
       this_collection_constituent.SetPhi(v_new.Phi());
-      if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
+      if ( new_pt >= 1e-6 )
+        smearedObjVec.push_back(this_collection_constituent);
+
+      if(verbose) {
+        if(!matched) {
+          std::cout << "\t" << "no match found! collection looks like:" << std::endl;
+          matching_collection->examine<Object2>("matching collection");
+        }
+        std::cout << "\t" << "smeared obj vec size = " << smearedObjVec.size() << std::endl;
+      }
     }
 
-    int n_constituents_to_remove = indices_of_zero_pt_constituents.size();
-    for (int i = 0; i < n_constituents_to_remove; ++i){
-      short index_to_remove = indices_of_zero_pt_constituents[i];
-      m_raw_indices.erase(std::remove(m_raw_indices.begin(),
-				      m_raw_indices.end  (),
-				      index_to_remove       ));
-    }
-
-    return;
+    return smearedObjVec;
   }
 
   //------------------------------------------------------------------------------------------
@@ -370,8 +383,10 @@ class Collection {
   //------------------------------------------------------------------------------------------
 
   template <class Object1> 
-    void ScaleEnergy ( int scale_sign, TLorentzVector & v_delta_met ){
+    std::vector<Object1> ScaleEnergy ( int scale_sign, TLorentzVector & v_delta_met ){
     unsigned short this_collection_size = GetSize();
+    std::vector<Object1> scaledObjVec;
+    scaledObjVec.reserve(this_collection_size);
     TLorentzVector v_old, v_new, v_delta;
     std::vector<short> indices_of_zero_pt_constituents;
     for (unsigned short i = 0; i < this_collection_size ; ++i) {    
@@ -399,19 +414,12 @@ class Collection {
       // std::cout << "\tDelta(MET) = " << v_delta_met.Pt() << ", " << v_delta_met.Eta()                     << ", " << v_delta_met.Phi() << std::endl;
 
       this_collection_constituent.SetPt(new_pt);
-      if ( new_pt < 1e-6 ) indices_of_zero_pt_constituents.push_back ( this_collection_constituent.GetRawIndex() );
+      if ( new_pt >= 1e-6 )
+        scaledObjVec.push_back(this_collection_constituent);
 
     }
     
-    int n_constituents_to_remove = indices_of_zero_pt_constituents.size();
-    for (int i = 0; i < n_constituents_to_remove; ++i){
-      short index_to_remove = indices_of_zero_pt_constituents[i];
-      m_raw_indices.erase(std::remove(m_raw_indices.begin(),
-				      m_raw_indices.end  (),
-				      index_to_remove       ));
-    }
-
-    return;
+    return scaledObjVec;
   }
 
   //------------------------------------------------------------------------------------------
