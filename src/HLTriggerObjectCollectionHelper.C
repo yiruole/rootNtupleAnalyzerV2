@@ -19,7 +19,7 @@ HLTriggerObjectCollectionHelper::HLTriggerObjectCollectionHelper( analysisClass 
 void HLTriggerObjectCollectionHelper::PrintObjectInfo(unsigned short i)
 {
 
-  CollectionPtr collection ( new Collection ( m_data->readerTools_));
+  //CollectionPtr collection ( new Collection ( m_data->readerTools_));
   std::cout << "Pt = "  << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_pt",i) << ", "
     << "Eta = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_eta",i)        << ", "
     << "Phi = " << m_data->readerTools_->ReadArrayBranch<Float_t>("TrigObj_phi",i)        << ", "
