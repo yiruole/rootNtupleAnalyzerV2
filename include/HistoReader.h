@@ -11,14 +11,13 @@ class HistoReader {
   
   void addHistoBarrel  ( TH2F* histo ) { histoBarrel = std::unique_ptr<TH2F>(histo); };
   void addHistoEndcap  ( TH2F* histo ) { histoEndcap = std::unique_ptr<TH2F>(histo); };
-  float LookupValue(const float& eta, const float& et, bool verbose=false);
-  float LookupValueError(const float& eta, const float& et, bool verbose=false);
+  float LookupValueError(const float eta, const float et, bool verbose=false) { return DoLookup(eta, et, true, verbose); }
+  float LookupValue(const float eta, const float et, bool verbose=false) { return DoLookup(eta, et, false, verbose); }
 
  private:
-  int GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose=false);
+  float DoLookup(const float eta, const float et, bool returnError, bool verbose);
+  int GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose);
 
-  //FIXME
-  //TFile* qcdTFile;
   std::unique_ptr<TH2F> histoBarrel;
   std::unique_ptr<TH2F> histoEndcap;
   bool isAbsEta;

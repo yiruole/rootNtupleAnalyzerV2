@@ -14,22 +14,16 @@ HistoReader::HistoReader()
 HistoReader::HistoReader(std::string filename, std::string barrelHistName, std::string endcapHistName,
     bool absEta, bool etIsXAxis) : isAbsEta(absEta), isEtXAxis(etIsXAxis)
 {
-  TFile* myTFile = TFile::Open(filename.c_str());
-  TH2F* histoB = 0;
-  myTFile->GetObject(barrelHistName.c_str(),histoB);
-  assert(histoB>0);
-  histoBarrel = std::unique_ptr<TH2F>(histoB);
+  unique_ptr<TFile> myTFile(TFile::Open(filename.c_str()));
+  histoBarrel = unique_ptr<TH2F>(myTFile->Get<TH2F>(barrelHistName.c_str()));
+  histoBarrel->SetDirectory(0);
 
-  TH2F* histoE = 0;
-  myTFile->GetObject(endcapHistName.c_str(),histoE);
-  assert(histoE>0);
-  histoEndcap = std::unique_ptr<TH2F>(histoE);
+  histoEndcap = unique_ptr<TH2F>(myTFile->Get<TH2F>(endcapHistName.c_str()));
+  histoEndcap->SetDirectory(0);
 }
 
 HistoReader::~HistoReader()
 {
-  //FIXME
-  //qcdTFile->Close();
 }
 
 // make sure that we don't ask for an Et that is beyond the max x range of the histogram
@@ -74,8 +68,7 @@ int HistoReader::GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue
   return lookupBin;
 }
 
-float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
-{
+float HistoReader::DoLookup(const float eta, const float et, bool returnError, bool verbose) {
   float value = -1.0;
   float etLookup = et;
   float etaLookup = isAbsEta ? fabs(eta) : eta;
@@ -111,14 +104,19 @@ float HistoReader::LookupValue(const float& eta, const float& et, bool verbose)
     //  << " for electron with eta=" << eta << "; isBarrel=" << isBarrel << std::endl;
     etLookupBin = GetLookupBin(histRef,isEtXAxis,etLookup,verbose);
     etaLookupBin = GetLookupBin(histRef,!isEtXAxis,etaLookup,verbose);
-    value = isEtXAxis ? histRef.GetBinContent(etLookupBin,etaLookupBin) : histRef.GetBinContent(etaLookupBin,etLookupBin);
+    if(returnError)
+      value = isEtXAxis ? histRef.GetBinError(etLookupBin,etaLookupBin) : histRef.GetBinError(etaLookupBin,etLookupBin);
+    else
+      value = isEtXAxis ? histRef.GetBinContent(etLookupBin,etaLookupBin) : histRef.GetBinContent(etaLookupBin,etLookupBin);
     if(verbose) {
-      std::cout << "INFO: Found " << (isBarrel ? "barrel" : "endcap") << " electron with et=" << et << " and eta=" << eta << "; value=" << value << std::endl;
+      std::cout << "INFO: Found " << (isBarrel ? "barrel" : "endcap") << " electron with et=" << et << " and eta=" << eta <<
+        (returnError ? "; value=" : "; error=") << value << std::endl;
     }
   }
 
   if(value<=0) {
-    std::cerr << "ERROR: Found an electron with unknown value: eta=" << eta << "; eT=" << et << "; return " << value << std::endl;
+    std::cerr << "ERROR: Found an electron with unknown value: eta=" << eta << "; eT=" << et << "; return " << (returnError ? "; value=" : "; error=") <<
+      value << std::endl;
     std::cerr << "ERROR: Used etaLookup=" << etaLookup << "; eT=" << etLookup << std::endl;
     std::cerr << "ERROR: Found " << (isBarrel ? "barrel" : "endcap") << " eta bin: " << etaLookupBin << "; found et bin: " << etLookupBin << std::endl;
   }
