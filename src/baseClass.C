@@ -1,8 +1,15 @@
 #define baseClass_cxx
 #include "baseClass.h"
+
 #include <boost/lexical_cast.hpp>
+
+#include <boost/regex.hpp>
+
 #include "TEnv.h"
 #include "TLeaf.h"
+#include "TGraphAsymmErrors.h"
+
+using namespace std;
 
 static_assert(std::numeric_limits<float>::is_iec559, "IEEE 754 required");
 
@@ -63,8 +70,43 @@ baseClass::~baseClass()
   checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
-  for(auto& hist : histsToSave_)
+  for(auto& hist : histsToSave_) {
     hist->Write();
+    // make hist of ratio proj/nominal
+    if(std::string(hist->GetName())=="systematics") {
+      unique_ptr<TH2F> systDiffs(new TH2F("systematicsDiffs", "systematicsDiffs", hist->GetNbinsX(), 0, hist->GetXaxis()->GetXmax(), hist->GetNbinsY(), 0, hist->GetYaxis()->GetXmax()));
+      hist->GetXaxis()->Copy(*systDiffs->GetXaxis());
+      hist->GetYaxis()->Copy(*systDiffs->GetYaxis());
+      systDiffs->Sumw2();
+      systDiffs->SetDirectory(0);
+      auto hist2D = dynamic_pointer_cast<TH2F>(hist);
+      unique_ptr<TH1D> nominal(hist2D->ProjectionX("nominal", 1, 1, "e"));
+      nominal->LabelsDeflate();
+      nominal->SetDirectory(0);
+      //cout << "nominal x bins: " << nominal->GetNbinsX() << endl;
+      for(auto yBin = 1; yBin <= hist->GetNbinsY(); ++yBin) {
+        unique_ptr<TH1D> proj(hist2D->ProjectionX("proj", yBin, yBin, "e"));
+        proj->LabelsDeflate(); // otherwise we get 2x number of bins
+        proj->SetDirectory(0);
+        //cout << "proj x bins: " << proj->GetNbinsX() << endl;
+        unique_ptr<TGraphAsymmErrors> quotient(new TGraphAsymmErrors());
+        // suppress warning messages for divide; this can happen for zero content bins, for example
+        int prevLevel = gErrorIgnoreLevel;
+        gErrorIgnoreLevel = kError;
+        quotient->Divide(proj.get(), nominal.get(), "pois cp");
+        gErrorIgnoreLevel = prevLevel;
+        for(auto iPoint = 0; iPoint < quotient->GetN(); ++iPoint) {
+          double x = quotient->GetPointX(iPoint);
+          double y = quotient->GetPointY(iPoint);
+          double err = quotient->GetErrorY(iPoint);
+          int binNum = systDiffs->FindBin(x, yBin-0.5);
+          systDiffs->SetBinContent(binNum, y);
+          systDiffs->SetBinError(binNum, err);
+        }
+      }
+      systDiffs->Write();
+    }
+  }
   output_root_->Close();
   if(produceSkim_)
   {
@@ -91,12 +133,21 @@ void baseClass::init()
     STDOUT("baseClass::init(): Had an error of code " << ret << " when calling LoadTree(); exit");
     exit(1);
   }
-  readCutFile();
   if(tree_ == NULL){
     STDOUT("baseClass::init(): ERROR: tree_ = NULL ");
     exit(1);
   }
   readerTools_ = std::shared_ptr<TTreeReaderTools>(new TTreeReaderTools(tree_));
+  readCutFile();
+  if(haveSystematics()) {
+    for(auto& syst: systematics_) {
+      if(syst.formula)
+        systFormulas_.Add(syst.formula.get());
+    }
+    tree_->SetNotify(&systFormulas_); // updates formulas in collection when needed
+    // see: https://root-forum.cern.ch/t/ttreeformula-and-tchain/15155/
+    // and: https://github.com/root-project/root/commit/5a918e25f8c5df4e51ad837e66d8fd23133dec38
+  }
 
 
   //directly from string
@@ -159,18 +210,11 @@ void baseClass::init()
     }
   }
 
-  //  for (map<string, cut>::iterator it = cutName_cut_.begin();
-  //   it != cutName_cut_.end(); it++) STDOUT("cutName_cut->first = "f<<it->first)
-  //  for (vector<string>::iterator it = orderedCutNames_.begin();
-  //       it != orderedCutNames_.end(); it++) STDOUT("orderedCutNames_ = "<<*it)
-  //STDOUT("ends");
-
   // setup sum of weights hist
   gDirectory->cd();
   h_weightSums_ = new TH1F("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
   h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
   h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
-
 }
 
 void baseClass::readInputList()
@@ -242,10 +286,10 @@ void baseClass::readCutFile()
   string s;
   STDOUT("Reading cutFile_ = "<< *cutFile_)
 
+  vector<string> systLines;
   ifstream is(cutFile_->c_str());
   if(is.good())
   {
-    //      STDOUT("Reading file: " << *cutFile_ );
     int id=0;
     int optimize_count=0;
     while( getline(is,s) )
@@ -254,14 +298,22 @@ void baseClass::readCutFile()
       vector<string> v = split(s);
       if ( v.size() == 0 ) continue;
 
-      if ( v[0] == "JSON" ){ 
-
-        if ( jsonFileWasUsed_ ){
+      if ( v[0] == "SYST" ) {
+        if ( v.size() < 3 || v.size() > 4 ){
+          STDOUT("ERROR: In your cutfile, SYST line must have the syntax: \"SYST name [regex=]/branchName/formula/value cutVariable(s)\"");
+          exit(-6);
+        }
+        else {
+          systLines.push_back(s);
+          continue;
+        }
+      }
+      else if ( v[0] == "JSON" ) {
+        if ( jsonFileWasUsed_ ) {
           STDOUT("ERROR: Please specify only one JSON file in your cut file!");
           return;
         }
-
-        if ( v.size() != 2 ){
+        if ( v.size() != 2 ) {
           STDOUT("ERROR: In your cutfile, JSON file line must have the syntax: \"JSON <full json file path>\"");
         }
         jsonFileName_ = v[1];
@@ -271,8 +323,7 @@ void baseClass::readCutFile()
         jsonFileWasUsed_ = true;
         continue;
       }
-
-      if (v[1]=="OPT") // add code for grabbing optimizer objects
+      else if (v[1]=="OPT") // add code for grabbing optimizer objects
       {
         if (optimizeName_cut_.size()>=6)
         {
@@ -307,7 +358,6 @@ void baseClass::readCutFile()
       {
         STDOUT("ERROR: variableName = "<< v[0] << " exists already in cutName_cut_. Returning.");
         exit(-1);
-        //return;
       }
 
       if(v.size() < 6)
@@ -323,7 +373,6 @@ void baseClass::readCutFile()
         {
           STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
           exit(-1);
-          //return;
         }
         preCutInfo_ << "### Preliminary cut values: " << s <<endl;
         preCut thisPreCut;
@@ -349,13 +398,12 @@ void baseClass::readCutFile()
       {
         STDOUT("ERROR: minValue1 and maxValue2 have to be provided. Returning.");
         exit(-2);
-        //return; // FIXME implement exception
       }
       if( (m2=="-" && M2!="-") || (m2!="-" && M2=="-") )
       {
+        std::cout << "ERROR reading line '" << s << "'" << endl;
         STDOUT("ERROR: if any of minValue2 and maxValue2 is -, then both have to be -. Returning");
         exit(-2);
-        //return; // FIXME implement exception
       }
       if( m2=="-") m2="+inf";
       if( M2=="-") M2="-inf";
@@ -408,6 +456,7 @@ void baseClass::readCutFile()
 
       orderedCutNames_.push_back(thisCut.variableName);
       cutName_cut_[thisCut.variableName]=thisCut;
+      systCutName_cut_[thisCut.variableName]=thisCut;
 
     }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
@@ -419,12 +468,12 @@ void baseClass::readCutFile()
   }
   // make optimizer histogram
   if (optimizeName_cut_.size()>0)
-    {
-      h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
-			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
-      h_optimizer_entries_ =new TH1I("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
-			    pow(nOptimizerCuts_,optimizeName_cut_.size()));
-    }
+  {
+    h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+        pow(nOptimizerCuts_,optimizeName_cut_.size()));
+    h_optimizer_entries_ =new TH1I("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+        pow(nOptimizerCuts_,optimizeName_cut_.size()));
+  }
 
   is.close();
 
@@ -434,7 +483,102 @@ void baseClass::readCutFile()
   gDirectory->cd();
   eventcuts_=new TH1F("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
 
+  for(auto& systLine : systLines) {
+    vector<string> v = split(systLine);
+    Systematic syst(v[1]);
+    // regexp to match with branch pattern
+    if (v[2].find("regex=")==0) {
+      size_t firstQuote = v[2].find_first_of("\"")+1;
+      size_t lastQuote = v[2].find_last_of("\"");
+      syst.regex = v[2].substr(firstQuote, lastQuote-firstQuote);
+      syst.length = 1;
+    }
+    else {
+      syst.formula.reset(new TTreeFormula(syst.name.c_str(), v[2].c_str(), readerTools_->GetTree().get()));
+      if(!syst.formula->GetNdim()) {
+        STDOUT("ERROR: syst named '" << syst.name << "' has invalid formula: '" << v[2] << "', Check syntax (TFormula) and make sure that any branches used exist in the tree.");
+        exit(-6);
+      }
+      syst.length = syst.formula->GetNdata();
+    }
+    // parse cut variables affected by syst
+    if(v.size() > 3) {
+      istringstream iss(v[3]);
+      string cutVar;
+      string branchName;
+      while (getline(iss, cutVar, ',')) {
+        boost::regex regExp(syst.regex);
+        // try to find the matching branch
+        string matchingBranch;
+        for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
+          TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
+          branchName = branch->GetName();
+          if(branchName.find(cutVar)!=string::npos) {
+            if(boost::regex_search(branchName, regExp)) {
+              matchingBranch = branchName;
+            }
+          }
+        }
+        bool handledCutVar = false;
+        // now, add other cuts
+        for(auto& cutName : orderedCutNames_) {
+          if(cutName.find(cutVar) != string::npos) {
+            syst.cutNamesToBranchNames[cutName] = matchingBranch;
+            handledCutVar = true;
+          }
+        }
+        if(!handledCutVar) {
+          STDOUT("ERROR: did not find any cuts in the cut file that contain the cutVar '" << cutVar << "'. Can't handle this systematic: '" << syst.name << "'. Quitting here.");
+          exit(-6);
+        }
+      }
+    }
+    systematics_.push_back(move(syst));
+  }
 
+
+  // make syst hist
+  if(haveSystematics()) {
+    // add hardcoded nominal
+    Systematic nominalSyst("nominal");
+    nominalSyst.formula.reset(new TTreeFormula("nominal","1", readerTools_->GetTree().get()));
+    systematics_.emplace(systematics_.begin(), move(nominalSyst));
+
+    int nSysts = 0;
+    for(auto& syst : systematics_) {
+      nSysts+=syst.length;
+    }
+    for (int i=0;i<orderedCutNames_.size();++i) {
+      map<string, cut>::iterator cc = cutName_cut_.find(orderedCutNames_[i]);
+      if(cc->second.level_int < 2)
+        continue;
+      orderedSystCutNames_.push_back(cc->first);
+    }
+    int nCutsForSysts = orderedSystCutNames_.size();
+    histsToSave_.push_back(std::shared_ptr<TH2F>(new TH2F("systematics", "systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
+    auto theHist = dynamic_pointer_cast<TH2F>(histsToSave_.back());
+    theHist->Sumw2();
+    theHist->SetDirectory(0);
+    int idx = 1;
+    for (auto& cutName : orderedSystCutNames_) {
+      theHist->GetXaxis()->SetBinLabel(idx, cutName.c_str());
+      ++idx;
+    }
+    idx = 1;
+    for(auto& syst : systematics_) {
+      if(syst.length==1) {
+        theHist->GetYaxis()->SetBinLabel(idx, syst.name.c_str());
+        ++idx;
+      }
+      else {
+        for(int arrIdx = 0; arrIdx < syst.length; ++arrIdx) {
+          string systName = syst.name + "_" + to_string(arrIdx);
+          theHist->GetYaxis()->SetBinLabel(idx, systName.c_str());
+          ++idx;
+        }
+      }
+    }
+  }
 }
 
 void baseClass::resetCuts(const string& s)
@@ -446,17 +590,46 @@ void baseClass::resetCuts(const string& s)
       c->value = 0;
       c->weight = 1;
       c->passed = false;
+      c->evaluatedPreviousCuts = false;
+      c->passedPreviousCuts = false;
+      if(haveSystematics()) {
+        systCutName_cut_[cc->first].filled = false;
+        systCutName_cut_[cc->first].value = 0;
+        systCutName_cut_[cc->first].weight = 1;
+        systCutName_cut_[cc->first].passed = false;
+        systCutName_cut_[cc->first].evaluatedPreviousCuts = false;
+        systCutName_cut_[cc->first].passedPreviousCuts = false;
+        for(auto& syst : systematics_) {
+          for(auto& mapItem : syst.cutNamesToSystValues) {
+            syst.cutNamesToSystValues[mapItem.first] = 0;
+            syst.cutNamesToSystFilled[mapItem.first] = false;
+          }
+        }
+      }
       if(s == "newEvent")
-	{
-	  c->nEvtPassedBeforeWeight_alreadyFilled = false;
-	}
+      {
+        c->nEvtPassedBeforeWeight_alreadyFilled = false;
+      }
       else if(s != "sameEvent")
-	{
-	  STDOUT("ERROR: unrecognized option. Only allowed options are 'sameEvent' and 'newEvent'; no option = 'newEvent'.");
-	}
+      {
+        STDOUT("ERROR: unrecognized option. Only allowed options are 'sameEvent' and 'newEvent'; no option = 'newEvent'.");
+      }
     }
   combCutName_passed_.clear();
   return;
+}
+
+void baseClass::fillSystVariableWithValue(const string& s, const string& cutVar, const float& d) {
+  if(!haveSystematics())
+    return;
+  bool systFound = false;
+  for(auto& syst : systematics_) {
+    if(syst.name==s) {
+      syst.cutNamesToSystValues[cutVar] = d;
+      syst.cutNamesToSystFilled[cutVar] = true;
+      systFound = true;
+    }
+  }
 }
 
 void baseClass::fillVariableWithValue(const string& s, const float& d, const float& w)
@@ -481,17 +654,6 @@ void baseClass::fillVariableWithValue(const string& s, const float& d, const flo
 void baseClass::fillVariableWithValue(const string& s, TTreeReaderValue<float>& reader, const float& w)
 {
   fillVariableWithValue(s, *reader, w);
-}
-
-bool baseClass::variableIsFilled(const string& s)
-{
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
-    }
-  cut * c = & (cc->second);
-  return (c->filled);
 }
 
 template <typename T> void baseClass::fillArrayVariableWithValue(const string& s, TTreeReaderArray<T>& reader)
@@ -548,36 +710,40 @@ void baseClass::fillOptimizerWithValue(const string& s, const float& d)
   return;
 }
 
-void baseClass::evaluateCuts(bool verbose)
+template<typename T> void baseClass::evaluateCuts(map<string, T>& cutNameToCut, map<string, bool>& combNameToPassFail, vector<string>& orderedCutNames, bool verbose)
 {
-  //  resetCuts();
-  combCutName_passed_.clear();
-  for (vector<string>::iterator it = orderedCutNames_.begin();
-      it != orderedCutNames_.end(); it++)
+  combNameToPassFail.clear();
+  for (vector<string>::iterator it = orderedCutNames.begin(); it != orderedCutNames.end(); it++)
   {
-    cut * c = & (cutName_cut_.find(*it)->second);
+    SimpleCut * c = & (cutNameToCut.find(*it)->second);
+    c->evaluatedPreviousCuts = false; // if redoing individual cuts, have to redo previous cut checking as well
     if( ! ( c->filled && (c->minValue1 < c->value && c->value <= c->maxValue1 || c->minValue2 < c->value && c->value <= c->maxValue2 ) ) )
     {
       c->passed = false;
-      combCutName_passed_[c->level_str.c_str()] = false;
-      combCutName_passed_["all"] = false;
+      combNameToPassFail[c->level_str.c_str()] = false;
+      combNameToPassFail["all"] = false;
       if(verbose) std::cout << "FAILED cut: " << c->variableName << "; value is: " << c->value << std::endl;
     }
     else
     {
       c->passed = true;
-      map<string,bool>::iterator cp = combCutName_passed_.find( c->level_str.c_str() );
-      combCutName_passed_[c->level_str.c_str()] = (cp==combCutName_passed_.end()?true:cp->second);
-      map<string,bool>::iterator ap = combCutName_passed_.find( "all" );
-      combCutName_passed_["all"] = (ap==combCutName_passed_.end()?true:ap->second);
+      map<string,bool>::iterator cp = combNameToPassFail.find( c->level_str.c_str() );
+      combNameToPassFail[c->level_str.c_str()] = (cp==combNameToPassFail.end()?true:cp->second);
+      map<string,bool>::iterator ap = combNameToPassFail.find( "all" );
+      combNameToPassFail["all"] = (ap==combNameToPassFail.end()?true:ap->second);
       if(verbose) std::cout << "PASSED cut: " << c->variableName << "; value is: " << c->value << std::endl;
     }
   }
+}
 
-  // reset optimization cut values
-  //for (int i=0;i<optimizeName_cut_.size();++i)
-  //  optimizeName_cut_[i].value=0;
+void baseClass::evaluateCuts(bool verbose)
+{
+  evaluateCuts(cutName_cut_, combCutName_passed_, orderedCutNames_);
+
   runOptimizer();
+
+  if(haveSystematics())
+    runSystematics();
 
   if( !fillCutHistos() )
   {
@@ -667,123 +833,93 @@ void baseClass::runOptimizer()
   return;
 } //runOptimizer
 
-bool baseClass::passedCut(const string& s)
+void baseClass::runSystematics()
 {
-  bool ret = false;
-  //  map<string, bool>::iterator vp = cutName_passed_.find(s);
-  //  if( vp != cutName_passed_.end() ) return ret = vp->second;
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc != cutName_cut_.end() )
-    {
-      cut * c = & (cutName_cut_.find(s)->second);
-      return (c->filled && c->passed);
-    }
-  map<string, bool>::iterator cp = combCutName_passed_.find(s);
-  if( cp != combCutName_passed_.end() )
-    {
-      return ret = cp->second;
-    }
-  STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutName_cut_ nor combCutName_passed_. Returning false.");
-  return (ret=false);
-}
-
-bool baseClass::hasCut(const string& s)
-{
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc != cutName_cut_.end() )
-    return true;
-  // check the comb map for completeness
-  map<string, bool>::iterator cp = combCutName_passed_.find(s);
-  if( cp != combCutName_passed_.end() )
-    return true;
-  return false;
-}
-
-bool baseClass::passedAllPreviousCuts(const string& s)
-{
-  //STDOUT("Examining variableName = "<<s);
-
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() )
-  {
-    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
-    return false;
+  shared_ptr<TH2F> systHist = dynamic_pointer_cast<TH2F>(findSavedHist("systematics"));
+  if(systHist == nullptr) {
+    cout << "ERROR: could not find systematics histogram. This shouldn't happen. Exiting" << endl;
+    exit(-6);
   }
-
-  for (vector<string>::iterator it = orderedCutNames_.begin();
-      it != orderedCutNames_.end(); it++)
-  {
-    cut * c = & (cutName_cut_.find(*it)->second);
-    if( c->variableName == s )
-    {
-      return true;
+  // copy cut decisions/filled
+  for(auto& cutName : orderedCutNames_) {
+    systCutName_cut_[cutName].passed = cutName_cut_[cutName].passed;
+    systCutName_cut_[cutName].filled = cutName_cut_[cutName].filled;
+    systCutName_cut_[cutName].weight = cutName_cut_[cutName].weight;
+    systCutName_cut_[cutName].value = cutName_cut_[cutName].value;
+    systCutName_cut_[cutName].passedPreviousCuts = cutName_cut_[cutName].passedPreviousCuts;
+    systCutName_cut_[cutName].evaluatedPreviousCuts = cutName_cut_[cutName].evaluatedPreviousCuts;
+  }
+  float ybinCoord = 0.5;
+  for(auto& syst : systematics_) {
+    int currentLength = syst.formula ? syst.formula->GetNdata() : 1;
+    if(syst.length!=currentLength) {
+      string msg = "For systematic named: " + syst.name + ", length in event " + to_string(GetCurrentEntry()) + " is: " + to_string(currentLength) +
+        " != initial length of: " + to_string(syst.length) + "." +
+        " Cannot handle this situation! Bailing out.";
+      cout << msg << endl;
+      exit(-6);
     }
-    else
-    {
-      if( ! (c->filled && c->passed) )
-        return false;
+    map<string, bool> combCutNameToPassFail;
+    bool shiftValue = !syst.cutNamesToBranchNames.empty();
+    for(int i=0; i < currentLength; ++i) {
+      float systVal = syst.formula ? syst.formula->EvalInstance(i) : 0;
+      if(shiftValue) {
+        for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
+          auto cutName = cutNameBranch.first;
+          auto& systCut = systCutName_cut_[cutName];
+          systCut.filled = false;
+          if(syst.cutNamesToBranchNames[cutName].size()) {
+            //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
+            //  " with the value of the branch: " << syst.cutNamesToBranchNames[cutNameCut.first];
+            //cout << " which is: " << readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutNameCut.first]) << endl;
+            systCut.value = readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutName]);
+            systCut.filled = true;
+          }
+          else {
+            systVal = syst.cutNamesToSystValues[cutName];
+            //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
+            //  " with the syst value: " << systVal << "; filled? " << syst.cutNamesToSystFilled[cutNameCut.first] << endl;
+            if(syst.cutNamesToSystFilled[cutName]) {
+              systCut.value = systVal;
+              systCut.filled = true;
+            }
+            else {
+              STDOUT("ERROR: syst value for cut named: " << cutName << " was not filled for systematic " << syst.name << "! can't compute systematic for this cut. Quitting.");
+              exit(-6);
+            }
+          }
+        }
+        // reevaluate since cuts were updated
+        evaluateCuts(systCutName_cut_, combCutNameToPassFail, orderedSystCutNames_);
+      }
+      float xbinCoord = 0.5;
+      for(auto& cutName : orderedSystCutNames_) {
+        //FIXME: perhaps remove the list of cut names; always have to use the full list!
+        if(passedSelection(cutName, systCutName_cut_, combCutNameToPassFail, orderedCutNames_)) {
+          //cout << "[sethlog]: fill syst hist xbin: " << xbin << ", ybin: " << ybin << ", name=" << cutName << endl;
+          if(shiftValue)
+            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName].weight);
+          else {
+            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName].weight*systVal);
+          }
+        }
+        xbinCoord+=1;
+      }
+      ybinCoord+=1;
+      if(shiftValue) {
+        // if value was shifted, reset all the cuts to nominal before moving to next syst
+        for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
+          auto cutName = cutNameBranch.first;
+          systCutName_cut_[cutName].passed = cutName_cut_[cutName].passed;
+          systCutName_cut_[cutName].filled = cutName_cut_[cutName].filled;
+          systCutName_cut_[cutName].weight = cutName_cut_[cutName].weight;
+          systCutName_cut_[cutName].value = cutName_cut_[cutName].value;
+          systCutName_cut_[cutName].passedPreviousCuts = cutName_cut_[cutName].passedPreviousCuts;
+          systCutName_cut_[cutName].evaluatedPreviousCuts = cutName_cut_[cutName].evaluatedPreviousCuts;
+        }
+      }
     }
   }
-  STDOUT("ERROR. It should never pass from here.");
-  return false;
-}
-
-bool baseClass::passedAllOtherCuts(const string& s)
-{
-  //STDOUT("Examining variableName = "<<s);
-  bool ret = true;
-
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() )
-  {
-    STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
-    return false;
-  }
-
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
-  {
-    cut * c = & (cc->second);
-    if( c->variableName == s )
-    {
-      continue;
-    }
-    else
-    {
-      if( ! (c->filled && c->passed) ) return false;
-    }
-  }
-  return ret;
-}
-
-bool baseClass::passedAllOtherSameAndLowerLevelCuts(const string& s)
-{
-  //STDOUT("Examining variableName = "<<s);
-  bool ret = true;
-  int cutLevel;
-  map<string, cut>::iterator cc = cutName_cut_.find(s);
-  if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
-      return false;
-    }
-  else
-    {
-      cutLevel = cc->second.level_int;
-    }
-
-  for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
-    {
-      cut * c = & (cc->second);
-      if( c->level_int > cutLevel || c->variableName == s )
-	{
-	  continue;
-	}
-      else
-	{
-	  if( ! (c->filled && c->passed) ) return false;
-	}
-    }
-  return ret;
 }
 
 float baseClass::getPreCutValue1(const string& s)
@@ -842,7 +978,6 @@ float baseClass::getPreCutValue4(const string& s)
   return (c->value4);
 }
 
-
 string baseClass::getPreCutString1(const string& s)
 {
   string ret;
@@ -855,7 +990,6 @@ string baseClass::getPreCutString1(const string& s)
   preCut * c = & (cc->second);
   return (c->string1);
 }
-
 
 float baseClass::getCutMinValue1(const string& s)
 {
@@ -1104,6 +1238,22 @@ bool baseClass::writeCutEfficFile()
   } else { 
     os << "################################## NO JSON file used at runtime ###################################################################\n";
   }
+  if (haveSystematics()) {
+    os << "################################## systematics used at runtime    ###################################################################\n"
+    << "##########systName                       source/formula                cutVariables" << endl;
+    for(auto& syst : systematics_) {
+      os << syst.name << setw(40) << (syst.formula ? syst.formula->GetTitle() : "N/A") << setw(40);
+      string cutVars;
+      for(auto& cutVarToBranchName: syst.cutNamesToBranchNames) {
+        cutVars+=cutVarToBranchName.first+",";
+      }
+      if(cutVars.length())
+        cutVars.pop_back();
+      os << cutVars << endl;
+    }
+  } else { 
+    os << "################################## NO systematics used at runtime ###################################################################\n";
+  }
 
   os << "################################## Preliminary Cut Values ###################################################################\n"
      << "########################### variableName                        value1          value2          value3          value4          level\n"
@@ -1282,19 +1432,9 @@ bool baseClass::sortCuts(const cut& X, const cut& Y)
 
 vector<string> baseClass::split(const string& s)
 {
-  vector<string> ret;
-  string::size_type i =0;
-  while (i != s.size()){
-    while (i != s.size() && isspace(s[i]))
-      ++i;
-    string::size_type j = i;
-    while (j != s.size() && !isspace(s[j]))
-      ++j;
-    if (i != j){
-      ret.push_back(s.substr(i, j -i));
-      i = j;
-    }
-  }
+  istringstream iss(s);
+  vector<string> ret( ( std::istream_iterator<string>( iss ) ), std::istream_iterator<string>() );
+
   return ret;
 }
 
@@ -1461,12 +1601,14 @@ void baseClass::saveLHEPdfSumw(const std::string& fileName)
   else
     lhePdfSumwArr = getSumArrayFromRunsTree(fileName, "LHEPdfSumw", true);
 
+  //FIXME SIC TODO: replace with findSavedHist()
   std::shared_ptr<TH1D> lhePdfSumwHist = nullptr;
   for(auto& hist : histsToSave_)
   {
     if(std::string(hist->GetName()) == "LHEPdfSumw")
       lhePdfSumwHist = dynamic_pointer_cast<TH1D>(hist);
   }
+  // END FIXME
   if(!lhePdfSumwHist)
   {
     gDirectory->cd();
@@ -1483,13 +1625,13 @@ void baseClass::saveLHEPdfSumw(const std::string& fileName)
 
 void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
-  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
-  TH1D * h;
+  map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH1Ds_.end() )
     {
-      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
+      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
       h->Sumw2();
-      userTH1Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
       h->Fill(value);
     }
   else
@@ -1499,13 +1641,13 @@ void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
-  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(nameAndTitle);
-  TH1D * h;
+  map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(nameAndTitle);
   if( nh_h == userTH1Ds_.end() )
     {
-      h = new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup);
+      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
       h->Sumw2();
-      userTH1Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -1514,8 +1656,7 @@ void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 }
 void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t weight)
 {
-  map<std::string , TH1D*>::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
-  TH1D * h;
+  map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH1Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
@@ -1532,13 +1673,13 @@ void baseClass::FillUserTH1D(const char* nameAndTitle, TTreeReaderValue<double>&
 
 void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  TH2D * h;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
-      userTH2Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
       h->Fill(value_x, value_y, weight);
     }
   else
@@ -1549,13 +1690,13 @@ void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Do
 
 void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
-  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  TH2D * h;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup);
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
-      userTH2Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -1566,13 +1707,13 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 
 void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
 {
-  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  TH2D * h;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      h = new TH2D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y );
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y ));
       h->Sumw2();
-      userTH2Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -1582,8 +1723,7 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 
 void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  TH2D * h;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
@@ -1601,53 +1741,52 @@ void baseClass::FillUserTH2D(const char* nameAndTitle, TTreeReaderValue<double>&
 
 void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , TH2D*>::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  // TH2D * h;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
     }
   else
-    {
-      TH2D * hist = nh_h->second;
-      TAxis * x_axis   = hist -> GetXaxis();
-      TAxis * y_axis   = hist -> GetYaxis();
-      int     n_bins_x = hist -> GetNbinsX();
-      int     n_bins_y = hist -> GetNbinsY();
-      
-      for ( int i_bin_x = 1; i_bin_x <= n_bins_x; ++i_bin_x ){
-	
-	float x_min  = x_axis -> GetBinLowEdge( i_bin_x );
-	float x_max  = x_axis -> GetBinUpEdge ( i_bin_x );
-	float x_mean = x_axis -> GetBinCenter ( i_bin_x );
+  {
+    TH2D * hist = nh_h->second.get();
+    TAxis * x_axis   = hist -> GetXaxis();
+    TAxis * y_axis   = hist -> GetYaxis();
+    int     n_bins_x = hist -> GetNbinsX();
+    int     n_bins_y = hist -> GetNbinsY();
 
-	if ( value_x <= x_min ) continue;
-	
-	for ( int i_bin_y = 1; i_bin_y <= n_bins_y; ++i_bin_y ){
-	  
-	  float y_min  = y_axis -> GetBinLowEdge( i_bin_y );
-	  float y_mean = y_axis -> GetBinCenter ( i_bin_y );
-	  
-	  if ( value_y <= y_min ) continue;
-	  
-	  hist -> Fill (x_mean,y_mean, weight);
-	  
-	}
+    for ( int i_bin_x = 1; i_bin_x <= n_bins_x; ++i_bin_x ){
+
+      float x_min  = x_axis -> GetBinLowEdge( i_bin_x );
+      float x_max  = x_axis -> GetBinUpEdge ( i_bin_x );
+      float x_mean = x_axis -> GetBinCenter ( i_bin_x );
+
+      if ( value_x <= x_min ) continue;
+
+      for ( int i_bin_y = 1; i_bin_y <= n_bins_y; ++i_bin_y ){
+
+        float y_min  = y_axis -> GetBinLowEdge( i_bin_y );
+        float y_mean = y_axis -> GetBinCenter ( i_bin_y );
+
+        if ( value_y <= y_min ) continue;
+
+        hist -> Fill (x_mean,y_mean, weight);
+
       }
     }
+  }
 }
 
 
 void baseClass::CreateAndFillUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup,  Double_t value_x,  Double_t value_y, Double_t z, Double_t weight)
 {
-  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  TH3D * h;
+  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
-      userTH3Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
       h->Fill(value_x, value_y, weight);
+      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -1657,30 +1796,28 @@ void baseClass::CreateAndFillUserTH3D(const char* nameAndTitle, Int_t nbinsx, Do
 
 void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
 {
-  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  TH3D * h;
+  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
-      userTH3Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
       STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
-
-
 void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z)
 {
-  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  TH3D * h;
+  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      h = new TH3D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y, nbinsz, z );
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y, nbinsz, z ));
       h->Sumw2();
-      userTH3Ds_[std::string(nameAndTitle)] = h;
+      h->SetDirectory(0);
+      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -1690,8 +1827,7 @@ void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 
 void baseClass::FillUserTH3D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight)
 {
-  map<std::string , TH3D*>::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  TH3D * h;
+  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
@@ -1706,6 +1842,34 @@ void baseClass::FillUserTH3D(const char* nameAndTitle, TTreeReaderValue<double>&
   FillUserTH3D(nameAndTitle, *xReader, *yReader, *zReader, weight);
 }
 
+void baseClass::CreateUserTProfile(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
+{
+  map<std::string , std::unique_ptr<TProfile> >::iterator nh_h = userTProfiles_.find(nameAndTitle);
+  if( nh_h == userTProfiles_.end() )
+    {
+      std::unique_ptr<TProfile> h(new TProfile(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
+      h->Sumw2();
+      h->SetDirectory(0);
+      userTProfiles_[std::string(nameAndTitle)] = std::move(h);
+    }
+  else
+    {
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+    }
+}
+void baseClass::FillUserTProfile(const char* nameAndTitle, Double_t x, Double_t y, Double_t weight)
+{
+  map<std::string , std::unique_ptr<TProfile> >::iterator nh_h = userTProfiles_.find(nameAndTitle);
+  if( nh_h == userTProfiles_.end() )
+    {
+      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+    }
+  else
+    {
+      nh_h->second->Fill(x, y, weight);
+    }
+}
+
 
 bool baseClass::writeUserHistos()
 {
@@ -1713,18 +1877,23 @@ bool baseClass::writeUserHistos()
   bool ret = true;
   output_root_->cd();
 
-  for (map<std::string, TH1D*>::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH1D> >::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
     {
       output_root_->cd();
       uh_h->second->Write();
     }
-  for (map<std::string, TH2D*>::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH2D> >::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       output_root_->cd();
       uh_h->second->Write();
     }
-  for (map<std::string, TH3D*>::iterator uh_h = userTH3Ds_.begin(); uh_h != userTH3Ds_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH3D> >::iterator uh_h = userTH3Ds_.begin(); uh_h != userTH3Ds_.end(); uh_h++)
+    {
+      output_root_->cd();
+      uh_h->second->Write();
+    }
+  for (map<std::string, std::unique_ptr<TProfile> >::iterator uh_h = userTProfiles_.begin(); uh_h != userTProfiles_.end(); uh_h++)
     {
       output_root_->cd();
       uh_h->second->Write();
@@ -2047,4 +2216,14 @@ template <typename T> void baseClass::checkOverflow(const TH1* hist, const T bin
       << " for overflow as it is not a TH1F, TH1I, or TH1D. Please implement this check.";
     STDOUT(stringStream.str());
   }
+}
+
+shared_ptr<TH1> baseClass::findSavedHist(string histName)
+{
+  for(auto& hist : histsToSave_)
+  {
+    if(std::string(hist->GetName()) == histName)
+      return hist;
+  }
+  return nullptr;
 }

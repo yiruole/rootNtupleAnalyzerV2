@@ -1,11 +1,10 @@
 #ifndef baseClass_h
 #define baseClass_h
 
-#include <TChain.h>
-#include <TFile.h>
 #include "jsonParser.h"
 #include "eventListHelper.h"
 #include "TTreeReaderTools.h"
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -14,72 +13,99 @@
 #include <fstream>
 #include <stdio.h>
 #include <iomanip>
+#include <math.h>
+#include <stdlib.h>
+
+#include <TChain.h>
+#include <TFile.h>
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TH3F.h>
-#include <math.h>
-#include <stdlib.h>
+#include <TProfile.h>
+#include <TTreeFormula.h>
 
 #define STDOUT(STRING) {		   \
 	std::cout << __FILE__ <<" - Line "<<__LINE__<<" - "<<__FUNCTION__<<": "<< STRING <<std::endl;   \
 }
 
-using namespace std;
+class SimpleCut {
+  public:
+    virtual ~SimpleCut() = default;
 
-struct cut {
-  const static size_t MAX_ARRAY_SIZE = 200;
-  string variableName = "";
-  float minValue1 = -1;
-  float maxValue1 = -1;
-  float minValue2 = -1;
-  float maxValue2 = -1;
-  int level_int = -1;
-  string level_str = "";
-  int histoNBins = -1;
-  float histoMin = -1;
-  float histoMax = -1;
-  bool saveVariableInReducedSkim = false;
-  bool saveVariableArrayInReducedSkim = false;
-  // Not filled from file
-  int id = -1;
-  TH1F histo1;
-  TH1F histo2;
-  TH1F histo3;
-  TH1F histo4;
-  TH1F histo5;
-  // Filled event by event
-  bool filled = false;
-  float value = -1;
-  unsigned int arraySize = 0;
-  float weight = 1;
-  bool passed = false;
-  float nEvtInput = -1;
-  float nEvtPassedBeforeWeight = -1;
-  float nEvtPassed = -1;
-  float nEvtPassedErr2 = -1;
-  bool nEvtPassedBeforeWeight_alreadyFilled = -1;
+    std::string variableName = "";
+    int level_int = -1;
+    std::string level_str = "";
+    bool filled = false;
+    bool passed = false;
+    bool evaluatedPreviousCuts = false;
+    bool passedPreviousCuts = false;
+    float value = -1;
+    float weight = 1;
+    float minValue1 = -1;
+    float maxValue1 = -1;
+    float minValue2 = -1;
+    float maxValue2 = -1;
+};
 
+class cut : public SimpleCut {
+  public:
+    const static size_t MAX_ARRAY_SIZE = 200;
+    int histoNBins = -1;
+    float histoMin = -1;
+    float histoMax = -1;
+    bool saveVariableInReducedSkim = false;
+    bool saveVariableArrayInReducedSkim = false;
+    // Not filled from file
+    int id = -1;
+    TH1F histo1;
+    TH1F histo2;
+    TH1F histo3;
+    TH1F histo4;
+    TH1F histo5;
+    // Filled event by event
+    unsigned int arraySize = 0;
+    float nEvtInput = -1;
+    float nEvtPassedBeforeWeight = -1;
+    float nEvtPassed = -1;
+    float nEvtPassedErr2 = -1;
+    bool nEvtPassedBeforeWeight_alreadyFilled = -1;
 };
 
 struct preCut {
-  string variableName = "";
-  string string1 = "";
-  string string2 = "";
-  string string3 = "";
-  string string4 = "";
+  std::string variableName = "";
+  std::string string1 = "";
+  std::string string2 = "";
+  std::string string3 = "";
+  std::string string4 = "";
   float value1 = -1;
   float value2 = -1;
   float value3 = -1;
   float value4 = -1;
   int level_int = -1;
-  string level_str = "";
+  std::string level_str = "";
+};
+
+struct Systematic {
+  std::string name = "";
+  std::unique_ptr<TTreeFormula> formula;
+  std::string regex = "";
+  std::map<std::string, std::string> cutNamesToBranchNames;
+  std::map<std::string, float> cutNamesToSystValues;
+  std::map<std::string, bool> cutNamesToSystFilled;
+  int length = 0;
+
+  Systematic(const std::string& systName, int length = 1) :
+    name(systName), length(length) {}
+  bool affectsCut(std::string cutName) {
+    return cutNamesToBranchNames.count(cutName);
+  }
 };
 
 // Create structure to hold
 class Optimize {
  public:
   Optimize(){count=0; variableName=""; minvalue=0; maxvalue=0; testgreater=false; level_int=-10;};
-  Optimize(int x0, string x1, float x2, float x3, bool x4, int x5, int x6)
+  Optimize(int x0, std::string& x1, float x2, float x3, bool x4, int x5, int x6)
     {
       count=x0;
       variableName=x1;
@@ -101,7 +127,7 @@ class Optimize {
   ~Optimize(){};
   int nCuts;
   int count; // store number for ordering of optimization cuts
-  string variableName; // store name of variable
+  std::string variableName; // store name of variable
   float minvalue; // minimum threshold value to test
   float maxvalue; // maximum threshold to test
   float increment; // max-min, divided into 10 parts
@@ -131,10 +157,9 @@ class Optimize {
 }; // class Optimize
 
 
-//class baseClass : public rootNtupleClass {
 class baseClass {
   public :
-  map<string, bool> combCutName_passed_;
+  std::map<std::string, bool> combCutName_passed_;
 
   int passJSON(int run, int ls, bool isData);
   bool triggerExists   ( const char* name);
@@ -148,11 +173,13 @@ class baseClass {
   const std::string getCurrentFileName() { return tree_->GetCurrentFile()->GetName();};
     
   void resetCuts(const std::string& s = "newEvent");
+  void fillSystVariableWithValue(const std::string&, const std::string&, const float&);
   void fillVariableWithValue(const std::string&, const float&, const float& w = 1.);
   void fillVariableWithValue(const std::string&, TTreeReaderValue<float>&, const float& w = 1.);
   void fillArrayVariableWithValue(const std::string&, float*);
-  template <typename T> void fillArrayVariableWithValue(const string& s, TTreeReaderArray<T>& reader);
+  template <typename T> void fillArrayVariableWithValue(const std::string& s, TTreeReaderArray<T>& reader);
   void evaluateCuts(bool verbose = false);
+  template<typename T> void evaluateCuts(std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combNameToPassFail, std::vector<std::string>& orderedCutNames, bool verbose = false);
   
   void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
   void fillAllPreviousCuts                ( bool b ) { fillAllPreviousCuts_               = b; } 
@@ -160,43 +187,171 @@ class baseClass {
   void fillAllSameLevelAndLowerLevelCuts  ( bool b ) { fillAllSameLevelAndLowerLevelCuts_ = b; } 
   void fillAllCuts                        ( bool b ) { fillAllCuts_                       = b; } 
   
-  bool passedCut(const string& s);
-  bool passedAllPreviousCuts(const string& s);
-  bool passedAllOtherCuts(const string& s);
-  bool passedAllOtherSameAndLowerLevelCuts(const string& s);
-  bool variableIsFilled(const string& s);
-  bool isOptimizationEnabled() { return optimizeName_cut_.size()>0; }
-  bool hasCut(const string& s);
-  float getVariableValue(const string& s);
-  float getPreCutValue1(const string& s);
-  float getPreCutValue2(const string& s);
-  float getPreCutValue3(const string& s);
-  float getPreCutValue4(const string& s);
-  string getPreCutString1(const string& s);
-  string getPreCutString2(const string& s);
-  string getPreCutString3(const string& s);
-  string getPreCutString4(const string& s);
-  float getCutMinValue1(const string& s);
-  float getCutMaxValue1(const string& s);
-  float getCutMinValue2(const string& s);
-  float getCutMaxValue2(const string& s);
+  // need to define these here
+  template <typename T> bool passedCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed) {
+    bool ret = false;
+    auto cc = cutNameToCut.find(s);
+    if( cc != cutNameToCut.end() )
+    {
+      auto c = & (cc->second);
+      return (c->filled && c->passed);
+    }
+    std::map<std::string, bool>::iterator cp = combCutNameToPassed.find(s);
+    if( cp != combCutNameToPassed.end() )
+      return ret = cp->second;
+    STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutNameToCut nor combCutNameToPassed. Returning false.");
+    return (ret=false);
+  }
+  template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string> orderedCutNames) {
+    auto cc = cutNameToCut.find(s);
+    if( cc == cutNameToCut.end() ) {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
+      return false;
+    }
+    if(!cc->second.evaluatedPreviousCuts) {
+      for (auto& cutName : orderedCutNames) {
+        auto c = & (cutNameToCut.find(cutName)->second);
+        if( c->variableName == cc->second.variableName ) {
+          cc->second.evaluatedPreviousCuts = true;
+          cc->second.passedPreviousCuts = true;
+          break;
+        }
+        else {
+          if( ! (c->filled && c->passed) ) {
+            cc->second.evaluatedPreviousCuts = true;
+            cc->second.passedPreviousCuts = false;
+            break;
+          }
+        }
+      }
+    }
+    return cc->second.passedPreviousCuts;
+  }
 
-  const TH1F& getHisto_noCuts_or_skim(const string& s);
-  const TH1F& getHisto_allPreviousCuts(const string& s);
-  const TH1F& getHisto_allOthrSmAndLwrLvlCuts(const string& s);
-  const TH1F& getHisto_allOtherCuts(const string& s);
-  const TH1F& getHisto_allCuts(const string& s);
+  template <typename T> bool passedAllOtherCuts(const std::string& s, std::map<std::string, T>& cutNameToCut)
+  {
+    //STDOUT("Examining variableName = "<<s);
+    bool ret = true;
 
-  int    getHistoNBins(const string& s);
-  float getHistoMin(const string& s);
-  float getHistoMax(const string& s);
+    auto cc = cutNameToCut.find(s);
+    if( cc == cutNameToCut.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
+      return false;
+    }
 
-  baseClass(string * inputList, string * cutFile, string * treeName, string *outputFileName=0, string * cutEfficFile=0);
+    for (std::map<std::string, cut>::iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+    {
+      cut * c = & (cc->second);
+      if( c->variableName == s )
+      {
+        continue;
+      }
+      else
+      {
+        if( ! (c->filled && c->passed) ) return false;
+      }
+    }
+    return ret;
+  }
+
+  template <typename T> bool passedAllOtherSameAndLowerLevelCuts(const std::string& s, std::map<std::string, T>& cutNameToCut)
+  {
+    //STDOUT("Examining variableName = "<<s);
+    bool ret = true;
+    int cutLevel;
+    auto cc = cutNameToCut.find(s);
+    if( cc == cutNameToCut.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
+      return false;
+    }
+    else
+    {
+      cutLevel = cc->second.level_int;
+    }
+
+    for (std::map<std::string, cut>::iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+    {
+      cut * c = & (cc->second);
+      if( c->level_int > cutLevel || c->variableName == s )
+      {
+        continue;
+      }
+      else
+      {
+        if( ! (c->filled && c->passed) ) return false;
+      }
+    }
+    return ret;
+  }
+
+  template <typename T> bool passedSelection(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed, std::vector<std::string>& orderedCutNames) {
+    return passedAllPreviousCuts(s, cutNameToCut, orderedCutNames) && passedCut(s, cutNameToCut, combCutNameToPassed);
+  }
+  template <typename T> bool variableIsFilled(const std::string& s, std::map<std::string, T>& cutNameToCut)
+  {
+    auto cc = cutNameToCut.find(s);
+    if( cc == cutNameToCut.end() )
+    {
+      STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning");
+    }
+    cut * c = & (cc->second);
+    return (c->filled);
+  }
+
+  template <typename T> bool hasCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed)
+  {
+    auto cc = cutNameToCut.find(s);
+    if( cc != cutNameToCut.end() )
+      return true;
+    // check the comb map for completeness
+    std::map<std::string, bool>::iterator cp = combCutNameToPassed.find(s);
+    if( cp != combCutNameToPassed.end() )
+      return true;
+    return false;
+  }
+  bool passedCut(const std::string& s) { return passedCut(s, cutName_cut_, combCutName_passed_); }
+  bool passedAllPreviousCuts(const std::string& s) { return passedAllPreviousCuts(s, cutName_cut_, orderedCutNames_); }
+  bool passedAllOtherCuts(const std::string& s) { return passedAllOtherCuts(s, cutName_cut_); }
+  bool passedAllOtherSameAndLowerLevelCuts(const std::string& s) { return passedAllOtherSameAndLowerLevelCuts(s, cutName_cut_); }
+  bool passedSelection(const std::string& s) { return passedAllPreviousCuts(s, cutName_cut_, orderedCutNames_); }
+  bool variableIsFilled(const std::string& s) { return variableIsFilled(s, cutName_cut_); }
+  bool hasCut(const std::string& s) { return hasCut(s, cutName_cut_, combCutName_passed_); }
+  float getVariableValue(const std::string& s);
+  float getPreCutValue1(const std::string& s);
+  float getPreCutValue2(const std::string& s);
+  float getPreCutValue3(const std::string& s);
+  float getPreCutValue4(const std::string& s);
+  std::string getPreCutString1(const std::string& s);
+  std::string getPreCutString2(const std::string& s);
+  std::string getPreCutString3(const std::string& s);
+  std::string getPreCutString4(const std::string& s);
+  float getCutMinValue1(const std::string& s);
+  float getCutMaxValue1(const std::string& s);
+  float getCutMinValue2(const std::string& s);
+  float getCutMaxValue2(const std::string& s);
+
+  const TH1F& getHisto_noCuts_or_skim(const std::string& s);
+  const TH1F& getHisto_allPreviousCuts(const std::string& s);
+  const TH1F& getHisto_allOthrSmAndLwrLvlCuts(const std::string& s);
+  const TH1F& getHisto_allOtherCuts(const std::string& s);
+  const TH1F& getHisto_allCuts(const std::string& s);
+
+  int    getHistoNBins(const std::string& s);
+  float getHistoMin(const std::string& s);
+  float getHistoMax(const std::string& s);
+
+  baseClass(std::string * inputList, std::string * cutFile, std::string * treeName, std::string *outputFileName=0, std::string * cutEfficFile=0);
   virtual ~baseClass();
 
   // Optimization stuff
-  void fillOptimizerWithValue(const string& s, const float& d);
+  void fillOptimizerWithValue(const std::string& s, const float& d);
   void runOptimizer();
+  bool isOptimizationEnabled() { return optimizeName_cut_.size()>0; }
+
+  bool haveSystematics() { return !systematics_.empty(); }
+  void runSystematics();
 
   void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
   void CreateUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
@@ -213,6 +368,8 @@ class baseClass {
   void CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
   void FillUserTH3D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
   void FillUserTH3D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight=1);
+  void CreateUserTProfile(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
+  void FillUserTProfile(const char*  nameAndTitle, Double_t x, Double_t y, Double_t weight=1);
 
   void fillSkimTree();
   void fillReducedSkimTree();
@@ -222,6 +379,7 @@ class baseClass {
   bool isData();
 
   Long64_t GetTreeEntries() { return treeEntries_; }
+  Long64_t GetCurrentEntry() { return readerTools_->GetCurrentEntry(); }
 
   bool hasBranch(const std::string& branchName) { return readerTools_->GetTree()->GetBranch(branchName.c_str()); }
 
@@ -231,23 +389,25 @@ class baseClass {
 
   private :
   int nOptimizerCuts_;
-  string * configFile_;
-  string outputFileName_;
-  string * inputList_;
-  string * cutFile_;
-  string * treeName_; // Name of input tree objects in (.root) files
+  std::string * configFile_;
+  std::string outputFileName_;
+  std::string * inputList_;
+  std::string * cutFile_;
+  std::string * treeName_; // Name of input tree objects in (.root) files
   std::shared_ptr<TChain> tree_; // main tree
-  TTree * tree2_; // tree for globalInfo
+  //TTree * tree2_; // tree for globalInfo
   Long64_t readerEntry_;
   Long64_t treeEntries_;
-  string * cutEfficFile_;
+  std::string * cutEfficFile_;
   std::stringstream preCutInfo_;
-  map<string, preCut> preCutName_cut_;
-  map<string, cut> cutName_cut_;
-  vector<string> orderedCutNames_;
-  map<std::string , TH1D*> userTH1Ds_;
-  map<std::string , TH2D*> userTH2Ds_;
-  map<std::string , TH3D*> userTH3Ds_;
+  std::map<std::string, preCut> preCutName_cut_;
+  std::map<std::string, cut> cutName_cut_;
+  std::vector<std::string> orderedCutNames_;
+  std::vector<std::string> orderedSystCutNames_;
+  std::map<std::string , std::unique_ptr<TH1D> > userTH1Ds_;
+  std::map<std::string , std::unique_ptr<TH2D> > userTH2Ds_;
+  std::map<std::string , std::unique_ptr<TH3D> > userTH3Ds_;
+  std::map<std::string , std::unique_ptr<TProfile> > userTProfiles_;
   void init();
   void readInputList();
   void readCutFile();
@@ -257,8 +417,8 @@ class baseClass {
   bool updateCutEffic();
   bool writeCutEfficFile();
   bool sortCuts(const cut&, const cut&);
-  vector<string> split(const string& s);
-  float decodeCutValue(const string& s);
+  std::vector<std::string> split(const std::string& s);
+  float decodeCutValue(const std::string& s);
   bool skimWasMade_;
   double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
   double getGlobalInfoNstart(const std::string& fileName);
@@ -293,7 +453,7 @@ class baseClass {
   // Skim stuff
   bool produceSkim_;
   int NAfterSkim_;
-  float getSkimPreCutValue(const string& s);
+  float getSkimPreCutValue(const std::string& s);
   TFile *skim_file_;
   TTree* skim_tree_;
   TH1F* hCount_;
@@ -302,14 +462,14 @@ class baseClass {
   //Reduced Skim stuff
   bool produceReducedSkim_;
   int NAfterReducedSkim_;
-  float getReducedSkimPreCutValue(const string& s);
+  float getReducedSkimPreCutValue(const std::string& s);
   TFile *reduced_skim_file_;
   TTree *reduced_skim_tree_;
   TH1F* hReducedCount_;
   bool writeReducedSkimTree();
 
   // Optimization stuff
-  map<int, Optimize> optimizeName_cut_;
+  std::map<int, Optimize> optimizeName_cut_;
   TH1F* eventcuts_; // number of events passing each cut
   TH1F* h_optimizer_; // optimization histogram
   TH1I* h_optimizer_entries_;
@@ -317,7 +477,12 @@ class baseClass {
   // Other stuff
   TH1F* h_weightSums_; // sums of various weights over all events
   std::vector<std::shared_ptr<TH1> > histsToSave_; // various histograms to save, like LHEPdfWeightSumHist
+  std::shared_ptr<TH1> findSavedHist(std::string histName);
 
+  // systematics
+  std::vector<Systematic> systematics_;
+  TList systFormulas_;
+  std::map<std::string, SimpleCut> systCutName_cut_;
 };
 
 #endif
