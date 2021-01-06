@@ -24,14 +24,13 @@ float   Electron::PtHeep             (){ return CaloEnergy()/cosh(SCEta()); }
 float   Electron::SCEta              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index)+m_collection->ReadArrayBranch<Float_t>("Electron_eta",m_raw_index); } 
 float   Electron::SCSeedEta          (){ return -1.0; } 
 float   Electron::SCPhi              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scPhi",m_raw_index); } 
-float   Electron::SCPt               (){ return SCEnergy()/cosh(SCEta()); } 
+float   Electron::SCEt               (){ return (m_collection->ReadArrayBranch<Float_t>("Electron_scEtOverPt",m_raw_index)+1)*Pt(); } 
 float   Electron::IsEB               (){ return fabs(Eta()) < 1.5; } 
 float   Electron::IsEE               (){ return fabs(Eta()) < 2.5; } 
 
 float   Electron::Charge             (){ return m_collection->ReadArrayBranch<Int_t>("Electron_charge",m_raw_index); } 
 float   Electron::R9                 (){ return m_collection->ReadArrayBranch<Float_t>("Electron_r9",m_raw_index); } 
-float   Electron::RawEnergy          (){ return -1.0; } 
-float   Electron::SCEnergy           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scEnergy",m_raw_index);} 
+float   Electron::SCEnergy           (){ return SCEt()*cosh(SCEta()); } 
 // ratio of the calibrated energy/miniaod energy
 float   Electron::ECorr              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_eCorr",m_raw_index);} 
 								      
@@ -176,6 +175,11 @@ bool   Electron::IsEBFiducial     (){ return bool  ( fabs(SCEta()) < 1.442 );}
 bool   Electron::IsEEFiducial     (){ return bool (( fabs(SCEta()) > 1.560 ) && 
 						   ( fabs(SCEta()) < 2.500 ));}
 
+float Electron::EnergyRes (){
+  // SIC: from https://arxiv.org/pdf/1502.02701v1.pdf
+  //      page 23. SIM worst case: sqrt(2)*2.93/90.75 GeV = 4.6%
+  return 0.05;
+}
 // Energy resolution scale factors
 //FIXME
 float Electron::EnergyResScaleFactor (){ 
@@ -199,21 +203,17 @@ float Electron::EnergyScaleFactor (){
 std::ostream& operator<<(std::ostream& stream, Electron& object) {
   stream << object.Name() << " " << ": "
 	 << "Pt = "    << object.Pt ()           << ", "
-	 << "PtHeep = "    << object.PtHeep ()           << ", "
-	 << "Uncorrected (SC) Pt = "    << object.SCPt()           << ", "
-	 << "SCEnergy = "          << object.SCEnergy() << ", "
-	 //<< "SCRawEnergy = "          << object.RawEnergy() << ", "
-	 //<< "EcalEnergy = "          << object.EcalEnergy() << ", "
-	 << "CaloEnergy = "          << object.CaloEnergy() << ", "
+	 //<< "PtHeep = "    << object.PtHeep ()           << ", "
+	 << "SC Et = "    << object.SCEt()           << ", "
+	 << "SC Energy = "          << object.SCEnergy() << ", "
+   << "ECorr (calibEnergy/MiniAODEnergy) = " << object.ECorr() << ", "
 	 << "H/E = "          << object.HoE() << ", "
 	 << "dxy = "          << object.LeadVtxDistXY() << ", "
-   << "ECorr = " << object.ECorr() << ", "
 	 << "Eta = "   << object.Eta()           << ", "
-	 //<< "SCEta = "   << object.SCEta()           << ", "
-	 //<< "SCSeedEta = "   << object.SCSeedEta()           << ", "
+	 << "SCEta = "   << object.SCEta()           << ", "
 	 << "Phi = "   << object.Phi()           << ", "
    << "PassLooseID = " << object.PassUserID(FAKE_RATE_HEEP_LOOSE) << ", "
-   << "PassHEEP (builtin) = " << object.PassHEEPID() << ", "
+   << "PassHEEP (builtin) = " << object.PassHEEPID() //<< ", "
    //<< "PassHEEP (manual) = " << object.PassUserID(HEEP70_MANUAL,true);
    ;
   return stream;

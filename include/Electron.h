@@ -17,7 +17,7 @@ class Electron : public Object {
   float SCEta                (); 
   float SCSeedEta            (); 
   float SCPhi                (); 
-  float SCPt                 (); 
+  float SCEt                 (); 
   float SCEnergy             (); 
   float ECorr                ();
   float Charge               (); 
@@ -25,6 +25,7 @@ class Electron : public Object {
 
   // Energy resolution scale factors
 
+  float EnergyRes ();
   float EnergyResScaleFactor ();
   float EnergyResScaleError  ();
   float EnergyScaleFactor    ();
@@ -154,7 +155,6 @@ class Electron : public Object {
   float HEEP70TrackIsolation ();
   float TrackPt              ();
   float TrackEta             ();
-  float RawEnergy            ();
 
  private:
 
