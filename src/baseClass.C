@@ -163,6 +163,9 @@ void baseClass::init()
   if(produceSkim_) {
     
     skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE", "", 207);
+    skim_file_->cd();
+    skim_file_->mkdir("rootTupleTree");
+    skim_file_->cd("rootTupleTree");
     skim_tree_ = tree_->CloneTree(0);
     hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
@@ -179,6 +182,9 @@ void baseClass::init()
   if(produceReducedSkim_) {
 
     reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE", "", 207);
+    reduced_skim_file_->cd();
+    reduced_skim_file_->mkdir("rootTupleTree");
+    reduced_skim_file_->cd("rootTupleTree");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
     hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
@@ -1958,18 +1964,12 @@ bool baseClass::writeSkimTree()
   for(auto& hist : histsToSave_)
     hist->Write();
 
-  if ( GetTreeEntries() == 0 ){
-    skim_file_->cd();
-    skim_file_->mkdir("rootTupleTree");
-    skim_file_->cd("rootTupleTree");
+  skim_file_->cd();
+  skim_file_->cd("rootTupleTree");
+  if ( GetTreeEntries() == 0 )
     tree_ -> CloneTree(0) -> Write("tree");
-  }
-  else { 
-    skim_file_->cd();
-    skim_file_->mkdir("rootTupleTree");
-    skim_file_->cd("rootTupleTree");
-    skim_tree_ -> Write("tree");
-  }
+  else
+    skim_tree_ -> Write("tree", TObject::kOverwrite);
 
   // Any failure mode to implement?
   return ret;
@@ -1982,9 +1982,8 @@ bool baseClass::writeReducedSkimTree()
   if(!produceReducedSkim_) return ret;
 
   reduced_skim_file_->cd();
-  reduced_skim_file_->mkdir("rootTupleTree");
   reduced_skim_file_->cd("rootTupleTree");
-  reduced_skim_tree_->Write();
+  reduced_skim_tree_->Write("", TObject::kOverwrite);
 
   reduced_skim_file_->cd();
   TDirectory *dir1 = reduced_skim_file_->mkdir("savedHists");
