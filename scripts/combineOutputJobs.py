@@ -21,6 +21,7 @@ def log_result(result):
 
 def CombinePlotsAndTables(args):
     fileList, sampleName, dataset_fromInputList = args
+    # print "INFO: CombinePlotsAndTables() called for sampleName {} -- {} input files".format(sampleName, len(fileList))
     sampleHistos = {}
     sampleTable = {}
     for currentRootFile in fileList:
@@ -32,7 +33,7 @@ def CombinePlotsAndTables(args):
     sampleTable = combineCommon.CalculateEfficiency(sampleTable)
     outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + "_tables.dat"
     with open(outputTableFilename, "w") as outputTableFile:
-        print "Write table to file:", outputTableFilename
+        # print "Write table to file:", outputTableFilename
         combineCommon.WriteTable(sampleTable, sampleName, outputTableFile, False)
     outputTfile = r.TFile(
         outputTableFilename.replace("_tables.dat", ".root"), "RECREATE", "", 207
@@ -40,7 +41,7 @@ def CombinePlotsAndTables(args):
     combineCommon.WriteHistos(outputTfile, sampleHistos)
     outputTfile.Close()
     if not options.saveInputFiles:
-        print "removing input root files"
+        # print "removing input root files"
         for rootFile in fileList:
             os.remove(rootFile)
     return True
@@ -105,7 +106,9 @@ ncores = 4  # only use 4 parallel jobs to be nice
 pool = multiprocessing.Pool(ncores)
 
 # ---Loop over datasets in the inputlist to check if dat/root files are there
-foundAllFiles = True
+missingDatasets = []
+jobCount = 0
+datasetCount = 0
 for lin in open(options.inputList):
 
     lin = string.strip(lin, "\n")
@@ -114,6 +117,7 @@ for lin in open(options.inputList):
         continue
 
     dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
+    datasetCount += 1
     # strip off the slashes and the .txt at the end
     # so this will look like 'TTJets_DiLept_reduced_skim'
     # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
@@ -145,14 +149,16 @@ for lin in open(options.inputList):
         fileList = glob.glob(fullPath2+"/"+rootFileName1.replace(".root", "_*.root"))
         completeNamesTried.append(fullPath2+"/"+rootFileName1.replace(".root", "_*.root"))
     if len(fileList) < 1:
-        print
         print "ERROR: could not find root file for dataset:", dataset_fromInputList
         print "ERROR: tried these full paths:", completeNamesTried
-        foundAllFiles = False
+        print
+        missingDatasets.append(dataset_fromInputList)
+        continue
     sampleName = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
     # print "Found dataset {}: matching files:".format(dataset_fromInputList), fileList
     try:
         pool.apply_async(CombinePlotsAndTables, [[fileList, sampleName, dataset_fromInputList]], callback=log_result)
+        jobCount += 1
     except KeyboardInterrupt:
         print "\n\nCtrl-C detected: Bailing."
         pool.terminate()
@@ -160,10 +166,14 @@ for lin in open(options.inputList):
 
 # now close the pool and wait for jobs to finish
 pool.close()
+print "INFO: running {}/{} jobs/datasets found in inputList...".format(jobCount, datasetCount),
+sys.stdout.flush()
 pool.join()
 # check results?
 # print(result_list)
+print "Done"
+sys.stdout.flush()
 
-if not foundAllFiles:
-    print "Some files not found. Exiting..."
-    sys.exit()
+if len(missingDatasets):
+    print "ERROR: Some files not found. Missing datasets:", missingDatasets, ". Exiting..."
+    exit(-2)
