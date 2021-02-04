@@ -138,6 +138,7 @@ for lin in open(options.inputList):
         + "output"
     )
     completeNamesTried = []
+    # TODO: replace with either newer python glob with recursive globbing, or something like os.walk()
     fileList = glob.glob(fullPath1+"/"+rootFileName1.replace(".root", "_*.root"))
     completeNamesTried.append(fullPath1+"/"+rootFileName1.replace(".root", "_*.root"))
     if len(fileList) < 1:
