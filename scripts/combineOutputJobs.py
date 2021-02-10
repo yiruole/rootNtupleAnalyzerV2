@@ -7,6 +7,7 @@ import string
 from optparse import OptionParser
 import glob
 import multiprocessing
+import traceback
 import ROOT as r
 import combineCommon
 
@@ -21,29 +22,36 @@ def log_result(result):
 
 def CombinePlotsAndTables(args):
     fileList, sampleName, dataset_fromInputList = args
-    # print "INFO: CombinePlotsAndTables() called for sampleName {} -- {} input files".format(sampleName, len(fileList))
-    sampleHistos = {}
-    sampleTable = {}
-    for currentRootFile in fileList:
-        combineCommon.AddHistosFromFile(currentRootFile, sampleHistos, sampleName)
-        currentDatFile = currentRootFile.replace(".root", ".dat")
-        data = combineCommon.ParseDatFile(currentDatFile)
-        data = combineCommon.FillTableErrors(data, currentRootFile)
-        sampleTable = combineCommon.UpdateTable(data, sampleTable)
-    sampleTable = combineCommon.CalculateEfficiency(sampleTable)
-    outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + "_tables.dat"
-    with open(outputTableFilename, "w") as outputTableFile:
-        # print "Write table to file:", outputTableFilename
-        combineCommon.WriteTable(sampleTable, sampleName, outputTableFile, False)
-    outputTfile = r.TFile(
-        outputTableFilename.replace("_tables.dat", ".root"), "RECREATE", "", 207
-    )
-    combineCommon.WriteHistos(outputTfile, sampleHistos)
-    outputTfile.Close()
-    if not options.saveInputFiles:
-        # print "removing input root files"
-        for rootFile in fileList:
-            os.remove(rootFile)
+    # print "INFO: CombinePlotsAndTables() called for sampleName {} -- {} input files: {}".format(sampleName, len(fileList), fileList)
+    try:
+        sampleHistos = {}
+        sampleTable = {}
+        for currentRootFile in fileList:
+            combineCommon.AddHistosFromFile(currentRootFile, sampleHistos, sampleName)
+            currentDatFile = currentRootFile.replace(".root", ".dat")
+            data = combineCommon.ParseDatFile(currentDatFile)
+            data = combineCommon.FillTableErrors(data, currentRootFile)
+            sampleTable = combineCommon.UpdateTable(data, sampleTable)
+        sampleTable = combineCommon.CalculateEfficiency(sampleTable)
+        outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
+        with open(outputTableFilename, "w") as outputTableFile:
+            # print "Write table to file:", outputTableFilename
+            combineCommon.WriteTable(sampleTable, sampleName, outputTableFile, False)
+        outputTfile = r.TFile(
+            outputTableFilename.replace(".dat", ".root"), "RECREATE", "", 207
+        )
+        # print "INFO: writing histos for sampleName {} to file {}".format(sampleName, outputTfile.GetName())
+        combineCommon.WriteHistos(outputTfile, sampleHistos)
+        outputTfile.Close()
+        if not options.saveInputFiles:
+            # print "removing input root files"
+            for rootFile in fileList:
+                os.remove(rootFile)
+    except Exception as e:
+        print "ERROR: exception in CombinePlotsAndTables for sampleName={}".format(sampleName)
+        traceback.print_exc()
+        raise e
+
     return True
 
 
@@ -163,6 +171,9 @@ for lin in open(options.inputList):
         print "\n\nCtrl-C detected: Bailing."
         pool.terminate()
         sys.exit(1)
+    except Exception as e:
+        print "ERROR: caught exception in job for sampleName: {}; exiting".format(sampleName)
+        exit(-2)
 
 # now close the pool and wait for jobs to finish
 pool.close()
@@ -170,7 +181,9 @@ print "INFO: running {}/{} jobs/datasets found in inputList...".format(jobCount,
 sys.stdout.flush()
 pool.join()
 # check results?
-# print(result_list)
+if len(result_list) < jobCount:
+    print "ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list))
+    exit(-2)
 print "Done"
 sys.stdout.flush()
 
