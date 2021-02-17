@@ -6,7 +6,7 @@ import math
 import string
 from prettytable import PrettyTable
 from ROOT import TFile, Math
-from combineCommon import lookupXSection, ParseXSectionFile, GetSamplesToCombineDict, SanitizeDatasetNameFromInputList, GetUnscaledTotalEvents, FindUnscaledRootFile
+import combineCommon as cc
 
 
 def GetFullSignalName(signal_name, mass_point):
@@ -300,37 +300,30 @@ def GetTableEntryStr(evts, errStatUp="-", errStatDown="-", errSyst=0, latex=Fals
             )
 
 
-def GetXSecTimesIntLumi(sampleNameFromDataset):
-    # print 'GetXSecTimesIntLumi(',sampleNameFromDataset+')'
-    xsection = float(lookupXSection(sampleNameFromDataset, xsectionDict))
-    intLumiF = float(intLumi)
-    return xsection * intLumiF
-
-
-def CalculateScaledRateError(
-    sampleNameFromDataset,
-    N_unscaled_tot,
-    N_unscaled_pass_entries,
-    N_unscaled_pass_integral,
-    doScaling=True,
-):
-    # print 'CalculateScaledRateError(', sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral, ')'
-    # sys.stdout.flush()
-    # binomial error
-    p = N_unscaled_pass_entries / N_unscaled_tot
-    q = 1 - p
-    w = (
-        N_unscaled_pass_integral / N_unscaled_pass_entries
-        if N_unscaled_pass_entries != 0
-        else 0.0
-    )
-    unscaledRateError = N_unscaled_tot * w * math.sqrt(p * q / N_unscaled_tot)
-    if doScaling:
-        xsecTimesIntLumi = GetXSecTimesIntLumi(sampleNameFromDataset)
-        scaledRateError = unscaledRateError * (xsecTimesIntLumi / N_unscaled_tot)
-    else:
-        scaledRateError = unscaledRateError
-    return scaledRateError
+# def CalculateScaledRateError(
+#     sampleNameFromDataset,
+#     N_unscaled_tot,
+#     N_unscaled_pass_entries,
+#     N_unscaled_pass_integral,
+#     doScaling=True,
+# ):
+#     # print 'CalculateScaledRateError(', sampleNameFromDataset, N_unscaled_tot, N_unscaled_pass_entries, N_unscaled_pass_integral, ')'
+#     # sys.stdout.flush()
+#     # binomial error
+#     p = N_unscaled_pass_entries / N_unscaled_tot
+#     q = 1 - p
+#     w = (
+#         N_unscaled_pass_integral / N_unscaled_pass_entries
+#         if N_unscaled_pass_entries != 0
+#         else 0.0
+#     )
+#     unscaledRateError = N_unscaled_tot * w * math.sqrt(p * q / N_unscaled_tot)
+#     if doScaling:
+#         xsecTimesIntLumi = GetXSecTimesIntLumi(sampleNameFromDataset)
+#         scaledRateError = unscaledRateError * (xsecTimesIntLumi / N_unscaled_tot)
+#     else:
+#         scaledRateError = unscaledRateError
+#     return scaledRateError
 
 
 def GetUnscaledSampleRootFile(sampleName, bkgType=""):
@@ -352,123 +345,8 @@ def GetUnscaledSampleRootFile(sampleName, bkgType=""):
             #     analysisCode = "analysisClass_lq_eejj"
             # else:
             #     analysisCode = "analysisClass_lq_enujj_MT"
-        d_unscaledRootFiles[bkgType][sampleName] = FindUnscaledRootFile(filepath, sampleName)
+        d_unscaledRootFiles[bkgType][sampleName] = cc.FindUnscaledRootFile(filepath, sampleName)
     return d_unscaledRootFiles[bkgType][sampleName]
-
-
-def GetRatesAndErrors(
-    unscaledRootFile,
-    combinedRootFile,
-    unscaledTotalEvts,
-    sampleName,
-    selection,
-    isDataOrQCD=False,
-    isTTBarFromData=False,
-):
-    verbose = True
-    if verbose and isTTBarFromData:
-        print "GetRatesAndErrors(", unscaledRootFile.GetName(), combinedRootFile.GetName(), unscaledTotalEvts, sampleName, selection, isDataOrQCD, ")"
-    if selection == "preselection":
-        selection = "PAS"
-    if doEEJJ:
-        histName = "Mej_selected_min"
-    else:
-        histName = "Mej"
-    # special case of TTBar from data
-    # if isTTBarFromData:
-    #     # rate calcs should be same as data/QCD
-    #     mejHist = combinedRootFile.Get(
-    #         "histo1D__" + ttbarSampleName + "__" + histName + "_" + selection
-    #     )
-    #     mejUnscaledRawHist = combinedRootFile.Get(
-    #         "histo1D__" + ttBarUnscaledRawSampleName + "__" + histName + "_" + selection
-    #     )
-    #     mejNonTTBarHist = combinedRootFile.Get(
-    #         "histo1D__" + nonTTBarSampleName + "__" + histName + "_" + selection
-    #     )
-    #     if not mejNonTTBarHist:
-    #         sys.stdout.flush()
-    #         print "ERROR: could not find hist histo1D__" + nonTTBarSampleName + "__" + histName + "_" + selection, " in file:", combinedRootFile.GetName()
-    #         print "EXIT"
-    #         exit(-1)
-    #     rateErr = Double(0)
-    #     integ = mejNonTTBarHist.IntegralAndError(
-    #         1, mejNonTTBarHist.GetNbinsX(), rateErr
-    #     )
-    #     print "mejNonTTBar:", integ, ",+/-", rateErr
-    #     integ = mejUnscaledRawHist.IntegralAndError(
-    #         1, mejUnscaledRawHist.GetNbinsX(), rateErr
-    #     )
-    #     print "mejUnscaledRaw:", integ, ",+/-", rateErr
-    #     # mejNonTTBarHist.Scale(1/1000.)
-    #     # rate = mejHist.Integral()
-    #     rate = mejHist.IntegralAndError(1, mejHist.GetNbinsX() + 1, rateErr)
-    #     unscaledHist = mejUnscaledRawHist.Clone()
-    #     # unscaledHist.Add(mejNonTTBarHist,-1) #LQ2 only uses emujj data events
-    #     # integ = mejUnscaledHist.IntegralAndError(1,mejUnscaledHist.GetNbinsX(),rateErr)
-    #     # print 'mejUnscaled:',integ,',+/-',rateErr
-    #     # scaledHist = unscaledHist.Clone()
-    #     # scaledHist.Scale(0.436873)
-    #     # integ = mejScaledHist.IntegralAndError(1,mejScaledHist.GetNbinsX(),rateErr)
-    #     # print 'mejScaled:',integ,',+/-',rateErr
-    #     # unscaledRate = unscaledHist.Integral()
-    #     unscaledRateErr = Double(0)
-    #     unscaledRate = unscaledHist.IntegralAndError(
-    #         1, mejHist.GetNbinsX() + 1, unscaledRateErr
-    #     )
-    #     # unscaledRate+=mejNonTTBarHist.Integral(1,mejHist.GetNbinsX()+1)
-    #     if verbose:
-    #         print "using unscaled (minus nonttbarMC) hist:", unscaledHist.GetName(), "from file:", combinedRootFile.GetName()
-    #         print "TTBARFROMDATA-->rate=", rate, "+/-", rateErr
-    #         print "mejUnscaled:", unscaledRate, ",+/-", unscaledRateErr
-    #         print "using hist:", mejHist.GetName(), "from file:", combinedRootFile.GetName()
-    #     return rate, rateErr, unscaledRate
-    # mejHist = combinedRootFile.Get('histo1D__'+sampleName+histName+'_'+selection)
-    # if not mejHist:
-    #  print 'ERROR: could not find hist','histo1D__'+sampleName+histName+'_'+selection,' in file:',combinedRootFile.GetName()
-    #  print 'EXIT'
-    #  exit(-1)
-    # rate = mejHist.Integral()
-    mejUnscaledHist = unscaledRootFile.Get(histName + "_" + selection)
-    if not mejUnscaledHist:
-        print "ERROR: could not find hist", histName + "_" + selection, " in file:", unscaledRootFile.GetName()
-        print "EXIT"
-        exit(-1)
-    unscaledInt = mejUnscaledHist.Integral(1, mejUnscaledHist.GetNbinsX() + 1)
-    unscaledRate = mejUnscaledHist.GetEntries()
-    xsecTimesIntLumi = GetXSecTimesIntLumi(sampleName)
-    sumOfWeightsHist = unscaledRootFile.Get("SumOfWeights")
-    if not sumOfWeightsHist:
-        print "ERROR: could not find hist SumOfWeights in file:", unscaledRootFile.GetName()
-        print "EXIT"
-        exit(-1)
-    sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
-    # sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
-    # avgTopPtWeight = sumTopPtWeights / unscaledTotalEvts
-    if not isDataOrQCD:
-        rate = unscaledInt * xsecTimesIntLumi / sumAMCatNLOweights
-        # print 'for sampleName',sampleName,'amcAtNLO, rate=',unscaledInt,'*',xsecTimesIntLumi,'/',sumAMCatNLOweights,'=',rate
-        # sys.stdout.flush()
-        rateErr = CalculateScaledRateError(
-            sampleName, sumAMCatNLOweights, unscaledRate, unscaledInt
-        )
-    else:
-        # print '[DataOrQCD detected] for sampleName',sampleName,'rate=',unscaledInt
-        # print 'reading 'histName+'_'+selection,'from',unscaledRootFile
-        rate = unscaledInt
-        rateErr = CalculateScaledRateError(
-            sampleName, unscaledTotalEvts, unscaledRate, unscaledInt, False
-        )
-    # if "TT" in sampleName and "data" not in sampleName.lower():
-    #     # print 'applying extra average weight to',sampleName
-    #     rate /= avgTopPtWeight
-    #     rateErr /= avgTopPtWeight
-    if verbose:
-        if selection == "LQ550":
-            print "INFO: hist", histName + "_" + selection, " in file:", unscaledRootFile.GetName()
-            print "\tunscaledRate=", unscaledRate, "unscaled entries=", mejUnscaledHist.GetEntries()
-            print "\txsecTimesIntLumi=", xsecTimesIntLumi, "unscaledInt=", unscaledInt, "unscaledRate=", unscaledRate, "unscaledTotalEvts=", unscaledTotalEvts, "rate=unscaledInt*xsecTimesIntLumi/unscaledTotalEvts=", rate
-    return rate, rateErr, unscaledRate
 
 
 def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
@@ -484,7 +362,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         if "TT" in bkg_name and "data" in bkg_name.lower():
             scaledRootFile = ttbarFile
             bkgType = "TTData"
-        elif "QCD" in bkg_name:  #  or "SinglePhoton" in bkg_name:
+        elif "QCD" in bkg_name:  # or "SinglePhoton" in bkg_name:
             scaledRootFile = qcdTFile
             bkgType = "QCD"
         else:
@@ -494,16 +372,16 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         sampleRateErr = 0
         sampleUnscaledRate = 0
         sampleUnscaledTotalEvts = 0
-        # print 'PRESELECTION bkg_bame=',bkg_name
-        # print 'backgroundType=',bkgType
-        # print 'sampleList['+bkg_name+']=',sampleList
+        # print 'PRESELECTION bkg_bame=', bkg_name
+        # # print 'backgroundType=', bkgType
+        # print 'sampleList['+bkg_name+']=', sampleList
         for bkgSample in sampleList:
             bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample, bkgType)
             bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
             if not bkgUnscaledRootFile:
                 print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
                 exit(-1)
-            unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+            unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
             # SIC removed Jul 2020
             # if bkgType == "TTData":
             #     unscaledTotalEvts = GetUnscaledTotalEvents(
@@ -512,12 +390,13 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             sampleUnscaledTotalEvts += unscaledTotalEvts
             # preselection
             # print 'PRESELECTION ------>Call GetRatesAndErrors for sampleName=',bkgSample
-            rate, rateErr, unscaledRate = GetRatesAndErrors(
+            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
                 bkgUnscaledRootFile,
                 scaledRootFile,
                 unscaledTotalEvts,
                 bkgSample,
                 "preselection",
+                doEEJJ,
                 not bkgType == "MC",
                 bkgType == "TTData",
             )
@@ -561,21 +440,22 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                     if not bkgUnscaledRootFile:
                         print "ERROR: file not found:", bkgUnscaledRootFilename
                         exit(-1)
-                    unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+                    unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
                     # SIC removed Jul 2020
                     # if bkgType == "TTData":
                     #     unscaledTotalEvts = GetUnscaledTotalEvents(
                     #         bkgUnscaledRootFile, ttBarUnscaledRawSampleName
                     #     )
                     sampleUnscaledTotalEvts += unscaledTotalEvts
-                    rate, rateErr, unscaledRate = GetRatesAndErrors(
+                    rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
                         bkgUnscaledRootFile,
                         scaledRootFile,
                         unscaledTotalEvts,
                         bkgSample,
                         selectionName,
+                        doEEJJ,
                         not bkgType == "MC",
-                        bkgType == "TTData",
+                        bkgType == "TTData"
                     )
                     # if bkgType=='TTData':
                     #  print '------>Called GetRatesAndErrors for sampleName=',bkgSample
@@ -627,14 +507,15 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             # print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
             unscaledRootFilename = GetUnscaledSampleRootFile(signalNameForFile)
             unscaledRootFile = TFile.Open(unscaledRootFilename)
-            unscaledTotalEvts = GetUnscaledTotalEvents(unscaledRootFile)
+            unscaledTotalEvts = cc.GetUnscaledTotalEvents(unscaledRootFile)
             # preselection
-            rate, rateErr, unscaledRate = GetRatesAndErrors(
+            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
                 unscaledRootFile,
                 tfile,
                 unscaledTotalEvts,
                 signalNameForFile,
                 "preselection",
+                doEEJJ
             )
             sigRatesDict = {}
             sigRatesDict["preselection"] = rate
@@ -647,12 +528,13 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             for imp, mp in enumerate(mass_points):
                 signalSelName = signal_name + mp
                 selectionName = "LQ" + mp
-                rate, rateErr, unscaledRate = GetRatesAndErrors(
+                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
                     unscaledRootFile,
                     tfile,
                     unscaledTotalEvts,
                     signalNameForFile,
                     selectionName,
+                    doEEJJ
                 )
                 sigRatesDict[selectionName] = rate
                 sigRateErrsDict[selectionName] = rateErr
@@ -684,17 +566,18 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         if not bkgUnscaledRootFile:
             print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
             exit(-1)
-        unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+        unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
         sampleUnscaledTotalEvts += unscaledTotalEvts
         # preselection
         # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
-        rate, rateErr, unscaledRate = GetRatesAndErrors(
+        rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
             bkgUnscaledRootFile,
             scaledRootFile,
             unscaledTotalEvts,
             bkgSample,
             "preselection",
-            isData,
+            doEEJJ,
+            isData
         )
         # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
         sampleRate += rate
@@ -725,17 +608,18 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 if not bkgUnscaledRootFile:
                     print "ERROR: file not found:", bkgUnscaledRootFilename
                     exit(-1)
-                unscaledTotalEvts = GetUnscaledTotalEvents(bkgUnscaledRootFile)
+                unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
                 sampleUnscaledTotalEvts += unscaledTotalEvts
                 # preselection
                 # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
-                rate, rateErr, unscaledRate = GetRatesAndErrors(
+                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
                     bkgUnscaledRootFile,
                     scaledRootFile,
                     unscaledTotalEvts,
                     bkgSample,
                     selectionName,
                     isData,
+                    doEEJJ
                 )
                 # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
                 # if isQCD:
@@ -770,58 +654,45 @@ doRPV = False  # to do RPV, set doEEJJ and doRPV to True
 forceGmNNormBkgStatUncert = False
 #signalNameTemplate = "LQToUE_M-{}_BetaOne"
 signalNameTemplate = "LQToDEle_M-{}_pair"
+year = 2016
+
+sampleListForMerging = "$LQANA/config/sampleListForMerging_13TeV_eejj_{}.txt"
+#
+sampleListsForMergingQCD = {}
+sampleListsForMergingQCD[2016] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2016.txt"
+sampleListsForMergingQCD[2017] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
+sampleListsForMergingQCD[2018] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
+#
+inputLists = {}
+#inputLists[2016] = "$LQANA/config/oldInputLists/nanoV7/2016/nanoV7_2016_pskEEJJ_16oct2020_comb/inputListAllCurrent.txt"
+inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt"
+inputLists[2017] = "$LQANA/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
+#
+qcdFilePaths = {}
+qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+qcdFilePaths[2017] = "$LQDATA/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+#
+filePaths = {}
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
+filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_9nov2020_optFinalSelsOld/output_cutTable_lq_eejj/"
+filePaths[2017] = "$LQDATA/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj/"
+#
+xsecFiles = {}
+# xsecFiles[2016] = "$LQANA/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+xsecFiles[2016] = "$LQANA/config/xsection_13TeV_2015.txt"
+xsecFiles[2017] = "$LQANA/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
 
 if doEEJJ:
-    sampleListForMerging = (
-        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj.txt"
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_eejj_2017.txt"
-    )
-    sampleListForMergingQCD = (
-        # os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven.txt"
-        os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
-    )
+    sampleListForMerging = os.path.expandvars(sampleListForMerging.format(year))
+    sampleListForMergingQCD = os.path.expandvars(sampleListsForMergingQCD[year])
     # SIC 6 Jul 2020 remove
     # sampleListForMergingTTBar = (
     #     os.environ["LQANA"] + "/config/sampleListForMerging_13TeV_ttbarBkg_emujj.txt"
     # )
-
-    inputList = (
-        os.environ["LQANA"]
-        # + "/config/oldInputLists/nanoV6_2016_pskEEJJ_11and4jun_25and8may2020_comb/inputListAllCurrent.txt"
-        # nanoV7
-        # + "/config/nanoV7_2016_pskEEJJ_3sep2020/inputListAllCurrent.txt"
-        # + "/config/nanoV7_2017_pskEEJJ_3sep2020_comb/inputListAllCurrent.txt"
-        #
-        # + "/config/nanoV7_2016_pskEEJJ_16oct2020_comb/inputListAllCurrent.txt"
-        + "/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
-    )
-    qcdFilePath = (
-        os.environ["LQDATA"]
-        # + "/nanoV6/2016/analysis/qcdYield_optFinalSels_13jul2020/output_cutTable_lq_eejj_QCD/"
-        # nanoV7
-        # + "/nanoV7/2016/analysis/qcdYield_eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
-        # + "/nanoV7/2017/analysis/qcdYield_eejj_8oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
-        #
-        # + "/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
-        + "/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
-    )
-    filePath = (
-        os.environ["LQDATA"]
-        # + "/nanoV6/2016/analysis/prefire_optFinalSels_13jul2020/output_cutTable_lq_eejj/"
-        # nanoV7
-        # + "/nanoV7/2016/analysis/eejj_16sep2020_optFinalSels/output_cutTable_lq_eejj/"
-        # + "/nanoV7/2017/analysis/prefire_eejj_6oct2020_optFinalSels//output_cutTable_lq_eejj/"
-        #
-        # + "/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
-        + "/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj/"
-    )
-    xsection = (
-        os.environ["LQANA"]
-        # + "/versionsOfAnalysis/2016/eejj/jun4/unscaled/extendTTbarRange/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-        # nanov7
-        # + "/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-        + "/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-    )
+    inputList = os.path.expandvars(inputLists[year])
+    qcdFilePath = os.path.expandvars(qcdFilePaths[year])
+    filePath = os.path.expandvars(filePaths[year])
+    xsection = os.path.expandvars(xsecFiles[year])
     # ttbarFilePath = (
     #     os.environ["LQDATA"]
     #     + "/2016ttbar/mar17_emujj_fixMuons/output_cutTable_lq_ttbar_emujj_correctTrig/"
@@ -893,18 +764,15 @@ else:
     ttbar_data_filepath = ""
     # ttbarFilePath = filePath
 
-do2016 = False
-do2017 = False
-do2018 = False
-if '2016' in dataMC_filepath:
+if year == 2016:
     do2016 = True
-    intLumi = 35867.0
-elif '2017' in dataMC_filepath:
+    cc.intLumi = 35867.0
+elif year == 2017:
     do2017 = True
-    intLumi = 41540.0
-elif '2018' in dataMC_filepath:
+    cc.intLumi = 41540.0
+elif year == 2018:
     do2018 = True
-    intLumi = 59399.0
+    cc.intLumi = 59399.0
 else:
     print "ERROR: could not find one of 2017/2017/2018 in inputfile path. cannot do year-specific customizations. quitting."
     exit(-1)
@@ -918,8 +786,8 @@ else:
         str(i) for i in range(300, 3100, 100)
     ]  # go from 300-2000 in 100 GeV steps
     # mass_points.extend(["3500", "4000"])
-    # mass_points.remove("2500")  # FIXME 2016
-    mass_points.remove("3000")  # FIXME 2017
+    mass_points.remove("2500")  # FIXME 2016
+    # mass_points.remove("3000")  # FIXME 2017
 
 if doEEJJ:
     if doRPV:
@@ -1171,10 +1039,13 @@ else:
     print "Using systematics files [RPV ctau1000]:", systematics_filepaths_ctau1000
 
 # get xsections
-xsectionDict = ParseXSectionFile(xsection)
-dictSamples = GetSamplesToCombineDict(sampleListForMerging)
-dictSamplesQCD = GetSamplesToCombineDict(sampleListForMergingQCD)
+cc.ParseXSectionFile(xsection)
+dictSamples = cc.GetSamplesToCombineDict(sampleListForMerging)
+dictSamplesQCD = cc.GetSamplesToCombineDict(sampleListForMergingQCD)
 dictSamples.update(dictSamplesQCD)
+# expand
+dictSamples = cc.ExpandSampleDict(dictSamples)
+
 # SIC 6 Jul 2020 remove
 # if doEEJJ:
 #     dictSamplesTTBarRaw = GetSamplesToCombineDict(sampleListForMergingTTBar)
@@ -1198,10 +1069,9 @@ for lin in open(inputList):
     if lin.startswith("#"):
         continue
     dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
-    xsection_val = lookupXSection(
-        SanitizeDatasetNameFromInputList(dataset_fromInputList), xsectionDict
+    xsection_val = cc.lookupXSection(
+        cc.SanitizeDatasetNameFromInputList(dataset_fromInputList)
     )
-
 
 # rates/etc.
 FillDicts(dataMC_filepath, qcd_data_filepath, ttbar_data_filepath)
@@ -1463,6 +1333,8 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 #   lnN_f = 1.0 + statErr/thisBkgEvts
                 #   forceLogNormBkgStatUncert = True
             else:
+                # print '[datacard] INFO:  for selection:', selectionName, 'and background:', background_name,
+                # 'total unscaled events=', thisBkgTotalEntries, 'rate=', thisBkgEvts
                 # for small uncertainties, use gamma distribution with alpha=(factor to go to signal region from control/MC)
                 # since we can't compute evts/entries, we use it from the preselection (following LQ2)
                 # gmN_weight = d_background_rates[background_name]['preselection'] / d_background_unscaledRates[background_name]['preselection']

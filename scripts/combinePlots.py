@@ -5,94 +5,14 @@ import sys
 import string
 from optparse import OptionParser
 import os.path
-from ROOT import TFile, TH1F, TH2F, TH3F, gROOT
-import ROOT
+from ROOT import TFile, gROOT
 import re
+import glob
 
 import combineCommon
 
 
-def updateSample(dictFinalHistoAtSample, htemp, h, toBeUpdated, plotWeight):
-    histoName = htemp.GetName()
-    # thanks Riccardo
-    # init histo if needed
-    if h not in dictFinalHistoAtSample:
-        if "TH2" in htemp.__repr__():
-            dictFinalHistoAtSample[h] = TH2F()
-            dictFinalHistoAtSample[h].SetName("histo2D__" + sample + "__" + histoName)
-            dictFinalHistoAtSample[h].SetBins(
-                htemp.GetNbinsX(),
-                htemp.GetXaxis().GetXmin(),
-                htemp.GetXaxis().GetXmax(),
-                htemp.GetNbinsY(),
-                htemp.GetYaxis().GetBinLowEdge(1),
-                htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()),
-            )
-            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
-            htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
-            # continue
-        elif "TH1" in htemp.ClassName():
-            dictFinalHistoAtSample[h] = TH1F()
-            dictFinalHistoAtSample[h].SetName("histo1D__" + sample + "__" + histoName)
-            dictFinalHistoAtSample[h].SetBins(
-                htemp.GetNbinsX(),
-                htemp.GetXaxis().GetXmin(),
-                htemp.GetXaxis().GetXmax(),
-            )
-            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
-        elif "TH3" in htemp.ClassName():
-            dictFinalHistoAtSample[h] = TH3F()
-            dictFinalHistoAtSample[h].SetName("histo3D__" + sample + "__" + histoName)
-            dictFinalHistoAtSample[h].SetBins(
-                htemp.GetNbinsX(),
-                htemp.GetXaxis().GetXmin(),
-                htemp.GetXaxis().GetXmax(),
-                htemp.GetNbinsY(),
-                htemp.GetYaxis().GetBinLowEdge(1),
-                htemp.GetYaxis().GetBinUpEdge(htemp.GetNbinsY()),
-                htemp.GetNbinsZ(),
-                htemp.GetZaxis().GetBinLowEdge(1),
-                htemp.GetZaxis().GetBinUpEdge(htemp.GetNbinsZ()),
-            )
-            htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
-            htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
-            htemp.GetZaxis().Copy(dictFinalHistoAtSample[h].GetZaxis())
-        else:
-            # print 'not combining classtype of',htemp.ClassName()
-            return
-    if toBeUpdated:
-        #  XXX DEBUG
-        # binToExamine = 33
-        # if 'OptBinLQ60' in histoName:
-        #  print
-        #  if htemp.GetBinContent(binToExamine)!=0:
-        #    print 'Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',htemp.GetBinContent(binToExamine),' error=',htemp.GetBinError(binToExamine),'relErr=',htemp.GetBinError(binToExamine)/htemp.GetBinContent(binToExamine)
-        #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
-        #    print 'BEFORE',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relErr=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
-        # if 'SumOfWeights' in histoName:
-        #  continue # do not sum up the individual SumOfWeights histos
-        # if 'optimizerentries' in histoName.lower():
-        # XXX DEBUG TEST
-        if "optimizerentries" in histoName.lower() or "noweight" in histoName.lower():
-            returnVal = dictFinalHistoAtSample[h].Add(htemp)
-        else:
-            # returnVal = dictFinalHistoAtSample[h].Add(htemp, plotWeight)
-            # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
-            htemp.Scale(plotWeight)
-            returnVal = dictFinalHistoAtSample[h].Add(htemp)
-        #  XXX DEBUG
-        # if 'OptBinLQ60' in histoName:
-        #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
-        #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
-        #    print
-        if not returnVal:
-            print 'ERROR: Failed adding hist named"' + histoName + '"to', dictFinalHistoAtSample[
-                h
-            ].GetName()
-            exit(-1)
-
-
-def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
+def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.0, pdfReweight=False):
     if xsection_val == "-1":
         weight = 1.0
         plotWeight = 1.0
@@ -104,14 +24,6 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         xsection_X_intLumi = float(xsection_val) * float(intLumi)
         print "\t[MC]",
         sys.stdout.flush()
-        # need to multiply by sum of weights
-        tfile = TFile(inputRootFile)
-        sumOfWeightsHist = tfile.Get("SumOfWeights")
-        sumWeights = sumOfWeightsHist.GetBinContent(1)
-        # sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
-        lhePdfWeightsHist = tfile.Get("LHEPdfSumw")
-        lhePdfWeightSumw = lhePdfWeightsHist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
-        tfile.Close()
 
         # removed 2018 March 2
         # XXX: This is incorrect anyway.
@@ -120,10 +32,9 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         #  print '\tapplying extra TopPt weight of',avgTopPtWeight,'to',dataset_fromInputList
         #  xsection_X_intLumi/=avgTopPtWeight
 
-        if "2016" in inputRootFile:
-            if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
-                print "\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights)
-                sumWeights = lhePdfWeightSumw
+        if pdfReweight:
+            print "\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights)
+            sumWeights = lhePdfWeightSumw
 
         # now calculate the actual weight
         # weight = 1.0
@@ -135,7 +46,7 @@ def CalculateWeight(Ntot, xsection_val, intLumi, inputRootFile):
         print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
         weight = xsection_X_intLumi / sumWeights
         plotWeight = weight / 1000.0
-    return weight, plotWeight, xsection_X_intLumi, sumWeights
+    return weight, plotWeight, xsection_X_intLumi
 
 
 doProfiling = False
@@ -158,7 +69,7 @@ gROOT.ProcessLine("gErrorIgnoreLevel=2001;")
 
 # ---Option Parser
 # --- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
-usage = "usage: %prog [options] \nExample: \n./combineTablesTemplate.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
+usage = "usage: %prog [options] \nExample: \n./combinePlots.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
 
 parser = OptionParser(usage=usage)
 
@@ -283,7 +194,12 @@ for arg in sys.argv:
     print " " + arg,
 print
 
+doPDFReweight2016LQSignals = False
+if doPDFReweight2016LQSignals:
+    print "Doing PDF reweighting for 2016 LQ B/D signal samples"
+
 # check logfile for errors if given
+# FIXME: this seems obsolete
 if os.path.isfile(options.logFile):
     foundError = False
     with open(options.logFile, "r") as logFile:
@@ -303,6 +219,11 @@ if os.path.isfile(options.logFile):
         print "Great! Logfile was checked and was completely clean!"
 else:
     print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
+
+if not options.tablesOnly:
+    outputTfile = TFile(
+        options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE", "", 207
+    )
 
 xsectionDict = combineCommon.ParseXSectionFile(options.xsection)
 # print 'Dataset      XSec'
@@ -329,8 +250,7 @@ for lin in open(options.inputList):
     xsection_val = combineCommon.lookupXSection(
         combineCommon.SanitizeDatasetNameFromInputList(
             dataset_fromInputList.replace("_tree", "")
-        ),
-        xsectionDict,
+        )
     )
 
 # ---Loop over datasets in the inputlist to check if dat/root files are there
@@ -359,8 +279,9 @@ for lin in open(options.inputList):
         + dataset_fromInputList
         + ".root"
     )
-    rootFileName2 = rootFileName1.replace(".root", "_0.root")
+    # rootFileName2 = rootFileName1.replace(".root", "_0.root")
     fullPath1 = options.inputDir
+    # fullPath2: condor style with one job per dataset
     fullPath2 = (
         options.inputDir
         + "/"
@@ -370,45 +291,37 @@ for lin in open(options.inputList):
         + "/"
         + "output"
     )
-    foundFile = False
     completeNamesTried = []
-    # fullpath1 is condor style, probably most frequent, so check that first
-    for path in [fullPath1, fullPath2]:
-        if not foundFile:
-            for filename in [rootFileName2, rootFileName1]:
-                completeName = path+"/"+filename
-                completeNamesTried.append(completeName)
-                if os.path.isfile(completeName):
-                    dictDatasetsFileNames[dataset_fromInputList] = completeName
-                    # print "Found file:", completeName, "for dataset=", dataset_fromInputList
-                    foundFile = True
-                    break
-    if foundFile:
-        inputDataFile = completeName.replace(".root", ".dat")
-        if not os.path.isfile(inputDataFile):
-            print
-            print "ERROR: file " + inputDataFile + " not found"
-            foundAllFiles = False
-    else:
+    fileList = glob.glob(fullPath1+"/"+rootFileName1)
+    completeNamesTried.append(fullPath1+"/"+rootFileName1)
+    if len(fileList) < 1:
+        fileList = glob.glob(fullPath2+"/"+rootFileName1.replace(".root", "*.root"))
+        completeNamesTried.append(fullPath2+"/"+rootFileName1.replace(".root", "*.root"))
+    if len(fileList) < 1:
         print
         print "ERROR: could not find root file for dataset:", dataset_fromInputList
         print "ERROR: tried these full paths:", completeNamesTried
         foundAllFiles = False
-
+    elif len(fileList) > 1:
+        print "ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList)
+        print "ERROR: considered these full paths: {}".format(completeNamesTried)
+        foundAllFiles = False
+    sampleName = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
+    dictDatasetsFileNames[dataset_fromInputList] = fileList[0]
 
 if not foundAllFiles:
     print "Some files not found. Exiting..."
     sys.exit()
 else:
     print "\bDone.  All root/dat files are present."
+    print
 
 if not os.path.isdir(options.outputDir):
     os.makedirs(options.outputDir)
 
-if not options.tablesOnly:
-    outputTfile = TFile(
-        options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE", "", 207
-    )
+outputTableFile = open(
+    options.outputDir + "/" + options.analysisCode + "_tables.dat", "w"
+)
 
 # loop over samples defined in sampleListForMerging
 for sample, pieceList in dictSamples.iteritems():
@@ -416,36 +329,59 @@ for sample, pieceList in dictSamples.iteritems():
     #    print "look at sample named:",sample
     print "-->Look at sample named:", sample, "with piecelist=", pieceList
 
-    # init if needed
-    if sample not in dictFinalTables:
-        dictFinalTables[sample] = {}
-    if sample not in dictFinalHisto:
-        dictFinalHisto[sample] = {}
+    # # init if needed
+    # if sample not in dictFinalTables:
+    #     dictFinalTables[sample] = {}
+    # if sample not in dictFinalHisto:
+    #     dictFinalHisto[sample] = {}
+    histoDictThisSample = {}
+    tablesThisSample = []
+
+    # piecesToAdd = []
+    # print "dictDatasetsFileNames=", dictDatasetsFileNames
+    # for piece in pieceList:
+    #     if "/" in piece:
+    #         piece = combineCommon.SanitizeDatasetNameFromFullDataset(piece)
+    #     if piece in dictDatasetsFileNames.iterkeys():
+    #         sampleHistos = combineCommon.GetSampleHistosFromTFile(outputTfile, piece)
+    #         print "INFO: replace non-dataset piece '{}' in sample '{}' by combining dicts.".format(piece, sample)
+    #         combineCommon.UpdateHistoDict(dictFinalHisto[sample], sampleHistos, sample)
+    #         dictSamplesPiecesAdded[sample].append(piece)
+    #         # FIXME TODO add tables
+    #     else:
+    #         print "ERROR: can't handle piece '{}' in sample '{}'; perhaps it was not defined already in the sampleList. Exiting.".format(
+    #                 piece, sample)
+    #         print "dictDatasetsFileNames:", dictDatasetsFileNames
+    #         exit(-2)
+    piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
+    # piecesToAdd = []
+    # for piece in pieceList:
+    #     if "/" in piece:
+    #         piece = combineCommon.SanitizeDatasetNameFromFullDataset(piece)
+    #         piecesToAdd.append(piece)
+    #     else:
+    #         pieces = [combineCommon.SanitizeDatasetNameFromFullDataset(x) for x in dictSamples[piece]]
+    #         piecesToAdd.extend(pieces)
+    print "INFO: piecesToAdd:", piecesToAdd
 
     # ---Loop over datasets in the inputlist
+    # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
     for dataset_fromInputList, rootFile in dictDatasetsFileNames.iteritems():
-
-        # lin = string.strip(lin, "\n")
-        # # print 'lin=',lin
-        # if lin.startswith("#"):
-        #     continue
-
-        # dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
-        # # dataset_fromInputList = dataset_fromInputList
-
+        if len(dictSamplesPiecesAdded[sample]) == len(piecesToAdd):
+            break  # we're done!
         toBeUpdated = False
-        # matchingPiece = dataset_fromInputList
         matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
             dataset_fromInputList.replace("_tree", "")
         )
-        # print 'INFO: possible matchingPiece from inputList=', matchingPiece
-        if matchingPiece in pieceList:
+        # print "INFO: possible matchingPiece from inputList=", matchingPiece
+        # print "INFO: piecesToAdd=", piecesToAdd
+        if matchingPiece in piecesToAdd:
             toBeUpdated = True
-            # print 'INFO: matchingPiece in pieceList: toBeUpdated=True'
+            # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
         # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
         elif matchingPiece.endswith("_reduced_skim"):
             matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
-            if matchingPieceNoRSK in pieceList:
+            if matchingPieceNoRSK in piecesToAdd:
                 toBeUpdated = True
                 matchingPiece = matchingPieceNoRSK
                 # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
@@ -463,38 +399,46 @@ for sample, pieceList in dictSamples.iteritems():
         # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
         sys.stdout.flush()
 
-        inputRootFile = rootFile
-        inputDataFile = rootFile.replace(".root", ".dat")
+        inputDatFile = rootFile.replace(".root", ".dat")
+        # sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFile, matchingPiece)
+        sampleHistos = []
+        combineCommon.GetSampleHistosFromTFile(rootFile, matchingPiece, sampleHistos)
 
-        # ---Find xsection correspondent to the current dataset
-        # dataset_fromInputList = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList)
         print "looking up xsection...",
         sys.stdout.flush()
         xsection_val = combineCommon.lookupXSection(
-            combineCommon.SanitizeDatasetNameFromInputList(
-                dataset_fromInputList.replace("_tree", "")
-            ),
-            xsectionDict,
+            # combineCommon.SanitizeDatasetNameFromInputList(
+            #     dataset_fromInputList.replace("_tree", "")
+            # )
+            matchingPiece
         )
         print "found", xsection_val, "pb"
         sys.stdout.flush()
-        # xsection_val = combineCommon.lookupXSection(dataset_fromInputList,xsectionDict)
-        # this is the current cross section
-        # print dataset_fromInputList,xsection_val
-
-        # ---Read .dat table for current dataset
-        data = combineCommon.ParseDatFile(inputDataFile)
 
         # example
         # print 'inputDataFile='+inputDataFile
         # print '\tdata[0]=',data[0]
-        Ntot = float(data[0]["N"])
         # print 'Ntot=',Ntot
 
+        # ---Read .dat table for current dataset
+        data = combineCommon.ParseDatFile(inputDatFile)
+
         # ---Calculate weight
-        Ntot = float(data[0]["N"])
-        weight, plotWeight, xsection_X_intLumi, sumWeights = CalculateWeight(
-            Ntot, xsection_val, options.intLumi, inputRootFile
+        sumWeights = 0
+        lhePdfWeightSumw = 0
+        for hist in sampleHistos:
+            if "SumOfWeights" in hist.GetName():
+                sumWeights = hist.GetBinContent(1)
+            elif "LHEPdfSumw" in hist.GetName():
+                lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
+        Ntot = float(data[0]["Npass"])
+        doPDFReweight = False
+        # FIXME
+        # if "2016" in inputRootFile:
+        #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
+        #         doPDFReweight = doPDFReweight2016LQSignals
+        weight, plotWeight, xsection_X_intLumi = CalculateWeight(
+            Ntot, xsection_val, options.intLumi, sumWeights, lhePdfWeightSumw, doPDFReweight
         )
         # print "xsection: " + xsection_val,
         print "\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/",
@@ -502,121 +446,34 @@ for sample, pieceList in dictSamples.iteritems():
         print str(sumWeights)
         sys.stdout.flush()
 
-        # ---Create new table using weight
-        newtable = {}
+        # ---Update table
+        # data = combineCommon.FillTableErrors(data, rootFile)
+        data = combineCommon.FillTableEfficiencies(data, rootFile, matchingPiece, weight)
+        # newTable = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
+        # tableDictThisSample = combineCommon.UpdateTable(data, tableDictThisSample)
+        tablesThisSample.append(data)
+        # FIXME TODO tables
+        # newTable = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
+        # # add this dataset's tables to the sample's table
+        # combineCommon.UpdateTable(newTable, dictFinalTables[sample])
 
-        for j, line in enumerate(data):
-            if j == 0:
-                newtable[int(j)] = {
-                    "variableName": data[j]["variableName"],
-                    "min1": "-",
-                    "max1": "-",
-                    "min2": "-",
-                    "max2": "-",
-                    "N": (Ntot * weight),
-                    "errN": int(0),
-                    "Npass": (Ntot * weight),
-                    "errNpass": int(0),
-                }
-
-            else:
-                # print 'data[j]=',data[j]
-                N = float(data[j]["N"]) * weight
-                errN = float(data[j - 1]["errEffAbs"]) * xsection_X_intLumi
-                # print data[j]['variableName']
-                # print "errN: " , errN
-                if str(errN) == "nan":
-                    errN = 0
-
-                    #            if( float(N) > 0 and float(errN) > 0 ):
-                    #                errRelN = errN / N
-                    #            else:
-                    #                errRelN = float(0)
-
-                Npass = float(data[j]["Npass"]) * weight
-                errNpass = float(data[j]["errEffAbs"]) * xsection_X_intLumi
-                # print "errNPass " , errNpass
-                # print ""
-                if str(errNpass) == "nan":
-                    errNpass = 0
-
-                    #            if( float(Npass) > 0 and float(errNpass) > 0 ):
-                    #                errRelNpass = errNpass / Npass
-                    #            else:
-                    #                errRelNpass = float(0)
-
-                newtable[int(j)] = {
-                    "variableName": data[j]["variableName"],
-                    "min1": data[j]["min1"],
-                    "max1": data[j]["max1"],
-                    "min2": data[j]["min2"],
-                    "max2": data[j]["max2"],
-                    "N": N,
-                    "errN": errN,
-                    "Npass": Npass,
-                    "errNpass": errNpass,
-                }
-
-                # print newtable
-
-        # add this dataset's tables to the sample's table
-        combineCommon.UpdateTable(newtable, dictFinalTables[sample])
-        dictSamplesPiecesAdded[sample].append(matchingPiece)
-
-        # ---Combine histograms using PYROOT
-        file = TFile(inputRootFile)
-        nHistos = len(file.GetListOfKeys())
-        # print "\tnKeys: " , nHistos
-        # print 'list of keys in this rootfile:',file.GetListOfKeys()
-
+        # XXX TEST
+        # print "sampleHistos[0]=", sampleHistos[0]
+        # first2pairs = {k: dictFinalHisto[sample][k] for k in dictFinalHisto[sample].keys()[:2]}
+        # print "before: dictFinalHisto[sample][:2]=", first2pairs
         if not options.tablesOnly:
-            # loop over histograms in rootfile
-            # for h in range(0, nHistos):
-            h = 0
-            for key in file.GetListOfKeys():
-                # histoName = file.GetListOfKeys()[h].GetName()
-                # htemp = file.Get(histoName)
-                histoName = key.GetName()
-                htemp = key.ReadObj()
-                if not htemp:
-                    print "ERROR: failed to get histo named:", histoName, "from file:", file.GetName()
-                    exit(-1)
-                ROOT.SetOwnership(htemp, True)
-
-                #
-                # temporary
-                #
-                # if "TDir" in htemp.__repr__():
-                ##print 'Getting optimizer hist!'
-                # htemp = file.Get(histoName + "/optimizer")
-                ##print 'entries:',htemp.GetEntries()
-                # only go 1 subdir deep
-                if "TDir" in htemp.ClassName():
-                    dirKeys = htemp.GetListOfKeys()
-                    for dirKey in dirKeys:
-                        hname = dirKey.GetName()
-                        htmp = dirKey.ReadObj()
-                        if not htmp:
-                            print "ERROR: failed to get histo named:", hname, "from file:", file.GetName()
-                            exit(-1)
-                        # else:
-                        #  print 'INFO: found key in subdir named:',hname,'hist name:',htmp.GetName()
-                        ROOT.SetOwnership(htmp, True)
-                        updateSample(
-                            dictFinalHisto[sample], htmp, h, toBeUpdated, plotWeight
-                        )
-                        h += 1
-                else:
-                    updateSample(
-                        dictFinalHisto[sample], htemp, h, toBeUpdated, plotWeight
-                    )
-                    h += 1
-        file.Close()
+            # dictFinalHisto[sample] = combineCommon.UpdateHistoDict(dictFinalHisto[sample], sampleHistos, sample, plotWeight)
+            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, sample, plotWeight)
+        # XXX TEST
+        # first2pairs = {k: dictFinalHisto[sample][k] for k in dictFinalHisto[sample].keys()[:2]}
+        # print "after dictFinalHisto[sample][:2]=", first2pairs
+        dictSamplesPiecesAdded[sample].append(matchingPiece)
 
     # done with this sample
     # validation of combining pieces
     piecesAdded = dictSamplesPiecesAdded[sample]
-    if set(piecesAdded) != set(pieceList):
+    # if set(piecesAdded) != set(pieceList):
+    if set(piecesAdded) != set(piecesToAdd):
         # print
         # print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
         # print 'are they equal?',
@@ -624,46 +481,35 @@ for sample, pieceList in dictSamples.iteritems():
         # print 'ERROR: for sample',sample,'the pieces added were:'
         # print sorted(piecesAdded)
         print "ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:"
-        print list(set(piecesAdded).symmetric_difference(set(pieceList)))
+        # print list(set(piecesAdded).symmetric_difference(set(pieceList)))
+        print list(set(piecesAdded).symmetric_difference(set(piecesToAdd)))
         print "\twhile the pieces indicated as part of the sample were:"
-        print sorted(pieceList)
+        # print sorted(pieceList)
+        print sorted(piecesToAdd)
         print "\tand the pieces added were:"
         print sorted(piecesAdded)
         print "\tRefusing to proceed."
         exit(-1)
 
+    # ---Create final tables
+    combinedTableThisSample = combineCommon.CombineEfficiencies(tablesThisSample)
+    # --- Write tables
+    combineCommon.WriteTable(combinedTableThisSample, sample, outputTableFile)
+
     # write histos
     if not options.tablesOnly:
-        outputTfile.cd()
-        nHistos = len(dictFinalHisto[sample])
-        print "Writing", nHistos, "histos...",
-        sys.stdout.flush()
-        for histo in dictFinalHisto[
-            sample
-        ].itervalues():  # for each hist contained in the sample's dict
-            histo.Write()
-        # if this is not a ttbar/singlephoton/allbkg sample, we don't need the hists later, so dump them
+        # combineCommon.WriteHistos(outputTfile, dictFinalHisto[sample])
+        combineCommon.WriteHistos(outputTfile, histoDictThisSample, True)
+        # if this is a ttbar/singlephoton/allbkg sample, we do need the hists later
         if (
-            "tt" not in sample.lower()
-            and "singlephoton" not in sample.lower()
-            and "allbkg" not in sample.lower()
+            "tt" in sample.lower()
+            or "singlephoton" in sample.lower()
+            or "allbkg" in sample.lower()
         ):
-            dictFinalHisto[sample] = {}
-        print "Done"
+            dictFinalHisto[sample] = histoDictThisSample
+            dictFinalTables[sample] = combinedTableThisSample
+        # print "Done"
 
-
-outputTableFile = open(
-    options.outputDir + "/" + options.analysisCode + "_tables.dat", "w"
-)
-
-for S, sample in enumerate(dictSamples):
-    # print "current sample is: ", sample
-    # print dictFinalTables[sample]
-
-    # ---Create final tables
-    combineCommon.CalculateEfficiency(dictFinalTables[sample])
-    # --- Write tables
-    combineCommon.WriteTable(dictFinalTables[sample], sample, outputTableFile)
 
 if options.ttbarBkg:
     # special actions for TTBarFromData
@@ -788,6 +634,7 @@ print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_t
 # for profiling
 if doProfiling:
     prof.disable()  # don't profile the generation of stats
+    print "profiling: dump stats to mystats.stats"
     prof.dump_stats("mystats.stats")
     with open("mystats_output.txt", "wt") as output:
         stats = Stats("mystats.stats", stream=output)
