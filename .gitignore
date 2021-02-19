@@ -13,3 +13,5 @@ commandsToRunOnMoreCutFiles*.txt
 main*
 makeOptCutFile
 src/analysisClass.C
+__pycache__
+*.pyc
