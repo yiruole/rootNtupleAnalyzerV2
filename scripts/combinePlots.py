@@ -362,7 +362,7 @@ for sample, pieceList in dictSamples.iteritems():
     #     else:
     #         pieces = [combineCommon.SanitizeDatasetNameFromFullDataset(x) for x in dictSamples[piece]]
     #         piecesToAdd.extend(pieces)
-    print "INFO: piecesToAdd:", piecesToAdd
+    # print "INFO: piecesToAdd:", piecesToAdd
 
     # ---Loop over datasets in the inputlist
     # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
@@ -634,8 +634,8 @@ print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_t
 # for profiling
 if doProfiling:
     prof.disable()  # don't profile the generation of stats
-    print "profiling: dump stats to mystats.stats"
     prof.dump_stats("mystats.stats")
+    print "profiling: dump stats to mystats_output.txt"
     with open("mystats_output.txt", "wt") as output:
         stats = Stats("mystats.stats", stream=output)
         stats.sort_stats("cumulative", "time")
