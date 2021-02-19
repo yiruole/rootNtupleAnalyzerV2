@@ -275,15 +275,10 @@ def FillTableEfficiencies(table, rootFileName, sampleName, weight):
         cutHists.append(cutHist)
     # create TEfficiencies
     noCutHist = cutHists[0]
-    # print "INFO: FillTableEfficiencies() -- creating TEfficiencyRel for noCut"
-    # FIXME: assign these to dummy values
-    # table[0]["TEfficiencyRel"] = r.TEfficiency(noCutHist, noCutHist)
-    # print "INFO: FillTableEfficiencies() -- creating TEfficiencyAbs for noCut"
-    # table[0]["TEfficiencyAbs"] = r.TEfficiency(noCutHist, noCutHist)
     # Turn off warning messages
-    # r.gErrorIgnoreLevel = 1001
-    prevIgnoreLevel = r.gErrorIgnoreLevel
-    r.gErrorIgnoreLevel = r.kInfo+1
+    # FIXME restore later
+    #prevIgnoreLevel = r.gErrorIgnoreLevel
+    #r.gErrorIgnoreLevel = r.kInfo+1
     for i, hist in enumerate(cutHists):
         if i == 0:
             table[i]["errNpassSqr"] = pow(hist.GetBinError(1), 2)
@@ -307,7 +302,8 @@ def FillTableEfficiencies(table, rootFileName, sampleName, weight):
             table[i]["TEfficiencyAbs"].SetWeight(weight)
             table[i]["errNpassSqr"] = pow(hist.GetBinError(1), 2)
             table[i]["errNSqr"] = pow(cutHists[i-1].GetBinError(1), 2)
-    r.gErrorIgnoreLevel = prevIgnoreLevel
+    # FIXME restore later
+    #r.gErrorIgnoreLevel = prevIgnoreLevel
     tfile.Close()
     return table
 
@@ -938,13 +934,16 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
         pieceHisto.SetName(GetShortHistoName(pieceHistoName))
         if idx in sampleHistoDict:
             sampleHisto = sampleHistoDict[idx]
-            sampleHistoName = sampleHisto.GetName()
-            sampleHisto.SetName(GetShortHistoName(sampleHistoName))
-            if sampleHisto and not sampleHisto.GetName() in pieceHisto.GetName():
+            # sampleHistoName = sampleHisto.GetName()
+            # sampleHisto.SetName(GetShortHistoName(sampleHistoName))
+            if pieceHisto.GetName() not in sampleHisto.GetName():
                 print "ERROR: apparently non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
                         sampleHisto.GetName(), pieceHisto.GetName())
                 exit(-2)
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, sample, plotWeight)
+        # if idx == 0:
+        #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
+        #             sample, pieceHisto.GetName(), pieceHisto.GetEntries(), sampleHistoDict[idx].GetName(), sampleHistoDict[idx].GetEntries())
     return sampleHistoDict
 
 
@@ -1030,7 +1029,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, sample, plotWeight):
     #  continue # do not sum up the individual SumOfWeights histos
     # if 'optimizerentries' in histoName.lower():
     # XXX DEBUG TEST
-    if "optimizerentries" in histoName.lower() or "noweight" in histoName.lower():
+    if "optimizerentries" in histoName.lower() or "noweight" in histoName.lower() or "unscaled" in histoName.lower():
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
     else:
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
