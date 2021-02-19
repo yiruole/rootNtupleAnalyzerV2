@@ -167,7 +167,7 @@ void baseClass::init()
     skim_file_->mkdir("rootTupleTree");
     skim_file_->cd("rootTupleTree");
     skim_tree_ = tree_->CloneTree(0);
-    hCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
+    hCount_ = new TH1D("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
     hCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
@@ -186,7 +186,7 @@ void baseClass::init()
     reduced_skim_file_->mkdir("rootTupleTree");
     reduced_skim_file_->cd("rootTupleTree");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
-    hReducedCount_ = new TH1F("EventCounter","Event Counter",4,-0.5,3.5);
+    hReducedCount_ = new TH1D("EventCounter","Event Counter",4,-0.5,3.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
@@ -218,7 +218,7 @@ void baseClass::init()
 
   // setup sum of weights hist
   gDirectory->cd();
-  h_weightSums_ = new TH1F("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
+  h_weightSums_ = new TH1D("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
   h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
   h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
 }
@@ -234,8 +234,8 @@ void baseClass::readInputList()
   int NBeforeSkim;
   sumAMCNLOWeights_ = 0;
   sumTopPtWeights_ = 0;
-  float tmpSumAMCNLOWeights = 0;
-  float tmpSumTopPtWeights = 0;
+  double tmpSumAMCNLOWeights = 0;
+  double tmpSumTopPtWeights = 0;
 
   STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
 
@@ -440,11 +440,11 @@ void baseClass::readCutFile()
       string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
       string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
       string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-      thisCut.histo1 = TH1F (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo2 = TH1F (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo3 = TH1F (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo4 = TH1F (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo5 = TH1F (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo1 = TH1D (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo2 = TH1D (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo3 = TH1D (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo4 = TH1D (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo5 = TH1D (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo1.Sumw2();
       thisCut.histo2.Sumw2();
       thisCut.histo3.Sumw2();
@@ -475,7 +475,7 @@ void baseClass::readCutFile()
   // make optimizer histogram
   if (optimizeName_cut_.size()>0)
   {
-    h_optimizer_=new TH1F("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
+    h_optimizer_=new TH1D("optimizer","Optimization of cut variables",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
         pow(nOptimizerCuts_,optimizeName_cut_.size()));
     h_optimizer_entries_ =new TH1I("optimizerEntries","Optimization of cut variables (entries)",(int)pow(nOptimizerCuts_,optimizeName_cut_.size()),0,
         pow(nOptimizerCuts_,optimizeName_cut_.size()));
@@ -487,7 +487,8 @@ void baseClass::readCutFile()
   int cutsize=orderedCutNames_.size()+1;
   if (skimWasMade_) ++cutsize;
   gDirectory->cd();
-  eventcuts_=new TH1F("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+  eventcuts_=new TH1D("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+  eventcuts_->Sumw2();
 
   for(auto& systLine : systLines) {
     vector<string> v = split(systLine);
@@ -1046,7 +1047,7 @@ float baseClass::getCutMaxValue2(const string& s)
 }
 
 
-const TH1F& baseClass::getHisto_noCuts_or_skim(const string& s)
+const TH1D& baseClass::getHisto_noCuts_or_skim(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1058,7 +1059,7 @@ const TH1F& baseClass::getHisto_noCuts_or_skim(const string& s)
   return (c->histo1);
 }
 
-const TH1F& baseClass::getHisto_allPreviousCuts(const string& s)
+const TH1D& baseClass::getHisto_allPreviousCuts(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1070,7 +1071,7 @@ const TH1F& baseClass::getHisto_allPreviousCuts(const string& s)
   return (c->histo2);
 }
 
-const TH1F& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
+const TH1D& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1082,7 +1083,7 @@ const TH1F& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
   return (c->histo3);
 }
 
-const TH1F& baseClass::getHisto_allOtherCuts(const string& s)
+const TH1D& baseClass::getHisto_allOtherCuts(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1094,7 +1095,7 @@ const TH1F& baseClass::getHisto_allOtherCuts(const string& s)
   return (c->histo4);
 }
 
-const TH1F& baseClass::getHisto_allCuts(const string& s)
+const TH1D& baseClass::getHisto_allCuts(const string& s)
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
@@ -1290,13 +1291,14 @@ bool baseClass::writeCutEfficFile()
      << setw(mainFieldWidth) << 0. //errEffAbs
      << endl;
 
-  float effRel;
-  float effRelErr;
-  float effAbs;
-  float effAbsErr;
+  double effRel;
+  double effRelErr;
+  double effAbs;
+  double effAbsErr;
 
   checkOverflow(eventcuts_,nEntTot);
   eventcuts_->SetBinContent(bincounter,nEntTot);
+  eventcuts_->SetBinError(bincounter,sqrt(nEntTot));
   if (optimizeName_cut_.size())
   {
     checkOverflow(h_optimizer_,nEntTot);
@@ -1305,16 +1307,17 @@ bool baseClass::writeCutEfficFile()
     h_optimizer_entries_->SetBinContent(0, nEntTot);
   }
 
-  float nEvtPassedBeforeWeight_previousCut = nEntTot;
-  float nEvtPassed_previousCut = nEntTot;
+  double nEvtPassedBeforeWeight_previousCut = nEntTot;
+  double nEvtPassed_previousCut = nEntTot;
 
   if(skimWasMade_)
     {
       ++bincounter;
       checkOverflow(eventcuts_,GetTreeEntries());
       eventcuts_->SetBinContent(bincounter, GetTreeEntries() );
-      effRel = (float) GetTreeEntries() / (float) NBeforeSkim_;
-      effRelErr = sqrt( (float) effRel * (1.0 - (float) effRel) / (float) NBeforeSkim_ );
+      eventcuts_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
+      effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
+      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
       effAbs = effRel;
       effAbsErr = effRelErr;
       os << fixed
@@ -1343,14 +1346,15 @@ bool baseClass::writeCutEfficFile()
       ++bincounter;
       checkOverflow(eventcuts_,c->nEvtPassed);
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
-      effRel = (float) c->nEvtPassed / nEvtPassed_previousCut;
-      float N = nEvtPassedBeforeWeight_previousCut;
-      float Np = c->nEvtPassedBeforeWeight;
-      float p = Np / N;
-      float q = 1-p;
-      float w = c->nEvtPassed / c->nEvtPassedBeforeWeight;
+      eventcuts_->SetBinError(bincounter, sqrt(c->nEvtPassedErr2));
+      effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
+      double N = nEvtPassedBeforeWeight_previousCut;
+      double Np = c->nEvtPassedBeforeWeight;
+      double p = Np / N;
+      double q = 1-p;
+      double w = c->nEvtPassed / c->nEvtPassedBeforeWeight;
       effRelErr = sqrt(p*q/N)*w;
-      effAbs = (float) c->nEvtPassed / (float) nEntTot;
+      effAbs = (double) c->nEvtPassed / (double) nEntTot;
       N = nEntTot;
       p = Np / N;
       q = 1-p;
@@ -1484,9 +1488,9 @@ double baseClass::getInfoFromHist(const std::string& fileName, const std::string
     string s1 = "LJFilter/EventCount/EventCounter";
     string s2 = "savedHists/EventCounter";
     string s3 = "EventCounter";
-    auto hCount1 = f->Get<TH1F>(s1.c_str());
-    auto hCount2 = f->Get<TH1F>(s2.c_str());
-    auto hCount3 = f->Get<TH1F>(s3.c_str());
+    auto hCount1 = f->Get<TH1D>(s1.c_str());
+    auto hCount2 = f->Get<TH1D>(s2.c_str());
+    auto hCount3 = f->Get<TH1D>(s3.c_str());
     if(!hCount1 && !hCount2 && !hCount3)
     {
       STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");

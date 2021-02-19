@@ -18,7 +18,7 @@
 
 #include <TChain.h>
 #include <TFile.h>
-#include <TH1F.h>
+#include <TH1.h>
 #include <TH2F.h>
 #include <TH3F.h>
 #include <TProfile.h>
@@ -57,17 +57,17 @@ class cut : public SimpleCut {
     bool saveVariableArrayInReducedSkim = false;
     // Not filled from file
     int id = -1;
-    TH1F histo1;
-    TH1F histo2;
-    TH1F histo3;
-    TH1F histo4;
-    TH1F histo5;
+    TH1D histo1;
+    TH1D histo2;
+    TH1D histo3;
+    TH1D histo4;
+    TH1D histo5;
     // Filled event by event
     unsigned int arraySize = 0;
-    float nEvtInput = -1;
-    float nEvtPassedBeforeWeight = -1;
-    float nEvtPassed = -1;
-    float nEvtPassedErr2 = -1;
+    double nEvtInput = -1;
+    double nEvtPassedBeforeWeight = -1;
+    double nEvtPassed = -1;
+    double nEvtPassedErr2 = -1;
     bool nEvtPassedBeforeWeight_alreadyFilled = -1;
 };
 
@@ -332,11 +332,11 @@ class baseClass {
   float getCutMinValue2(const std::string& s);
   float getCutMaxValue2(const std::string& s);
 
-  const TH1F& getHisto_noCuts_or_skim(const std::string& s);
-  const TH1F& getHisto_allPreviousCuts(const std::string& s);
-  const TH1F& getHisto_allOthrSmAndLwrLvlCuts(const std::string& s);
-  const TH1F& getHisto_allOtherCuts(const std::string& s);
-  const TH1F& getHisto_allCuts(const std::string& s);
+  const TH1D& getHisto_noCuts_or_skim(const std::string& s);
+  const TH1D& getHisto_allPreviousCuts(const std::string& s);
+  const TH1D& getHisto_allOthrSmAndLwrLvlCuts(const std::string& s);
+  const TH1D& getHisto_allOtherCuts(const std::string& s);
+  const TH1D& getHisto_allCuts(const std::string& s);
 
   int    getHistoNBins(const std::string& s);
   float getHistoMin(const std::string& s);
@@ -429,7 +429,7 @@ class baseClass {
   void saveLHEPdfSumw(const std::string& fileName);
   Long64_t NBeforeSkim_;
   double sumAMCNLOWeights_;
-  float sumTopPtWeights_;
+  double sumTopPtWeights_;
 
   template <typename T> void checkOverflow(const TH1*, const T);
 
@@ -456,7 +456,7 @@ class baseClass {
   float getSkimPreCutValue(const std::string& s);
   TFile *skim_file_;
   TTree* skim_tree_;
-  TH1F* hCount_;
+  TH1D* hCount_;
   bool writeSkimTree();
 
   //Reduced Skim stuff
@@ -465,17 +465,17 @@ class baseClass {
   float getReducedSkimPreCutValue(const std::string& s);
   TFile *reduced_skim_file_;
   TTree *reduced_skim_tree_;
-  TH1F* hReducedCount_;
+  TH1D* hReducedCount_;
   bool writeReducedSkimTree();
 
   // Optimization stuff
   std::map<int, Optimize> optimizeName_cut_;
-  TH1F* eventcuts_; // number of events passing each cut
-  TH1F* h_optimizer_; // optimization histogram
+  TH1D* eventcuts_; // number of events passing each cut
+  TH1D* h_optimizer_; // optimization histogram
   TH1I* h_optimizer_entries_;
 
   // Other stuff
-  TH1F* h_weightSums_; // sums of various weights over all events
+  TH1D* h_weightSums_; // sums of various weights over all events
   std::vector<std::shared_ptr<TH1> > histsToSave_; // various histograms to save, like LHEPdfWeightSumHist
   std::shared_ptr<TH1> findSavedHist(std::string histName);
 
