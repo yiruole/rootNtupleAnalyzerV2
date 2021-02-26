@@ -152,16 +152,27 @@ def GetSamplesToCombineDict(sampleListForMerging):
     return dictSamples
 
 
+def ExpandPiece(piece, dictSamples):
+    if "/" in piece:
+        piece = SanitizeDatasetNameFromFullDataset(piece)
+        return [piece]
+    else:
+        pieces = dictSamples[piece]
+        return ExpandPieces(pieces, dictSamples)
+
+
 def ExpandPieces(pieceList, dictSamples):
     piecesToAdd = []
+    # for piece in pieceList:
+    #     if "/" in piece:
+    #         piece = SanitizeDatasetNameFromFullDataset(piece)
+    #         piecesToAdd.append(piece)
+    #     else:
+    #         pieces = dictSamples[piece]
+    #         expandedPieces = ExpandPieces(pieces, dictSamples)
+    #         piecesToAdd.extend(expandedPieces)
     for piece in pieceList:
-        if "/" in piece:
-            piece = SanitizeDatasetNameFromFullDataset(piece)
-            piecesToAdd.append(piece)
-        else:
-            pieces = dictSamples[piece]
-            expandedPieces = ExpandPieces(pieces, dictSamples)
-            piecesToAdd.extend(expandedPieces)
+        piecesToAdd.extend(ExpandPiece(piece, dictSamples))
     return piecesToAdd
 
 
@@ -254,16 +265,18 @@ def ParseDatFile(datFilename):
     return data
 
 
-def FillTableEfficiencies(table, rootFileName, sampleName, weight):
+def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
         print "ERROR: could not open file '{}'. Exiting here.".format(rootFileName)
         exit(-1)
-    histName = "histo1D__{}__EventsPassingCuts".format(sampleName)
+    if sampleName:
+        histName = "histo1D__{}__EventsPassingCuts".format(sampleName)
+    else:
+        histName = "EventsPassingCuts"
     eventsPassingHist = tfile.Get(histName)
     if not eventsPassingHist:
-        print "ERROR: could not find hist '{}' in file '{}'. Exiting here.".format(histName, rootFileName)
-        exit(-1)
+        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'. Exiting here.".format(histName, rootFileName))
     cutHists = []
     for i in range(0, eventsPassingHist.GetNbinsX()):
         iBin = i+1
@@ -315,8 +328,7 @@ def FillTableErrors(table, rootFileName):
         exit(-1)
     eventsPassingHist = tfile.Get("EventsPassingCuts")
     if not eventsPassingHist:
-        print "ERROR: could not find hist 'EventsPassingCuts' in file '{}'. Exiting here.".format(rootFileName)
-        exit(-1)
+        raise RuntimeError("ERROR: could not find hist 'EventsPassingCuts' in file '{}'. Exiting here.".format(rootFileName))
 
     for j, line in enumerate(table):
         iBin = j+1
@@ -838,7 +850,7 @@ def WriteTable(table, name, file, printToScreen=True):
             ###
 
 
-def GetSampleHistosFromTFile(tfileName, sampleName, sampleHistos):
+def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
     tfile = r.TFile(tfileName)
     # sampleHistos = []
     for key in tfile.GetListOfKeys():
@@ -847,16 +859,16 @@ def GetSampleHistosFromTFile(tfileName, sampleName, sampleHistos):
         histoName = key.GetName()
         htemp = key.ReadObj()
         if not htemp or htemp is None:
-            print "ERROR: failed to get histo named:", histoName, "from file:", tfile.GetName()
-            exit(-1)
+            raise RuntimeError("ERROR: failed to get histo named:", histoName, "from file:", tfile.GetName())
         r.SetOwnership(htemp, True)
         if sampleName in histoName:
             htemp.SetDirectory(0)
             sampleHistos.append(htemp)
     tfile.Close()
     if len(sampleHistos) < 1:
-        print "ERROR: GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file! Exiting.".format(tfile.GetName(), sampleName)
-        exit(-2)
+        raise RuntimeError(
+                "ERROR: GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file! Exiting."
+                .format(tfile.GetName(), sampleName))
     # return sampleHistos
 
 
@@ -1062,6 +1074,7 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
 
 
 def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
+    # print "INFO: reading root file {}".format(unscaledRootFile)
     if len(ttBarUnscaledRawSampleName) <= 0:
         unscaledEvtsHist = unscaledRootFile.Get("EventsPassingCuts")
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
@@ -1091,9 +1104,7 @@ def FindUnscaledRootFile(filepath, sampleName):
                 continue
             if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
                 return os.path.join(root, name)
-    print "ERROR:  could not find unscaled root file for sample", sampleName
-    print "Looked in:", filepath
-    raise RuntimeError("could not find unscaled root file for sample {}".format(sampleName))
+    return None
 
 
 def GetXSecTimesIntLumi(sampleNameFromDataset):
@@ -1243,6 +1254,6 @@ def GetRatesAndErrors(
             print "\tscaledInt=", scaledInt
             if math.fabs(scaledInt - scaledIntFromUnscaled) > 1e-3:
                 print "\tERROR: scaledInt != scaledIntFromUnscaled!"
-                exit(-2)
+                # exit(-2)
             print "\txsecTimesIntLumi=", xsecTimesIntLumi, "unscaledInt=", unscaledInt, "unscaledRate=", unscaledRate, "unscaledTotalEvts=", unscaledTotalEvts, "rate=", rate
     return rate, rateErr, unscaledRate

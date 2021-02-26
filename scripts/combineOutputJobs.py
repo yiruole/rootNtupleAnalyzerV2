@@ -27,7 +27,7 @@ def CombinePlotsAndTables(args):
         sampleHistos = {}
         sampleTable = {}
         for currentRootFile in fileList:
-            combineCommon.AddHistosFromFile(currentRootFile, sampleHistos, sampleName)
+            combineCommon.AddHistosFromFile(currentRootFile, sampleHistos)
             currentDatFile = currentRootFile.replace(".root", ".dat")
             data = combineCommon.ParseDatFile(currentDatFile)
             data = combineCommon.FillTableErrors(data, currentRootFile)
