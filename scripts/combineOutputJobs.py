@@ -18,6 +18,9 @@ def log_result(result):
     # This is called whenever foo_pool(i) returns a result.
     # result_list is modified only by the main process, not the pool workers.
     result_list.append(result)
+    sys.stdout.write("\rINFO: running {} parallel jobs for {} datasets found in inputList...".format(jobCount, datasetCount))
+    sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+    sys.stdout.flush()
 
 
 def CombinePlotsAndTables(args):
@@ -109,6 +112,9 @@ if options.inputList is None or options.analysisCode is None or options.inputDir
     parser.print_help()
     exit(-1)
 
+if not os.path.exists(options.outputDir):
+    os.makedirs(options.outputDir)
+
 # ncores = multiprocessing.cpu_count()
 ncores = 4  # only use 4 parallel jobs to be nice
 pool = multiprocessing.Pool(ncores)
@@ -177,13 +183,15 @@ for lin in open(options.inputList):
 
 # now close the pool and wait for jobs to finish
 pool.close()
-print "INFO: running {}/{} jobs/datasets found in inputList...".format(jobCount, datasetCount),
+sys.stdout.write("INFO: running {} parallel jobs for {} datasets found in inputList...".format(jobCount, datasetCount))
+sys.stdout.write("\t"+str(len(result_list))+" jobs done")
 sys.stdout.flush()
 pool.join()
 # check results?
 if len(result_list) < jobCount:
     print "ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list))
     exit(-2)
+print
 print "Done"
 sys.stdout.flush()
 
