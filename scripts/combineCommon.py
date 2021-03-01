@@ -283,8 +283,8 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
         # cutHist = r.TH1D("passCutBin"+str(iBin), "passCutBin"+str(iBin), 1, 0, 1)
         histName = "passCutBin"+str(iBin)+"_"+eventsPassingHist.GetXaxis().GetBinLabel(iBin)
         cutHist = r.TH1D(histName, histName, 1, 0, 1)
-        cutHist.SetBinContent(1, eventsPassingHist.GetBinContent(iBin))
-        cutHist.SetBinError(1, eventsPassingHist.GetBinError(iBin))
+        cutHist.SetBinContent(1, eventsPassingHist.GetBinContent(iBin)*eventsPassingHist.GetBinEntries(iBin))
+        cutHist.SetBinError(1, math.sqrt(eventsPassingHist.GetSumw2().At(iBin)))
         cutHists.append(cutHist)
     # create TEfficiencies
     noCutHist = cutHists[0]
@@ -332,9 +332,9 @@ def FillTableErrors(table, rootFileName):
 
     for j, line in enumerate(table):
         iBin = j+1
-        errNpassSqr = pow(eventsPassingHist.GetBinError(iBin), 2)
+        errNpassSqr = eventsPassingHist.GetSumw2().At(iBin)
         if j > 0:
-            errNSqr = pow(eventsPassingHist.GetBinError(iBin-1), 2)
+            errNSqr = eventsPassingHist.GetSumw2().At(iBin-1)
         else:
             errNSqr = errNpassSqr
         table[j]["errNpassSqr"] = errNpassSqr
@@ -1077,7 +1077,6 @@ def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
     # print "INFO: reading root file {}".format(unscaledRootFile)
     if len(ttBarUnscaledRawSampleName) <= 0:
         unscaledEvtsHist = unscaledRootFile.Get("EventsPassingCuts")
-        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
     else:
         # scaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
         unscaledEvtsHist = unscaledRootFile.Get(
@@ -1086,13 +1085,14 @@ def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
         # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
         # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
         # print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
+    if unscaledEvtsHist.ClassName() == "TProfile":
+        unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)*unscaledEvtsHist.GetBinEntries(1)
+    else:
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
     return unscaledTotalEvts
 
 
 def FindUnscaledRootFile(filepath, sampleName):
-    filepath = os.path.expandvars(filepath.rstrip("/"))
-    filepath = filepath[:filepath.rfind("/")]
     for root, dirs, files in os.walk(filepath):
         for name in files:
             # print "FindUnscaledRootFile({}, {}): check against file: {}".format(filepath, sampleName, name)
