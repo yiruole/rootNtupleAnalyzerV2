@@ -402,7 +402,7 @@ for sample, pieceList in dictSamples.iteritems():
         inputDatFile = rootFile.replace(".root", ".dat")
         # sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFile, matchingPiece)
         sampleHistos = []
-        combineCommon.GetSampleHistosFromTFile(rootFile, matchingPiece, sampleHistos)
+        combineCommon.GetSampleHistosFromTFile(rootFile, sampleHistos)
 
         print "looking up xsection...",
         sys.stdout.flush()
@@ -448,7 +448,7 @@ for sample, pieceList in dictSamples.iteritems():
 
         # ---Update table
         # data = combineCommon.FillTableErrors(data, rootFile)
-        data = combineCommon.FillTableEfficiencies(data, rootFile, matchingPiece, weight)
+        data = combineCommon.FillTableEfficiencies(data, rootFile, weight)
         # newTable = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
         # tableDictThisSample = combineCommon.UpdateTable(data, tableDictThisSample)
         tablesThisSample.append(data)
