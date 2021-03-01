@@ -346,6 +346,15 @@ def GetUnscaledSampleRootFile(sampleName, bkgType=""):
             # else:
             #     analysisCode = "analysisClass_lq_enujj_MT"
         d_unscaledRootFiles[bkgType][sampleName] = cc.FindUnscaledRootFile(filepath, sampleName)
+        if d_unscaledRootFiles[bkgType][sampleName] is None:
+            filepathList = [filepath]
+            # try with condor added
+            filepath = os.path.expandvars(filepath.rstrip("/"))
+            filepath = filepath[:filepath.rfind("/")]+"/condor/"
+            d_unscaledRootFiles[bkgType][sampleName] = cc.FindUnscaledRootFile(filepath, sampleName)
+            filepathList.append(filepath)
+            if d_unscaledRootFiles[bkgType][sampleName] is None:
+                raise RuntimeError("couldn't find root file in dirs '{}' for sample '{}' and bkgType '{}'".format(filepathList, sampleName, bkgType))
     return d_unscaledRootFiles[bkgType][sampleName]
 
 
@@ -436,6 +445,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                     bkgUnscaledRootFilename = GetUnscaledSampleRootFile(
                         bkgSample, bkgType
                     )
+                    # print "found bkgUnscaledRootFilename: {}".format(bkgUnscaledRootFilename)
                     bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
                     if not bkgUnscaledRootFile:
                         print "ERROR: file not found:", bkgUnscaledRootFilename
@@ -457,12 +467,11 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                         not bkgType == "MC",
                         bkgType == "TTData"
                     )
-                    # if bkgType=='TTData':
-                    #  print '------>Called GetRatesAndErrors for sampleName=',bkgSample
-                    #  print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-                    #  print '------>from file=:',bkgUnscaledRootFilename
+                    # print '------>Called GetRatesAndErrors for sampleName=', bkgSample
+                    # print '------>rate=', rate, 'rateErr=', rateErr, 'unscaledRate=', unscaledRate
+                    # print '------>from file=:', bkgUnscaledRootFilename
                     # if isQCD:
-                    #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
+                    #     print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
                     sampleRate += rate
                     sampleUnscaledRate += unscaledRate
                     sampleRateErr += rateErr * rateErr
@@ -665,7 +674,8 @@ sampleListsForMergingQCD[2018] = "$LQANA/config/sampleListForMerging_13TeV_QCD_d
 #
 inputLists = {}
 #inputLists[2016] = "$LQANA/config/oldInputLists/nanoV7/2016/nanoV7_2016_pskEEJJ_16oct2020_comb/inputListAllCurrent.txt"
-inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt"
+#inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt"
+inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_25feb2021_comb/inputListAllCurrent.txt"
 inputLists[2017] = "$LQANA/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
 #
 qcdFilePaths = {}
@@ -674,7 +684,9 @@ qcdFilePaths[2017] = "$LQDATA/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFi
 #
 filePaths = {}
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
-filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_9nov2020_optFinalSelsOld/output_cutTable_lq_eejj/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_9nov2020_optFinalSelsOld/output_cutTable_lq_eejj/"
+# filePaths[2016] = "/tmp/scooper/validation/combinePlotsValidation22Feb/"
+filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/validation_looserPSK_eejj_26feb2021_oldOptFinalSels/output_cutTable_lq_eejj/"
 filePaths[2017] = "$LQDATA/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj/"
 #
 xsecFiles = {}
