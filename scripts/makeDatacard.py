@@ -437,14 +437,10 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 # print 'use selection name=',selectionName
                 doMassPointLoop = False
             # print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
-            #unscaledRootFilename = GetUnscaledSampleRootFile(signalNameForFile)
-            #unscaledRootFile = TFile.Open(unscaledRootFilename)
             unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, signalNameForFile)
             # preselection
             rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                #unscaledRootFile,
                 scaledRootFile,
-                #unscaledTotalEvts,
                 signalNameForFile,
                 "preselection",
                 doEEJJ
@@ -461,9 +457,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 #signalSelName = signal_name + mp
                 selectionName = "LQ" + mp
                 rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                    #unscaledRootFile,
                     tfile,
-                    #unscaledTotalEvts,
                     signalNameForFile,
                     selectionName,
                     doEEJJ
@@ -471,7 +465,6 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 sigRatesDict[selectionName] = rate
                 sigRateErrsDict[selectionName] = rateErr
                 sigUnscaledRatesDict[selectionName] = unscaledRate
-            #unscaledRootFile.Close()
 
             # fill full dicts
             # signalFullName = signal_name + mass_point
@@ -486,7 +479,6 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
 
     # DATA
     dataSampleName = "DATA"
-    #isQCD = False
     isData = True
     unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, dataSampleName)
     sampleUnscaledTotalEvts = unscaledTotalEvts
@@ -866,7 +858,6 @@ d_data_rates = {}
 d_data_rateErrs = {}
 d_data_unscaledRates = {}
 d_data_totalEvents = {}
-#d_unscaledRootFiles = {}
 
 
 systematics_filepaths_background = dict()
