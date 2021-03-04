@@ -220,6 +220,9 @@ if os.path.isfile(options.logFile):
 else:
     print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
 
+if not os.path.exists(options.outputDir):
+    os.makedirs(options.outputDir)
+
 if not options.tablesOnly:
     outputTfile = TFile(
         options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE", "", 207
@@ -325,44 +328,12 @@ outputTableFile = open(
 
 # loop over samples defined in sampleListForMerging
 for sample, pieceList in dictSamples.iteritems():
-    # if 'ALLBKG_MG_HT' in sample:
-    #    print "look at sample named:",sample
     print "-->Look at sample named:", sample, "with piecelist=", pieceList
 
-    # # init if needed
-    # if sample not in dictFinalTables:
-    #     dictFinalTables[sample] = {}
-    # if sample not in dictFinalHisto:
-    #     dictFinalHisto[sample] = {}
     histoDictThisSample = {}
     tablesThisSample = []
 
-    # piecesToAdd = []
-    # print "dictDatasetsFileNames=", dictDatasetsFileNames
-    # for piece in pieceList:
-    #     if "/" in piece:
-    #         piece = combineCommon.SanitizeDatasetNameFromFullDataset(piece)
-    #     if piece in dictDatasetsFileNames.iterkeys():
-    #         sampleHistos = combineCommon.GetSampleHistosFromTFile(outputTfile, piece)
-    #         print "INFO: replace non-dataset piece '{}' in sample '{}' by combining dicts.".format(piece, sample)
-    #         combineCommon.UpdateHistoDict(dictFinalHisto[sample], sampleHistos, sample)
-    #         dictSamplesPiecesAdded[sample].append(piece)
-    #         # FIXME TODO add tables
-    #     else:
-    #         print "ERROR: can't handle piece '{}' in sample '{}'; perhaps it was not defined already in the sampleList. Exiting.".format(
-    #                 piece, sample)
-    #         print "dictDatasetsFileNames:", dictDatasetsFileNames
-    #         exit(-2)
     piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
-    # piecesToAdd = []
-    # for piece in pieceList:
-    #     if "/" in piece:
-    #         piece = combineCommon.SanitizeDatasetNameFromFullDataset(piece)
-    #         piecesToAdd.append(piece)
-    #     else:
-    #         pieces = [combineCommon.SanitizeDatasetNameFromFullDataset(x) for x in dictSamples[piece]]
-    #         piecesToAdd.extend(pieces)
-    # print "INFO: piecesToAdd:", piecesToAdd
 
     # ---Loop over datasets in the inputlist
     # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
@@ -396,20 +367,15 @@ for sample, pieceList in dictSamples.iteritems():
 
         # prepare to combine
         print "\tfound matching dataset:", matchingPiece + " ... ",
-        # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
         sys.stdout.flush()
 
         inputDatFile = rootFile.replace(".root", ".dat")
-        # sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFile, matchingPiece)
         sampleHistos = []
         combineCommon.GetSampleHistosFromTFile(rootFile, sampleHistos)
 
         print "looking up xsection...",
         sys.stdout.flush()
         xsection_val = combineCommon.lookupXSection(
-            # combineCommon.SanitizeDatasetNameFromInputList(
-            #     dataset_fromInputList.replace("_tree", "")
-            # )
             matchingPiece
         )
         print "found", xsection_val, "pb"
@@ -447,26 +413,11 @@ for sample, pieceList in dictSamples.iteritems():
         sys.stdout.flush()
 
         # ---Update table
-        # data = combineCommon.FillTableErrors(data, rootFile)
         data = combineCommon.FillTableEfficiencies(data, rootFile, weight)
-        # newTable = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
-        # tableDictThisSample = combineCommon.UpdateTable(data, tableDictThisSample)
         tablesThisSample.append(data)
-        # FIXME TODO tables
-        # newTable = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
-        # # add this dataset's tables to the sample's table
-        # combineCommon.UpdateTable(newTable, dictFinalTables[sample])
 
-        # XXX TEST
-        # print "sampleHistos[0]=", sampleHistos[0]
-        # first2pairs = {k: dictFinalHisto[sample][k] for k in dictFinalHisto[sample].keys()[:2]}
-        # print "before: dictFinalHisto[sample][:2]=", first2pairs
         if not options.tablesOnly:
-            # dictFinalHisto[sample] = combineCommon.UpdateHistoDict(dictFinalHisto[sample], sampleHistos, sample, plotWeight)
             histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, sample, plotWeight)
-        # XXX TEST
-        # first2pairs = {k: dictFinalHisto[sample][k] for k in dictFinalHisto[sample].keys()[:2]}
-        # print "after dictFinalHisto[sample][:2]=", first2pairs
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
     # done with this sample
@@ -498,7 +449,6 @@ for sample, pieceList in dictSamples.iteritems():
 
     # write histos
     if not options.tablesOnly:
-        # combineCommon.WriteHistos(outputTfile, dictFinalHisto[sample])
         combineCommon.WriteHistos(outputTfile, histoDictThisSample, True)
         # if this is a ttbar/singlephoton/allbkg sample, we do need the hists later
         if (
