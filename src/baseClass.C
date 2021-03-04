@@ -487,7 +487,7 @@ void baseClass::readCutFile()
   int cutsize=orderedCutNames_.size()+1;
   if (skimWasMade_) ++cutsize;
   gDirectory->cd();
-  eventcuts_=new TH1D("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
+  eventcuts_=new TProfile("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize);
   eventcuts_->Sumw2();
 
   for(auto& systLine : systLines) {
@@ -1299,6 +1299,7 @@ bool baseClass::writeCutEfficFile()
   checkOverflow(eventcuts_,nEntTot);
   eventcuts_->SetBinContent(bincounter,nEntTot);
   eventcuts_->SetBinError(bincounter,sqrt(nEntTot));
+  eventcuts_->SetBinEntries(bincounter,nEntTot);
   if (optimizeName_cut_.size())
   {
     checkOverflow(h_optimizer_,nEntTot);
@@ -1316,6 +1317,7 @@ bool baseClass::writeCutEfficFile()
       checkOverflow(eventcuts_,GetTreeEntries());
       eventcuts_->SetBinContent(bincounter, GetTreeEntries() );
       eventcuts_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
+      eventcuts_->SetBinEntries(bincounter, GetTreeEntries() );
       effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
       effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
       effAbs = effRel;
@@ -1347,6 +1349,7 @@ bool baseClass::writeCutEfficFile()
       checkOverflow(eventcuts_,c->nEvtPassed);
       eventcuts_->SetBinContent(bincounter, c->nEvtPassed);
       eventcuts_->SetBinError(bincounter, sqrt(c->nEvtPassedErr2));
+      eventcuts_->SetBinEntries(bincounter, c->nEvtPassedBeforeWeight);
       effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
       double N = nEvtPassedBeforeWeight_previousCut;
       double Np = c->nEvtPassedBeforeWeight;
@@ -1488,22 +1491,29 @@ double baseClass::getInfoFromHist(const std::string& fileName, const std::string
     string s1 = "LJFilter/EventCount/EventCounter";
     string s2 = "savedHists/EventCounter";
     string s3 = "EventCounter";
-    auto hCount1 = f->Get<TH1D>(s1.c_str());
-    auto hCount2 = f->Get<TH1D>(s2.c_str());
-    auto hCount3 = f->Get<TH1D>(s3.c_str());
-    if(!hCount1 && !hCount2 && !hCount3)
-    {
-      STDOUT("Skim filter histogram(s) not found. Will assume skim was not made for ALL files.");
+    auto hCount1 = f->Get<TH1D>(s3.c_str());
+    auto hCount2 = f->Get<TH1F>(s3.c_str());
+    if(!hCount1 && !hCount2) {
+      hCount1 = f->Get<TH1D>(s2.c_str());
+      hCount2 = f->Get<TH1F>(s2.c_str());
+    }
+    if(!hCount1 && !hCount2) {
+      hCount1 = f->Get<TH1D>(s1.c_str());
+      hCount2 = f->Get<TH1F>(s1.c_str());
+    }
+    if(!hCount1 && !hCount2) {
+      STDOUT("Skim filter histogram not found. Will assume skim was not made for ALL files.");
       skimWasMade_ = false;
       return NBeforeSkim;
     }
-    if (hCount1) NBeforeSkim = hCount1->GetBinContent(bin);
-    else if (hCount2) NBeforeSkim = hCount2->GetBinContent(bin);
-    else NBeforeSkim = hCount3->GetBinContent(bin);
+    else if(hCount1)
+      NBeforeSkim = hCount1->GetBinContent(bin);
+    else
+      NBeforeSkim = hCount2->GetBinContent(bin);
   }
   else
   {
-    auto hCount = f->Get<TH1F>(histName.c_str());
+    auto hCount = f->Get<TH1D>(histName.c_str());
     if(!hCount)
     {
       STDOUT("ERROR: Did not find specified hist named: '" << histName << "'. Cannot extract info. Quitting");
@@ -2206,7 +2216,7 @@ template <typename T> void baseClass::checkOverflow(const TH1* hist, const T bin
       exit(-3);
     }
   }
-  else if(std::string(hist->ClassName()).find("TH1D") != std::string::npos) {
+  else if(hist->InheritsFrom("TH1D")) {
     double limit = std::numeric_limits<double>::max();
     if(binContent>limit) {
       stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1D bin in histo: " << hist->GetName() << "! Quitting.";

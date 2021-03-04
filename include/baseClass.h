@@ -470,7 +470,7 @@ class baseClass {
 
   // Optimization stuff
   std::map<int, Optimize> optimizeName_cut_;
-  TH1D* eventcuts_; // number of events passing each cut
+  TProfile* eventcuts_; // number of events passing each cut
   TH1D* h_optimizer_; // optimization histogram
   TH1I* h_optimizer_entries_;
 
