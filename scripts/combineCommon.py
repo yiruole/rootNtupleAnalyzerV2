@@ -6,10 +6,11 @@ import os
 import string
 import math
 import re
-import fnmatch
-import ctypes
 from collections import OrderedDict
 import ROOT as r
+
+# FORMAT = "%(levelname)s %(module)s %(funcName)s line:%(lineno)d - %(message)s"
+# logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 intLumi = -1
 xsectionDict = {}
@@ -266,12 +267,13 @@ def ParseDatFile(datFilename):
 
 
 def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
+    verbose = False
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
         print "ERROR: could not open file '{}'. Exiting here.".format(rootFileName)
         exit(-1)
     if sampleName:
-        histName = "histo1D__{}__EventsPassingCuts".format(sampleName)
+        histName = "profile1D__{}__EventsPassingCuts".format(sampleName)
     else:
         histName = "EventsPassingCuts"
     eventsPassingHist = tfile.Get(histName)
@@ -281,10 +283,16 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
     for i in range(0, eventsPassingHist.GetNbinsX()):
         iBin = i+1
         # cutHist = r.TH1D("passCutBin"+str(iBin), "passCutBin"+str(iBin), 1, 0, 1)
+        if eventsPassingHist.ClassName() == "TProfile":
+            binContent = eventsPassingHist.GetBinContent(iBin)*eventsPassingHist.GetBinEntries(iBin)
+            binError = math.sqrt(eventsPassingHist.GetSumw2().At(iBin))
+        else:
+            binContent = eventsPassingHist.GetBinContent(iBin)
+            binError = eventsPassingHist.GetBinError(iBin)
         histName = "passCutBin"+str(iBin)+"_"+eventsPassingHist.GetXaxis().GetBinLabel(iBin)
         cutHist = r.TH1D(histName, histName, 1, 0, 1)
-        cutHist.SetBinContent(1, eventsPassingHist.GetBinContent(iBin)*eventsPassingHist.GetBinEntries(iBin))
-        cutHist.SetBinError(1, math.sqrt(eventsPassingHist.GetSumw2().At(iBin)))
+        cutHist.SetBinContent(1, binContent)
+        cutHist.SetBinError(1, binError)
         cutHists.append(cutHist)
     # create TEfficiencies
     noCutHist = cutHists[0]
@@ -297,12 +305,13 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
             table[i]["errNpassSqr"] = pow(hist.GetBinError(1), 2)
             table[i]["errNSqr"] = table[i]["errNpassSqr"]
         else:
-            # print "INFO: i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName())
-            # print "cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1))
-            # print "hist: GetBinContent(1) = {} +/- {}".format(hist.GetBinContent(1), hist.GetBinError(1))
-            # print "noCutHist: GetBinContent(1) = {} +/- {}".format(noCutHist.GetBinContent(1), noCutHist.GetBinError(1))
-            # print "creating TEfficiencyRel"
-            # sys.stdout.flush()
+            if verbose:
+                print "FillTableEfficiencies(): i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName())
+                print "FillTableEfficiencies(): cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1))
+                print "FillTableEfficiencies(): hist: GetBinContent(1) = {} +/- {}".format(hist.GetBinContent(1), hist.GetBinError(1))
+                print "FillTableEfficiencies(): noCutHist: GetBinContent(1) = {} +/- {}".format(noCutHist.GetBinContent(1), noCutHist.GetBinError(1))
+                print "FillTableEfficiencies(): creating TEfficiencyRel"
+                sys.stdout.flush()
             if(hist.GetBinContent(1) > cutHists[i-1].GetBinContent(1)):
                 # here, passed > total, so root will complain; this can happen if we remove a negative weight event with this cut
                 r.gErrorIgnoreLevel = r.kError+1
@@ -690,39 +699,58 @@ def CalculateEfficiency(table):
 def CombineEfficiencies(tableList):
     newTable = {}
     nLines = len(tableList[0])
-    table = tableList[0]
     weightList = [t[1]["TEfficiencyAbs"].GetWeight() for t in tableList]
+    firstTable = tableList[0]
     for j in range(0, nLines):
         nPass = 0
-        # errNSqr = 0
         errNpassSqr = 0
         for i, t in enumerate(tableList):
             nPass += float(t[j]["Npass"])*weightList[i]
-            # errNSqr += float(t[j]["errNSqr"])*pow(weightList[i], 2)
             errNpassSqr += float(t[j]["errNpassSqr"])*pow(weightList[i], 2)
         if j > 0:
-            coll = r.TList()
-            for o in [t[j]["TEfficiencyRel"] for t in tableList]:
-                coll.AddLast(o)
-            grRel = r.TEfficiency.Combine(coll)
-            effRel = grRel.GetY()[0]
-            effRelErr = max(grRel.GetErrorYhigh(0), grRel.GetErrorYlow(0))
-            coll = r.TList()
-            for o in [t[j]["TEfficiencyAbs"] for t in tableList]:
-                coll.AddLast(o)
-            grAbs = r.TEfficiency.Combine(coll)
-            effAbs = grAbs.GetY()[0]
-            effAbsErr = max(grAbs.GetErrorYhigh(0), grAbs.GetErrorYlow(0))
+            # ideally, we'd be more accurate with this
+            # - different processes should be combined, not added
+            # TODO FIXME
+            # if len(tableList) > 1:
+            #     coll = r.TList()
+            #     for o in [t[j]["TEfficiencyRel"] for t in tableList]:
+            #         coll.AddLast(o)
+            #     grRel = r.TEfficiency.Combine(coll)
+            #     effRel = grRel.GetY()[0]
+            #     effRelErr = max(grRel.GetErrorYhigh(0), grRel.GetErrorYlow(0))
+            #     # print "CombineEfficiencies() -- varName={} Npass={} effRel={}".format(firstTable[int(j)]["variableName"], nPass, effRel)
+            #     coll = r.TList()
+            #     for o in [t[j]["TEfficiencyAbs"] for t in tableList]:
+            #         coll.AddLast(o)
+            #     grAbs = r.TEfficiency.Combine(coll)
+            #     effAbs = grAbs.GetY()[0]
+            #     effAbsErr = max(grAbs.GetErrorYhigh(0), grAbs.GetErrorYlow(0))
+            # else:
+            #     effRel = firstTable[j]["TEfficiencyRel"].GetEfficiency(1)
+            #     effRelErr = max(firstTable[j]["TEfficiencyRel"].GetEfficiencyErrorLow(1), firstTable[j]["TEfficiencyRel"].GetEfficiencyErrorUp(1))
+            #     effAbs = firstTable[j]["TEfficiencyAbs"].GetEfficiency(1)
+            #     effAbsErr = max(firstTable[j]["TEfficiencyAbs"].GetEfficiencyErrorLow(1), firstTable[j]["TEfficiencyAbs"].GetEfficiencyErrorUp(1))
+            firstRelEff = firstTable[j]["TEfficiencyRel"]
+            for o in [t[j]["TEfficiencyRel"] for t in tableList[1:]]:
+                firstRelEff.Add(o)
+            effRel = firstRelEff.GetEfficiency(1)
+            effRelErr = max(firstRelEff.GetEfficiencyErrorLow(1), firstRelEff.GetEfficiencyErrorUp(1))
+            # print "CombineEfficiencies() -- varName={} Npass={} effRel={}".format(firstTable[int(j)]["variableName"], nPass, effRel)
+            firstAbsEff = firstTable[j]["TEfficiencyAbs"]
+            for o in [t[j]["TEfficiencyAbs"] for t in tableList[1:]]:
+                firstAbsEff.Add(o)
+            effAbs = firstAbsEff.GetEfficiency(1)
+            effAbsErr = max(firstAbsEff.GetEfficiencyErrorLow(1), firstAbsEff.GetEfficiencyErrorUp(1))
         else:
             effRel = effAbs = 1
             effRelErr = effAbsErr = 0
 
         newTable[int(j)] = {
-            "variableName": table[int(j)]["variableName"],
-            "min1": table[int(j)]["min1"],
-            "max1": table[int(j)]["max1"],
-            "min2": table[int(j)]["min2"],
-            "max2": table[int(j)]["max2"],
+            "variableName": firstTable[int(j)]["variableName"],
+            "min1": firstTable[int(j)]["min1"],
+            "max1": firstTable[int(j)]["max1"],
+            "min2": firstTable[int(j)]["min2"],
+            "max2": firstTable[int(j)]["max2"],
             # "N": nTot,
             # "errNSqr": errNSqr,
             "Npass": nPass,
@@ -894,9 +922,9 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, sample="", plotWeight=1.0):
         # temporary
         #
         # if "TDir" in htemp.__repr__():
-        # #print 'Getting optimizer hist!'
+        # #print "Getting optimizer hist!"
         # htemp = file.Get(histoName + "/optimizer")
-        # #print 'entries:',htemp.GetEntries()
+        # #print "entries:",htemp.GetEntries()
         # only go 1 subdir deep
         if "TDir" in htemp.ClassName():
             dirKeys = htemp.GetListOfKeys()
@@ -907,29 +935,17 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, sample="", plotWeight=1.0):
                     print "ERROR: failed to get histo named:", hname, "from file:", tfile.GetName()
                     exit(-1)
                 # else:
-                #  print 'INFO: found key in subdir named:',hname,'hist name:',htmp.GetName()
+                #  print "INFO: found key in subdir named:",hname,"hist name:",htmp.GetName()
                 r.SetOwnership(htmp, True)
                 updateSample(
                     sampleHistoDict, htmp, h, sample, plotWeight
                 )
                 h += 1
-                if "eventspassingcuts" in htmp.GetName().lower():
-                    # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
-                    unscaledEvtsPassingCuts = htmp.Clone()
-                    unscaledEvtsPassingCuts.SetNameTitle(htmp.GetName()+"_unscaled", htmp.GetTitle()+"_unscaled")
-                    updateSample(sampleHistoDict, htmp, h, sample, 1.0)
-                    h += 1
         else:
             updateSample(
                 sampleHistoDict, htemp, h, sample, plotWeight
             )
             h += 1
-            if "eventspassingcuts" in htemp.GetName().lower():
-                # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
-                unscaledEvtsPassingCuts = htemp.Clone()
-                unscaledEvtsPassingCuts.SetNameTitle(htemp.GetName()+"_unscaled", htemp.GetTitle()+"_unscaled")
-                updateSample(sampleHistoDict, unscaledEvtsPassingCuts, h, sample, 1.0)
-                h += 1
     tfile.Close()
 
 
@@ -941,7 +957,8 @@ def GetShortHistoName(histName):
 
 
 def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
-    for idx, pieceHisto in enumerate(pieceHistoList):
+    idx = 0
+    for pieceHisto in pieceHistoList:
         pieceHistoName = pieceHisto.GetName()
         pieceHisto.SetName(GetShortHistoName(pieceHistoName))
         if idx in sampleHistoDict:
@@ -956,6 +973,14 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
         # if idx == 0:
         #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
         #             sample, pieceHisto.GetName(), pieceHisto.GetEntries(), sampleHistoDict[idx].GetName(), sampleHistoDict[idx].GetEntries())
+        idx += 1
+        if "eventspassingcuts" in pieceHisto.GetName().lower() and "unscaled" not in pieceHisto.GetName().lower():
+            # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
+            # print "INFO: create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi.".format(pieceHisto.GetName())
+            unscaledEvtsPassingCuts = pieceHisto.Clone()
+            unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
+            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, sample, 1.0)
+            idx += 1
     return sampleHistoDict
 
 
@@ -1073,18 +1098,31 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
     sys.stdout.flush()
 
 
-def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
-    # print "INFO: reading root file {}".format(unscaledRootFile)
-    if len(ttBarUnscaledRawSampleName) <= 0:
-        unscaledEvtsHist = unscaledRootFile.Get("EventsPassingCuts")
+def GetUnscaledTotalEvents(combinedRootFile, sampleName):
+    # XXX FIXME TODO: now moved to just using TProfile;
+    # 1) remove code for hist support
+    # 2) remove exception for QCD/DATA
+    if "DATA" in sampleName:
+        # no scaling done to data
+        histName = "profile1D__" + sampleName + "__EventsPassingCuts"
     else:
-        # scaledEvtsHist = unscaledRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
-        unscaledEvtsHist = unscaledRootFile.Get(
-            "histo1D__" + ttBarUnscaledRawSampleName + "__EventsPassingCuts"
-        )
-        # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
-        # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
-        # print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
+        histName = "profile1D__" + sampleName + "__EventsPassingCuts_unscaled"
+    # scaledEvtsHist = combinedRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
+    unscaledEvtsHist = combinedRootFile.Get(histName)
+    if not unscaledEvtsHist:
+        # print "WARN: failed reading hist {} from root file {}".format(histName, combinedRootFile.GetName())
+        oldHistName = histName
+        if "DATA" in sampleName:
+            histName = "histo1D__" + sampleName + "__EventsPassingCuts"
+        else:
+            histName = "histo1D__" + sampleName + "__EventsPassingCuts_unscaled"
+        unscaledEvtsHist = combinedRootFile.Get(histName)
+    if not unscaledEvtsHist:
+        raise RuntimeError("could not get hist {} nor hist {} from root file {}".format(oldHistName, histName, combinedRootFile.GetName()))
+    # print "INFO: reading hist {} from root file {}".format(histName, combinedRootFile.GetName())
+    # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
+    # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
+    # print 'GetUnscaledTotalEvents(): Got unscaled events=',unscaledTotalEvts,'from hist:',unscaledEvtsHist.GetName(),'in file:',unscaledRootFile.GetName()
     if unscaledEvtsHist.ClassName() == "TProfile":
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)*unscaledEvtsHist.GetBinEntries(1)
     else:
@@ -1092,19 +1130,19 @@ def GetUnscaledTotalEvents(unscaledRootFile, ttBarUnscaledRawSampleName=""):
     return unscaledTotalEvts
 
 
-def FindUnscaledRootFile(filepath, sampleName):
-    for root, dirs, files in os.walk(filepath):
-        for name in files:
-            # print "FindUnscaledRootFile({}, {}): check against file: {}".format(filepath, sampleName, name)
-            noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
-            noExtBackupName = noExtName.replace("backup_", "").replace("newPMX_", "")
-            # print "compare", noExtBackupName, " to *"+sampleName+"*.root"
-            # don't match an amcatnloFXFX file with a sampleName that doesn't include it
-            if "amcatnloFXFX" in name and "amcatnloFXFX" not in sampleName:
-                continue
-            if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
-                return os.path.join(root, name)
-    return None
+#def FindUnscaledRootFile(filepath, sampleName):
+#    for root, dirs, files in os.walk(filepath):
+#        for name in files:
+#            # print "FindUnscaledRootFile({}, {}): check against file: {}".format(filepath, sampleName, name)
+#            noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
+#            noExtBackupName = noExtName.replace("backup_", "").replace("newPMX_", "")
+#            # print "compare", noExtBackupName, " to *"+sampleName+"*.root"
+#            # don't match an amcatnloFXFX file with a sampleName that doesn't include it
+#            if "amcatnloFXFX" in name and "amcatnloFXFX" not in sampleName:
+#                continue
+#            if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
+#                return os.path.join(root, name)
+#    return None
 
 
 def GetXSecTimesIntLumi(sampleNameFromDataset):
@@ -1115,9 +1153,7 @@ def GetXSecTimesIntLumi(sampleNameFromDataset):
 
 
 def GetRatesAndErrors(
-    unscaledRootFile,
     combinedRootFile,
-    unscaledTotalEvts,
     sampleName,
     selection,
     doEEJJ=True,
@@ -1126,13 +1162,8 @@ def GetRatesAndErrors(
 ):
     verbose = False
     if verbose or isTTBarFromData:
-        print "GetRatesAndErrors(", unscaledRootFile.GetName(), combinedRootFile.GetName(), unscaledTotalEvts, sampleName, selection, isDataOrQCD, ")"
-    if selection == "preselection":
-        selection = "PAS"
-    if doEEJJ:
-        histName = "Mej_selected_min"
-    else:
-        histName = "Mej"
+        print "GetRatesAndErrors(", combinedRootFile.GetName(), sampleName, selection, doEEJJ, isDataOrQCD, isTTBarFromData, ")"
+    histName = "EventsPassingCuts"
     # special case of TTBar from data
     # if isTTBarFromData:
     #     # rate calcs should be same as data/QCD
@@ -1189,71 +1220,37 @@ def GetRatesAndErrors(
     #  exit(-1)
     # rate = mejHist.Integral()
 
-    xsecTimesIntLumi = GetXSecTimesIntLumi(sampleName)
-    mejScaledHist = combinedRootFile.Get("histo1D__"+sampleName+"__"+histName+"_"+selection)
-    mejUnscaledHist = unscaledRootFile.Get(histName + "_" + selection)
-    if not mejUnscaledHist and not mejScaledHist:
-        print "ERROR: could not find hist", histName + "_" + selection, " in file:", unscaledRootFile.GetName()
-        print "ERROR: could not find hist histo1D__"+sampleName+"__"+histName+"_"+selection, " in file:", combinedRootFile.GetName()
-        print "EXIT"
-        exit(-1)
-    if mejUnscaledHist:
-        unscaledIntErr = ctypes.c_double()
-        unscaledInt = mejUnscaledHist.IntegralAndError(1, mejUnscaledHist.GetNbinsX() + 1, unscaledIntErr)
-        unscaledIntErr = unscaledIntErr.value
-        unscaledRate = mejUnscaledHist.GetEntries()
-        sumOfWeightsHist = unscaledRootFile.Get("SumOfWeights")
-        if not sumOfWeightsHist:
-            print "ERROR: could not find hist SumOfWeights in file:", unscaledRootFile.GetName()
-            print "EXIT"
-            exit(-1)
-        sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
-        scaledIntFromUnscaled = unscaledInt * xsecTimesIntLumi / sumAMCatNLOweights if sumAMCatNLOweights > 0 else 0
-        scaledIntErrFromUnscaled = unscaledIntErr * xsecTimesIntLumi / sumAMCatNLOweights if sumAMCatNLOweights > 0 else 0
-        scaledInt = scaledIntFromUnscaled
-        scaledIntErr = scaledIntErrFromUnscaled
-    if mejScaledHist:
-        scaledIntErr = ctypes.c_double()
-        scaledInt = mejScaledHist.IntegralAndError(1, mejScaledHist.GetNbinsX() + 1, scaledIntErr)
-        scaledIntErr = scaledIntErr.value
-        # scaledRate = mejScaledHist.GetEntries()
-    # sumOfWeightsHist = unscaledRootFile.Get("SumOfWeights")
-    # if not sumOfWeightsHist:
-    #     print "ERROR: could not find hist SumOfWeights in file:", unscaledRootFile.GetName()
-    #     print "EXIT"
-    #     exit(-1)
-    # sumAMCatNLOweights = sumOfWeightsHist.GetBinContent(1)
-    # sumTopPtWeights = sumOfWeightsHist.GetBinContent(2)
-    # avgTopPtWeight = sumTopPtWeights / unscaledTotalEvts
-    if not isDataOrQCD:
-        # rate = unscaledInt * xsecTimesIntLumi / sumAMCatNLOweights
-        # # # print 'for sampleName',sampleName,'amcAtNLO, rate=',unscaledInt,'*',xsecTimesIntLumi,'/',sumAMCatNLOweights,'=',rate
-        # # # sys.stdout.flush()
-        # # # rateErr = CalculateScaledRateError(
-        # # #     sampleName, sumAMCatNLOweights, unscaledRate, unscaledInt
-        # # # )
-        # rateErr = unscaledIntErr * xsecTimesIntLumi / sumAMCatNLOweights
-        rate = scaledInt
-        rateErr = scaledIntErr
+    scaledHistName = "profile1D__"+sampleName+"__"+histName
+    scaledHist = combinedRootFile.Get(scaledHistName)
+    if not scaledHist:
+        # oldHistName = scaledHistName
+        # scaledHistName = "histo1D__"+sampleName+"__"+histName
+        # scaledHist = combinedRootFile.Get(scaledHistName)
+        # if not scaledHist:
+        #     raise RuntimeError("ERROR: could not find hist {} not hist {} in file: {}".format(oldHistName, scaledHistName, combinedRootFile.GetName()))
+        raise RuntimeError("ERROR: could not find hist {} in file: {}".format(scaledHistName, combinedRootFile.GetName()))
+    # min_M_ej_LQ300 for eejj
+    if "preselection" not in selection:
+        if doEEJJ:
+            selection = "min_M_ej_"+selection
+        else:
+            # enujj
+            selection = "MT_"+selection
+    selectionBin = scaledHist.GetXaxis().FindFixBin(selection)
+    if scaledHist.ClassName() == "TProfile":
+        scaledInt = scaledHist.GetBinContent(selectionBin)*scaledHist.GetBinEntries(selectionBin)
+        scaledIntErr = math.sqrt(scaledHist.GetSumw2().At(selectionBin))
     else:
-        # print '[DataOrQCD detected] for sampleName',sampleName,'rate=',unscaledInt
-        # print 'reading 'histName+'_'+selection,'from',unscaledRootFile
-        rate = unscaledInt
-        # rateErr = CalculateScaledRateError(
-        #     sampleName, unscaledTotalEvts, unscaledRate, unscaledInt, False
-        # )
-        rateErr = unscaledIntErr
-    # if "TT" in sampleName and "data" not in sampleName.lower():
-    #     # print 'applying extra average weight to',sampleName
-    #     rate /= avgTopPtWeight
-    #     rateErr /= avgTopPtWeight
-    if verbose:
-        if selection == "PAS":
-            print "INFO: hist", histName + "_" + selection, " in file:", unscaledRootFile.GetName()
-            print "\tscaledIntFromUnscaled=", scaledIntFromUnscaled, "unscaled entries=", mejUnscaledHist.GetEntries()
-            print "\tscaledInt=", scaledInt
-            if math.fabs(scaledInt - scaledIntFromUnscaled) > 1e-3:
-                print "\tERROR: scaledInt != scaledIntFromUnscaled!"
-                # exit(-2)
-            print "\txsecTimesIntLumi=", xsecTimesIntLumi, "unscaledInt=", unscaledInt, "unscaledRate=", unscaledRate, "unscaledTotalEvts=", unscaledTotalEvts, "rate=", rate
+        scaledInt = scaledHist.GetBinContent(selectionBin)
+        scaledIntErr = scaledHist.GetBinError(selectionBin)
+    rate = scaledInt
+    rateErr = scaledIntErr
+    if not isDataOrQCD:
+        unscaledHistName = "profile1D__"+sampleName+"__"+histName+"_unscaled"
+        unscaledHist = combinedRootFile.Get(unscaledHistName)
+        if not unscaledHist:
+            raise RuntimeError("ERROR: could not find hist {} in file: {}".format(unscaledHistName, combinedRootFile.GetName()))
+        unscaledRate = unscaledHist.GetBinEntries(selectionBin)
+    else:
+        unscaledRate = scaledHist.GetBinEntries(selectionBin)
     return rate, rateErr, unscaledRate

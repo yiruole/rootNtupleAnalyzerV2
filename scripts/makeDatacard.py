@@ -326,38 +326,6 @@ def GetTableEntryStr(evts, errStatUp="-", errStatDown="-", errSyst=0, latex=Fals
 #     return scaledRateError
 
 
-def GetUnscaledSampleRootFile(sampleName, bkgType=""):
-    # print 'GetUnscaledSampleRootFile('+sampleName+','+bkgType+')'
-    if bkgType not in d_unscaledRootFiles.keys():
-        d_unscaledRootFiles[bkgType] = {}
-    if sampleName not in d_unscaledRootFiles[bkgType].keys():
-        if bkgType == "QCD":
-            filepath = qcdFilePath
-            # if doEEJJ:
-            #     analysisCode = "analysisClass_lq_eejj_QCD"
-            # else:
-            #     analysisCode = "analysisClass_lq_enujj_QCD"
-        elif bkgType == "TTData":
-            return ttbar_data_filepath
-        else:
-            filepath = filePath
-            # if doEEJJ:
-            #     analysisCode = "analysisClass_lq_eejj"
-            # else:
-            #     analysisCode = "analysisClass_lq_enujj_MT"
-        d_unscaledRootFiles[bkgType][sampleName] = cc.FindUnscaledRootFile(filepath, sampleName)
-        if d_unscaledRootFiles[bkgType][sampleName] is None:
-            filepathList = [filepath]
-            # try with condor added
-            filepath = os.path.expandvars(filepath.rstrip("/"))
-            filepath = filepath[:filepath.rfind("/")]+"/condor/"
-            d_unscaledRootFiles[bkgType][sampleName] = cc.FindUnscaledRootFile(filepath, sampleName)
-            filepathList.append(filepath)
-            if d_unscaledRootFiles[bkgType][sampleName] is None:
-                raise RuntimeError("couldn't find root file in dirs '{}' for sample '{}' and bkgType '{}'".format(filepathList, sampleName, bkgType))
-    return d_unscaledRootFiles[bkgType][sampleName]
-
-
 def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
     if len(ttbarRootFilename) > 0:
         ttbarFile = TFile(ttbarRootFilename)
@@ -376,46 +344,23 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             bkgType = "QCD"
         else:
             scaledRootFile = tfile
-        sampleList = dictSamples[bkg_name]
-        sampleRate = 0
-        sampleRateErr = 0
-        sampleUnscaledRate = 0
-        sampleUnscaledTotalEvts = 0
-        # print 'PRESELECTION bkg_bame=', bkg_name
-        # # print 'backgroundType=', bkgType
-        # print 'sampleList['+bkg_name+']=', sampleList
-        for bkgSample in sampleList:
-            bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample, bkgType)
-            bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
-            if not bkgUnscaledRootFile:
-                print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
-                exit(-1)
-            unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
-            # SIC removed Jul 2020
-            # if bkgType == "TTData":
-            #     unscaledTotalEvts = GetUnscaledTotalEvents(
-            #         bkgUnscaledRootFile, ttBarUnscaledRawSampleName
-            #     )
-            sampleUnscaledTotalEvts += unscaledTotalEvts
-            # preselection
-            # print 'PRESELECTION ------>Call GetRatesAndErrors for sampleName=',bkgSample
-            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                bkgUnscaledRootFile,
-                scaledRootFile,
-                unscaledTotalEvts,
-                bkgSample,
-                "preselection",
-                doEEJJ,
-                not bkgType == "MC",
-                bkgType == "TTData",
-            )
-            # print 'PRESELECTION ------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-            sampleRate += rate
-            sampleUnscaledRate += unscaledRate
-            sampleRateErr += rateErr * rateErr
-            bkgUnscaledRootFile.Close()
-        sampleRateErr = math.sqrt(sampleRateErr)
-        # print 'PRESELECTION sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
+        print "PRESELECTION bkg_bame=", bkg_name
+        print "backgroundType=", bkgType
+        unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, bkg_name)
+        rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
+            scaledRootFile,
+            bkg_name,
+            "preselection",
+            doEEJJ,
+            not bkgType == "MC",
+            bkgType == "TTData",
+        )
+        print "INFO: PRESELECTION ------>rate=", rate, "rateErr=", rateErr, "unscaledRate=", unscaledRate, "unscaledTotalEvts=", unscaledTotalEvts
+        sampleUnscaledTotalEvts = unscaledTotalEvts
+        sampleRate = rate
+        sampleUnscaledRate = unscaledRate
+        sampleRateErr = rateErr
+        print "PRESELECTION sampleRate:", sampleRate, "sampleRateErr=", sampleRateErr, "sampleUnscaledRate=", sampleUnscaledRate
         bkgRatesDict = {}
         bkgRatesDict["preselection"] = sampleRate
         if bkgRatesDict["preselection"] < 0:
@@ -436,48 +381,26 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
         for i_signal_name, signal_name in enumerate(signal_names):
             for i_mass_point, mass_point in enumerate(mass_points):
                 selectionName = "LQ" + mass_point
-                sampleList = dictSamples[bkg_name]
-                sampleRate = 0
-                sampleRateErr = 0
-                sampleUnscaledRate = 0
-                # print selectionName,'bkg_name=',bkg_name
-                for bkgSample in sampleList:
-                    bkgUnscaledRootFilename = GetUnscaledSampleRootFile(
-                        bkgSample, bkgType
-                    )
-                    # print "found bkgUnscaledRootFilename: {}".format(bkgUnscaledRootFilename)
-                    bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
-                    if not bkgUnscaledRootFile:
-                        print "ERROR: file not found:", bkgUnscaledRootFilename
-                        exit(-1)
-                    unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
-                    # SIC removed Jul 2020
-                    # if bkgType == "TTData":
-                    #     unscaledTotalEvts = GetUnscaledTotalEvents(
-                    #         bkgUnscaledRootFile, ttBarUnscaledRawSampleName
-                    #     )
-                    sampleUnscaledTotalEvts += unscaledTotalEvts
-                    rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                        bkgUnscaledRootFile,
-                        scaledRootFile,
-                        unscaledTotalEvts,
-                        bkgSample,
-                        selectionName,
-                        doEEJJ,
-                        not bkgType == "MC",
-                        bkgType == "TTData"
-                    )
-                    # print '------>Called GetRatesAndErrors for sampleName=', bkgSample
-                    # print '------>rate=', rate, 'rateErr=', rateErr, 'unscaledRate=', unscaledRate
-                    # print '------>from file=:', bkgUnscaledRootFilename
-                    # if isQCD:
-                    #     print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
-                    sampleRate += rate
-                    sampleUnscaledRate += unscaledRate
-                    sampleRateErr += rateErr * rateErr
-                    bkgUnscaledRootFile.Close()
-                sampleRateErr = math.sqrt(sampleRateErr)
-                # print 'sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
+                # print selectionName,"bkg_name=",bkg_name
+                unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, bkg_name)
+                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
+                    scaledRootFile,
+                    bkg_name,
+                    selectionName,
+                    doEEJJ,
+                    not bkgType == "MC",
+                    bkgType == "TTData"
+                )
+                # print "------>Called GetRatesAndErrors for sampleName=", bkg_name
+                # print "------>rate=", rate, "rateErr=", rateErr, "unscaledRate=", unscaledRate
+                # print "------>from file=:", scaledRootFile
+                # if isQCD:
+                #     print "for sample:",bkgSample,"got unscaled entries=",unscaledRate
+                sampleUnscaledTotalEvts = unscaledTotalEvts
+                sampleRate = rate
+                sampleUnscaledRate = unscaledRate
+                sampleRateErr = rateErr
+                # print "sampleRate:", sampleRate, "sampleRateErr=", sampleRateErr, "sampleUnscaledRate=", sampleUnscaledRate
                 bkgRatesDict[selectionName] = sampleRate
                 if bkgRatesDict[selectionName] < 0:
                     print "WARN: for sample", bkg_name, "selection", selectionName, "found negative rate:", sampleRate, "; set to zero."
@@ -514,14 +437,14 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 # print 'use selection name=',selectionName
                 doMassPointLoop = False
             # print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
-            unscaledRootFilename = GetUnscaledSampleRootFile(signalNameForFile)
-            unscaledRootFile = TFile.Open(unscaledRootFilename)
-            unscaledTotalEvts = cc.GetUnscaledTotalEvents(unscaledRootFile)
+            #unscaledRootFilename = GetUnscaledSampleRootFile(signalNameForFile)
+            #unscaledRootFile = TFile.Open(unscaledRootFilename)
+            unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, signalNameForFile)
             # preselection
             rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                unscaledRootFile,
-                tfile,
-                unscaledTotalEvts,
+                #unscaledRootFile,
+                scaledRootFile,
+                #unscaledTotalEvts,
                 signalNameForFile,
                 "preselection",
                 doEEJJ
@@ -535,12 +458,12 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
             sigTotalEvts = unscaledTotalEvts
             # final selection
             for imp, mp in enumerate(mass_points):
-                signalSelName = signal_name + mp
+                #signalSelName = signal_name + mp
                 selectionName = "LQ" + mp
                 rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                    unscaledRootFile,
+                    #unscaledRootFile,
                     tfile,
-                    unscaledTotalEvts,
+                    #unscaledTotalEvts,
                     signalNameForFile,
                     selectionName,
                     doEEJJ
@@ -548,7 +471,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 sigRatesDict[selectionName] = rate
                 sigRateErrsDict[selectionName] = rateErr
                 sigUnscaledRatesDict[selectionName] = unscaledRate
-            unscaledRootFile.Close()
+            #unscaledRootFile.Close()
 
             # fill full dicts
             # signalFullName = signal_name + mass_point
@@ -562,38 +485,24 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
                 break
 
     # DATA
-    sampleList = dictSamples["DATA"]
-    sampleRate = 0
-    sampleRateErr = 0
-    sampleUnscaledRate = 0
-    sampleUnscaledTotalEvts = 0
-    isQCD = False
+    dataSampleName = "DATA"
+    #isQCD = False
     isData = True
-    for bkgSample in sampleList:
-        bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample)
-        bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
-        if not bkgUnscaledRootFile:
-            print "ERROR: something happened when trying to open the file:", bkgUnscaledRootFilename
-            exit(-1)
-        unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
-        sampleUnscaledTotalEvts += unscaledTotalEvts
-        # preselection
-        # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
-        rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-            bkgUnscaledRootFile,
-            scaledRootFile,
-            unscaledTotalEvts,
-            bkgSample,
-            "preselection",
-            doEEJJ,
-            isData
-        )
-        # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-        sampleRate += rate
-        sampleUnscaledRate += unscaledRate
-        sampleRateErr += rateErr * rateErr
-        bkgUnscaledRootFile.Close()
-    sampleRateErr = math.sqrt(sampleRateErr)
+    unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, dataSampleName)
+    sampleUnscaledTotalEvts = unscaledTotalEvts
+    # preselection
+    # print "------>Call GetRatesAndErrors for sampleName=", dataSampleName
+    rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
+        scaledRootFile,
+        dataSampleName,
+        "preselection",
+        doEEJJ,
+        isData
+    )
+    # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
+    sampleRate = rate
+    sampleUnscaledRate = unscaledRate
+    sampleRateErr = rateErr
     # print 'DATA preselection sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
     dataRatesDict = {}
     dataRatesDict["preselection"] = sampleRate
@@ -606,38 +515,23 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
     for i_signal_name, signal_name in enumerate(signal_names):
         for i_mass_point, mass_point in enumerate(mass_points):
             selectionName = "LQ" + mass_point
-            sampleList = dictSamples["DATA"]
-            sampleRate = 0
-            sampleRateErr = 0
-            sampleUnscaledRate = 0
-            # print selectionName,'bkg_bame=',bkg_name
-            for bkgSample in sampleList:
-                bkgUnscaledRootFilename = GetUnscaledSampleRootFile(bkgSample)
-                bkgUnscaledRootFile = TFile.Open(bkgUnscaledRootFilename)
-                if not bkgUnscaledRootFile:
-                    print "ERROR: file not found:", bkgUnscaledRootFilename
-                    exit(-1)
-                unscaledTotalEvts = cc.GetUnscaledTotalEvents(bkgUnscaledRootFile)
-                sampleUnscaledTotalEvts += unscaledTotalEvts
-                # preselection
-                # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
-                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                    bkgUnscaledRootFile,
-                    scaledRootFile,
-                    unscaledTotalEvts,
-                    bkgSample,
-                    selectionName,
-                    isData,
-                    doEEJJ
-                )
-                # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-                # if isQCD:
-                #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
-                sampleRate += rate
-                sampleUnscaledRate += unscaledRate
-                sampleRateErr += rateErr * rateErr
-                bkgUnscaledRootFile.Close()
-            sampleRateErr = math.sqrt(sampleRateErr)
+            unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, dataSampleName)
+            sampleUnscaledTotalEvts += unscaledTotalEvts
+            # preselection
+            # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
+            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
+                scaledRootFile,
+                dataSampleName,
+                selectionName,
+                isData,
+                doEEJJ
+            )
+            # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
+            # if isQCD:
+            #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
+            sampleRate = rate
+            sampleUnscaledRate = unscaledRate
+            sampleRateErr = rateErr
             # print 'sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
             dataRatesDict[selectionName] = sampleRate
             dataRateErrsDict[selectionName] = sampleRateErr
@@ -679,7 +573,8 @@ inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_25feb2021_comb/inputListAl
 inputLists[2017] = "$LQANA/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
 #
 qcdFilePaths = {}
-qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+#qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
+qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_2mar2021_oldOptFinalSels/output_cutTable_lq_eejj_QCD/"
 qcdFilePaths[2017] = "$LQDATA/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
 #
 filePaths = {}
@@ -971,7 +866,7 @@ d_data_rates = {}
 d_data_rateErrs = {}
 d_data_unscaledRates = {}
 d_data_totalEvents = {}
-d_unscaledRootFiles = {}
+#d_unscaledRootFiles = {}
 
 
 systematics_filepaths_background = dict()
@@ -1546,6 +1441,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
         otherBackgroundErrStatDown = 0.0
         for i_background_name, background_name in enumerate(background_names):
             thisBkgEvts = d_background_rates[background_name][selectionName]
+            # print "INFO:  background_name={}, d_background_rates[{}]=".format(background_name, background_name), d_background_rates[background_name]
             thisBkgEvtsErr = d_background_rateErrs[background_name][selectionName]
             thisBkgEvtsErrUp = d_background_rateErrs[background_name][selectionName]
             thisBkgEvtsErrDown = thisBkgEvtsErrUp
