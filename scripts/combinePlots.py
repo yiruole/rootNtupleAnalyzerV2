@@ -332,6 +332,7 @@ for sample, pieceList in dictSamples.iteritems():
 
     histoDictThisSample = {}
     tablesThisSample = []
+    sampleTable = {}
 
     piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
 
@@ -413,7 +414,9 @@ for sample, pieceList in dictSamples.iteritems():
         sys.stdout.flush()
 
         # ---Update table
-        data = combineCommon.FillTableEfficiencies(data, rootFile, weight)
+        data = combineCommon.FillTableErrors(data, rootFile)
+        data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
+        sampleTable = combineCommon.UpdateTable(data, sampleTable)
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
@@ -443,7 +446,7 @@ for sample, pieceList in dictSamples.iteritems():
         exit(-1)
 
     # ---Create final tables
-    combinedTableThisSample = combineCommon.CombineEfficiencies(tablesThisSample)
+    combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
     # --- Write tables
     combineCommon.WriteTable(combinedTableThisSample, sample, outputTableFile)
 

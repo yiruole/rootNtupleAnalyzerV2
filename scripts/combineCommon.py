@@ -267,7 +267,7 @@ def ParseDatFile(datFilename):
 
 
 def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
-    verbose = False
+    verbose = True
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
         print "ERROR: could not open file '{}'. Exiting here.".format(rootFileName)
@@ -298,46 +298,55 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
     noCutHist = cutHists[0]
     # Turn off warning messages
     # FIXME restore later
-    #prevIgnoreLevel = r.gErrorIgnoreLevel
-    #r.gErrorIgnoreLevel = r.kInfo+1
+    prevIgnoreLevel = r.gErrorIgnoreLevel
+    #r.gErrorIgnoreLevel = r.kError+1
     for i, hist in enumerate(cutHists):
         if i == 0:
             table[i]["errNpassSqr"] = pow(hist.GetBinError(1), 2)
             table[i]["errNSqr"] = table[i]["errNpassSqr"]
         else:
             if verbose:
-                print "FillTableEfficiencies(): i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName())
-                print "FillTableEfficiencies(): cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1))
+                print "--> FillTableEfficiencies(): i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName())
                 print "FillTableEfficiencies(): hist: GetBinContent(1) = {} +/- {}".format(hist.GetBinContent(1), hist.GetBinError(1))
+                print "FillTableEfficiencies(): cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1))
                 print "FillTableEfficiencies(): noCutHist: GetBinContent(1) = {} +/- {}".format(noCutHist.GetBinContent(1), noCutHist.GetBinError(1))
-                print "FillTableEfficiencies(): creating TEfficiencyRel"
+                print "- Creating TEfficiencyRel"
                 sys.stdout.flush()
+            r.gErrorIgnoreLevel = 0
             if(hist.GetBinContent(1) > cutHists[i-1].GetBinContent(1)):
                 # here, passed > total, so root will complain; this can happen if we remove a negative weight event with this cut
+                print "\tINFO: passed > pass(N-1); attempting to silence error messages!"
+                sys.stdout.flush()
                 r.gErrorIgnoreLevel = r.kError+1
+                # r.gErrorIgnoreLevel = 3001
+                #r.gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")
             table[i]["TEfficiencyRel"] = r.TEfficiency(hist, cutHists[i-1])
             table[i]["TEfficiencyRel"].SetWeight(weight)
-            # print "creating TEfficiencyAbs"
-            # sys.stdout.flush()
-            r.gErrorIgnoreLevel = r.kInfo+1
+            print "- Creating TEfficiencyAbs"
+            sys.stdout.flush()
+            # r.gErrorIgnoreLevel = r.kInfo+1
             table[i]["TEfficiencyAbs"] = r.TEfficiency(hist, noCutHist)
             table[i]["TEfficiencyAbs"].SetWeight(weight)
             table[i]["errNpassSqr"] = pow(hist.GetBinError(1), 2)
             table[i]["errNSqr"] = pow(cutHists[i-1].GetBinError(1), 2)
+        r.gErrorIgnoreLevel = prevIgnoreLevel
     # FIXME restore later
     #r.gErrorIgnoreLevel = prevIgnoreLevel
     tfile.Close()
     return table
 
 
-def FillTableErrors(table, rootFileName):
+def FillTableErrors(table, rootFileName, sampleName=""):
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
-        print "ERROR: could not open file '{}'. Exiting here.".format(rootFileName)
-        exit(-1)
-    eventsPassingHist = tfile.Get("EventsPassingCuts")
+        raise RuntimeError("ERROR: could not open file '{}'. Exiting here.".format(rootFileName))
+    if sampleName:
+        histName = "profile1D__{}__EventsPassingCuts".format(sampleName)
+    else:
+        histName = "EventsPassingCuts"
+    eventsPassingHist = tfile.Get(histName)
     if not eventsPassingHist:
-        raise RuntimeError("ERROR: could not find hist 'EventsPassingCuts' in file '{}'. Exiting here.".format(rootFileName))
+        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'. Exiting here.".format(histName, rootFileName))
 
     for j, line in enumerate(table):
         iBin = j+1
@@ -356,7 +365,7 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
     # ---Create new table using weight
     newtable = {}
 
-    Ntot = float(data[0]["N"])
+    #Ntot = float(data[0]["N"])
     for j, line in enumerate(data):
         if j == 0:
             newtable[int(j)] = {
@@ -365,21 +374,21 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
                     "max1": "-",
                     "min2": "-",
                     "max2": "-",
-                    "N": (Ntot * weight),
-                    "errN": int(0),
-                    "Npass": (Ntot * weight),
-                    "errNpass": int(0),
+                    #"N": (Ntot * weight),
+                    #"errNSqr": int(0),
+                    "Npass": (float(data[j]["Npass"]) * weight),
+                    "errNpassSqr": int(0),
                     }
 
         else:
             # print 'data[j]=',data[j]
-            N = float(data[j]["N"]) * weight
-            # errN = float(data[j - 1]["errEffAbs"]) * xsection_X_intLumi
-            errN = float(data[j]["errN"]) * weight
+            #N = float(data[j]["N"]) * weight
+            ## errN = float(data[j - 1]["errEffAbs"]) * xsection_X_intLumi
+            #errNSqr = pow(float(data[j]["errN"]) * weight, 2)
             # print data[j]['variableName']
             # print "errN: " , errN
-            if str(errN) == "nan":
-                errN = 0
+            #if str(errNSqr) == "nan":
+            #    errNSqr = 0
 
                 #            if( float(N) > 0 and float(errN) > 0 ):
                 #                errRelN = errN / N
@@ -388,11 +397,11 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
 
             Npass = float(data[j]["Npass"]) * weight
             # errNpass = float(data[j]["errEffAbs"]) * xsection_X_intLumi
-            errNpass = float(data[j]["errNpass"]) * weight
+            errNpassSqr = pow(float(data[j]["errNpass"]) * weight, 2)
             # print "errNPass " , errNpass
             # print ""
-            if str(errNpass) == "nan":
-                errNpass = 0
+            #if str(errNpassSqr) == "nan":
+            #    errNpassSqr = 0
 
                 #            if( float(Npass) > 0 and float(errNpass) > 0 ):
                 #                errRelNpass = errNpass / Npass
@@ -405,10 +414,10 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
                     "max1": data[j]["max1"],
                     "min2": data[j]["min2"],
                     "max2": data[j]["max2"],
-                    "N": N,
-                    "errN": errN,
+                    #"N": N,
+                    #"errNSqr": errNSqr,
                     "Npass": Npass,
-                    "errNpass": errNpass,
+                    "errNpassSqr": errNpassSqr,
                     # "TEfficiencyAbs": data[j]["TEfficiencyAbs"].SetWeight(weight),
                     # "TEfficiencyRel": data[j]["TEfficiencyRel"].SetWeight(weight)
                     }
@@ -449,8 +458,8 @@ def UpdateTable(inputTable, outputTable):
                 "max1": inputTable[j]["max1"],
                 "min2": inputTable[j]["min2"],
                 "max2": inputTable[j]["max2"],
-                "N": float(outputTable[int(j)]["N"]) + float(inputTable[j]["N"]),
-                "errNSqr": float(outputTable[int(j)]["errNSqr"]) + float(inputTable[j]["errNSqr"]),
+                #"N": float(outputTable[int(j)]["N"]) + float(inputTable[j]["N"]),
+                #"errNSqr": float(outputTable[int(j)]["errNSqr"]) + float(inputTable[j]["errNSqr"]),
                 "Npass": float(outputTable[int(j)]["Npass"]) + float(inputTable[j]["Npass"]),
                 "errNpassSqr": float(outputTable[int(j)]["errNpassSqr"]) + float(inputTable[j]["errNpassSqr"]),
                 "EffRel": float(0),
@@ -577,7 +586,7 @@ def CalculateEfficiency(table):
     newTable = {}
     # cutHists = []
     for j, line in enumerate(table):
-        errN = math.sqrt(table[j]["errNSqr"])
+        #errN = math.sqrt(table[j]["errNSqr"])
         errNpass = math.sqrt(table[j]["errNpassSqr"])
         newTable[int(j)] = {
             "variableName": table[int(j)]["variableName"],
@@ -585,8 +594,8 @@ def CalculateEfficiency(table):
             "max1": table[int(j)]["max1"],
             "min2": table[int(j)]["min2"],
             "max2": table[int(j)]["max2"],
-            "N": float(table[j]["N"]),
-            "errN": errN,
+            #"N": float(table[j]["N"]),
+            #"errN": errN,
             "Npass": float(table[j]["Npass"]),
             "errNpass": errNpass,
             "EffRel": int(1),
@@ -733,12 +742,14 @@ def CombineEfficiencies(tableList):
             firstRelEff = firstTable[j]["TEfficiencyRel"]
             for o in [t[j]["TEfficiencyRel"] for t in tableList[1:]]:
                 firstRelEff.Add(o)
+            firstRelEff.SetStatisticOption(r.TEfficiency.kFNormal)
             effRel = firstRelEff.GetEfficiency(1)
+            # print "INFO: CombineEfficiencies() -- varName={} Npass={} (N-1)pass effRel={}".format(firstTable[int(j)]["variableName"], nPass, firstRelEff.GetPassedHistogram().GetBinContent(1), effRel)
             effRelErr = max(firstRelEff.GetEfficiencyErrorLow(1), firstRelEff.GetEfficiencyErrorUp(1))
-            # print "CombineEfficiencies() -- varName={} Npass={} effRel={}".format(firstTable[int(j)]["variableName"], nPass, effRel)
             firstAbsEff = firstTable[j]["TEfficiencyAbs"]
             for o in [t[j]["TEfficiencyAbs"] for t in tableList[1:]]:
                 firstAbsEff.Add(o)
+            firstAbsEff.SetStatisticOption(r.TEfficiency.kFNormal)
             effAbs = firstAbsEff.GetEfficiency(1)
             effAbsErr = max(firstAbsEff.GetEfficiencyErrorLow(1), firstAbsEff.GetEfficiencyErrorUp(1))
         else:
