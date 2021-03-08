@@ -15,3 +15,4 @@ makeOptCutFile
 src/analysisClass.C
 __pycache__
 *.pyc
+*.swp
