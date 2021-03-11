@@ -181,13 +181,20 @@ for ijob in range(ijobmax):
     # prepare the list file
     inputfilename = outputmain+"/input/input_"+str(ijob)+".list"
     inputfile = open(inputfilename, "w")
+    filesThisJob = 0
     for i in range(filesperjob):
         line = input.readline()
+        if line.startswith("#"):
+            continue
         if line != "":
             inputfile.write(line)
+            filesThisJob += 1
         continue
     inputfile.close()
 
+    if filesThisJob < 1:
+        os.remove(inputfilename)
+        continue
     # prepare the exec script
     outputname = outputmain+"/src/submit_"+str(ijob)+".sh"
     PrepareJobScript(outputname)
