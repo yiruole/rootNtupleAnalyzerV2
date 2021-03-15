@@ -198,6 +198,7 @@ for ijob in range(ijobmax):
 
     if filesThisJob < 1:
         os.remove(inputfilename)
+        ijobmax -= 1
         continue
     # prepare the exec script
     outputname = outputmain+"/src/submit_"+str(ijob)+".sh"
