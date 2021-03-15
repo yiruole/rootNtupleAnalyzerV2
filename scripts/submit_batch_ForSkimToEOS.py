@@ -166,14 +166,18 @@ os.system("/usr/bin/eos mkdir -p "+outputeosdir)
 ################################################
 numfiles = len(file(inputlist).readlines())
 ijobmax = int(options.ijobmax)
-if ijobmax > numfiles:
+if ijobmax < 0:
     ijobmax = numfiles
-filesperjob = int(numfiles/ijobmax)
-if numfiles % ijobmax != 0:
-    filesperjob = filesperjob+1
-    ijobmax = int(numfiles/filesperjob)
-    if numfiles % filesperjob != 0:
-        ijobmax = ijobmax+1
+    filesperjob = 1
+else:
+    if ijobmax > numfiles:
+        ijobmax = numfiles
+    filesperjob = int(numfiles/ijobmax)
+    if numfiles % ijobmax != 0:
+        filesperjob = filesperjob+1
+        ijobmax = int(numfiles/filesperjob)
+        if numfiles % filesperjob != 0:
+            ijobmax = ijobmax+1
 #################################################
 input = open(inputlist)
 #################################################

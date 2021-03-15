@@ -402,7 +402,12 @@ for line in inputlist_file:
     # print "n jobs allowed   =", options.ijobmax
     # print "n jobs to submit =", jobs_to_submit
 
-    total_jobs = total_jobs + jobs_to_submit
+    if jobs_to_submit > 0:
+        total_jobs = total_jobs + jobs_to_submit
+    else:
+        with open(line.strip()) as inputFile:
+            numLines = sum(1 for line in inputFile)
+        total_jobs = total_jobs + numLines
 
     command = "./scripts/submit_batch_ForSkimToEOS.py"
     command = command + " -i " + line.strip()
