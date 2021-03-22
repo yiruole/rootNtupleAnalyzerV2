@@ -338,7 +338,7 @@ for sample, pieceList in dictSamples.iteritems():
 
     # ---Loop over datasets in the inputlist
     # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-    for dataset_fromInputList, rootFile in dictDatasetsFileNames.iteritems():
+    for dataset_fromInputList, rootFilename in dictDatasetsFileNames.iteritems():
         if len(dictSamplesPiecesAdded[sample]) == len(piecesToAdd):
             break  # we're done!
         toBeUpdated = False
@@ -370,11 +370,13 @@ for sample, pieceList in dictSamples.iteritems():
         print "\tfound matching dataset:", matchingPiece + " ... ",
         sys.stdout.flush()
 
-        inputDatFile = rootFile.replace(".root", ".dat")
+        inputDatFile = rootFilename.replace(".root", ".dat")
         sampleHistos = []
-        combineCommon.GetSampleHistosFromTFile(rootFile, sampleHistos)
+        print "with file: {}".format(rootFilename)
+        sys.stdout.flush()
+        combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos)
 
-        print "looking up xsection...",
+        print "\tlooking up xsection...",
         sys.stdout.flush()
         xsection_val = combineCommon.lookupXSection(
             matchingPiece
@@ -382,10 +384,7 @@ for sample, pieceList in dictSamples.iteritems():
         print "found", xsection_val, "pb"
         sys.stdout.flush()
 
-        # example
-        # print 'inputDataFile='+inputDataFile
-        # print '\tdata[0]=',data[0]
-        # print 'Ntot=',Ntot
+        # print "inputDatFile="+inputDatFile
 
         # ---Read .dat table for current dataset
         data = combineCommon.ParseDatFile(inputDatFile)
@@ -414,13 +413,13 @@ for sample, pieceList in dictSamples.iteritems():
         sys.stdout.flush()
 
         # ---Update table
-        data = combineCommon.FillTableErrors(data, rootFile)
+        data = combineCommon.FillTableErrors(data, rootFilename)
         data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
         sampleTable = combineCommon.UpdateTable(data, sampleTable)
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
-            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, sample, plotWeight)
+            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight)
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
     # done with this sample

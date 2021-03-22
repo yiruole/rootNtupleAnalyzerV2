@@ -7,6 +7,7 @@ import string
 import math
 import re
 from collections import OrderedDict
+import numpy as np
 import ROOT as r
 
 # FORMAT = "%(levelname)s %(module)s %(funcName)s line:%(lineno)d - %(message)s"
@@ -240,29 +241,33 @@ def ParseDatFile(datFilename):
     lineCounter = int(0)
 
     # print '(opening:',inputDataFile,
-    sys.stdout.flush()
+    # sys.stdout.flush()
     with open(datFilename) as datFile:
+        # start with line that begins with '#id'
+        foundFirstLine = False
         for j, line in enumerate(datFile):
             # ignore comments
             if re.search("^###", line):
                 continue
             line = string.strip(line, "\n")
+            if line.strip().startswith("#id"):
+                foundFirstLine = True
             # print "---> lineCounter: " , lineCounter
             # print line
+            if foundFirstLine:
+                if lineCounter == 0:
+                    for i, piece in enumerate(line.split()):
+                        column.append(piece)
+                else:
+                    for i, piece in enumerate(line.split()):
+                        if i == 0:
+                            data[int(piece)] = {}
+                            row = int(piece)
+                        else:
+                            data[row][column[i]] = piece
+                            # print data[row][ column[i] ]
 
-            if lineCounter == 0:
-                for i, piece in enumerate(line.split()):
-                    column.append(piece)
-            else:
-                for i, piece in enumerate(line.split()):
-                    if i == 0:
-                        data[int(piece)] = {}
-                        row = int(piece)
-                    else:
-                        data[row][column[i]] = piece
-                        # print data[row][ column[i] ]
-
-            lineCounter = lineCounter + 1
+                lineCounter = lineCounter + 1
     return data
 
 
@@ -776,7 +781,7 @@ def CombineEfficiencies(tableList):
 # --- TODO: FIX TABLE FORMAT (NUMBER OF DECIMAL PLATES AFTER THE 0)
 
 
-def WriteTable(table, name, file, printToScreen=True):
+def WriteTable(table, name, file, printToScreen=False):
     print >> file, "### "+name
     print >> file, "#id".rjust(4, " "),
     print >> file, "variableName".rjust(35),
@@ -890,8 +895,8 @@ def WriteTable(table, name, file, printToScreen=True):
 
 
 def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
+    # used in combinePlots.py
     tfile = r.TFile(tfileName)
-    # sampleHistos = []
     for key in tfile.GetListOfKeys():
         # histoName = file.GetListOfKeys()[h].GetName()
         # htemp = file.Get(histoName)
@@ -901,22 +906,33 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
             raise RuntimeError("ERROR: failed to get histo named:", histoName, "from file:", tfile.GetName())
         r.SetOwnership(htemp, True)
         if sampleName in histoName:
+            if "amcatnlo" in tfileName.lower() and "systematics" in histoName.lower() and "diffs" not in histoName.lower():
+                # FIXME TODO: check PDF set
+                # in this case, we check if there are 102 LHEPdfWeights in the y bins, and if so, we remove index 100 and 101 (alpha_S weights)
+                yBinLabels = htemp.GetYaxis().GetLabels()
+                lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data().lower()]
+                if len(lhePdfWeightLabels) == 102:
+                    print "INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} in file {}".format(
+                            len(lhePdfWeightLabels)-100, htemp, tfileName)
+                    htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
             htemp.SetDirectory(0)
             sampleHistos.append(htemp)
     tfile.Close()
     if len(sampleHistos) < 1:
         raise RuntimeError(
-                "ERROR: GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file! Exiting."
-                .format(tfile.GetName(), sampleName))
-    # return sampleHistos
+                "ERROR: GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file! Exiting.".format(
+                    tfile.GetName(), sampleName))
 
 
-def AddHistosFromFile(rootFileName, sampleHistoDict, sample="", plotWeight=1.0):
+def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeight=1.0):
     # ---Combine histograms using PYROOT
     tfile = r.TFile(rootFileName)
     # nHistos = len(file.GetListOfKeys())
     # print "\tnKeys: " , nHistos
     # print 'list of keys in this rootfile:',file.GetListOfKeys()
+    # print
+    # print "INFO: AddHistosFromFile for file: {}".format(rootFileName)
+    sys.stdout.flush()
     # loop over histograms in rootfile
     # for h in range(0, nHistos):
     h = 0
@@ -926,8 +942,7 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, sample="", plotWeight=1.0):
         histoName = key.GetName()
         htemp = key.ReadObj()
         if not htemp:
-            print "ERROR: failed to get histo named:", histoName, "from file:", tfile.GetName()
-            exit(-1)
+            raise RuntimeError("ERROR: failed to get histo named: {} from file: {}".format(histoName, tfile.GetName()))
         r.SetOwnership(htemp, True)
         #
         # temporary
@@ -943,18 +958,17 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, sample="", plotWeight=1.0):
                 hname = dirKey.GetName()
                 htmp = dirKey.ReadObj()
                 if not htmp:
-                    print "ERROR: failed to get histo named:", hname, "from file:", tfile.GetName()
-                    exit(-1)
+                    raise RuntimeError("ERROR: failed to get histo named: {} from file: {}".format(hname, tfile.GetName()))
                 # else:
                 #  print "INFO: found key in subdir named:",hname,"hist name:",htmp.GetName()
                 r.SetOwnership(htmp, True)
                 updateSample(
-                    sampleHistoDict, htmp, h, sample, plotWeight
+                    sampleHistoDict, htmp, h, piece, sample, plotWeight
                 )
                 h += 1
         else:
             updateSample(
-                sampleHistoDict, htemp, h, sample, plotWeight
+                sampleHistoDict, htemp, h, piece, sample, plotWeight
             )
             h += 1
     tfile.Close()
@@ -967,7 +981,7 @@ def GetShortHistoName(histName):
         return histName
 
 
-def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
+def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeight=1.0):
     idx = 0
     for pieceHisto in pieceHistoList:
         pieceHistoName = pieceHisto.GetName()
@@ -980,7 +994,7 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
                 print "ERROR: apparently non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
                         sampleHisto.GetName(), pieceHisto.GetName())
                 exit(-2)
-        sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, sample, plotWeight)
+        sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight)
         # if idx == 0:
         #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
         #             sample, pieceHisto.GetName(), pieceHisto.GetEntries(), sampleHistoDict[idx].GetName(), sampleHistoDict[idx].GetEntries())
@@ -990,14 +1004,22 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, sample="", plotWeight=1.0):
             # print "INFO: create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi.".format(pieceHisto.GetName())
             unscaledEvtsPassingCuts = pieceHisto.Clone()
             unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
-            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, sample, 1.0)
+            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0)
             idx += 1
     return sampleHistoDict
 
 
-def updateSample(dictFinalHistoAtSample, htemp, h, sample, plotWeight):
+def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
     histoName = htemp.GetName()
     histoTitle = htemp.GetTitle()
+    if "systematics" in histoName.lower() and IsHistEmpty(htemp):
+        # For systematics hists, these can have the wrong number of bins in the case where the tree read by the analysis has zero entries
+        #    because any array systematics will have size zero, instead of the actual size.
+        # In the case where the input tree has zero entries, the systematics hist will be empty anyway, so we can safely skip it.
+        return dictFinalHistoAtSample
+    if "systematicsdiffs" in histoName.lower():
+        # ignore systematicsDiffs hist here; we remake this at the end so that it's correct
+        return dictFinalHistoAtSample
     # thanks Riccardo
     # init histo if needed
     if h not in dictFinalHistoAtSample:
@@ -1063,8 +1085,9 @@ def updateSample(dictFinalHistoAtSample, htemp, h, sample, plotWeight):
             htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
             htemp.GetZaxis().Copy(dictFinalHistoAtSample[h].GetZaxis())
         else:
-            # print 'not combining classtype of',htemp.ClassName()
-            return
+            raise RuntimeError("not combining hist with classtype of {}".format(htemp, htemp.ClassName()))
+            # return
+        dictFinalHistoAtSample[h].Sumw2()
     #  XXX DEBUG
     # binToExamine = 33
     # if 'OptBinLQ60' in histoName:
@@ -1080,6 +1103,34 @@ def updateSample(dictFinalHistoAtSample, htemp, h, sample, plotWeight):
     if "optimizerentries" in histoName.lower() or "noweight" in histoName.lower() or "unscaled" in histoName.lower():
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
     else:
+        if "systematics" in htemp.GetName().lower():
+            # check systematics hist; y bin labels should be unique, so use a set
+            systematicsListFromDictHist = list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())
+            systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
+            systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
+            if len(systsNotInTempHist) > 0:
+                print "\tINFO: systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
+                        piece, sample, systsNotInTempHist)
+                # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
+                # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
+                sys.stdout.flush()
+                # remove systs that are missing from htemp
+                dictFinalHistoAtSample[h] = RemoveHistoBins(dictFinalHistoAtSample[h], "y", systsNotInTempHist)
+            # it can also happen that new systematics appear in htemp that aren't in the dict hist
+            systsNotInDictHist = [label for label in systematicsListFromTempHist if label not in systematicsListFromDictHist]
+            if len(systsNotInDictHist) > 0:
+                print "\tINFO: systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
+                        sample, piece, systsNotInDictHist)
+                # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
+                # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
+                sys.stdout.flush()
+                # remove systs that are missing from htemp
+                htemp = RemoveHistoBins(htemp, "y", systsNotInDictHist)
+
+            if htemp.GetNbinsX() != dictFinalHistoAtSample[h].GetNbinsX() or htemp.GetNbinsY() != dictFinalHistoAtSample[h].GetNbinsY():
+                raise RuntimeError("htemp to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
+                    htemp.GetNbinsX(), htemp.GetNbinsY(),
+                    dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY()))
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
@@ -1089,10 +1140,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, sample, plotWeight):
     #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
     #    print
     if not returnVal:
-        print 'ERROR: Failed adding hist named"' + histoName + '"to', dictFinalHistoAtSample[
-            h
-        ].GetName()
-        exit(-1)
+        raise RuntimeError("ERROR: Failed adding hist named '{}' to {}".format(histoName, dictFinalHistoAtSample[h].GetName()))
     return dictFinalHistoAtSample
 
 
@@ -1104,6 +1152,10 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
     sys.stdout.flush()
     for histo in sampleHistoDict.itervalues():  # for each hist contained in the sample's dict
         histo.Write()
+        # make systDiffs hist if needed
+        if "systematics" in histo.GetName().split("__")[-1].lower():
+            systDiffsHist = MakeSystDiffsPlot(histo)
+            systDiffsHist.Write()
     if verbose:
         print "Done."
     sys.stdout.flush()
@@ -1139,21 +1191,6 @@ def GetUnscaledTotalEvents(combinedRootFile, sampleName):
     else:
         unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)
     return unscaledTotalEvts
-
-
-#def FindUnscaledRootFile(filepath, sampleName):
-#    for root, dirs, files in os.walk(filepath):
-#        for name in files:
-#            # print "FindUnscaledRootFile({}, {}): check against file: {}".format(filepath, sampleName, name)
-#            noExtName = re.sub("ext[0-9_]*", "", name)  # remove any "ext/extN" from file name
-#            noExtBackupName = noExtName.replace("backup_", "").replace("newPMX_", "")
-#            # print "compare", noExtBackupName, " to *"+sampleName+"*.root"
-#            # don't match an amcatnloFXFX file with a sampleName that doesn't include it
-#            if "amcatnloFXFX" in name and "amcatnloFXFX" not in sampleName:
-#                continue
-#            if fnmatch.fnmatch(noExtBackupName, "*"+sampleName+"*.root"):
-#                return os.path.join(root, name)
-#    return None
 
 
 def GetXSecTimesIntLumi(sampleNameFromDataset):
@@ -1265,3 +1302,84 @@ def GetRatesAndErrors(
     else:
         unscaledRate = scaledHist.GetBinEntries(selectionBin)
     return rate, rateErr, unscaledRate
+
+
+def IsHistEmpty(hist):
+    # copy/adapt from TH1::IsEmpty()
+    statArr = np.zeros(11)  # for TH3F
+    hist.GetStats(statArr)
+    fTsumw = statArr[0]
+    if fTsumw != 0:
+        return False
+    if hist.GetEntries() != 0:
+        return False
+    sumw = 0.0
+    for i in range(0, hist.GetNcells()):
+        sumw += hist.GetBinContent(i)
+    return False if sumw != 0 else True
+
+
+def RemoveHistoBins(hist, axis, labelsToRemove):
+    if "TH2" in hist.__repr__():
+        newHist = r.TH2D()
+        newHist.SetNameTitle(hist.GetName(), hist.GetTitle())
+        if axis == "y":
+            numNewBins = hist.GetNbinsY()-len(labelsToRemove)
+            yBinLabels = hist.GetYaxis().GetLabels()
+            newBinLabels = [label.GetString().Data() for label in yBinLabels if label.GetString().Data().lower() not in labelsToRemove]
+            newHist.SetBins(
+                hist.GetNbinsX(),
+                hist.GetXaxis().GetXmin(),
+                hist.GetXaxis().GetXmax(),
+                numNewBins,
+                hist.GetYaxis().GetBinLowEdge(1),
+                hist.GetYaxis().GetBinUpEdge(numNewBins)
+            )
+            for ibin in range(1, numNewBins+1):
+                newHist.GetYaxis().SetBinLabel(ibin, newBinLabels[ibin-1])
+            hist.GetXaxis().Copy(newHist.GetXaxis())
+            # now handle bin content
+            for xbin in range(0, newHist.GetNbinsX()+2):
+                for ybin in range(0, newHist.GetNbinsY()+2):
+                    if hist.GetYaxis().GetBinLabel(ybin) in labelsToRemove:
+                        continue
+                    binContent = hist.GetBinContent(xbin, ybin)
+                    binError = hist.GetBinError(xbin, ybin)
+                    newHist.SetBinContent(xbin, ybin, binContent)
+                    newHist.SetBinError(xbin, ybin, binError)
+            return newHist
+        else:
+            raise RuntimeError("ERROR: RemoveHistoBins not implemented for axes other than y, and {} was requested.".format(axis))
+    else:
+        raise RuntimeError("ERROR: RemoveHistoBins not implemented for histos other than TH2 and this is a {}.".format(hist.__repr__()))
+
+
+def MakeSystDiffsPlot(systHist):
+    histName = systHist.GetName().replace("systematics", "systematicsDiffs")
+    # print "INFO: Creating new systematicsDiffs hist with name {}".format(histName)
+    systDiffs = r.TH2D(histName, histName, systHist.GetNbinsX(), 0, systHist.GetXaxis().GetXmax(), systHist.GetNbinsY(), 0, systHist.GetYaxis().GetXmax())
+    systHist.GetXaxis().Copy(systDiffs.GetXaxis())
+    systHist.GetYaxis().Copy(systDiffs.GetYaxis())
+    systDiffs.Sumw2()
+    systDiffs.SetDirectory(0)
+    nominal = systHist.ProjectionX("nominal", 1, 1, "e")
+    nominal.LabelsDeflate()
+    nominal.SetDirectory(0)
+    for yBin in range(1, systHist.GetNbinsY()+1):
+        proj = systHist.ProjectionX("proj", yBin, yBin, "e")
+        proj.LabelsDeflate()  # otherwise we get 2x number of bins
+        proj.SetDirectory(0)
+        quotient = r.TGraphAsymmErrors()
+        # suppress warning messages for divide this can happen for zero content bins, for example
+        prevLevel = r.gErrorIgnoreLevel
+        r.gErrorIgnoreLevel = r.kError
+        quotient.Divide(proj, nominal, "pois cp")
+        r.gErrorIgnoreLevel = prevLevel
+        for iPoint in range(0, quotient.GetN()):
+            x = quotient.GetPointX(iPoint)
+            y = quotient.GetPointY(iPoint)
+            err = quotient.GetErrorY(iPoint)
+            binNum = systDiffs.FindBin(x, yBin-0.5)
+            systDiffs.SetBinContent(binNum, y)
+            systDiffs.SetBinError(binNum, err)
+    return systDiffs
