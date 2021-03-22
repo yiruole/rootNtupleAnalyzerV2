@@ -30,7 +30,7 @@ def CombinePlotsAndTables(args):
         sampleHistos = {}
         sampleTable = {}
         for currentRootFile in fileList:
-            combineCommon.AddHistosFromFile(currentRootFile, sampleHistos)
+            combineCommon.AddHistosFromFile(currentRootFile, sampleHistos, currentRootFile)  # use root filename as piece name--only used for logging
             currentDatFile = currentRootFile.replace(".root", ".dat")
             data = combineCommon.ParseDatFile(currentDatFile)
             data = combineCommon.FillTableErrors(data, currentRootFile)
@@ -39,7 +39,7 @@ def CombinePlotsAndTables(args):
         outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
         with open(outputTableFilename, "w") as outputTableFile:
             # print "Write table to file:", outputTableFilename
-            combineCommon.WriteTable(sampleTable, sampleName, outputTableFile, False)
+            combineCommon.WriteTable(sampleTable, sampleName, outputTableFile)
         outputTfile = r.TFile(
             outputTableFilename.replace(".dat", ".root"), "RECREATE", "", 207
         )
