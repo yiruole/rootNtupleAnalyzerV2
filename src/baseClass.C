@@ -74,12 +74,12 @@ baseClass::~baseClass()
     hist->Write();
     // make hist of ratio proj/nominal
     if(std::string(hist->GetName())=="systematics") {
-      unique_ptr<TH2F> systDiffs(new TH2F("systematicsDiffs", "systematicsDiffs", hist->GetNbinsX(), 0, hist->GetXaxis()->GetXmax(), hist->GetNbinsY(), 0, hist->GetYaxis()->GetXmax()));
+      unique_ptr<TH2D> systDiffs(new TH2D("systematicsDiffs", "systematicsDiffs", hist->GetNbinsX(), 0, hist->GetXaxis()->GetXmax(), hist->GetNbinsY(), 0, hist->GetYaxis()->GetXmax()));
       hist->GetXaxis()->Copy(*systDiffs->GetXaxis());
       hist->GetYaxis()->Copy(*systDiffs->GetYaxis());
       systDiffs->Sumw2();
       systDiffs->SetDirectory(0);
-      auto hist2D = dynamic_pointer_cast<TH2F>(hist);
+      auto hist2D = dynamic_pointer_cast<TH2D>(hist);
       unique_ptr<TH1D> nominal(hist2D->ProjectionX("nominal", 1, 1, "e"));
       nominal->LabelsDeflate();
       nominal->SetDirectory(0);
@@ -507,6 +507,7 @@ void baseClass::readCutFile()
         exit(-6);
       }
       syst.length = syst.formula->GetNdata();
+      STDOUT("for syst named: " << syst.name << "; syst.length = " << syst.length);
     }
     // parse cut variables affected by syst
     if(v.size() > 3) {
@@ -562,8 +563,8 @@ void baseClass::readCutFile()
       orderedSystCutNames_.push_back(cc->first);
     }
     int nCutsForSysts = orderedSystCutNames_.size();
-    histsToSave_.push_back(std::shared_ptr<TH2F>(new TH2F("systematics", "systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
-    auto theHist = dynamic_pointer_cast<TH2F>(histsToSave_.back());
+    histsToSave_.push_back(std::shared_ptr<TH2D>(new TH2D("systematics", "systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
+    auto theHist = dynamic_pointer_cast<TH2D>(histsToSave_.back());
     theHist->Sumw2();
     theHist->SetDirectory(0);
     int idx = 1;
@@ -842,7 +843,7 @@ void baseClass::runOptimizer()
 
 void baseClass::runSystematics()
 {
-  shared_ptr<TH2F> systHist = dynamic_pointer_cast<TH2F>(findSavedHist("systematics"));
+  shared_ptr<TH2D> systHist = dynamic_pointer_cast<TH2D>(findSavedHist("systematics"));
   if(systHist == nullptr) {
     cout << "ERROR: could not find systematics histogram. This shouldn't happen. Exiting" << endl;
     exit(-6);
