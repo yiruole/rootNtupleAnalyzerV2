@@ -1,17 +1,21 @@
 import ROOT as rt
 
+tdrStyle = None
+
 
 def tdrGrid(gridOn):
+    global tdrStyle
     tdrStyle.SetPadGridX(gridOn)
     tdrStyle.SetPadGridY(gridOn)
 
 
 # fixOverlay: Redraws the axis
 def fixOverlay():
-    gPad.RedrawAxis()
+    rt.gPad.RedrawAxis()
 
 
 def setTDRStyle():
+    global tdrStyle
     tdrStyle = rt.TStyle("tdrStyle", "Style for P-TDR")
 
     # for the canvas:
