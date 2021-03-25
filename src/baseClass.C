@@ -210,8 +210,9 @@ void baseClass::init()
           exit(-5);
         }
         reduced_skim_tree_->Branch(arraySizeVar.c_str(),&c->arraySize,(arraySizeVar+"/i").c_str());
-          branchFormat << "[" << arraySizeVar << "]";
-          reduced_skim_tree_->Branch(c->variableName.c_str(),(void*)nullptr,(branchFormat.str()+"/F").c_str());
+        branchFormat << "[" << arraySizeVar << "]";
+        TBranch* branch = reduced_skim_tree_->Branch(c->variableName.c_str(),(void*)nullptr,(branchFormat.str()+"/F").c_str());
+        branch->SetTitle("");
       }
     }
   }
@@ -668,25 +669,32 @@ template <typename T> void baseClass::fillArrayVariableWithValue(const string& s
 {
   map<string, cut>::iterator cc = cutName_cut_.find(s);
   if( cc == cutName_cut_.end() )
-    {
-      STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Exiting.");
-      exit(-5);
-    }
+  {
+    STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Exiting.");
+    exit(-5);
+  }
   else
+  {
+    cut * c = & (cc->second);
+    c->filled = true;
+    c->value = 0.;
+    c->weight = 1.;
+    if(reader.GetSize() > cut::MAX_ARRAY_SIZE)
     {
-      cut * c = & (cc->second);
-      c->filled = true;
-      c->value = 0.;
-      c->weight = 1.;
-      if(reader.GetSize() > cut::MAX_ARRAY_SIZE)
-      {
-        STDOUT("WARNING: truncated array size from" << reader.GetSize() << " to MAX_ARRAY_SIZE=" << cut::MAX_ARRAY_SIZE << " in this event.");
-        c->arraySize = cut::MAX_ARRAY_SIZE;
-      }
-      else
-        c->arraySize = reader.GetSize();
-      reduced_skim_tree_->FindBranch(s.c_str())->SetAddress(const_cast<void*>(reader.GetAddress()));
+      STDOUT("WARNING: truncated array size from" << reader.GetSize() << " to MAX_ARRAY_SIZE=" << cut::MAX_ARRAY_SIZE << " in this event.");
+      c->arraySize = cut::MAX_ARRAY_SIZE;
     }
+    else
+      c->arraySize = reader.GetSize();
+    // set the branch title for arrays; this includes useful information from NanoAOD
+    if(std::string(reduced_skim_tree_->FindBranch(s.c_str())->GetTitle()).empty())
+    {
+      std::string readerBranchName(reader.GetBranchName());
+      std::string title(readerTools_->GetTree()->FindBranch(readerBranchName.c_str())->GetTitle());
+      //STDOUT("INFO: setting branch '" << s << "' title to '" << title << "'");
+      reduced_skim_tree_->FindBranch(s.c_str())->SetTitle(title.c_str());
+    }
+  }
   return;
 }
 
