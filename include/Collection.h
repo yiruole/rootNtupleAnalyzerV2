@@ -201,6 +201,8 @@ class Collection {
       if ( tmp_min_dr >= min_dr ) { 
         new_collection -> Append ( this_collection_constituent.GetRawIndex() );
       }
+      //else
+      //  std::cout << "SkimByVetoDRMatch(): too close to an object in other_collection; remove object1: " << this_collection_constituent << std::endl;
     }
     return new_collection;
   }
