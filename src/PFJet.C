@@ -89,10 +89,11 @@ float PFJet::EnergyRes(){
 }
 
 std::ostream& operator<<(std::ostream& stream, PFJet& object) {
-  stream           << object.Name() << " : "
-	 << "Pt = "      << object.Pt ()  << ", "
-	 << "Eta = "     << object.Eta()  << ", "
-	 << "Phi = "     << object.Phi()  << ", "
-   << "MVABtag = " << object.CombinedMVABTag();
+  stream            << object.Name() << " : "
+	 << "Pt = "       << object.Pt ()  << ", "
+	 << "Eta = "      << object.Eta()  << ", "
+	 << "Phi = "      << object.Phi()  << ", "
+   << "loose ID = " << object.PassUserID(PFJET_LOOSE) << ", "
+   << "MVABtag = "  << object.CombinedMVABTag();
   return stream;
 }
