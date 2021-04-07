@@ -167,66 +167,35 @@ def GetBackgroundSyst(background_name, selectionName):
     return totalSyst
 
 
-def GetSystDictFromFile(filename):
-    # go custom text parsing :`(
-    # format is like:
-    # LQ300  :     0.0152215
-    # selection point, 100*(deltaX/X) [rel. change in %]
+def GetSystematicsDict(rootFile, sampleName, selections, verbose=False):
+    systHistName = "histo2D__{}__systematics".format(sampleName)
+    systHist = rootFile.Get(systHistName)
     systDict = {}
-    if not os.path.isfile(filename):
-        print "ERROR: file'" + filename + "' not found; cannot proceed"
-        exit(-1)
-    with open(filename, "r") as thisFile:
-        for line in thisFile:
-            line = line.strip()
-            # print 'line=',line,'; with length=',len(line)
-            if len(line) == 0:
-                continue
-            # print 'line.strip()="'+line.strip()+'"'
-            # print 'line.strip().split(":")=',line.strip().split(':')
-            items = line.split(":")
-            # print 'items[0].strip()='+items[0].strip()
-            # print 'items[1].strip()='+items[1].strip()
-            selectionPoint = items[0].strip()
-            if "_" in selectionPoint:
-                bkgName = selectionPoint.split("_")[1]
-                if bkgName not in syst_background_names:
-                    print "WARN: background named:", bkgName, " was not found in list of systematics background names:", syst_background_names
-                    print "selectionPoint=", selectionPoint, "from", filename
-                selectionPoint = selectionPoint.split("_")[0]
-                if bkgName not in systDict.keys():
-                    systDict[bkgName] = {}
-                try:
-                    systDict[bkgName][selectionPoint] = float(items[1].strip()) / 100.0
-                except ValueError:
-                    print 'ERROR: Had ValueError exception trying to convert "' + items[
-                        1
-                    ].strip() + '" to a float. From line:', line, "in file:", filename
-                    exit(-1)
-            # signal
-            systDict[selectionPoint] = float(items[1].strip()) / 100.0
+    for selection in selections:
+        # expect that selections are either "preselection" or "LQXXXX"
+        finalSelection = cc.GetFinalSelection(selection, doEEJJ)
+        systDict[selection] = {}
+        xBin = systHist.GetXaxis().FindFixBin(finalSelection)
+        if xBin < 1:
+            raise RuntimeError("Could not find requested selection name '{}' in hist {} in file {}".format(finalSelection, systHistName, rootFile.GetName()))
+        for yBin in range(1, systHist.GetNbinsY()):
+            systName = systHist.GetYaxis().GetBinLabel(yBin)
+            systDict[selection][systName] = systHist.GetBinContent(xBin, yBin)
+    #  new_dict = {v['id']: {'pet': k} for k, v in original_dict.items()}
+    #  >>> e = {key:{k:d[k][key] for k in d if key in d[k]} for key in keys}
+    if verbose:
+        print "sampleName={}: systDict={}".format(sampleName, systDict["LQ300"])
+    # reindex by syst name
+    systDict = {syst: {sel: systDict[sel][syst] for sel in systDict} for syst in systDict[selections[0]].keys()}
+    # if verbose:
+    #     print "sampleName={}: systDict=".format(sampleName)
+    #     for systName, selYieldDicts in systDict.items():
+    #         print "{} : {}".format(systName, selYieldDicts["LQ300"]),
+    #     print
     return systDict
 
 
-def FillSystDicts(systNames, systematics_filepaths, isBackground=True):
-    verbose = True
-    systDict = {}
-    for syst in systNames:
-        if isBackground and not doRPV:
-            filePath = systematics_filepaths[syst] + syst + "_sys.dat"
-        elif not isBackground and not doRPV:
-            filePath = systematics_filepaths[syst] + "LQ" + syst + "_sys.dat"
-        elif doRPV:
-            if verbose:
-                print "INFO: FillSystDicts: [RPV] systematics_filepaths looks like:", systematics_filepaths
-                print "INFO: FillSystDicts: [RPV] try to fill systematics_filepaths[" + syst + "]"
-            filePath = systematics_filepaths[syst] + syst + "_sys.dat"
-        thisSystDict = GetSystDictFromFile(filePath)
-        # this will give the form (for background):
-        #   systDict['Trigger'][bkgname]['LQXXXX'] = value
-        systDict[syst] = thisSystDict
-    return systDict
-
+#def GetSystematicEffect(systName, systDict):
 
 def RoundToN(x, n):
     # if n < 1:
@@ -328,219 +297,66 @@ def GetTableEntryStr(evts, errStatUp="-", errStatDown="-", errSyst=0, latex=Fals
 #     return scaledRateError
 
 
-def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
-    if len(ttbarRootFilename) > 0:
-        ttbarFile = TFile(ttbarRootFilename)
-    qcdTFile = TFile(qcdRootFilename)
-    tfile = TFile(rootFilename)
-
-    # backgrounds
-    for i_bkg, bkg_name in enumerate(background_names):
-        scaledRootFile = ""
-        bkgType = "MC"
-        if "TT" in bkg_name and "data" in bkg_name.lower():
-            scaledRootFile = ttbarFile
-            bkgType = "TTData"
-        elif "QCD" in bkg_name:  # or "SinglePhoton" in bkg_name:
-            scaledRootFile = qcdTFile
-            bkgType = "QCD"
-        else:
-            scaledRootFile = tfile
-        if not scaledRootFile or scaledRootFile.IsZombie():
-            raise RuntimeError("Could not open root file: {}".format(scaledRootFile.GetName()))
-        print "PRESELECTION bkg_bame=", bkg_name
-        print "backgroundType=", bkgType
-        unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, bkg_name)
-        rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-            scaledRootFile,
-            bkg_name,
-            "preselection",
-            doEEJJ,
-            not bkgType == "MC",
-            bkgType == "TTData",
-        )
-        print "INFO: PRESELECTION ------>rate=", rate, "rateErr=", rateErr, "unscaledRate=", unscaledRate, "unscaledTotalEvts=", unscaledTotalEvts
-        sampleUnscaledTotalEvts = unscaledTotalEvts
-        sampleRate = rate
-        sampleUnscaledRate = unscaledRate
-        sampleRateErr = rateErr
-        print "PRESELECTION sampleRate:", sampleRate, "sampleRateErr=", sampleRateErr, "sampleUnscaledRate=", sampleUnscaledRate
-        bkgRatesDict = {}
-        bkgRatesDict["preselection"] = sampleRate
-        if bkgRatesDict["preselection"] < 0:
-            print "WARN: for sample", bkg_name, "preselection", "found negative rate:", sampleRate, "; set to zero."
-            bkgRatesDict["preselection"] = 0.0
-        bkgRateErrsDict = {}
-        bkgRateErrsDict["preselection"] = sampleRateErr
-        bkgUnscaledRatesDict = {}
-        bkgUnscaledRatesDict["preselection"] = sampleUnscaledRate
-        if bkgUnscaledRatesDict["preselection"] < 0:
-            print "WARN: for sample", bkg_name, "preselection", "found negative unscaled rate:", sampleUnscaledRate, "; set to zero."
-            bkgUnscaledRatesDict["preselection"] = 0.0
-        bkgTotalEvts = sampleUnscaledTotalEvts
-        if bkgTotalEvts < 0:
-            print "WARN: for sample", bkg_name, "preselection", "found negative sampleUnscaledTotalEvents:", bkgTotalEvts, "; set to zero."
-            bkgTotalEvts = 0.0
-        # final selections
+def FillDicts(rootFilename, sampleNames, bkgType):
+    isData = False if "mc" in bkgType.lower() or "signal" in bkgType.lower() else True
+    scaledRootFile = TFile.Open(rootFilename)
+    if not scaledRootFile or scaledRootFile.IsZombie():
+        raise RuntimeError("Could not open root file: {}".format(scaledRootFile.GetName()))
+    d_rates = {}
+    d_rateErrs = {}
+    d_unscaledRates = {}
+    d_totalEvents = {}
+    d_systematics = {}
+    selectionPoints = ["preselection"] + mass_points
+    selectionNames = ["LQ"+sel if "preselection" not in sel else sel for sel in selectionPoints]
+    # start sample
+    for i_sample, sampleName in enumerate(sampleNames):
+        unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, sampleName)
+        if unscaledTotalEvts < 0:
+            print "WARN: for sample {}, found negative sampleUnscaledTotalEvents: {}; set to zero.".format(sampleName, unscaledTotalEvts)
+            unscaledTotalEvts = 0.0
+        ratesDict = {}
+        rateErrsDict = {}
+        unscaledRatesDict = {}
+        # do all selections
         for i_signal_name, signal_name in enumerate(signal_names):
-            for i_mass_point, mass_point in enumerate(mass_points):
-                selectionName = "LQ" + mass_point
-                # print selectionName,"bkg_name=",bkg_name
-                unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, bkg_name)
-                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
+            for i_mass_point, mass_point in enumerate(selectionPoints):
+                selectionName = selectionNames[i_mass_point]
+                # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
+                sampleRate, sampleRateErr, sampleUnscaledRate = cc.GetRatesAndErrors(
                     scaledRootFile,
-                    bkg_name,
+                    sampleName,
                     selectionName,
                     doEEJJ,
-                    not bkgType == "MC",
+                    isData,
                     bkgType == "TTData"
                 )
-                # print "------>Called GetRatesAndErrors for sampleName=", bkg_name
-                # print "------>rate=", rate, "rateErr=", rateErr, "unscaledRate=", unscaledRate
-                # print "------>from file=:", scaledRootFile
+                # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
                 # if isQCD:
-                #     print "for sample:",bkgSample,"got unscaled entries=",unscaledRate
-                sampleUnscaledTotalEvts = unscaledTotalEvts
-                sampleRate = rate
-                sampleUnscaledRate = unscaledRate
-                sampleRateErr = rateErr
-                # print "sampleRate:", sampleRate, "sampleRateErr=", sampleRateErr, "sampleUnscaledRate=", sampleUnscaledRate
-                bkgRatesDict[selectionName] = sampleRate
-                if bkgRatesDict[selectionName] < 0:
-                    print "WARN: for sample", bkg_name, "selection", selectionName, "found negative rate:", sampleRate, "; set to zero."
-                    bkgRatesDict[selectionName] = 0.0
-                bkgRateErrsDict[selectionName] = sampleRateErr
-                bkgUnscaledRatesDict[selectionName] = sampleUnscaledRate
-                if bkgUnscaledRatesDict[selectionName] < 0:
-                    print "WARN: for sample", bkg_name, "selection", selectionName, "found negative unscaled rate:", sampleUnscaledRate, "; set to zero."
-                    bkgUnscaledRatesDict[selectionName] = 0.0
+                #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
+                # print 'sampleName={}, sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
+                if selectionName == "preselection":
+                    print "INFO: for sampleName={}, PRESELECTION ------>rate={} rateErr={} unscaledRate={} unscaledTotalEvts={}".format(sampleName, sampleRate, sampleRateErr, sampleUnscaledRate, unscaledTotalEvts)
+                elif selectionName == "LQ300" and "300" in sampleName:
+                    print "INFO: for sampleName={}, LQ300 ------>rate={} rateErr={} unscaledRate={} unscaledTotalEvts={}".format(sampleName, sampleRate, sampleRateErr, sampleUnscaledRate, unscaledTotalEvts)
+                ratesDict[selectionName] = sampleRate
+                if ratesDict[selectionName] < 0:
+                    print "WARN: for sample {}, selection {}: found negative rate: {}; set to zero.".format(sampleName, selectionName, sampleRate)
+                    ratesDict[selectionName] = 0.0
+                rateErrsDict[selectionName] = sampleRateErr
+                unscaledRatesDict[selectionName] = sampleUnscaledRate
+                if unscaledRatesDict[selectionName] < 0:
+                    print "WARN: for sample {}, selection {}: found negative unscaled rate: {}; set to zero.".format(sampleName, selectionName, sampleUnscaledRate)
+                    unscaledRatesDict[selectionName] = 0.0
+        if not isData and doSystematics:
+            d_systematics[sampleName] = GetSystematicsDict(scaledRootFile, sampleName, selectionNames)  # , sampleName == "LQToDEle_M-300_pair")
         # fill full dicts
-        d_background_rates[bkg_name] = bkgRatesDict
-        d_background_rateErrs[bkg_name] = bkgRateErrsDict
-        d_background_unscaledRates[bkg_name] = bkgUnscaledRatesDict
-        d_background_totalEvents[bkg_name] = bkgTotalEvts
-
-    # signals
-    for i_signal_name, signal_name in enumerate(signal_names):
-        doMassPointLoop = True
-        for i_mass_point, mass_point in enumerate(mass_points):
-            # if 'BetaHalf' in signal_name:
-            #    #signalNameForFile = 'LQToUE_' #FIXME
-            #    signalNameForFile = 'LQToUE_ENuJJFilter_M-'+mass_point+'_BetaHalf'
-            # else:
-            #    signalNameForFile = 'LQToUE_M-'+mass_point+'_BetaOne'
-            # fullSignalName = signal_name+mass_point
-            fullSignalName, signalNameForFile = GetFullSignalName(
-                signal_name, mass_point
-            )
-            selectionName = "LQ" + mass_point
-            # if "[masspoint]" in signal_name:
-            #     selectionName = "LQ" + mass_point
-            # else:
-            #     # figure out mass point from name. currently the only case for this is RPV stop, where they are like 'Stop_M100_CTau100'
-            #     selectionName = "LQ" + signal_name.split("_")[1].replace("M", "")
-            #     # print 'use selection name=',selectionName
-            #     doMassPointLoop = False
-            # print 'got full signal name=',fullSignalName,';signalNameForFile',signalNameForFile
-            unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, signalNameForFile)
-            # preselection
-            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                scaledRootFile,
-                signalNameForFile,
-                "preselection",
-                doEEJJ
-            )
-            sigRatesDict = {}
-            sigRatesDict["preselection"] = rate
-            sigRateErrsDict = {}
-            sigRateErrsDict["preselection"] = rateErr
-            sigUnscaledRatesDict = {}
-            sigUnscaledRatesDict["preselection"] = unscaledRate
-            sigTotalEvts = unscaledTotalEvts
-            # final selection
-            for imp, mp in enumerate(mass_points):
-                # signalSelName = signal_name + mp
-                selectionName = "LQ" + mp
-                rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                    tfile,
-                    signalNameForFile,
-                    selectionName,
-                    doEEJJ
-                )
-                sigRatesDict[selectionName] = rate
-                sigRateErrsDict[selectionName] = rateErr
-                sigUnscaledRatesDict[selectionName] = unscaledRate
-
-            # fill full dicts
-            # signalFullName = signal_name + mass_point
-            signalFullName = fullSignalName
-            d_signal_rates[signalFullName] = sigRatesDict
-            d_signal_rateErrs[signalFullName] = sigRateErrsDict
-            d_signal_unscaledRates[signalFullName] = sigUnscaledRatesDict
-            d_signal_totalEvents[signalFullName] = sigTotalEvts
-            if not doMassPointLoop:
-                break
-
-    # DATA
-    dataSampleName = "DATA"
-    isData = True
-    unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, dataSampleName)
-    sampleUnscaledTotalEvts = unscaledTotalEvts
-    # preselection
-    # print "------>Call GetRatesAndErrors for sampleName=", dataSampleName
-    rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-        scaledRootFile,
-        dataSampleName,
-        "preselection",
-        doEEJJ,
-        isData
-    )
-    # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-    sampleRate = rate
-    sampleUnscaledRate = unscaledRate
-    sampleRateErr = rateErr
-    # print 'DATA preselection sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
-    dataRatesDict = {}
-    dataRatesDict["preselection"] = sampleRate
-    dataRateErrsDict = {}
-    dataRateErrsDict["preselection"] = sampleRateErr
-    dataUnscaledRatesDict = {}
-    dataUnscaledRatesDict["preselection"] = sampleUnscaledRate
-    dataTotalEvts = sampleUnscaledTotalEvts
-    # final selections
-    for i_signal_name, signal_name in enumerate(signal_names):
-        for i_mass_point, mass_point in enumerate(mass_points):
-            selectionName = "LQ" + mass_point
-            unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, dataSampleName)
-            sampleUnscaledTotalEvts += unscaledTotalEvts
-            # preselection
-            # print '------>Call GetRatesAndErrors for sampleName=',bkgSample
-            rate, rateErr, unscaledRate = cc.GetRatesAndErrors(
-                scaledRootFile,
-                dataSampleName,
-                selectionName,
-                isData,
-                doEEJJ
-            )
-            # print '------>rate=',rate,'rateErr=',rateErr,'unscaledRate=',unscaledRate
-            # if isQCD:
-            #  print 'for sample:',bkgSample,'got unscaled entries=',unscaledRate
-            sampleRate = rate
-            sampleUnscaledRate = unscaledRate
-            sampleRateErr = rateErr
-            # print 'sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
-            dataRatesDict[selectionName] = sampleRate
-            dataRateErrsDict[selectionName] = sampleRateErr
-            dataUnscaledRatesDict[selectionName] = sampleUnscaledRate
-    # fill full dicts
-    bkg_name = "DATA"
-    d_data_rates[bkg_name] = dataRatesDict
-    d_data_rateErrs[bkg_name] = dataRateErrsDict
-    d_data_unscaledRates[bkg_name] = dataUnscaledRatesDict
-    d_data_totalEvents[bkg_name] = dataTotalEvts
-
-    qcdTFile.Close()
-    tfile.Close()
+        d_rates[sampleName] = ratesDict
+        d_rateErrs[sampleName] = rateErrsDict
+        d_unscaledRates[sampleName] = unscaledRatesDict
+        d_totalEvents[sampleName] = unscaledTotalEvts
+    scaledRootFile.Close()
+    return d_rates, d_rateErrs, d_unscaledRates, d_totalEvents, d_systematics
 
 
 ###################################################################################################
@@ -548,7 +364,7 @@ def FillDicts(rootFilename, qcdRootFilename, ttbarRootFilename):
 ###################################################################################################
 
 blinded = True
-doSystematics = False
+doSystematics = True
 doEEJJ = True
 doRPV = False  # to do RPV, set doEEJJ and doRPV to True
 forceGmNNormBkgStatUncert = False
@@ -706,22 +522,24 @@ if doEEJJ:
         # signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
     else:
         signal_names = [signalNameTemplate]
+    maxLQselectionBkg = "LQ1200"  # max background selection point used
     systematicsNamesBackground = [
-        "Trigger",
-        "Reco",
-        "PU",
-        "PDF",
+        "EleTrigSF",
+        "Pileup",
+        "LHEPDFWeight",
         "Lumi",
         "JER",
-        "JEC",
-        "HEEP",
-        "E_scale",
+        "JES",
+        "EleRecoSF",
+        "EleHEEPSF",
+        "EES",
         "EER",
-        "DYShape",
-        "DY_Norm",
-        "TTShape",
         "TT_Norm",
-        "Diboson_shape",
+        "DY_Norm",
+        "DY_Shape",
+        "TT_Shape",
+        "Diboson_Shape",
+        "QCD_Norm",
     ]
     # background_names =  [ "PhotonJets_Madgraph", "QCDFakes_DATA", "TTBarFromDATA", "ZJet_amcatnlo_ptBinned", "WJet_amcatnlo_ptBinned", "DIBOSON","SingleTop"  ]
     background_names = [
@@ -739,8 +557,9 @@ if doEEJJ:
         "SingleTop",
         "PhotonJets_Madgraph",
     ]
-    maxLQselectionBkg = "LQ1150"  # max background selection point used
-    systematicsNamesSignal = systematicsNamesBackground
+    background_fromMC_names = [bkg for bkg in background_names if "data" not in bkg.lower()]
+    background_QCDfromData = [bkg for bkg in background_names if "data" in bkg.lower() and "qcd" in bkg.lower()]
+    systematicsNamesSignal = [syst for syst in systematicsNamesBackground if "shape" not in syst.lower() and "norm" not in syst.lower()]
 else:
     signal_names = ["LQ_BetaHalf_M[masspoint]"]
     systematicsNamesBackground = [
@@ -832,20 +651,6 @@ else:
     n_systematics = n_background + 1
 n_channels = 1
 
-d_background_rates = {}
-d_background_rateErrs = {}
-d_background_unscaledRates = {}
-d_background_totalEvents = {}
-d_background_systs = {}
-d_signal_rates = {}
-d_signal_rateErrs = {}
-d_signal_unscaledRates = {}
-d_signal_totalEvents = {}
-d_signal_systs = {}
-d_data_rates = {}
-d_data_rateErrs = {}
-d_data_unscaledRates = {}
-d_data_totalEvents = {}
 
 ###################################################################################################
 # RUN
@@ -912,7 +717,21 @@ for lin in open(inputList):
     )
 
 # rates/etc.
-FillDicts(dataMC_filepath, qcd_data_filepath, ttbar_data_filepath)
+print "INFO: Filling background [MC] information..."
+d_background_rates, d_background_rateErrs, d_background_unscaledRates, d_background_totalEvents, d_background_systs = FillDicts(dataMC_filepath, background_fromMC_names, "MC")
+print "INFO: Filling background [data] information..."
+bgFromData_rates, bgFromData_rateErrs, bgFromData_unscaledRates, bgFromData_totalEvents, bgFromData_systs = FillDicts(qcd_data_filepath, background_QCDfromData, "DATA")
+d_background_rates.update(bgFromData_rates)
+d_background_rateErrs.update(bgFromData_rateErrs)
+d_background_unscaledRates.update(bgFromData_unscaledRates)
+d_background_totalEvents.update(bgFromData_totalEvents)
+d_background_systs.update(bgFromData_systs)
+# above would be similar for TTBarFromDATA
+signalNameList = [GetFullSignalName(signalNameTemplate, massPoint)[1] for massPoint in mass_points]
+print "INFO: Filling signal information..."
+d_signal_rates, d_signal_rateErrs, d_signal_unscaledRates, d_signal_totalEvents, d_signal_systs = FillDicts(dataMC_filepath, signalNameList, "signal")
+print "INFO: Filling data information..."
+d_data_rates, d_data_rateErrs, d_data_unscaledRates, d_data_totalEvents, d_data_systs_garbage = FillDicts(dataMC_filepath, ["DATA"], "DATA")
 # print one of the systematics for checking
 # for syst in backgroundSystDict.keys():
 #    print 'Syst is:',syst
@@ -923,6 +742,8 @@ FillDicts(dataMC_filepath, qcd_data_filepath, ttbar_data_filepath)
 # print signalSystDict
 # print backgroundSystDict
 
+print "INFO: Preparing datacard"
+
 card_file_path = "tmp_card_file.txt"
 card_file = open(card_file_path, "w")
 
@@ -931,7 +752,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
     for i_mass_point, mass_point in enumerate(mass_points):
         # fullSignalName = signal_name.replace('[masspoint]',mass_point)
         fullSignalName, signalNameForFile = GetFullSignalName(signal_name, mass_point)
-        print "consider fullSignalName={}".format(fullSignalName)
+        # print "consider fullSignalName={}".format(fullSignalName)
         selectionName = "LQ" + mass_point
         # this will need to be fixed later if needed
         # else:
@@ -950,7 +771,6 @@ for i_signal_name, signal_name in enumerate(signal_names):
         card_file.write("jmax " + str(n_background) + "\n")
         card_file.write("kmax " + str(n_systematics) + "\n\n")
 
-        # card_file.write ( "bin 1\n\n" )
         card_file.write("bin bin1\n\n")
 
         if "BetaHalf" in signal_name:
@@ -962,11 +782,9 @@ for i_signal_name, signal_name in enumerate(signal_names):
 
         line = "bin "
         for i_channel in range(0, n_background + 1):
-            # line = line + "1 "
             line = line + "bin1 "
         card_file.write(line + "\n")
 
-        # line = "process " + signal_name + mass_point + " "
         line = "process " + fullSignalName + " "
         for background_name in background_names:
             line = line + background_name + " "
@@ -980,8 +798,10 @@ for i_signal_name, signal_name in enumerate(signal_names):
         # rate line
         line = "rate "
         total_bkg = 0.0
-        print "d_signal_rates.keys()={}".format(d_signal_rates.keys())
-        total_signal = d_signal_rates[fullSignalName][selectionName]
+        total_signal = d_signal_rates[signalNameForFile][selectionName]
+        # if selectionName == "LQ300":
+        #     print "d_signal_rates={}".format(d_signal_rates[signalNameForFile][selectionName])
+        #     print "total_signal={}".format(total_signal)
         line = line + str(total_signal) + " "
         for ibkg, background_name in enumerate(background_names):
             thisBkgEvts = d_background_rates[background_name][selectionName]
@@ -992,118 +812,118 @@ for i_signal_name, signal_name in enumerate(signal_names):
         # print signal_name, mass_point, total_signal, total_bkg, total_data
         # print signal_name+str(mass_point), total_signal, total_bkg
 
-        # recall the form: signal --> sysDict['Trigger']['LQXXXX'] = value
-        #             backgrounds --> sysDict['Trigger'][bkgName]['LQXXXX'] = value
+        # recall the form: systDict['PileupUp'/systematicFromHist]['ZJet_amcatnlo_ptBinned'/sampleName]['LQXXXX'/selection] = yield
         # for RPV, select proper signalSystDict based on ctau of signal
+        # FIXME
         # if doRPV:
         #     ctau = int(signal_name[signal_name.find("CTau") + 4:])
         #     signalSystDict = signalSystDictByCTau[ctau]
-        for syst in d_signal_systs.keys():
-            line = syst + " lnN "
-            if selectionName not in d_signal_systs[syst].keys():
-                selectionNameSigSyst = maxLQselectionBkg
-            else:
-                selectionNameSigSyst = selectionName
-            line += str(1 + d_signal_systs[syst][selectionNameSigSyst])
-            line += " "
-            # else:
-            #    print 'ERROR: could not find syst "',syst,'" in d_signal_systs.keys():',d_signal_systs.keys()
-            for ibkg, background_name in enumerate(systematicsNamesBackground):
-                # print 'try to lookup backgroundSystDict['+syst+']['+background_name+']['+selectionName+']'
-                # print 'syst="'+syst+'"'
-                if (
-                    background_name == ""
-                    or "QCD" in background_name
-                    or "TTBarFromDATA" in background_name
-                ):
-                    # print 'empty background_name; use - and continue'
-                    line += " - "
-                    continue
-                if (
-                    selectionName
-                    not in d_background_systs[syst][background_name].keys()
-                ):
-                    selectionNameBkgSyst = maxLQselectionBkg
-                else:
-                    selectionNameBkgSyst = selectionName
-                try:
-                    line += (
-                        str(
-                            1
-                            + d_background_systs[syst][background_name][
-                                selectionNameBkgSyst
-                            ]
-                        )
-                        + " "
-                    )
-                except KeyError:
-                    print "Got a KeyError with: d_background_systs[" + syst + "][" + background_name + "][" + selectionNameBkgSyst + "]"
-            card_file.write(line + "\n")
-
-        # background-only special systs: "DYShape", "TTShape"
-        specialSysts = (
-            # ["DYShape", "DY_Norm", "Diboson_shape"]
-            # if doEEJJ
-            # else [
-            #     "WShape",
-            #     "TTShape",
-            #     "W_Norm",
-            #     "W_btag_Norm",
-            #     "W_RMt_Norm",
-            #     "TT_Norm",
-            #     "TTbar_btag_Norm",
-            #     "Diboson_shape",
-            # ]
-        )
-        for syst in specialSysts:
-            line = syst + " lnN - "
-            for ibkg, background_name in enumerate(systematicsNamesBackground):
-                if (
-                    "TTBarFromDATA" in background_name
-                    or "DY" in syst
-                    and "DY" not in background_name
-                    or "TT" in syst
-                    and "TT" not in background_name
-                    or "W" in syst
-                    and "W" not in background_name
-                    or "Diboson" in syst
-                    and "Diboson" not in background_name
-                ):
-                    # print 'empty background_name; use - and continue'
-                    line += " - "
-                    continue
-                try:
-                    selections = d_background_systs[syst][background_name].keys()
-                except KeyError:
-                    print "Got a KeyError with: d_background_systs[" + syst + "][" + background_name + "]"
-                    print "d_background_systs.keys()=", d_background_systs.keys()
-                    print "d_background_systs[" + syst + "]=", d_background_systs[syst]
-                    print "d_background_systs[" + syst + "].keys()=", d_background_systs[
-                        syst
-                    ].keys()
-                if (
-                    selectionName
-                    not in d_background_systs[syst][background_name].keys()
-                ):
-                    selectionNameBkgSyst = maxLQselectionBkg
-                else:
-                    selectionNameBkgSyst = selectionName
-                try:
-                    line += (
-                        str(
-                            1
-                            + d_background_systs[syst][background_name][
-                                selectionNameBkgSyst
-                            ]
-                        )
-                        + " "
-                    )
-                except KeyError:
-                    print "Got a KeyError with: d_background_systs[" + syst + "][" + background_name + "][" + selectionNameBkgSyst + "]"
-            card_file.write(line + "\n")
-
-        # background norm systs
         if doSystematics:
+            signalSystDict = d_signal_systs[signalNameForFile]
+            for syst in signalSystDict.keys():
+                line = syst + " lnN "
+                if selectionName not in signalSystDict[syst].keys():
+                    selectionNameSigSyst = maxLQselectionBkg
+                else:
+                    selectionNameSigSyst = selectionName
+                try:
+                    line += str(1 + signalSystDict[syst][selectionNameSigSyst])
+                except KeyError:
+                    # print d_signal_systs
+                    raise RuntimeError("Got a KeyError with: d_signal_systs[" + signalNameForFile + "][" + syst + "][" + selectionNameSigSyst + "]")
+                line += " "
+                # else:
+                #    print 'ERROR: could not find syst "',syst,'" in d_signal_systs.keys():',d_signal_systs.keys()
+                for ibkg, background_name in enumerate(background_names):
+                    if (
+                        background_name == ""
+                        or "QCD" in background_name
+                        or "TTBarFromDATA" in background_name
+                    ):
+                        # print 'empty background_name; use - and continue'
+                        line += " - "
+                        continue
+                    backgroundSystDict = d_background_systs[background_name]
+                    for syst in backgroundSystDict.keys():
+                        # print "try to lookup d_background_systs["+background_name+"]["+syst+"]["+selectionName+"]"
+                        # print "look at keys/systs for this background_name"
+                        # print backgroundSystDict.keys()
+                        # print backgroundSystDict[syst].keys()
+                        if (
+                            selectionName
+                            not in backgroundSystDict[syst].keys()
+                        ):
+                            selectionNameBkgSyst = maxLQselectionBkg
+                        else:
+                            selectionNameBkgSyst = selectionName
+                        try:
+                            line += (str(1 + backgroundSystDict[syst][selectionNameBkgSyst]) + " ")
+                        except KeyError:
+                            raise RuntimeError("Got a KeyError with: backgroundSystDict[" + syst + "][" + selectionNameBkgSyst + "]")
+                card_file.write(line + "\n")
+
+            # background-only special systs: "DYShape", "TTShape"
+            specialSysts = (
+                # ["DYShape", "DY_Norm", "Diboson_shape"]
+                # if doEEJJ
+                # else [
+                #     "WShape",
+                #     "TTShape",
+                #     "W_Norm",
+                #     "W_btag_Norm",
+                #     "W_RMt_Norm",
+                #     "TT_Norm",
+                #     "TTbar_btag_Norm",
+                #     "Diboson_shape",
+                # ]
+            )
+            for syst in specialSysts:
+                line = syst + " lnN - "
+                for ibkg, background_name in enumerate(systematicsNamesBackground):
+                    if (
+                        "TTBarFromDATA" in background_name
+                        or "DY" in syst
+                        and "DY" not in background_name
+                        or "TT" in syst
+                        and "TT" not in background_name
+                        or "W" in syst
+                        and "W" not in background_name
+                        or "Diboson" in syst
+                        and "Diboson" not in background_name
+                    ):
+                        # print 'empty background_name; use - and continue'
+                        line += " - "
+                        continue
+                    try:
+                        selections = d_background_systs[syst][background_name].keys()
+                    except KeyError:
+                        print "Got a KeyError with: d_background_systs[" + syst + "][" + background_name + "]"
+                        print "d_background_systs.keys()=", d_background_systs.keys()
+                        print "d_background_systs[" + syst + "]=", d_background_systs[syst]
+                        print "d_background_systs[" + syst + "].keys()=", d_background_systs[
+                            syst
+                        ].keys()
+                    if (
+                        selectionName
+                        not in d_background_systs[syst][background_name].keys()
+                    ):
+                        selectionNameBkgSyst = maxLQselectionBkg
+                    else:
+                        selectionNameBkgSyst = selectionName
+                    try:
+                        line += (
+                            str(
+                                1
+                                + d_background_systs[syst][background_name][
+                                    selectionNameBkgSyst
+                                ]
+                            )
+                            + " "
+                        )
+                    except KeyError:
+                        print "Got a KeyError with: d_background_systs[" + syst + "][" + background_name + "][" + selectionNameBkgSyst + "]"
+                card_file.write(line + "\n")
+
             foundQCD = False
             # foundTTBar = False if doEEJJ else True
             for ibkg, background_name in enumerate(systematicsNamesBackground):
@@ -1212,9 +1032,9 @@ for i_signal_name, signal_name in enumerate(signal_names):
 
         # signal stat error part
         # always use lnN error
-        thisSigEvts = d_signal_rates[fullSignalName][selectionName]
-        thisSigEvtsErr = d_signal_rateErrs[fullSignalName][selectionName]
-        thisSigTotalEntries = d_signal_unscaledRates[fullSignalName][selectionName]
+        thisSigEvts = d_signal_rates[signalNameForFile][selectionName]
+        thisSigEvtsErr = d_signal_rateErrs[signalNameForFile][selectionName]
+        thisSigTotalEntries = d_signal_unscaledRates[signalNameForFile][selectionName]
         # if thisSigEvts == 0.0:
         #  print 'ERROR: signal events for this signal (',fullSignalName,'came out to be zero...stat error not supported. Quitting!'
         #  exit(-1)
@@ -1309,12 +1129,12 @@ latexRowsAN = []
 latexRowsPaper = []
 t = PrettyTable(columnNames)
 t.float_format = "4.3"
-selectionNames = ["LQ" + mass_point for mass_point in mass_points]
-selectionNames.insert(0, "preselection")
+selectionNames = ["preselection"]
+selectionNames.append([cc.GetFinalSelection(mass, doEEJJ) for mass in mass_points])
 for i_signal_name, signal_name in enumerate(signal_names):
     for selectionName in selectionNames:
         massPoint = selectionName.replace("LQ", "")
-        fullSignalName, filename = GetFullSignalName(signal_name, massPoint)
+        fullSignalName, signalNameForFile = GetFullSignalName(signal_name, massPoint)
         # # figure out mass point from name
         # if "BetaHalf" not in fullSignalName:
         #     signalMass = fullSignalName.split("_")[1].replace("M", "")
@@ -1325,8 +1145,8 @@ for i_signal_name, signal_name in enumerate(signal_names):
         thisSigEvtsErr = "-"
         # print 'selectionName=',selectionName
         if selectionName != "preselection":
-            thisSigEvts = d_signal_rates[fullSignalName][selectionName]
-            thisSigEvtsErr = d_signal_rateErrs[fullSignalName][selectionName]
+            thisSigEvts = d_signal_rates[signalNameForFile][selectionName]
+            thisSigEvtsErr = d_signal_rateErrs[signalNameForFile][selectionName]
             # this is true now by construction
             # # the signal name and mass point from the selection need to match
             # if int(signalMass) != int(massPoint):
