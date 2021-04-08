@@ -42,7 +42,7 @@ float Muon::CocktailPhi              (){ return m_collection->ReadArrayBranch<Fl
 //float & Muon::CocktailPhiError         (){ return -1.0; } 
 // Isolation variables				   				   
 float Muon::TrkIso                    (){ return -999; } 
-float Muon::TrkIsoR03SumPt            (){ return m_collection->ReadArrayBranch<Bool_t>("Muon_tkRelIso", m_raw_index) * CocktailPt(); } 
+float Muon::TrkIsoR03SumPt            (){ return m_collection->ReadArrayBranch<Float_t>("Muon_tkRelIso", m_raw_index) * CocktailPt(); } 
 //float Muon::PFIsoR04ChargedHadron     (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04ChargedHadron      -> at ( m_raw_index ); } 
 //float Muon::PFIsoR04NeutralHadron     (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04NeutralHadron      -> at ( m_raw_index ); } 
 //float Muon::PFIsoR04Photon            (){ return m_collection->ReadArrayBranch<Float_t>("") MuonPFIsoR04Photon             -> at ( m_raw_index ); } 
@@ -67,6 +67,9 @@ std::ostream& operator<<(std::ostream& stream, Muon& object) {
   stream << object.Name() << " " << ": "
 	 << "Pt = "  << object.Pt ()    << " +/- " << object.PtError() << ", "
 	 << "Eta = " << object.Eta()    << ", "
-	 << "Phi = " << object.Phi();
+	 << "Phi = " << object.Phi()    << ", "
+   << "PassHighPtGlobalId = " << object.PassHighPtGlobalId() << ", "
+   << "TrkIsoR03SumPt = " << object.TrkIsoR03SumPt() << ", "
+   << "PassHighPtTrkRelIso03 = " << object.PassUserID(MUON_HIGH_PT_TRKRELISO03);
   return stream;
 }

@@ -19,7 +19,14 @@ bool Muon::PassUserID (ID id, bool verbose){
 // see: https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2
 bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
 
-  bool decision = PassHighPtGlobalId();
+  bool passHighPtGlobal = PassHighPtGlobalId();
+  double trkRelIsoR03 = (TrkIsoR03SumPt()) / CocktailPt();
+  // tight
+  bool pass_trkRelIsoR03_tight = bool ( trkRelIsoR03             < 0.05);
+  // loose
+  bool pass_trkRelIsoR03_loose = bool ( trkRelIsoR03             < 0.10);
+
+  bool decision = passHighPtGlobal && pass_trkRelIsoR03_loose;
   
   if(verbose) {
     // Checked against Dave's definition: Jan. 30 2016
@@ -39,24 +46,6 @@ bool Muon::PassUserID_MuonHighPt_TrkRelIso03 ( bool verbose ){
     bool pass_trkLayers     = bool ( TrackLayersWithMeasurement()    > 5   );
     bool pass_ptErr         = bool ( CocktailPtError()/CocktailPt()  < 0.3 );
 
-    double trkRelIsoR03 = (TrkIsoR03SumPt()) / CocktailPt();
-    // tight
-    bool pass_trkRelIsoR03_tight = bool ( trkRelIsoR03             < 0.05);
-    // loose
-    bool pass_trkRelIsoR03_loose = bool ( trkRelIsoR03             < 0.10);
-
-    //bool decision = (
-    //    pass_isGlobalAndPt  && 
-    //    pass_eta       &&
-    //    pass_muonHits  && 
-    //    pass_stations  && 
-    //    pass_dxy       && 
-    //    pass_dz        && 
-    //    pass_pixelHits && 
-    //    pass_trkLayers && 
-    //    pass_ptErr     &&
-    //    pass_trkRelIsoR03_loose
-    //    );
     std::cout << "INFO: Muon::PassUserID_MuonHighPt_TrkRelIso03: " << (decision ? "PASS" : "FAIL") <<
       "; pass_isGlobalAndPt=" << pass_isGlobalAndPt << "(CocktailPt=" << CocktailPt() << ")" << 
       "; pass_eta=" << pass_eta <<
