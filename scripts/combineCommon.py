@@ -910,10 +910,10 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
                 # FIXME TODO: check PDF set
                 # in this case, we check if there are 102 LHEPdfWeights in the y bins, and if so, we remove index 100 and 101 (alpha_S weights)
                 yBinLabels = htemp.GetYaxis().GetLabels()
-                lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data().lower()]
+                lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data()]
                 if len(lhePdfWeightLabels) == 102:
-                    print "INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} in file {}".format(
-                            len(lhePdfWeightLabels)-100, htemp, tfileName)
+                    print "INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
+                            len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName)
                     htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
             htemp.SetDirectory(0)
             sampleHistos.append(htemp)
@@ -991,9 +991,8 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
             # sampleHistoName = sampleHisto.GetName()
             # sampleHisto.SetName(GetShortHistoName(sampleHistoName))
             if pieceHisto.GetName() not in sampleHisto.GetName():
-                print "ERROR: apparently non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
-                        sampleHisto.GetName(), pieceHisto.GetName())
-                exit(-2)
+                raise RuntimeError("ERROR: apparently non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
+                        sampleHisto.GetName(), pieceHisto.GetName()))
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight)
         # if idx == 0:
         #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
@@ -1104,22 +1103,27 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
     else:
         if "systematics" in htemp.GetName().lower():
-            # check systematics hist; y bin labels should be unique, so use a set
+            # check systematics hist bins
+            #print "INFO (1) the existing combined hist has {} x bins and {} y bins: {}".format(
+            #        dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
+            #sys.stdout.flush()
             systematicsListFromDictHist = list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())
             systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
             systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
             if len(systsNotInTempHist) > 0:
-                print "\tINFO: systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
+                print "\tINFO: some systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
                         piece, sample, systsNotInTempHist)
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
                 sys.stdout.flush()
                 # remove systs that are missing from htemp
                 dictFinalHistoAtSample[h] = RemoveHistoBins(dictFinalHistoAtSample[h], "y", systsNotInTempHist)
+                # now update the systematics list, since we removed some
+                systematicsListFromDictHist = list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())
             # it can also happen that new systematics appear in htemp that aren't in the dict hist
             systsNotInDictHist = [label for label in systematicsListFromTempHist if label not in systematicsListFromDictHist]
             if len(systsNotInDictHist) > 0:
-                print "\tINFO: systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
+                print "\tINFO: some systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
                         sample, piece, systsNotInDictHist)
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
@@ -1127,6 +1131,12 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
                 # remove systs that are missing from htemp
                 htemp = RemoveHistoBins(htemp, "y", systsNotInDictHist)
 
+            #print "INFO syst hist to be added has {} x bins and {} y bins {}" .format(
+            #        htemp.GetNbinsX(), htemp.GetNbinsY(), [obj.GetName() for obj in htemp.GetYaxis().GetLabels()])
+            #sys.stdout.flush()
+            #print "INFO the current combined hist has {} x bins and {} y bins: {}".format(
+            #        dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
+            #sys.stdout.flush()
             if htemp.GetNbinsX() != dictFinalHistoAtSample[h].GetNbinsX() or htemp.GetNbinsY() != dictFinalHistoAtSample[h].GetNbinsY():
                 raise RuntimeError("htemp to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
                     htemp.GetNbinsX(), htemp.GetNbinsY(),
@@ -1134,7 +1144,10 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
-    #  XXX DEBUG
+        #if "systematics" in htemp.GetName().lower():
+        #    print "INFO the combined hist {} NOW has {} x bins and {} y bins: {}".format(
+        #            dictFinalHistoAtSample[h].GetName(), dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
+        #  XXX DEBUG
     # if 'OptBinLQ60' in histoName:
     #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
     #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
@@ -1200,14 +1213,32 @@ def GetXSecTimesIntLumi(sampleNameFromDataset):
     return xsection * intLumiF
 
 
+def GetFinalSelection(selectionPoint, doEEJJ):
+    # min_M_ej_LQ300 for eejj
+    selection = "preselection"
+    if "preselection" not in selectionPoint:
+        if doEEJJ:
+            if selectionPoint.isdigit():
+                selection = "min_M_ej_LQ"+selectionPoint
+            else:
+                selection = "min_M_ej_"+selectionPoint
+        else:
+            # enujj
+            if selectionPoint.isdigit():
+                selection = "MT_LQ"+selectionPoint
+            else:
+                selection = "MT_"+selectionPoint
+    return selection
+
+
 def GetRatesAndErrors(
-    combinedRootFile,
-    sampleName,
-    selection,
-    doEEJJ=True,
-    isDataOrQCD=False,
-    isTTBarFromData=False
-):
+        combinedRootFile,
+        sampleName,
+        selection,
+        doEEJJ=True,
+        isDataOrQCD=False,
+        isTTBarFromData=False
+        ):
     verbose = False
     if verbose or isTTBarFromData:
         print "GetRatesAndErrors(", combinedRootFile.GetName(), sampleName, selection, doEEJJ, isDataOrQCD, isTTBarFromData, ")"
@@ -1277,13 +1308,7 @@ def GetRatesAndErrors(
         # if not scaledHist:
         #     raise RuntimeError("ERROR: could not find hist {} not hist {} in file: {}".format(oldHistName, scaledHistName, combinedRootFile.GetName()))
         raise RuntimeError("ERROR: could not find hist {} in file: {}".format(scaledHistName, combinedRootFile.GetName()))
-    # min_M_ej_LQ300 for eejj
-    if "preselection" not in selection:
-        if doEEJJ:
-            selection = "min_M_ej_"+selection
-        else:
-            # enujj
-            selection = "MT_"+selection
+    selection = GetFinalSelection(selection, doEEJJ)
     selectionBin = scaledHist.GetXaxis().FindFixBin(selection)
     if scaledHist.ClassName() == "TProfile":
         scaledInt = scaledHist.GetBinContent(selectionBin)*scaledHist.GetBinEntries(selectionBin)
@@ -1326,15 +1351,15 @@ def RemoveHistoBins(hist, axis, labelsToRemove):
         if axis == "y":
             numNewBins = hist.GetNbinsY()-len(labelsToRemove)
             yBinLabels = hist.GetYaxis().GetLabels()
-            newBinLabels = [label.GetString().Data() for label in yBinLabels if label.GetString().Data().lower() not in labelsToRemove]
+            newBinLabels = [label.GetString().Data() for label in yBinLabels if label.GetString().Data() not in labelsToRemove]
             newHist.SetBins(
-                hist.GetNbinsX(),
-                hist.GetXaxis().GetXmin(),
-                hist.GetXaxis().GetXmax(),
-                numNewBins,
-                hist.GetYaxis().GetBinLowEdge(1),
-                hist.GetYaxis().GetBinUpEdge(numNewBins)
-            )
+                    hist.GetNbinsX(),
+                    hist.GetXaxis().GetXmin(),
+                    hist.GetXaxis().GetXmax(),
+                    numNewBins,
+                    hist.GetYaxis().GetBinLowEdge(1),
+                    hist.GetYaxis().GetBinUpEdge(numNewBins)
+                    )
             for ibin in range(1, numNewBins+1):
                 newHist.GetYaxis().SetBinLabel(ibin, newBinLabels[ibin-1])
             hist.GetXaxis().Copy(newHist.GetXaxis())
