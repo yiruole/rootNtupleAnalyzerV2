@@ -329,6 +329,7 @@ outputTableFile = open(
 # loop over samples defined in sampleListForMerging
 for sample, pieceList in dictSamples.iteritems():
     print "-->Look at sample named:", sample, "with piecelist=", pieceList
+    sys.stdout.flush()
 
     histoDictThisSample = {}
     tablesThisSample = []
@@ -419,6 +420,7 @@ for sample, pieceList in dictSamples.iteritems():
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
+            # print "INFO: UpdateHistoDict for file {}".format(rootFilename)
             histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight)
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
