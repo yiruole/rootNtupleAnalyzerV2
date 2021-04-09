@@ -687,13 +687,15 @@ template <typename T> void baseClass::fillArrayVariableWithValue(const string& s
     else
       c->arraySize = reader.GetSize();
     // set the branch title for arrays; this includes useful information from NanoAOD
-    if(std::string(reduced_skim_tree_->FindBranch(s.c_str())->GetTitle()).empty())
+    TBranch* arrayBranch = reduced_skim_tree_->FindBranch(s.c_str());
+    if(std::string(arrayBranch->GetTitle()).empty())
     {
       std::string readerBranchName(reader.GetBranchName());
       std::string title(readerTools_->GetTree()->FindBranch(readerBranchName.c_str())->GetTitle());
       //STDOUT("INFO: setting branch '" << s << "' title to '" << title << "'");
-      reduced_skim_tree_->FindBranch(s.c_str())->SetTitle(title.c_str());
+      arrayBranch->SetTitle(title.c_str());
     }
+    arrayBranch->SetAddress(const_cast<void*>(reader.GetAddress()));
   }
   return;
 }
