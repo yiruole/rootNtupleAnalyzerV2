@@ -105,6 +105,32 @@ baseClass::~baseClass()
         }
       }
       systDiffs->Write();
+      // here we make the TMap of systematicName-->branchNames
+      unique_ptr<TMap> systNameToBranchTitlesMap(new TMap());
+      systNameToBranchTitlesMap->SetName("systematicNameToBranchesMap");
+      systNameToBranchTitlesMap->SetOwner(true); // clean up for us, please
+      for(auto const& syst : systematics_) {
+        TObjString* systName = new TObjString(syst.name.c_str());
+        TList* branchTitleList = new TList();
+        branchTitleList->SetOwner(true);
+        if(syst.formula) {
+          int nBranches = syst.formula->GetNcodes();
+          for(int iBranch = 0; iBranch < nBranches; ++iBranch) {
+            TObjString* branchTitle = new TObjString(syst.formula->GetLeaf(iBranch)->GetBranch()->GetTitle());
+            branchTitleList->Add(branchTitle);
+          }
+        }
+        else {
+          // regex cases
+          for(auto const& pair : syst.cutNamesToBranchNames) {
+            if(pair.second.empty())
+              continue; // here is a case where there is no branch in the tree and we manually fill the systVar in the analysis class code, so skip this
+            branchTitleList->Add(new TObjString(pair.second.c_str()));
+          }
+        }
+        systNameToBranchTitlesMap->Add(systName, branchTitleList);
+      }
+      systNameToBranchTitlesMap->Write(systNameToBranchTitlesMap->GetName(), TObject::kSingleKey);
     }
   }
   output_root_->Close();
@@ -515,9 +541,10 @@ void baseClass::readCutFile()
       istringstream iss(v[3]);
       string cutVar;
       string branchName;
+      // loop over list of cutVars
       while (getline(iss, cutVar, ',')) {
         boost::regex regExp(syst.regex);
-        // try to find the matching branch
+        // try to find the regex-matching branch for this cutVar
         string matchingBranch;
         for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
           TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
@@ -528,11 +555,12 @@ void baseClass::readCutFile()
             }
           }
         }
+        // in case there is no matching branch, we still put an entry in the map: cutVar-->""
         bool handledCutVar = false;
-        // now, add other cuts
         for(auto& cutName : orderedCutNames_) {
           if(cutName.find(cutVar) != string::npos) {
             syst.cutNamesToBranchNames[cutName] = matchingBranch;
+            //STDOUT("syst=" << syst.name << "--> Added matchingBranch=" << matchingBranch << " for cutName=" << cutName);
             handledCutVar = true;
           }
         }
@@ -688,12 +716,22 @@ template <typename T> void baseClass::fillArrayVariableWithValue(const string& s
       c->arraySize = reader.GetSize();
     // set the branch title for arrays; this includes useful information from NanoAOD
     TBranch* arrayBranch = reduced_skim_tree_->FindBranch(s.c_str());
-    if(std::string(arrayBranch->GetTitle()).empty())
-    {
+    if(std::string(arrayBranch->GetTitle()).empty()) {
       std::string readerBranchName(reader.GetBranchName());
       std::string title(readerTools_->GetTree()->FindBranch(readerBranchName.c_str())->GetTitle());
       //STDOUT("INFO: setting branch '" << s << "' title to '" << title << "'");
       arrayBranch->SetTitle(title.c_str());
+    }
+    else {
+      // check to make sure the title hasn't changed (could happen when running over different datasets in one job)
+      std::string readerBranchName(reader.GetBranchName());
+      std::string title(readerTools_->GetTree()->FindBranch(readerBranchName.c_str())->GetTitle());
+      if(title != std::string(arrayBranch->GetTitle())) {
+        STDOUT("ERROR: inconsistent array branch content for branch named: " << s << "; branch title had been '" << arrayBranch->GetTitle() <<
+            "', and has now changed to '" << title <<
+            "' inside file: " << readerTools_->GetTree()->GetCurrentFile()->GetName());
+        exit(-5);
+      }
     }
     arrayBranch->SetAddress(const_cast<void*>(reader.GetAddress()));
   }
