@@ -200,25 +200,25 @@ if doPDFReweight2016LQSignals:
 
 # check logfile for errors if given
 # FIXME: this seems obsolete
-if os.path.isfile(options.logFile):
-    foundError = False
-    with open(options.logFile, "r") as logFile:
-        for line in logFile:
-            if (
-                "error" in line
-                or "ERROR" in line
-                and "ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!"
-                not in line
-            ):
-                print "Found error line in logfile:", line
-                foundError = True
-    if foundError:
-        print "WARNING: FOUND ERRORS IN THE LOGFILE! bailing out..."
-        sys.exit(-2)
-    else:
-        print "Great! Logfile was checked and was completely clean!"
-else:
-    print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
+# if os.path.isfile(options.logFile):
+#     foundError = False
+#     with open(options.logFile, "r") as logFile:
+#         for line in logFile:
+#             if (
+#                 "error" in line
+#                 or "ERROR" in line
+#                 and "ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!"
+#                 not in line
+#             ):
+#                 print "Found error line in logfile:", line
+#                 foundError = True
+#     if foundError:
+#         print "WARNING: FOUND ERRORS IN THE LOGFILE! bailing out..."
+#         sys.exit(-2)
+#     else:
+#         print "Great! Logfile was checked and was completely clean!"
+# else:
+#     print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
 
 if not os.path.exists(options.outputDir):
     os.makedirs(options.outputDir)
@@ -256,62 +256,7 @@ for lin in open(options.inputList):
         )
     )
 
-# ---Loop over datasets in the inputlist to check if dat/root files are there
-foundAllFiles = True
-dictDatasetsFileNames = dict()
-print
-print "Checking for root/dat files from samples in inputList...",
-sys.stdout.flush()
-for lin in open(options.inputList):
-
-    lin = string.strip(lin, "\n")
-    # print 'lin=',lin
-    if lin.startswith("#"):
-        continue
-
-    dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
-    # strip off the slashes and the .txt at the end
-    # so this will look like 'TTJets_DiLept_reduced_skim'
-    # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
-    # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
-    # sys.stdout.flush()
-
-    rootFileName1 = (
-        options.analysisCode
-        + "___"
-        + dataset_fromInputList
-        + ".root"
-    )
-    # rootFileName2 = rootFileName1.replace(".root", "_0.root")
-    fullPath1 = options.inputDir
-    # fullPath2: condor style with one job per dataset
-    fullPath2 = (
-        options.inputDir
-        + "/"
-        + options.analysisCode
-        + "___"
-        + dataset_fromInputList
-        + "/"
-        + "output"
-    )
-    completeNamesTried = []
-    fileList = glob.glob(fullPath1+"/"+rootFileName1)
-    completeNamesTried.append(fullPath1+"/"+rootFileName1)
-    if len(fileList) < 1:
-        fileList = glob.glob(fullPath2+"/"+rootFileName1.replace(".root", "*.root"))
-        completeNamesTried.append(fullPath2+"/"+rootFileName1.replace(".root", "*.root"))
-    if len(fileList) < 1:
-        print
-        print "ERROR: could not find root file for dataset:", dataset_fromInputList
-        print "ERROR: tried these full paths:", completeNamesTried
-        foundAllFiles = False
-    elif len(fileList) > 1:
-        print "ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList)
-        print "ERROR: considered these full paths: {}".format(completeNamesTried)
-        foundAllFiles = False
-    sampleName = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
-    dictDatasetsFileNames[dataset_fromInputList] = fileList[0]
-
+foundAllFiles, dictDatasetsFileNames = combineCommon.FindInputFiles(options.inputList, options.analysisCode, options.inputDir)
 if not foundAllFiles:
     print "Some files not found. Exiting..."
     sys.exit()
