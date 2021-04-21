@@ -12,20 +12,41 @@ import ROOT as r
 import combineCommon
 
 result_list = []
+logString = "INFO: running {} parallel jobs for {} separate datasets found in inputList..."
+
+def CombineLikeDatasets(dictDatasetsFileNames):
+    combinedDictDatasetsFileNames = dict()
+    sanitizedDatasetsHandled = []
+    for dataset, fileList in dictDatasetsFileNames.iteritems():
+        sanitizedName = combineCommon.SanitizeDatasetNameFromInputList(dataset)
+        if sanitizedName in sanitizedDatasetsHandled:
+            continue  # already handled this dataset
+        matchingDatasets = []
+        matchingFiles = []
+        for matchingDataset, matchingFileList in dictDatasetsFileNames.iteritems():
+            sanitizedMatchingName = combineCommon.SanitizeDatasetNameFromInputList(matchingDataset)
+            if sanitizedMatchingName == sanitizedName:
+                matchingFiles.extend(matchingFileList)
+                matchingDatasets.append(matchingDataset)
+        shortestDataset = sorted(matchingDatasets, key=lambda x: len(x))[0]
+        combinedDictDatasetsFileNames[shortestDataset] = matchingFiles
+        sanitizedDatasetsHandled.append(sanitizedName)
+    # print "combinedDictDatasetsFileNames DYJ keys: {}".format([key for key in combinedDictDatasetsFileNames.keys() if "DYJ" in key])
+    return combinedDictDatasetsFileNames
 
 
 def log_result(result):
     # This is called whenever foo_pool(i) returns a result.
     # result_list is modified only by the main process, not the pool workers.
     result_list.append(result)
-    sys.stdout.write("\rINFO: running {} parallel jobs for {} datasets found in inputList...".format(jobCount, datasetCount))
+    sys.stdout.write("\r"+logString.format(jobCount, datasetCount))
     sys.stdout.write("\t"+str(len(result_list))+" jobs done")
     sys.stdout.flush()
 
 
 def CombinePlotsAndTables(args):
-    fileList, sampleName, dataset_fromInputList = args
-    # print "INFO: CombinePlotsAndTables() called for sampleName {} -- {} input files: {}".format(sampleName, len(fileList), fileList)
+    fileList, datasetName = args
+    # print "INFO: CombinePlotsAndTables() called for datasetName {} -- {} input files: {}".format(datasetName, len(fileList), fileList)
     try:
         sampleHistos = {}
         sampleTable = {}
@@ -36,14 +57,14 @@ def CombinePlotsAndTables(args):
             data = combineCommon.FillTableErrors(data, currentRootFile)
             sampleTable = combineCommon.UpdateTable(data, sampleTable)
         sampleTable = combineCommon.CalculateEfficiency(sampleTable)
-        outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + dataset_fromInputList + ".dat"
+        outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + datasetName + ".dat"
         with open(outputTableFilename, "w") as outputTableFile:
             # print "Write table to file:", outputTableFilename
-            combineCommon.WriteTable(sampleTable, sampleName, outputTableFile)
+            combineCommon.WriteTable(sampleTable, datasetName, outputTableFile)
         outputTfile = r.TFile(
             outputTableFilename.replace(".dat", ".root"), "RECREATE", "", 207
         )
-        # print "INFO: writing histos for sampleName {} to file {}".format(sampleName, outputTfile.GetName())
+        # print "INFO: writing histos for datasetName {} to file {}".format(datasetName, outputTfile.GetName())
         combineCommon.WriteHistos(outputTfile, sampleHistos)
         outputTfile.Close()
         if not options.saveInputFiles:
@@ -51,7 +72,7 @@ def CombinePlotsAndTables(args):
             for rootFile in fileList:
                 os.remove(rootFile)
     except Exception as e:
-        print "ERROR: exception in CombinePlotsAndTables for sampleName={}".format(sampleName)
+        print "ERROR: exception in CombinePlotsAndTables for datasetName={}".format(datasetName)
         traceback.print_exc()
         raise e
 
@@ -120,6 +141,8 @@ ncores = 4  # only use 4 parallel jobs to be nice
 pool = multiprocessing.Pool(ncores)
 
 # ---Loop over datasets in the inputlist to check if dat/root files are there
+#FIXME use combineCommon.FindInputFiles instead (needs some adaptation)
+dictDatasetsFileNames = {}
 missingDatasets = []
 jobCount = 0
 datasetCount = 0
@@ -168,22 +191,27 @@ for lin in open(options.inputList):
         print
         missingDatasets.append(dataset_fromInputList)
         continue
-    sampleName = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
+    # sampleName = combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
     # print "Found dataset {}: matching files:".format(dataset_fromInputList), fileList
+    dictDatasetsFileNames[dataset_fromInputList] = fileList
+
+dictDatasetsFileNames = CombineLikeDatasets(dictDatasetsFileNames)
+
+for datasetName, fileList in dictDatasetsFileNames.iteritems():
     try:
-        pool.apply_async(CombinePlotsAndTables, [[fileList, sampleName, dataset_fromInputList]], callback=log_result)
+        pool.apply_async(CombinePlotsAndTables, [[fileList, datasetName]], callback=log_result)
         jobCount += 1
     except KeyboardInterrupt:
         print "\n\nCtrl-C detected: Bailing."
         pool.terminate()
         sys.exit(1)
     except Exception as e:
-        print "ERROR: caught exception in job for sampleName: {}; exiting".format(sampleName)
+        print "ERROR: caught exception in job for datasetName: {}; exiting".format(datasetName)
         exit(-2)
 
 # now close the pool and wait for jobs to finish
 pool.close()
-sys.stdout.write("INFO: running {} parallel jobs for {} datasets found in inputList...".format(jobCount, datasetCount))
+sys.stdout.write(logString.format(jobCount, datasetCount))
 sys.stdout.write("\t"+str(len(result_list))+" jobs done")
 sys.stdout.flush()
 pool.join()
