@@ -4,6 +4,7 @@ import os
 import sys
 import math
 import string
+import re
 from prettytable import PrettyTable
 import numpy as np
 import ROOT as r
@@ -64,6 +65,7 @@ def GetStatErrorFromDict(statErrDict, mass):
     return statErrDict[mass]
 
 
+# returns dict like systDict[systName][selection] = yield
 def GetSystematicsDict(rootFile, sampleName, selections, verbose=False):
     systHistName = "histo2D__{}__systematics".format(sampleName)
     systHist = rootFile.Get(systHistName)
@@ -78,6 +80,25 @@ def GetSystematicsDict(rootFile, sampleName, selections, verbose=False):
         for yBin in range(1, systHist.GetNbinsY()+1):
             systName = systHist.GetYaxis().GetBinLabel(yBin)
             systDict[selection][systName] = systHist.GetBinContent(xBin, yBin)
+    # add special entry for branch titles
+    systDict["branchTitles"] = {}
+    tmapName = "tmap__{}__systematicNameToBranchesMap".format(sampleName)
+    tmap = rootFile.Get(tmapName)
+    for yBin in range(1, systHist.GetNbinsY()+1):
+        branchTitleList = []
+        systName = systHist.GetYaxis().GetBinLabel(yBin)
+        mapObject = tmap.FindObject(systName)
+        if not mapObject:
+            # assume it's an array syst, so try to match stripping off the _N part
+            mapObject = tmap.FindObject(systName[:systName.rfind("_")])
+        # print "INFO: for syst {}, found matching mapObject key: {}, value: {}".format(systName, mapObject.Key(), mapObject.Value())
+        branchTitleListItr = r.TIter(mapObject.Value())
+        branchTitle = branchTitleListItr.Next()
+        while branchTitle:
+            branchTitleList.append(branchTitle.GetName())
+            branchTitle = branchTitleListItr.Next()
+        systDict["branchTitles"][systName] = branchTitleList
+        # print "INFO: systDict[\"branchTitles\"][{}] = {}".format(systName, branchTitleList)
     if verbose:
         print "sampleName={}: systDict={}".format(sampleName, systDict["LQ300"])
     # reindex by syst name
@@ -101,7 +122,7 @@ def GetBackgroundSystDeltaOverNominal(background_name, selectionName, verbose=Fa
 def GetTotalSystDeltaOverNominal(sampleName, selectionName, systematicsNames, d_systs, verbose=False):
     totalSyst = 0
     for syst in systematicsNames:
-        systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffect(syst, sampleName, selectionName, d_systs)
+        systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffectAbs(syst, sampleName, selectionName, d_systs)
         deltaOverNominalMax = max(deltaOverNominalUp, deltaOverNominalDown)
         if deltaOverNominalMax > 0:
             totalSyst += deltaOverNominalMax * deltaOverNominalMax
@@ -125,7 +146,7 @@ def DoesSystematicApply(systName, sampleName):
 
 def GetSystematicEffect(systName, sampleName, selection, fullSystDict):
     if not DoesSystematicApply(systName, sampleName):
-        return "-", -1, -1
+        return "-", -1, -1  # FIXME: change to exception?
     # systematicsNamesBackground = [
     #    "LHEPDFWeight",
     #    "Lumi",
@@ -138,21 +159,21 @@ def GetSystematicEffect(systName, sampleName, selection, fullSystDict):
     hasUpDownVariation = True
     isFlat = False
     if "shape" in systName.lower():
-        return "-", -1, -1  # FIXME TODO special handling
-    elif systName == "LHEPDFWeight":
-        return "-", -1, -1  # FIXME TODO special handling for PDF systematic
+        return CalculateShapeSystematic("LHEScaleWeight", sampleName, selection, systDict)
+    elif systName == "LHEPdfWeight":
+        return CalculatePDFSystematic(systName, sampleName, selection, systDict)
     elif systName == "Lumi":
-        return "-", -1, -1  # FIXME TODO special handling
+        return str(1+lumiDeltaXOverX), lumiDeltaXOverX, lumiDeltaXOverX
     elif "norm" in systName.lower():
-        if "tt" in systName.lower() or "dy" in systName.lower():
-            return "-", -1, -1  # FIXME TODO special handling for TT_Norm, DY_Norm
-        if "qcd" in systName.lower():
+        if "tt" in systName.lower() or "dy" in systName.lower() or "qcd" in systName.lower():
             isFlat = True
     elif "eer" in systName.lower():
         hasUpDownVariation = False
     # now extract the systematic number
     if isFlat:
         # assumes that the number here is < 1
+        # print "d_applicableSystematics["+sampleName+"]=", d_applicableSystematics[sampleName]
+        # print "for sample={}, systName={}, systDict.keys()={}".format(sampleName, systName, systDict.keys())
         return str(1 + systDict[systName][selection]), systDict[systName][selection], systDict[systName][selection]
     # if we get here, we should have Up/Down variations for this syst
     try:
@@ -163,8 +184,8 @@ def GetSystematicEffect(systName, sampleName, selection, fullSystDict):
             )
     if nominal == 0:
         # FIXME TODO: how to handle this case?
-        # for now return invalid value
-        return "-", -1, -1
+        # for now return zero or no effect
+        return "-", 0, 0
     if hasUpDownVariation:
         try:
             systYieldUp = systDict[systName+"Up"][selection]
@@ -173,13 +194,6 @@ def GetSystematicEffect(systName, sampleName, selection, fullSystDict):
             raise RuntimeError("Could not find Up or Down key for syst={}; keys={}".format(systName, systDict.keys()))
         kUp = systYieldUp/nominal
         kDown = systYieldDown/nominal
-        # if kUp >= 1:
-        #     kUp -= 1
-        # if kDown >= 1:
-        #     kDown -= 1
-        # if kUp == 0:
-        #     return str(0), 0, kDown
-        # return str(kDown/kUp), kUp, kDown
         upDelta = systYieldUp-nominal
         if upDelta >= 1:
             upDelta -= 1
@@ -193,6 +207,152 @@ def GetSystematicEffect(systName, sampleName, selection, fullSystDict):
         if delta >= 1:
             delta -= 1
         return str(1 + delta/nominal), delta/nominal, delta/nominal
+
+
+def GetSystematicEffectAbs(systName, sampleName, selection, fullSystDict):
+    entry, deltaOverNomUp, deltaOverNomDown = GetSystematicEffect(systName, sampleName, selection, fullSystDict)
+    if entry != "-":
+        floatEntry = float(entry)
+        entry = str(math.fabs(floatEntry))
+    return entry, math.fabs(deltaOverNomUp), math.fabs(deltaOverNomDown)
+
+
+def GetPDFVariationType(branchTitle):
+    # example title: "LHE pdf variation weights (w_var / w_nominal) for LHA IDs 292200 - 292302"
+    # see: https://lhapdf.hepforge.org/pdfsets.html
+    # NNPDF3.0 is always MC; NNPDF3.1 can be either, but usually Hessian in CMS samples
+    if "292200" in branchTitle:  # NNPDF30_nlo_nf_5_pdfas
+        pdfType = "mc"
+    elif "292201" in branchTitle:
+        pdfType = "mcNoCentral"
+    elif "262000" in branchTitle:  # NNPDF30_lo_as_0118
+        pdfType = "mc"
+    elif "260001" in branchTitle:
+        pdfType = "mcNoCentral"
+    elif "91400" in branchTitle:  # PDF4LHC15_nnlo_30_pdfas
+        pdfType = "mc"
+    else:
+        raise RuntimeError("Can't determine whether branch title '{}' is a Hessian or MC set".format(branchTitle))
+    return pdfType
+
+
+def GetBranchTitle(systName, sampleName, selection, systDict):
+    pdfKeys = [syst for syst in systDict.keys() if syst == systName]
+    if len(pdfKeys) == 1:
+        return "", pdfKeys
+    if len(pdfKeys) < 1:
+        # try for an array branch
+        pdfKeys = [syst for syst in systDict.keys() if syst[:syst.rfind("_")] == systName]
+    # here we have to handle the PDF syst somehow
+    branchTitleLists = [systDict[key]["branchTitles"] for key in pdfKeys]
+    branchTitleLists = [list(item) for item in set(tuple(titleList) for titleList in branchTitleLists)]
+    # branchTitleLists = set(tuple(titleList) for titleList in branchTitleLists)
+    if len(branchTitleLists) > 1:
+        raise RuntimeError("For sample {}, found multiple branch title lists for the PDF syst variations: {}".format(sampleName, branchTitleLists))
+    if len(branchTitleLists) < 1:
+        raise RuntimeError("For sample {}, found zero branch title lists for the PDF syst variations; systDict.keys()={}".format(sampleName, systDict.keys()))
+    branchTitleList = branchTitleLists[0]
+    if len(branchTitleList) > 1:
+        raise RuntimeError("For sample {}, found multiple branch titles for the PDF syst variations: {}".format(sampleName, branchTitleList))
+    branchTitle = branchTitleList[0]
+    return branchTitle, pdfKeys
+
+
+def CalculatePDFSystematic(systName, sampleName, selection, systDict):
+    branchTitle, pdfKeys = GetBranchTitle(systName, sampleName, selection, systDict)
+    if len(pdfKeys) == 1:
+        # we have an exactly matching PDF syst key; hwe manually specified a flat syst
+        # assumes that the number here is < 1
+        return str(1 + systDict[systName][selection]), systDict[systName][selection], systDict[systName][selection]
+    # print "INFO: For sampleName={}, systName={}, found branch title={}".format(sampleName, systName, branchTitle)
+    # print len(pdfKeys), "sorted(pdfKeys)=", sorted(pdfKeys, key=lambda x: int(x[x.rfind("_")+1:]))
+    pdfVariationType = GetPDFVariationType(branchTitle)
+    # print "INFO: For sampleName={}, systName={}, found branch title={} and PDFType={}".format(sampleName, systName, branchTitle, pdfVariationType)
+    if pdfVariationType != "mcNoCentral":
+        pdfKeys.remove("LHEPdfWeight_0")  # don't consider index 0, central value
+    if "mc" in pdfVariationType:
+        return CalculatePDFVariationMC(systDict, sampleName, selection, pdfKeys)
+    #elif pdfVariationType == "hessian":
+    #    CalculatePDFVariationHessian()
+
+
+def CalculatePDFVariationMC(systDict, sampleName, selection, pdfKeys):
+    pdfKeys = sorted(pdfKeys, key=lambda x: int(x[x.rfind("_")+1:]))
+    # now, if we still have over 100, remove the last two
+    if len(pdfKeys) > 100:
+        pdfKeys = pdfKeys[:-2]
+    elif len(pdfKeys) == 32:
+        pdfKeys = pdfKeys[:-2]
+    # print "INFO: we now have {} pdf variations to consider".format(len(pdfKeys))
+    # Order the 100 yields and take the 84th and 16th.
+    pdfYields = sorted([systDict[pdfKey][selection] for pdfKey in pdfKeys])
+    if len(pdfKeys) == 100:
+        pdfUp = pdfYields[83]
+        pdfDown = pdfYields[15]
+    elif len(pdfKeys) == 30:
+        pdfUp = pdfYields[27]
+        pdfDown = pdfYields[5]
+    nominal = systDict["nominal"][selection]
+    if nominal == 0:
+        #FIXME: how to handle this?
+        print "WARN: can't calculate PDFVariationMC for this sample '{}' as nominal yield is zero at this selection '{}'. Return empty/-1 syst.".format(sampleName, selection)
+        return "-", -1, -1
+    kDown = pdfDown/nominal
+    kUp = pdfUp/nominal
+    # if "boson" in sampleName.lower():
+    #     print "for sampleName={}, selection={}, pdfYields={}, nominal={}; pdfUp={}, pdfDown={}".format(
+    #             sampleName, selection, pdfYields, nominal, pdfUp, pdfDown)
+    return str(kDown/kUp), (pdfUp-nominal)/nominal, (pdfDown-nominal)/nominal
+
+
+def CalculateShapeSystematic(systName, sampleName, selection, systDict):
+    branchTitle, shapeKeys = GetBranchTitle(systName, sampleName, selection, systDict)
+    # print "INFO: For sampleName={}, systName={}, found branch title={} and shapeKeys={}".format(sampleName, systName, branchTitle, shapeKeys)
+    # print "INFO: For sampleName={}, systName={}, found branch title={}".format(sampleName, systName, branchTitle)
+    sys.stdout.flush()
+    validIndices, shapeTitles = ParseShapeBranchTitle(branchTitle)
+    shapeKeys = [shapeKey for shapeKey in shapeKeys if shapeKey[shapeKey.rfind("_")+1:] in validIndices]
+    shapeYields = [systDict[shapeKey][selection] for shapeKey in shapeKeys]
+    # print "INFO: For sampleName={}, systName={}, found valid shapeKeys={}, valid shapeTitles={} and shapeYields={}".format(sampleName, systName, shapeKeys, shapeTitles, shapeYields)
+    nominal = systDict["nominal"][selection]
+    if nominal == 0:
+        #FIXME: how to handle this?
+        print "WARN: can't calculate ShapeSystematic for this sample '{}' as nominal yield is zero at this selection '{}'. Return empty/-1 syst.".format(sampleName, selection)
+        return "-", -1, -1
+    deltas = [math.fabs(shapeYield-nominal) for shapeYield in shapeYields]
+    maxDelta = max(deltas)
+    # print "INFO: For sampleName={}, systName={}, found deltas={} with maxDelta={} and nominal={}".format(sampleName, systName, deltas, maxDelta, nominal)
+    return str(1+maxDelta/nominal), maxDelta/nominal, maxDelta/nominal
+
+
+def ParseShapeBranchTitle(branchTitle):
+    validIndices = []
+    validTitles = []
+    # one format of title: "LHE scale variation weights (w_var / w_nominal); [0] is muR=0.50000E+00 muF=0.50000E+00 ; [1] is muR=0.50000E+00 muF=0.10000E+01 ; " ... "[7] is muR=0.20000E+01 muF=0.10000E+01 ; [8] is muR=0.20000E+01 muF=0.20000E+01"
+    # a second format: "LHE scale variation weights (w_var / w_nominal); [0] is renscfact=0.5d0 facscfact=0.5d0 ; [1] is renscfact=0.5d0 facscfact=1d0 ; " ... "[7] is renscfact=2d0 facscfact=1d0 ; [8] is renscfact=2d0 facscfact=2d0"
+    # if "muR" in branchTitle:
+    #     regEx = re.compile(r"\[(\d+)\] is muR=([0-9.+E]+) muF=([0-9.+E]+)")
+    regEx = re.compile(r"\[(\d+)\][\D\s]+=([0-9.+Ed]+)[\D\s]+=([0-9.+Ed]+)")
+    match = re.search(regEx, branchTitle)
+    searchStart = 0
+    while match:
+        groups = match.groups()
+        end = match.end()
+        index = int(groups[0])
+        muR = float(groups[1].replace("d", "E+"))
+        muF = float(groups[2].replace("d", "E+"))
+        ratio = muR/muF
+        if ratio < 3.9 and ratio > 0.3:  # leave some room for float rounding
+            # print "INFO: keep this variation with title={}; index={}, ratio={}".format(branchTitle[searchStart:searchStart+end], index, ratio)
+            validIndices.append(str(index))
+            validTitles.append(branchTitle[searchStart:searchStart+end])
+        # else:
+        #     print "INFO: REJECT this variation with title={}; index={}, ratio={}".format(branchTitle[searchStart:searchStart+end], index, ratio)
+        searchStart += end
+        match = re.search(regEx, branchTitle[searchStart:])
+    if len(validIndices) < 1:
+        raise RuntimeError("Failed to parse branch title which looks like '{}'".format(branchTitle))
+    return validIndices, validTitles
 
 
 def RoundToN(x, n):
@@ -305,8 +465,6 @@ def FillDicts(rootFilename, sampleNames, bkgType):
     d_unscaledRates = {}
     d_totalEvents = {}
     d_systematics = {}
-    selectionPoints = ["preselection"] + mass_points
-    selectionNames = ["LQ"+sel if "preselection" not in sel else sel for sel in selectionPoints]
     # start sample
     for i_sample, sampleName in enumerate(sampleNames):
         unscaledTotalEvts = cc.GetUnscaledTotalEvents(scaledRootFile, sampleName)
@@ -348,6 +506,10 @@ def FillDicts(rootFilename, sampleNames, bkgType):
                     unscaledRatesDict[selectionName] = 0.0
         if not isData and doSystematics:
             d_systematics[sampleName] = GetSystematicsDict(scaledRootFile, sampleName, selectionNames)  # , sampleName == "LQToDEle_M-300_pair")
+            if "zjet" in sampleName.lower():
+                d_systematics[sampleName].update({"DY_Norm": {sel: dyNormDeltaXOverX for sel in selectionNames}})
+            if "ttbar" in sampleName.lower():
+                d_systematics[sampleName].update({"TT_Norm": {sel: ttBarNormDeltaXOverX for sel in selectionNames}})
         elif sampleName == "QCDFakes_DATA":
             # special handling for QCDFakes_DATA
             d_selsAndSysts = {sel: qcdNormDeltaXOverX for sel in selectionNames}
@@ -384,7 +546,8 @@ sampleListsForMergingQCD[2018] = "$LQANA/config/sampleListForMerging_13TeV_QCD_d
 inputLists = {}
 #inputLists[2016] = "$LQANA/config/oldInputLists/nanoV7/2016/nanoV7_2016_pskEEJJ_16oct2020_comb/inputListAllCurrent.txt"
 #inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt"
-inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_16mar2021_comb/inputListAllCurrent.txt"
+#inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_16mar2021_comb/inputListAllCurrent.txt"
+inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_12apr2021/inputListAllCurrent.txt"
 inputLists[2017] = "$LQANA/config/nanoV7_2017_pskEEJJ_20oct2020_comb/inputListAllCurrent.txt"
 #
 qcdFilePaths = {}
@@ -396,7 +559,8 @@ qcdFilePaths[2017] = "$LQDATA/nanoV7/2017/analysis/qcdYield_eejj_23oct2020_optFi
 filePaths = {}
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_9nov2020_optFinalSelsOld/output_cutTable_lq_eejj/"
-filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/precomputePrefire_looserPSK_eejj_16mar2021_oldOptFinalSels/output_cutTable_lq_eejj/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/precomputePrefire_looserPSK_eejj_16mar2021_oldOptFinalSels/output_cutTable_lq_eejj/"
+filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/precomputePrefire_looserPSK_eejj_12apr2021_oldOptFinalSels/output_cutTable_lq_eejj/"
 filePaths[2017] = "$LQDATA/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalSels/output_cutTable_lq_eejj/"
 #
 xsecFiles = {}
@@ -528,7 +692,7 @@ if doEEJJ:
     systematicsNamesBackground = [
         "EleTrigSF",
         "Pileup",
-        "LHEPDFWeight",
+        "LHEPdfWeight",
         "Lumi",
         "JER",
         "JES",
@@ -565,7 +729,7 @@ if doEEJJ:
     d_systTitles = {
             "EleTrigSF": "Trigger",
             "Pileup": "Pileup",
-            "LHEPDFWeight": "PDF",
+            "LHEPdfWeight": "PDF",
             "Lumi": "Lumi",
             "JER": "Jet energy resolution",
             "JES": "Jet energy scale",
@@ -577,7 +741,7 @@ if doEEJJ:
             "DY_Norm": "DYJ normalization",
             "DY_Shape": "DYJ shape",
             "TT_Shape": "TTbar shape",
-            "Diboson_Shape" : "Diboson shape",
+            "Diboson_Shape": "Diboson shape",
             "QCD_Norm": "QCD background normalization",
     }
 else:
@@ -648,10 +812,19 @@ minLQselectionBkg = "LQ200"
 #     # nonTTBarSampleName='NONTTBARBKG_amcatnloPt_emujj'
 #     nonTTBarSampleName = "NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj"
 
+selectionPoints = ["preselection"] + mass_points
+selectionNames = ["LQ"+sel if "preselection" not in sel else sel for sel in selectionPoints]
+additionalBkgSystsDict = {}
 # update to 2016 analysis numbers
 # QCDNorm is 0.50 [50% norm uncertainty for eejj = uncertaintyPerElectron*2]
 if doEEJJ:
     qcdNormDeltaXOverX = 0.50
+    # from: https://arxiv.org/pdf/1506.04072.pdf tables 1-3: 5% is probably good enough for SingleTop PDF syst
+    additionalBkgSystsDict["SingleTop"] = {"LHEPdfWeight": {sel: 0.10 for sel in selectionNames}}
+    if do2016:
+        lumiDeltaXOverX = 0.012  # new number from https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#SummaryTable
+        dyNormDeltaXOverX = 0.01  # rounded up
+        ttBarNormDeltaXOverX = 0.03
 else:
     qcdNormDeltaXOverX = 0.25
 
@@ -660,8 +833,8 @@ n_background = len(background_names)
 # update July/Sep 2020: no more data-driven TBar, so only 1 extra syst for eejj
 if doSystematics:
     if doEEJJ:
-        # n_systematics = len(systematicsNamesBackground) + n_background + 1 + 2
-        n_systematics = len(systematicsNamesBackground) + n_background + 1 + 1
+        # systematics + stat_errors_background + stat_errors_signal
+        n_systematics = len(systematicsNamesBackground) + n_background + 1
     else:
         n_systematics = (
             len(systematicsNamesBackground) + n_background + 1 + 1
@@ -672,9 +845,17 @@ n_channels = 1
 
 signalNameList = [GetFullSignalName(signalNameTemplate, massPoint)[1] for massPoint in mass_points]
 allBkgSysts = [syst for syst in systematicsNamesBackground if "norm" not in syst.lower() and "shape" not in syst.lower()]
-d_applicableSystematics = {bkg: allBkgSysts for bkg in background_fromMC_names}
+d_applicableSystematics = {bkg: list(allBkgSysts) for bkg in background_fromMC_names}
 d_applicableSystematics.update({bkg: "QCD_Norm" for bkg in background_QCDfromData})
-# FIXME TODO ADD shape/norm for DY/TTBar
+if do2016:
+    d_applicableSystematics["ZJet_amcatnlo_ptBinned"].append("DY_Norm")
+    d_applicableSystematics["ZJet_amcatnlo_ptBinned"].append("DY_Shape")
+else:
+    d_applicableSystematics["ZJet_jetAndPtBinned"].append("DY_Norm")
+    d_applicableSystematics["ZJet_jetAndPtBinned"].append("DY_Shape")
+d_applicableSystematics["TTbar_powheg"].append("TT_Norm")
+d_applicableSystematics["TTbar_powheg"].append("TT_Shape")
+d_applicableSystematics["DIBOSON_nlo"].append("Diboson_Shape")
 d_applicableSystematics.update({sig: systematicsNamesSignal for sig in signalNameList})
 datacard_filePath = "tmp_card_file.txt"
 plots_filePath = "plots.root"
@@ -717,7 +898,7 @@ dictSamples = cc.ExpandSampleDict(dictSamples)
 
 d_systUpDeltas = {}
 d_systDownDeltas = {}
-d_systNominals = {} # same as rates, but more conveniently indexed
+d_systNominals = {}  # same as rates, but more conveniently indexed
 
 # SIC 6 Jul 2020 remove
 # if doEEJJ:
@@ -756,6 +937,8 @@ d_background_rateErrs.update(bgFromData_rateErrs)
 d_background_unscaledRates.update(bgFromData_unscaledRates)
 d_background_totalEvents.update(bgFromData_totalEvents)
 d_background_systs.update(bgFromData_systs)
+for sampleName in additionalBkgSystsDict.iterkeys():
+    d_background_systs[sampleName].update(additionalBkgSystsDict[sampleName])
 # above would be similar for TTBarFromDATA
 print "INFO: Filling signal information..."
 d_signal_rates, d_signal_rateErrs, d_signal_unscaledRates, d_signal_totalEvents, d_signal_systs = FillDicts(dataMC_filepath, signalNameList, "signal")
@@ -864,7 +1047,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
                         d_systNominals[signalNameForFile][syst] = {}
                         d_systUpDeltas[signalNameForFile][syst] = {}
                         d_systDownDeltas[signalNameForFile][syst] = {}
-                    systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffect(syst, signalNameForFile, selectionNameSyst, d_signal_systs)
+                    systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffectAbs(syst, signalNameForFile, selectionNameSyst, d_signal_systs)
                     thisSigEvts = d_signal_rates[signalNameForFile][selectionNameSyst]
                     thisSigSystUp = deltaOverNominalUp*thisSigEvts
                     thisSigSystDown = deltaOverNominalDown*thisSigEvts
@@ -883,7 +1066,7 @@ for i_signal_name, signal_name in enumerate(signal_names):
                         d_systNominals[background_name][syst] = {}
                         d_systUpDeltas[background_name][syst] = {}
                         d_systDownDeltas[background_name][syst] = {}
-                    systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffect(syst, background_name, selectionNameSyst, d_background_systs)
+                    systEntry, deltaOverNominalUp, deltaOverNominalDown = GetSystematicEffectAbs(syst, background_name, selectionNameSyst, d_background_systs)
                     thisBkgEvts = d_background_rates[background_name][selectionNameSyst]
                     thisBkgSystUp = deltaOverNominalUp*thisBkgEvts
                     thisBkgSystDown = deltaOverNominalDown*thisBkgEvts
@@ -1077,7 +1260,7 @@ if doSystematics:
             if syst in systematicsNamesSignal:
                 for i_signal_name, signal_name in enumerate(signal_names):
                     fullSignalName, signalNameForFile = GetFullSignalName(signal_name, massPoint)
-                    entry, sigSystDeltaOverNominalUp, sigSystDeltaOverNominalDown = GetSystematicEffect(syst, signalNameForFile, selectionNameSyst, d_signal_systs)
+                    entry, sigSystDeltaOverNominalUp, sigSystDeltaOverNominalDown = GetSystematicEffectAbs(syst, signalNameForFile, selectionNameSyst, d_signal_systs)
                     if entry == "-":
                         thisSigSystPercent = -1
                         continue
@@ -1088,10 +1271,12 @@ if doSystematics:
             totalBkgSyst = 0
             totalBkgNominal = 0
             for background_name in background_names:
-                entry, bkgSystDeltaOverNominalUp, bkgSystDeltaOverNominalDown = GetSystematicEffect(syst, background_name, selectionNameSyst, d_background_systs)
+                # compute effect of this systematic on the total background yield
+                totalBkgNominal += d_systNominals[background_name][syst][selectionNameSyst]
+                entry, bkgSystDeltaOverNominalUp, bkgSystDeltaOverNominalDown = GetSystematicEffectAbs(syst, background_name, selectionNameSyst, d_background_systs)
                 if entry != "-":
                     thisBkgSyst = max(bkgSystDeltaOverNominalUp, bkgSystDeltaOverNominalDown)
-                    totalBkgNominal += d_systNominals[background_name][syst][selectionNameSyst]
+                    # totalBkgNominal += d_systNominals[background_name][syst][selectionNameSyst]
                     thisBkgDelta = thisBkgSyst*d_systNominals[background_name][syst][selectionNameSyst]
                     totalBkgSyst += thisBkgDelta*thisBkgDelta
             if totalBkgNominal > 0:
