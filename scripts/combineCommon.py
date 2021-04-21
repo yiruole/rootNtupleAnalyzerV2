@@ -6,6 +6,7 @@ import os
 import string
 import math
 import re
+import glob
 from collections import OrderedDict
 import numpy as np
 import ROOT as r
@@ -15,6 +16,82 @@ import ROOT as r
 
 intLumi = -1
 xsectionDict = {}
+
+
+def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
+    # ---Loop over datasets in the inputlist to check if dat/root files are there
+    foundAllFiles = True
+    dictDatasetsFileNames = dict()
+    print
+    print "Checking for root/dat files from samples in inputList...",
+    sys.stdout.flush()
+    datasetsHandled = []
+    for lin in open(inputList):
+        lin = string.strip(lin, "\n")
+        # print 'lin=',lin
+        if lin.startswith("#"):
+            continue
+        dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
+        if skipSimilarDatasets and SanitizeDatasetNameFromInputList(dataset_fromInputList) in datasetsHandled:
+            continue  # in the case where we already combined similar datasets, skip similiar dataset entries in the inputlist
+        # strip off the slashes and the .txt at the end
+        # so this will look like 'TTJets_DiLept_reduced_skim'
+        # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList) + " ... ",
+        # print combineCommon.SanitizeDatasetNameFromInputList(dataset_fromInputList),dataset_fromInputList,
+        # sys.stdout.flush()
+        rootFileName1 = (
+            analysisCode
+            + "___"
+            + dataset_fromInputList
+            + ".root"
+        )
+        # rootFileName2 = rootFileName1.replace(".root", "_0.root")
+        fullPath1 = inputDir
+        # fullPath2: condor style with one job per dataset
+        fullPath2 = (
+            inputDir
+            + "/"
+            + analysisCode
+            + "___"
+            + dataset_fromInputList
+            + "/"
+            + "output"
+        )
+        completeNamesTried = []
+        fileList = glob.glob(fullPath1+"/"+rootFileName1)
+        completeNamesTried.append(fullPath1+"/"+rootFileName1)
+        if len(fileList) < 1:
+            newPathToTry = fullPath2+"/"+rootFileName1.replace(".root", "*.root")
+            fileList = glob.glob(newPathToTry)
+            completeNamesTried.append(newPathToTry)
+        if len(fileList) < 1:
+            newPathToTry = fullPath1+"/"+rootFileName1.replace("backup", "ext*").replace(".root", "*.root")
+            fileList = glob.glob(newPathToTry)
+            completeNamesTried.append(newPathToTry)
+        if len(fileList) < 1:
+            rootFileNameWithoutExt = rootFileName1[:rootFileName1.find("ext")] + rootFileName1[rootFileName1.rfind("_")+1:]
+            newPathToTry = fullPath1+"/"+rootFileNameWithoutExt.replace(".root", "*.root")
+            fileList = glob.glob(newPathToTry)
+            completeNamesTried.append(newPathToTry)
+        if len(fileList) < 1:
+            rootFileNameWithoutBackup = rootFileName1[:rootFileName1.find("backup")] + rootFileName1[rootFileName1.rfind("_")+1:]
+            newPathToTry = fullPath1+"/"+rootFileNameWithoutBackup.replace(".root", "*.root")
+            fileList = glob.glob(newPathToTry)
+            completeNamesTried.append(newPathToTry)
+        if len(fileList) < 1:
+            print
+            print "ERROR: could not find root file for dataset:", dataset_fromInputList
+            print "ERROR: tried these full paths:", completeNamesTried
+            foundAllFiles = False
+        elif len(fileList) > 1:
+            print "ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList)
+            print "ERROR: considered these full paths: {}".format(completeNamesTried)
+            foundAllFiles = False
+        sampleName = SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
+        dictDatasetsFileNames[dataset_fromInputList] = fileList[0]
+        # print "for dataset {}, found files: {}".format(dataset_fromInputList, fileList[0])
+        datasetsHandled.append(sampleName)
+    return foundAllFiles, dictDatasetsFileNames
 
 
 def SanitizeDatasetNameFromInputList(dataset_fromInputList):
@@ -52,6 +129,7 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     # dataset_fromInputList = dataset_fromInputList.replace("ext2_", "").replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "")
     dataset_fromInputList = re.sub("ext[0-9_]*", "", dataset_fromInputList)
     dataset_fromInputList = dataset_fromInputList.replace("backup_", "")
+    dataset_fromInputList = dataset_fromInputList.replace("_backup", "")
     dataset_fromInputList = re.sub("newPMX[_]*", "", dataset_fromInputList)
     # dataset_fromInputList = re.sub("NNPDF[0-9_]*", "", dataset_fromInputList)
     dataset_fromInputList = dataset_fromInputList.rstrip("_")
@@ -211,10 +289,9 @@ def ParseXSectionFile(xsectionFile):
 
 def lookupXSection(datasetNameFromInputList):
     verbose = False
+    datasetNameFromInputList = SanitizeDatasetNameFromInputList(datasetNameFromInputList)
     if len(xsectionDict) <= 0:
-        print
-        print "ERROR: xsectionDict is empty. Cannot lookupXSection for", datasetNameFromInputList
-        exit(-1)
+        raise RuntimeError("xsectionDict is empty. Cannot lookupXSection for "+datasetNameFromInputList)
     for dataset in xsectionDict.keys():
         if verbose and "LQ" in dataset:
             print 'INFO: dataset in xsec file:', dataset, ' starts with the one we are asking for:', datasetNameFromInputList, '?'
@@ -226,12 +303,9 @@ def lookupXSection(datasetNameFromInputList):
             if datasetNameFromInputList.startswith(dataset.split("_")[0]):
                 # print 'INFO: found dataset in xsec file:', dataset, 'that starts with the one we are asking for:', datasetNameFromInputList
                 return xsectionDict[dataset]
-    print
-    print "ERROR"
     # for key in sorted(xsectionDict.iterkeys()):
     #  print 'sample=',key,'xsection=',xsectionDict[key]
-    print "ERROR: lookupXSection(): xsectionDict does not have an entry for", datasetNameFromInputList, "; i.e., no dataset in xsectionDict starts with this."
-    exit(-1)
+    raise RuntimeError("xsectionDict does not have an entry for " + datasetNameFromInputList + ", i.e., no dataset in xsectionDict starts with this.")
 
 
 def ParseDatFile(datFilename):
@@ -907,7 +981,6 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
         r.SetOwnership(htemp, True)
         if sampleName in histoName:
             if "amcatnlo" in tfileName.lower() and "systematics" in histoName.lower() and "diffs" not in histoName.lower():
-                # FIXME TODO: check PDF set
                 # in this case, we check if there are 102 LHEPdfWeights in the y bins, and if so, we remove index 100 and 101 (alpha_S weights)
                 yBinLabels = htemp.GetYaxis().GetLabels()
                 lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data()]
@@ -915,7 +988,8 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
                     print "INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
                             len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName)
                     htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
-            htemp.SetDirectory(0)
+            if htemp.InheritsFrom("TH1"):
+                htemp.SetDirectory(0)
             sampleHistos.append(htemp)
     tfile.Close()
     if len(sampleHistos) < 1:
@@ -971,6 +1045,11 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
                 sampleHistoDict, htemp, h, piece, sample, plotWeight
             )
             h += 1
+    # check TMap consistency
+    sampleTMap = next((x.ReadObj() for x in tfile.GetListOfKeys() if x.ReadObj().ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName() == "systematics"), None)
+    CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
     tfile.Close()
 
 
@@ -991,8 +1070,9 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
             # sampleHistoName = sampleHisto.GetName()
             # sampleHisto.SetName(GetShortHistoName(sampleHistoName))
             if pieceHisto.GetName() not in sampleHisto.GetName():
-                raise RuntimeError("ERROR: apparently non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
-                        sampleHisto.GetName(), pieceHisto.GetName()))
+                raise RuntimeError(
+                        "ERROR: non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
+                            sampleHisto.GetName(), pieceHisto.GetName()))
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight)
         # if idx == 0:
         #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
@@ -1005,17 +1085,30 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
             unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
             sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0)
             idx += 1
+    # check TMap consistency
+    sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName().endswith("systematics")), None)
+    if comboSystHist is None:
+        print "Could not find comboSystHist in sampleHistoDict"
+        print [x.GetName() for x in sampleHistoDict.values() if "systematics" in x.GetName()]
+    CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
     return sampleHistoDict
 
 
 def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
     histoName = htemp.GetName()
     histoTitle = htemp.GetTitle()
-    if "systematics" in histoName.lower() and IsHistEmpty(htemp):
-        # For systematics hists, these can have the wrong number of bins in the case where the tree read by the analysis has zero entries
-        #    because any array systematics will have size zero, instead of the actual size.
-        # In the case where the input tree has zero entries, the systematics hist will be empty anyway, so we can safely skip it.
-        return dictFinalHistoAtSample
+    if "systematics" in histoName.lower():
+        if h in dictFinalHistoAtSample:
+            if list(dictFinalHistoAtSample[h].GetYaxis().GetLabels()) != list(htemp.GetYaxis().GetLabels()):
+                if IsHistEmpty(dictFinalHistoAtSample[h]):
+                    del dictFinalHistoAtSample[h]  # replace the empty hist with a filled one
+                elif IsHistEmpty(htemp):
+                    # For systematics hists, these can have the wrong number of bins in the case where the tree read by the analysis has zero entries
+                    #    because any array systematics will have size zero, instead of the actual size.
+                    # In the case where the input tree has zero entries, the systematics hist will be empty anyway, so we can safely skip it.
+                    return dictFinalHistoAtSample
     if "systematicsdiffs" in histoName.lower():
         # ignore systematicsDiffs hist here; we remake this at the end so that it's correct
         return dictFinalHistoAtSample
@@ -1083,10 +1176,16 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
             htemp.GetXaxis().Copy(dictFinalHistoAtSample[h].GetXaxis())
             htemp.GetYaxis().Copy(dictFinalHistoAtSample[h].GetYaxis())
             htemp.GetZaxis().Copy(dictFinalHistoAtSample[h].GetZaxis())
+        elif "TMap" in htemp.ClassName() and "systematicNameToBranchesMap" in htemp.GetName():
+            dictFinalHistoAtSample[h] = htemp.Clone()
+            if sample != "":
+                dictFinalHistoAtSample[h].SetName("tmap__" + sample + "__" + histoName)
+            else:
+                dictFinalHistoAtSample[h].SetName(histoName)
         else:
             raise RuntimeError("not combining hist with classtype of {}".format(htemp, htemp.ClassName()))
-            # return
-        dictFinalHistoAtSample[h].Sumw2()
+        if "TMap" not in htemp.ClassName():
+            dictFinalHistoAtSample[h].Sumw2()
     #  XXX DEBUG
     # binToExamine = 33
     # if 'OptBinLQ60' in histoName:
@@ -1102,6 +1201,13 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
     if "optimizerentries" in histoName.lower() or "noweight" in histoName.lower() or "unscaled" in histoName.lower():
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
     else:
+        if "TMap" in htemp.ClassName() and "systematicNameToBranchesMap" in htemp.GetName():
+            # for this special TMap, check that the keys and values are consistent
+            # recall: TObjString --> TList
+            # print "INFO: checking systematicNameToBranchesMap consistency for piece {} in combined sample {}".format(piece, sample)
+            # CheckSystematicsTMapConsistency(dictFinalHistoAtSample[h], htemp)
+            # no-op
+            return dictFinalHistoAtSample
         if "systematics" in htemp.GetName().lower():
             # check systematics hist bins
             #print "INFO (1) the existing combined hist has {} x bins and {} y bins: {}".format(
@@ -1164,14 +1270,69 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
         print "Writing", nHistos, "histos...",
     sys.stdout.flush()
     for histo in sampleHistoDict.itervalues():  # for each hist contained in the sample's dict
-        histo.Write()
-        # make systDiffs hist if needed
-        if "systematics" in histo.GetName().split("__")[-1].lower():
-            systDiffsHist = MakeSystDiffsPlot(histo)
-            systDiffsHist.Write()
+        if histo.ClassName() == "TMap":
+            histo.Write(histo.GetName(), r.TObject.kSingleKey)
+        else:
+            histo.Write()
+            # make systDiffs hist if needed
+            if "systematics" in histo.GetName().split("__")[-1].lower():
+                systDiffsHist = MakeSystDiffsPlot(histo)
+                systDiffsHist.Write()
     if verbose:
         print "Done."
     sys.stdout.flush()
+
+
+def GetTMapKeys(tmap):
+    mapKeys = []
+    mapIter = r.TIter(tmap)
+    mapKey = mapIter.Next()
+    while mapKey:
+        mapKeys.append(mapKey)
+        mapKey = mapIter.Next()
+    return mapKeys
+
+
+def CheckSystematicsTMapConsistency(combinedSampleMap, mapToCheck, systematicsList):
+    combIter = r.TIter(combinedSampleMap)
+    combKey = combIter.Next()
+    while combKey:
+        sampleMapObject = mapToCheck.FindObject(combKey.GetName())
+        if not sampleMapObject:
+            sampleItr = r.TIter(mapToCheck)
+            sampleKey = sampleItr.Next()
+            while sampleKey:
+                print "sampleKey: '{}'".format(sampleKey.GetName())
+                sampleKey = sampleItr.Next()
+            raise RuntimeError("could not find syst '{}' in sampleMap. systematics TMap in combined sample is inconsistent in input root file".format(combKey.GetName()))
+        sampleMapVal = sampleMapObject.Value()  # TList of associated branch titles
+        combVal = combinedSampleMap.GetValue(combKey)
+        # now check the TLists
+        combListIter = r.TIter(combVal)
+        combListItem = combListIter.Next()
+        while combListItem:
+            sampleListItem = sampleMapVal.FindObject(combListItem.GetName())
+            if not sampleListItem:
+                raise RuntimeError("branch title used in combined sample '{}' for syst '{}' not found in sample list: '{}'".format(combListItem.GetName(), combKey.GetName(), [item for item in sampleMapVal]))
+            if not sampleListItem.GetName() == combListItem.GetName():
+                raise RuntimeError("branch title for combined sample '{}' does not equal branch name for candidate sample '{}' for syst '{}'".format(combListItem.GetName(), sampleListItem.GetName(), combKey.GetName()))
+            combListItem = combListIter.Next()
+        combKey = combIter.Next()
+        # now check that we have a TMap entry for each systematic in the 2D syst hist
+        for syst in systematicsList:
+            # if syst.GetName() == "nominal":
+            #     continue  # nominal doesn't have any associated branches so it will never be in the TMap
+            found = False
+            combIter = r.TIter(combinedSampleMap)
+            combKey = combIter.Next()
+            while combKey:
+                if combKey.GetName() == syst.GetName():
+                    found = True
+                elif combKey.GetName() == syst.GetName()[:syst.GetName().rfind("_")]:
+                    found = True
+                combKey = combIter.Next()
+            if not found:
+                raise RuntimeError("syst '{}' used in combined sample not found in TMap '{}'; keys: '{}'".format(syst, combinedSampleMap.GetName(), GetTMapKeys(combinedSampleMap)))
 
 
 def GetUnscaledTotalEvents(combinedRootFile, sampleName):
