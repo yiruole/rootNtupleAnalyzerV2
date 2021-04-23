@@ -6,6 +6,7 @@ import math
 import string
 import re
 from prettytable import PrettyTable
+from tabulate import tabulate
 import numpy as np
 import ROOT as r
 import combineCommon as cc
@@ -285,6 +286,7 @@ def CalculatePDFVariationMC(systDict, sampleName, selection, pdfKeys):
         pdfKeys = pdfKeys[:-2]
     # print "INFO: we now have {} pdf variations to consider".format(len(pdfKeys))
     # Order the 100 yields and take the 84th and 16th.
+    # See eq. 25 here: https://arxiv.org/pdf/1510.03865.pdf
     pdfYields = sorted([systDict[pdfKey][selection] for pdfKey in pdfKeys])
     if len(pdfKeys) == 100:
         pdfUp = pdfYields[83]
@@ -565,8 +567,9 @@ filePaths[2017] = "$LQDATA/nanoV7/2017/analysis/prefire_eejj_23oct2020_optFinalS
 #
 xsecFiles = {}
 # xsecFiles[2016] = "$LQANA/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
-xsecFiles[2016] = "$LQANA/config/xsection_13TeV_2015.txt"
-xsecFiles[2017] = "$LQANA/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+# xsecFiles[2016] = "$LQANA/config/xsection_13TeV_2015.txt"
+# xsecFiles[2017] = "$LQANA/versionsOfAnalysis/2017/nanoV7/eejj/aug27/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
+xsecFiles[2016] = "$LQANA/versionsOfAnalysis/2016/nanoV7/eejj/apr16/xsection_13TeV_2015_Mee_PAS_gteTwoBtaggedJets_TTbar_Mee_PAS_DYJets.txt"
 
 if doEEJJ:
     sampleListForMerging = os.path.expandvars(sampleListForMerging.format(year))
@@ -1074,6 +1077,9 @@ for i_signal_name, signal_name in enumerate(signal_names):
                     d_systUpDeltas[background_name][syst][selectionNameSyst] = thisBkgSystUp
                     d_systDownDeltas[background_name][syst][selectionNameSyst] = thisBkgSystDown
                     line += str(systEntry) + " "
+                    # if "ZJet" in background_name and "800" in selectionNameSyst and "EES" in syst:
+                    #     print "INFO: For sample={} selection={} syst={}, thisBkgEvts={}, d_systUpDeltas={}, d_systDownDeltas={}".format(
+                    #             background_name, selectionNameSyst, syst, thisBkgEvts, thisBkgSystUp, thisBkgSystDown)
                 card_file.write(line + "\n")
 
         # background stat error part
@@ -1222,6 +1228,10 @@ if doSystematics:
                     # FIXME TODO
                     upVariation.append(0.0)
                     downVariation.append(0.0)
+                # if "ZJet" in sampleName and "800" in selection and "EES" in syst:
+                #     print "INFO: For sample={} selection={} syst={}, nominal={}, d_systUpDeltas={}, d_systDownDeltas={}".format(
+                #             sampleName, selection, syst, value, d_systUpDeltas[sampleName][syst][selection],
+                #             d_systDownDeltas[sampleName][syst][selection])
             # if "Z" in sampleName:
             #     if "EES" in syst:
             #         print "INFO for sampleName={} syst={}".format(sampleName, syst)
@@ -1240,15 +1250,15 @@ if doSystematics:
             systGraph.Write()
     plots_tfile.Close()
     print "plots written to: {}".format(plots_filePath)
+    print
 
     # tables
     columnNames = ["Systematic", "Signal (%)", "Background (%)"]
     for selectionName in selectionNames:
         if selectionName == "preselection":  # change this if we want to see systematics at preselection
             continue
-        table = PrettyTable(columnNames)
-        table.align["Systematic"] = "l"
-        table.float_format = "4.3"
+        table = []
+        #table.align["Systematic"] = "l"
         for syst in systematicsNamesBackground:
             if "QCD" in syst:
                 continue  # don't need to print the flat QCD syst in each table
@@ -1265,7 +1275,7 @@ if doSystematics:
                         thisSigSystPercent = -1
                         continue
                     thisSigSyst = max(sigSystDeltaOverNominalUp, sigSystDeltaOverNominalDown)
-                    thisSigSystPercent = 100*thisSigSyst
+                    thisSigSystPercent = round(100*thisSigSyst, 1)
             else:
                 thisSigSystPercent = "  - "
             totalBkgSyst = 0
@@ -1283,9 +1293,11 @@ if doSystematics:
                 totalBkgSystPercent = 100*(math.sqrt(totalBkgSyst))/totalBkgNominal
             else:
                 totalBkgSystPercent = -1
-            table.add_row([d_systTitles[syst], thisSigSystPercent, totalBkgSystPercent])
+            table.append([d_systTitles[syst], thisSigSystPercent, totalBkgSystPercent])
         print "Selection: {}".format(selectionName)
-        print table
+        print tabulate(table, headers=columnNames, tablefmt="github", floatfmt=".1f")
+        print tabulate(table, headers=columnNames, tablefmt="latex", floatfmt=".1f")
+        print
 
 # make final selection tables
 if doEEJJ:
