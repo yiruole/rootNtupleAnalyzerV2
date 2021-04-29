@@ -32,7 +32,7 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files=`ls $LQMACRO/config2012/Analysis/cutTable_lq_eejj.txt`
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nanoV6/2017/analysis/eejj_attempt_1apr
+SUBDIR=nanoV6/2017/analysis/eejj_22apr
 
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
@@ -43,7 +43,8 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 EXE=main
 CODENAME=analysisClass_lq_eejj
 #------------
-INPUTLIST=config/nanoV6_2017_pskEEJJ_31mar2020/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2017_pskEEJJ_31mar2020/inputListAllCurrent.txt
+INPUTLIST=config/nanoV6_2017_pskEEJJ_22apr2020/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------

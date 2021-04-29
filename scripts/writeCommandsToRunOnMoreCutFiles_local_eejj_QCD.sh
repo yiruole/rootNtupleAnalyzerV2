@@ -13,7 +13,7 @@
 #### INPUTS HERE ####
 #------------
 # analysis
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD.txt"
+files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj_QCD.txt"
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD.txt"
 # analysis -- preselection only
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Analysis/cutTable_lq_eejj_QCD_preselOnly.txt"
@@ -21,7 +21,8 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #files="/afs/cern.ch/user/s/scooper/work/private/cmssw/8011/TestRootNTuplizerRecipe/src/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/Optimization/cutTable_lq_eejj_QCD_opt.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nano/2016/analysis/eejj_qcd_rsk_feb18
+SUBDIR=nanoV6/2016/analysis/eejj_qcd_rsk_feb18
+#SUBDIR=nano/2016/analysis/eejj_qcd_rsk_feb18
 #SUBDIR=nano/2016/analysis/eejj_qcd_rsk_nov22
 #SUBDIR=nano/2016/analysis/eejj_qcd_rsk_oct24
 #SUBDIR=nano/2016/analysis/eejj_qcd_rsk_aug29

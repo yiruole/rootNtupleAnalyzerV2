@@ -30,7 +30,7 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 EXE=main
 CODENAME=analysisClass_lq_eejj_QCD
 #------------
-INPUTLIST=config/nanoV6_2017_rskQCD_29mar2020_comb/inputList_data.txt
+INPUTLIST=config/nanoV6_2017_rskQCD_18may2020_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------

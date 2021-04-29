@@ -24,7 +24,7 @@ SUBDIR=nanoV6/2017/qcdFakeRateCalc/apr17_attempt2
 ILUM=41540 #FIXME: this number is just from the Egamma twiki
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
-EXE=mainQCDFR
+EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #------------
 INPUTLIST=config/nanoV6_2017_rskQCD_29mar2020_comb/inputListAllCurrent.txt
