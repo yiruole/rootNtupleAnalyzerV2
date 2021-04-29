@@ -7,6 +7,7 @@ import string
 import math
 import re
 import glob
+import copy
 from collections import OrderedDict
 import numpy as np
 import ROOT as r
@@ -65,19 +66,23 @@ def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
             fileList = glob.glob(newPathToTry)
             completeNamesTried.append(newPathToTry)
         if len(fileList) < 1:
-            newPathToTry = fullPath1+"/"+rootFileName1.replace("backup", "ext*").replace(".root", "*.root")
+            newPathToTry = fullPath1+"/"+analysisCode+"___"+SanitizeDatasetNameFromInputList(dataset_fromInputList)+".root"
             fileList = glob.glob(newPathToTry)
             completeNamesTried.append(newPathToTry)
-        if len(fileList) < 1:
-            rootFileNameWithoutExt = rootFileName1[:rootFileName1.find("ext")] + rootFileName1[rootFileName1.rfind("_")+1:]
-            newPathToTry = fullPath1+"/"+rootFileNameWithoutExt.replace(".root", "*.root")
-            fileList = glob.glob(newPathToTry)
-            completeNamesTried.append(newPathToTry)
-        if len(fileList) < 1:
-            rootFileNameWithoutBackup = rootFileName1[:rootFileName1.find("backup")] + rootFileName1[rootFileName1.rfind("_")+1:]
-            newPathToTry = fullPath1+"/"+rootFileNameWithoutBackup.replace(".root", "*.root")
-            fileList = glob.glob(newPathToTry)
-            completeNamesTried.append(newPathToTry)
+        # if len(fileList) < 1:
+        #     newPathToTry = fullPath1+"/"+rootFileName1.replace("backup", "ext*").replace(".root", "*.root")
+        #     fileList = glob.glob(newPathToTry)
+        #     completeNamesTried.append(newPathToTry)
+        # if len(fileList) < 1:
+        #     rootFileNameWithoutExt = rootFileName1[:rootFileName1.find("ext")] + rootFileName1[rootFileName1.rfind("_")+1:]
+        #     newPathToTry = fullPath1+"/"+rootFileNameWithoutExt.replace(".root", "*.root")
+        #     fileList = glob.glob(newPathToTry)
+        #     completeNamesTried.append(newPathToTry)
+        # if len(fileList) < 1:
+        #     rootFileNameWithoutBackup = rootFileName1[:rootFileName1.find("backup")] + rootFileName1[rootFileName1.rfind("_")+1:]
+        #     newPathToTry = fullPath1+"/"+rootFileNameWithoutBackup.replace(".root", "*.root")
+        #     fileList = glob.glob(newPathToTry)
+        #     completeNamesTried.append(newPathToTry)
         if len(fileList) < 1:
             print
             print "ERROR: could not find root file for dataset:", dataset_fromInputList
@@ -97,7 +102,7 @@ def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
 def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     # "hack" for data-driven QCD samples: name is created by the createInputList script
     # do this first, since it's at the very end of the filename
-    # XXX FIXME special hacks for datasets
+    # special hacks for datasets
     # if dataset_fromInputList.contains('_reduced_skim'):
     #  #dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_reduced_skim')]
     #  dataset_fromInputList.replace('_reduced_skim','')
@@ -105,14 +110,6 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     dataset_fromInputList = dataset_fromInputList.replace("_reduced_skim", "")
     # in rare cases, replace __ by _
     dataset_fromInputList = dataset_fromInputList.replace("__", "_")
-    # XXX FIXME
-    # # special hack for handling repated madgraphMLM samples
-    # if dataset_fromInputList.endswith('_madgraphMLM'):
-    #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_madgraphMLM')]
-    # XXX FIXME
-    # # special hack for handling repated amcatnloFXFX samples
-    # elif dataset_fromInputList.endswith('_amcatnloFXFX'):
-    #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('_amcatnloFXFX')]
     if dataset_fromInputList.endswith("_pythia8"):
         dataset_fromInputList = dataset_fromInputList[
             0: dataset_fromInputList.find("_pythia8")
@@ -128,6 +125,7 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     #     dataset_fromInputList = dataset_fromInputList.replace('TuneCP5_', '').replace('13TeV-', '')
     # dataset_fromInputList = dataset_fromInputList.replace("ext2_", "").replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "")
     dataset_fromInputList = re.sub("ext[0-9_]*", "", dataset_fromInputList)
+    dataset_fromInputList = re.sub("EXT[0-9_]*", "", dataset_fromInputList)
     dataset_fromInputList = dataset_fromInputList.replace("backup_", "")
     dataset_fromInputList = dataset_fromInputList.replace("_backup", "")
     dataset_fromInputList = re.sub("newPMX[_]*", "", dataset_fromInputList)
@@ -150,7 +148,6 @@ def SanitizeDatasetNameFromFullDataset(dataset):
         except IndexError:
             print "ERROR: SanitizeDatasetNameFromFullDataset(): IndexError trying to split('/') dataset:", dataset, "; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile"
             raise
-
         # use the one with the shortest filename
         outputFile = sorted(outputFileNames, key=len)[0]
         # ignore all ext files, or rather, treat them the same as non-ext
@@ -1073,18 +1070,18 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
                 raise RuntimeError(
                         "ERROR: non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
                             sampleHisto.GetName(), pieceHisto.GetName()))
+        if "eventspassingcuts" in pieceHisto.GetName().lower() and "unscaled" not in pieceHisto.GetName().lower():
+            # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
+            # print "INFO: create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi.".format(pieceHisto.GetName())
+            unscaledEvtsPassingCuts = copy.deepcopy(pieceHisto)
+            unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
+            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0)
+            idx += 1
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight)
         # if idx == 0:
         #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
         #             sample, pieceHisto.GetName(), pieceHisto.GetEntries(), sampleHistoDict[idx].GetName(), sampleHistoDict[idx].GetEntries())
         idx += 1
-        if "eventspassingcuts" in pieceHisto.GetName().lower() and "unscaled" not in pieceHisto.GetName().lower():
-            # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
-            # print "INFO: create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi.".format(pieceHisto.GetName())
-            unscaledEvtsPassingCuts = pieceHisto.Clone()
-            unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
-            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0)
-            idx += 1
     # check TMap consistency
     sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
@@ -1270,14 +1267,17 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
         print "Writing", nHistos, "histos...",
     sys.stdout.flush()
     for histo in sampleHistoDict.itervalues():  # for each hist contained in the sample's dict
+        nbytes = 0
         if histo.ClassName() == "TMap":
-            histo.Write(histo.GetName(), r.TObject.kSingleKey)
+            nbytes = histo.Write(histo.GetName(), r.TObject.kSingleKey)
         else:
-            histo.Write()
+            nbytes = histo.Write()
             # make systDiffs hist if needed
-            if "systematics" in histo.GetName().split("__")[-1].lower():
+            if nbytes > 0 and "systematics" in histo.GetName().split("__")[-1].lower():
                 systDiffsHist = MakeSystDiffsPlot(histo)
-                systDiffsHist.Write()
+                nbytes = systDiffsHist.Write()
+        if nbytes <= 0:
+            raise RuntimeError("Error writing into the output file '{}': wrote {} bytes to file when writing object '{}'.".format(outputTfile.GetName(), nbytes, histo.GetName()))
     if verbose:
         print "Done."
     sys.stdout.flush()
@@ -1336,9 +1336,6 @@ def CheckSystematicsTMapConsistency(combinedSampleMap, mapToCheck, systematicsLi
 
 
 def GetUnscaledTotalEvents(combinedRootFile, sampleName):
-    # XXX FIXME TODO: now moved to just using TProfile;
-    # 1) remove code for hist support
-    # 2) remove exception for QCD/DATA
     if "DATA" in sampleName:
         # no scaling done to data
         histName = "profile1D__" + sampleName + "__EventsPassingCuts"
@@ -1347,15 +1344,7 @@ def GetUnscaledTotalEvents(combinedRootFile, sampleName):
     # scaledEvtsHist = combinedRootFile.Get('histo1D__'+ttbarSampleName+'__EventsPassingCuts')
     unscaledEvtsHist = combinedRootFile.Get(histName)
     if not unscaledEvtsHist:
-        # print "WARN: failed reading hist {} from root file {}".format(histName, combinedRootFile.GetName())
-        oldHistName = histName
-        if "DATA" in sampleName:
-            histName = "histo1D__" + sampleName + "__EventsPassingCuts"
-        else:
-            histName = "histo1D__" + sampleName + "__EventsPassingCuts_unscaled"
-        unscaledEvtsHist = combinedRootFile.Get(histName)
-    if not unscaledEvtsHist:
-        raise RuntimeError("could not get hist {} nor hist {} from root file {}".format(oldHistName, histName, combinedRootFile.GetName()))
+        raise RuntimeError("could not get hist {} from root file {}".format(histName, combinedRootFile.GetName()))
     # print "INFO: reading hist {} from root file {}".format(histName, combinedRootFile.GetName())
     # nonTTBarHist = combinedRootFile.Get('histo1D__'+nonTTBarSampleName+'__EventsPassingCuts')
     # unscaledTotalEvts = unscaledEvtsHist.GetBinContent(1)-nonTTBarHist.GetBinContent(1)
@@ -1462,32 +1451,15 @@ def GetRatesAndErrors(
 
     scaledHistName = "profile1D__"+sampleName+"__"+histName
     scaledHist = combinedRootFile.Get(scaledHistName)
-    if not scaledHist:
-        # oldHistName = scaledHistName
-        # scaledHistName = "histo1D__"+sampleName+"__"+histName
-        # scaledHist = combinedRootFile.Get(scaledHistName)
-        # if not scaledHist:
-        #     raise RuntimeError("ERROR: could not find hist {} not hist {} in file: {}".format(oldHistName, scaledHistName, combinedRootFile.GetName()))
-        raise RuntimeError("ERROR: could not find hist {} in file: {}".format(scaledHistName, combinedRootFile.GetName()))
+    if not scaledHist or scaledHist.ClassName() != "TProfile":
+        raise RuntimeError("ERROR: could not find TProfile named '{}' in file: {}".format(scaledHistName, combinedRootFile.GetName()))
     selection = GetFinalSelection(selection, doEEJJ)
     selectionBin = scaledHist.GetXaxis().FindFixBin(selection)
-    if scaledHist.ClassName() == "TProfile":
-        scaledInt = scaledHist.GetBinContent(selectionBin)*scaledHist.GetBinEntries(selectionBin)
-        scaledIntErr = math.sqrt(scaledHist.GetSumw2().At(selectionBin))
-    else:
-        scaledInt = scaledHist.GetBinContent(selectionBin)
-        scaledIntErr = scaledHist.GetBinError(selectionBin)
-    rate = scaledInt
-    rateErr = scaledIntErr
-    if not isDataOrQCD:
-        unscaledHistName = "profile1D__"+sampleName+"__"+histName+"_unscaled"
-        unscaledHist = combinedRootFile.Get(unscaledHistName)
-        if not unscaledHist:
-            raise RuntimeError("ERROR: could not find hist {} in file: {}".format(unscaledHistName, combinedRootFile.GetName()))
-        unscaledRate = unscaledHist.GetBinEntries(selectionBin)
-    else:
-        unscaledRate = scaledHist.GetBinEntries(selectionBin)
-    return rate, rateErr, unscaledRate
+    rate = scaledHist.GetBinContent(selectionBin)*scaledHist.GetBinEntries(selectionBin)
+    rateErr = math.sqrt(scaledHist.GetSumw2().At(selectionBin))
+    # raw events (without weights or any kind of scaling) will always be the BinEntries in a TProfile, even if scaling/weights are applied
+    rawEventsAtSelection = scaledHist.GetBinEntries(selectionBin)
+    return rate, rateErr, rawEventsAtSelection
 
 
 def IsHistEmpty(hist):
