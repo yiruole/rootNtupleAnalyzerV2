@@ -26,13 +26,15 @@ fi
 
 #### INPUTS HERE ####
 #------------
-ANANAME=qcdYield_eejj_2mar2021_oldOptFinalSels
+ANANAME=qcdYield_eejj_23mar2021_oldOptFinalSels
+#ANANAME=qcdYield_eejj_2mar2021_oldOptFinalSels
 #ANANAME=qcdYield_eejj_20oct2020_optFinalSels
 #ANANAME=qcdOpt_14sep2020
 #ANANAME=qcdYield_eejj_23oct2020_optFinalSels
 #ANANAME=qcdYield_eejj_16sep2020_optFinalSels
 #------------
-inputlist2016=config/oldInputLists/nanoV7/2016/nanoV7_2016_rskQCD_16oct2020_comb/inputList_dataOnly.txt
+#inputlist2016=config/oldInputLists/nanoV7/2016/nanoV7_2016_rskQCD_16oct2020_comb/inputList_dataOnly.txt
+inputlist2016=config/nanoV7_2016_rskQCD_22mar2021_comb/inputList_dataOnly.txt
 inputlist2017=config/nanoV7_2017_rskQCD_19oct2020_comb/inputList_dataOnly.txt
 inputlist2018=config/nanoV7_2018_rskQCD_21aug2020_comb/inputList_eGammaOnly.txt
 #------------
@@ -93,7 +95,7 @@ cat >> $COMMANDFILE <<EOF
 ####################################################
 #### launch, check and combine cmds for $suffix ####
 
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor -c $file -q $QUEUE -d $EOSDIR -j 20 -n rootTupleTree/tree
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor -c $file -q $QUEUE -d $EOSDIR -j -1 -n rootTupleTree/tree
 
 ./scripts/checkJobs.sh $OUTDIRPATH/$SUBDIR/condor $OUTDIRPATH/$SUBDIR/condor
 
