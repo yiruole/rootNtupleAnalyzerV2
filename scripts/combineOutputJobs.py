@@ -8,11 +8,13 @@ from optparse import OptionParser
 import glob
 import multiprocessing
 import traceback
+import re
 import ROOT as r
 import combineCommon
 
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate datasets found in inputList..."
+
 
 def CombineLikeDatasets(dictDatasetsFileNames):
     combinedDictDatasetsFileNames = dict()
@@ -28,10 +30,11 @@ def CombineLikeDatasets(dictDatasetsFileNames):
             if sanitizedMatchingName == sanitizedName:
                 matchingFiles.extend(matchingFileList)
                 matchingDatasets.append(matchingDataset)
-        shortestDataset = sorted(matchingDatasets, key=lambda x: len(x))[0]
-        combinedDictDatasetsFileNames[shortestDataset] = matchingFiles
+        #shortestDataset = sorted(matchingDatasets, key=lambda x: len(x))[0]
+        #combinedDictDatasetsFileNames[shortestDataset] = matchingFiles
+        combinedDictDatasetsFileNames[sanitizedName] = matchingFiles
         sanitizedDatasetsHandled.append(sanitizedName)
-    # print "combinedDictDatasetsFileNames DYJ keys: {}".format([key for key in combinedDictDatasetsFileNames.keys() if "DYJ" in key])
+    # print "combinedDictDatasetsFileNames DY keys: {}".format([key for key in combinedDictDatasetsFileNames.keys() if "DY" in key])
     return combinedDictDatasetsFileNames
 
 
@@ -125,6 +128,14 @@ parser.add_option(
     metavar="SAVEINPUTFILES",
 )
 
+parser.add_option(
+    "-e",
+    "--excludeDatasetsFromLikeCombining",
+    dest="regexToExcludeFromCombining",
+    default="",
+    help="Regex matching datasets that should not be combined when similar",
+    metavar="EXCLUDEDATASETS",
+)
 
 (options, args) = parser.parse_args()
 
@@ -195,7 +206,18 @@ for lin in open(options.inputList):
     # print "Found dataset {}: matching files:".format(dataset_fromInputList), fileList
     dictDatasetsFileNames[dataset_fromInputList] = fileList
 
-dictDatasetsFileNames = CombineLikeDatasets(dictDatasetsFileNames)
+datasetsToKeepSeparate = []
+if len(options.regexToExcludeFromCombining) > 0:
+    regex = re.compile(options.regexToExcludeFromCombining)
+    for dataset, fileList in dictDatasetsFileNames.iteritems():
+        regexMatch = re.match(regex, dataset)
+        if regexMatch:
+            datasetsToKeepSeparate.append(dataset)
+    print "Not combining like datasets for: {}".format(datasetsToKeepSeparate)
+dictDatasetsToKeepSeparate = {dataset: fileList for dataset, fileList in dictDatasetsFileNames.items() if dataset in datasetsToKeepSeparate}
+dictDatasetsToCombine = {dataset: fileList for dataset, fileList in dictDatasetsFileNames.items() if dataset not in datasetsToKeepSeparate}
+dictDatasetsFileNames = CombineLikeDatasets(dictDatasetsToCombine)
+dictDatasetsFileNames.update(dictDatasetsToKeepSeparate)
 
 for datasetName, fileList in dictDatasetsFileNames.iteritems():
     try:
