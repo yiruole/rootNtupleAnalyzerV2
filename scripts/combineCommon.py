@@ -1207,9 +1207,6 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
             return dictFinalHistoAtSample
         if "systematics" in htemp.GetName().lower():
             # check systematics hist bins
-            #print "INFO (1) the existing combined hist has {} x bins and {} y bins: {}".format(
-            #        dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
-            #sys.stdout.flush()
             systematicsListFromDictHist = list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())
             systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
             systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
@@ -1230,27 +1227,22 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
                         sample, piece, systsNotInDictHist)
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
-                sys.stdout.flush()
+                # sys.stdout.flush()
                 # remove systs that are missing from htemp
                 htemp = RemoveHistoBins(htemp, "y", systsNotInDictHist)
-
-            #print "INFO syst hist to be added has {} x bins and {} y bins {}" .format(
-            #        htemp.GetNbinsX(), htemp.GetNbinsY(), [obj.GetName() for obj in htemp.GetYaxis().GetLabels()])
-            #sys.stdout.flush()
-            #print "INFO the current combined hist has {} x bins and {} y bins: {}".format(
-            #        dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
-            #sys.stdout.flush()
             if htemp.GetNbinsX() != dictFinalHistoAtSample[h].GetNbinsX() or htemp.GetNbinsY() != dictFinalHistoAtSample[h].GetNbinsY():
                 raise RuntimeError("htemp to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
                     htemp.GetNbinsX(), htemp.GetNbinsY(),
                     dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY()))
+            if list(htemp.GetYaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetYaxis().GetLabels()):
+                raise RuntimeError("htemp to be added has y-axis bin labels {} which are inconsistent with existing hist: {}".format(
+                    list(htemp.GetYaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())))
+            if list(htemp.GetXaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetXaxis().GetLabels()):
+                raise RuntimeError("htemp to be added has x-axis bin labels {} which are inconsistent with existing hist: {}".format(
+                    list(htemp.GetXaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
         returnVal = dictFinalHistoAtSample[h].Add(htemp)
-        #if "systematics" in htemp.GetName().lower():
-        #    print "INFO the combined hist {} NOW has {} x bins and {} y bins: {}".format(
-        #            dictFinalHistoAtSample[h].GetName(), dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), [obj.GetName() for obj in dictFinalHistoAtSample[h].GetYaxis().GetLabels()])
-        #  XXX DEBUG
     # if 'OptBinLQ60' in histoName:
     #  if dictFinalHistoAtSample[h].GetBinContent(binToExamine) != 0:
     #    print 'AFTER Add',histoName,'hist: sample=',sample,'bin',binToExamine,'content=',dictFinalHistoAtSample[h].GetBinContent(binToExamine),' error=',dictFinalHistoAtSample[h].GetBinError(binToExamine),'relError=',dictFinalHistoAtSample[h].GetBinError(binToExamine)/dictFinalHistoAtSample[h].GetBinContent(binToExamine)
@@ -1277,7 +1269,8 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
                 systDiffsHist = MakeSystDiffsPlot(histo)
                 nbytes = systDiffsHist.Write()
         if nbytes <= 0:
-            raise RuntimeError("Error writing into the output file '{}': wrote {} bytes to file when writing object '{}'.".format(outputTfile.GetName(), nbytes, histo.GetName()))
+            raise RuntimeError("Error writing into the output file '{}': wrote {} bytes to file when writing object '{}'.".format(
+                outputTfile.GetName(), nbytes, histo.GetName()))
     if verbose:
         print "Done."
     sys.stdout.flush()
@@ -1293,10 +1286,31 @@ def GetTMapKeys(tmap):
     return mapKeys
 
 
+def ComparePDFBranches(combList, sampleList):
+    if len(combList) != 1 or len(sampleList) != 1:
+        raise RuntimeError("One of the PDF branch lists has length != 1; combList={}, sampleList={}".format(
+            combList, sampleList))
+    sampleListItem = sampleList[0]
+    combListItem = combList[0]
+    sampleBranchName = sampleListItem.GetName()
+    combBranchName = combListItem.GetName()
+    if sampleBranchName != combBranchName:
+        # handle special case of compatible PDFs
+        if "260001" in sampleBranchName and "292201" in combBranchName:
+            return
+        elif "260001" in combBranchName and "292201" in sampleBranchName:
+            return
+        else:
+            raise RuntimeError("branch title for combined sample '{}' does not equal branch name for candidate sample '{}' for PDF branch".format(
+                combListItem.GetName(), sampleListItem.GetName()))
+
+
 def CheckSystematicsTMapConsistency(combinedSampleMap, mapToCheck, systematicsList):
     combIter = r.TIter(combinedSampleMap)
     combKey = combIter.Next()
     while combKey:
+        if combKey.GetName() not in systematicsList:
+            combKey = combIter.Next()  # only check those systs which are still in the combined sample
         sampleMapObject = mapToCheck.FindObject(combKey.GetName())
         if not sampleMapObject:
             sampleItr = r.TIter(mapToCheck)
@@ -1304,35 +1318,41 @@ def CheckSystematicsTMapConsistency(combinedSampleMap, mapToCheck, systematicsLi
             while sampleKey:
                 print "sampleKey: '{}'".format(sampleKey.GetName())
                 sampleKey = sampleItr.Next()
-            raise RuntimeError("could not find syst '{}' in sampleMap. systematics TMap in combined sample is inconsistent in input root file".format(combKey.GetName()))
+            raise RuntimeError("could not find syst '{}' in sampleMap. systematics TMap in combined sample is inconsistent in input root file".format(
+                combKey.GetName()))
         sampleMapVal = sampleMapObject.Value()  # TList of associated branch titles
         combVal = combinedSampleMap.GetValue(combKey)
         # now check the TLists
         combListIter = r.TIter(combVal)
         combListItem = combListIter.Next()
         while combListItem:
+            if "lha id" in combListItem.GetName().lower():
+                return ComparePDFBranches([item for item in combVal], [item for item in sampleMapVal])
             sampleListItem = sampleMapVal.FindObject(combListItem.GetName())
             if not sampleListItem:
-                raise RuntimeError("branch title used in combined sample '{}' for syst '{}' not found in sample list: '{}'".format(combListItem.GetName(), combKey.GetName(), [item for item in sampleMapVal]))
-            if not sampleListItem.GetName() == combListItem.GetName():
-                raise RuntimeError("branch title for combined sample '{}' does not equal branch name for candidate sample '{}' for syst '{}'".format(combListItem.GetName(), sampleListItem.GetName(), combKey.GetName()))
+                raise RuntimeError("branch title used in combined sample '{}' for syst '{}' not found in sample list: {}".format(
+                    combListItem.GetName(), combKey.GetName(), [item for item in sampleMapVal]))
+            if sampleListItem.GetName() != combListItem.GetName():
+                raise RuntimeError("branch title for combined sample '{}' does not equal branch name for candidate sample '{}' for syst '{}'".format(
+                    combListItem.GetName(), sampleListItem.GetName(), combKey.GetName()))
             combListItem = combListIter.Next()
         combKey = combIter.Next()
-        # now check that we have a TMap entry for each systematic in the 2D syst hist
-        for syst in systematicsList:
-            # if syst.GetName() == "nominal":
-            #     continue  # nominal doesn't have any associated branches so it will never be in the TMap
-            found = False
-            combIter = r.TIter(combinedSampleMap)
+    # now check that we have a TMap entry for each systematic in the 2D syst hist
+    for syst in systematicsList:
+        # if syst.GetName() == "nominal":
+        #     continue  # nominal doesn't have any associated branches so it will never be in the TMap
+        found = False
+        combIter = r.TIter(combinedSampleMap)
+        combKey = combIter.Next()
+        while combKey:
+            if combKey.GetName() == syst.GetName():
+                found = True
+            elif combKey.GetName() == syst.GetName()[:syst.GetName().rfind("_")]:
+                found = True
             combKey = combIter.Next()
-            while combKey:
-                if combKey.GetName() == syst.GetName():
-                    found = True
-                elif combKey.GetName() == syst.GetName()[:syst.GetName().rfind("_")]:
-                    found = True
-                combKey = combIter.Next()
-            if not found:
-                raise RuntimeError("syst '{}' used in combined sample not found in TMap '{}'; keys: '{}'".format(syst, combinedSampleMap.GetName(), GetTMapKeys(combinedSampleMap)))
+        if not found:
+            raise RuntimeError("syst '{}' used in combined sample not found in TMap '{}'; keys: '{}'".format(
+                syst, combinedSampleMap.GetName(), GetTMapKeys(combinedSampleMap)))
 
 
 def GetUnscaledTotalEvents(combinedRootFile, sampleName):
@@ -1498,13 +1518,22 @@ def RemoveHistoBins(hist, axis, labelsToRemove):
             hist.GetXaxis().Copy(newHist.GetXaxis())
             # now handle bin content
             for xbin in range(0, newHist.GetNbinsX()+2):
-                for ybin in range(0, newHist.GetNbinsY()+2):
-                    if hist.GetYaxis().GetBinLabel(ybin) in labelsToRemove:
-                        continue
-                    binContent = hist.GetBinContent(xbin, ybin)
-                    binError = hist.GetBinError(xbin, ybin)
+                ybin = 0
+                ybinOld = 0
+                while ybin < newHist.GetNbinsY()+2:
+                    while hist.GetYaxis().GetBinLabel(ybinOld) in labelsToRemove:
+                        ybinOld += 1
+                    binLabelOld = hist.GetYaxis().GetBinLabel(ybinOld)
+                    binLabelNew = newHist.GetYaxis().GetBinLabel(ybin)
+                    if binLabelNew != binLabelOld:
+                        raise RuntimeError("RemoveHistoBins(): bin label of old histo {} doesn't match new histo label {}!".format(
+                            binLabelOld, binLabelNew))
+                    binContent = hist.GetBinContent(xbin, ybinOld)
+                    binError = hist.GetBinError(xbin, ybinOld)
                     newHist.SetBinContent(xbin, ybin, binContent)
                     newHist.SetBinError(xbin, ybin, binError)
+                    ybin += 1
+                    ybinOld += 1
             return newHist
         else:
             raise RuntimeError("ERROR: RemoveHistoBins not implemented for axes other than y, and {} was requested.".format(axis))
@@ -1541,3 +1570,26 @@ def MakeSystDiffsPlot(systHist):
             systDiffs.SetBinContent(binNum, y)
             systDiffs.SetBinError(binNum, err)
     return systDiffs
+
+
+def SetDistinctiveTColorPalette():
+    # 12 distinctive colors
+    myColors = ["#76be79",
+                "#8049c5",
+                "#86d54b",
+                "#d056a2",
+                "#cab244",
+                "#443058",
+                "#d15739",
+                "#7dc2c1",
+                "#893e44",
+                "#9090c5",
+                "#4d5635",
+                "#cca58a"]
+    SetTColorPalette(myColors)
+
+
+def SetTColorPalette(colorList):
+    tcolors = [r.TColor.GetColor(i) for i in colorList]
+    print "tcolors=", tcolors
+    r.gStyle.SetPalette(len(tcolors), np.array(tcolors, dtype=np.int32))
