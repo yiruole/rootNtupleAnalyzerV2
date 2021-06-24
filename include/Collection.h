@@ -91,7 +91,7 @@ class Collection {
 
   template <class Object1> 
     bool Has ( const Object1 & o ) { 
-    std::vector<unsigned short>::iterator it = std::find ( m_raw_indices.begin(), m_raw_indices.end(), o.GetRawIndex ) ;
+    std::vector<unsigned short>::iterator it = std::find ( m_raw_indices.begin(), m_raw_indices.end(), o.GetRawIndex() ) ;
     bool not_found = ( it == m_raw_indices.end() );
     return (!not_found);
   }
@@ -326,7 +326,8 @@ class Collection {
         
         //if(std::string(this_collection_constituent.Name())=="PFJet") {
         if(verbose) {
-          std::cout << "\tMatched obj " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
+          std::cout << "\tMatched obj " << this_collection_constituent.Name() << " constituent #" << i << " with pt = " << old_pt << " GeV and Eta= " <<
+            this_collection_constituent.Eta() << " to " << matched_object.Name() << " with pt = " << matched_pt << " GeV" << std::endl;
           std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
           std::cout << "\t" << "GEN pt               = " << matched_pt           << std::endl;
           std::cout << "\t" << "res. scale factor    = " << res_scale_factor     << std::endl;
@@ -334,7 +335,7 @@ class Collection {
           std::cout << "\t" << "smeared scale factor = " << smearFactor          << std::endl;
           std::cout << "\t" << "delta pt             = " << delta_pt             << std::endl;
           std::cout << "\t" << "max DPt for matching = " << 3*resolution*old_pt  << std::endl;
-          std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
+          //std::cout << "\t" << "new RECO pt          = " << new_pt               << std::endl;
         }
         
       }
@@ -365,6 +366,10 @@ class Collection {
       this_collection_constituent.SetPt(v_new.Pt());
       this_collection_constituent.SetEta(v_new.Eta());
       this_collection_constituent.SetPhi(v_new.Phi());
+      if(verbose) {
+        std::cout << "\tsmeared object has Pt=" << this_collection_constituent.Pt() << ", Eta=" << this_collection_constituent.Eta() <<
+          ", Phi=" << this_collection_constituent.Phi() << std::endl;
+      }
       if ( new_pt >= 1e-6 )
         smearedObjVec.push_back(this_collection_constituent);
 
@@ -405,15 +410,15 @@ class Collection {
       v_delta = v_old - v_new;
       v_delta_met = v_delta_met + v_delta;
       
-      // std::cout << "Old pt = "       << old_pt       << ", "
-      // 		<< "scale = "        << scale        << ", "
-      // 		<< "sign = "         << scale_sign   << ", "
-      // 		<< "scale factor = " << scale_factor << ", "
-      // 		<< "new pt = "       << new_pt       << ", " << std::endl;
-      // std::cout << "\tOld: "    << old_pt       << ", " << this_collection_constituent.Eta() << ", " << this_collection_constituent.Phi() << std::endl;
-      // std::cout << "\tNew: "    << new_pt       << ", " << this_collection_constituent.Eta() << ", " << this_collection_constituent.Phi() << std::endl;
-      // std::cout << "\tOld - New: " << v_delta.Pt() << ", " << v_delta.Eta()                     << ", " << v_delta.Phi() << std::endl;
-      // std::cout << "\tDelta(MET) = " << v_delta_met.Pt() << ", " << v_delta_met.Eta()                     << ", " << v_delta_met.Phi() << std::endl;
+      //std::cout << "Old pt = "       << old_pt       << ", "
+      //		<< "scale = "        << scale        << ", "
+      //		<< "sign = "         << scale_sign   << ", "
+      //		<< "scale factor = " << scale_factor << ", "
+      //		<< "new pt = "       << new_pt       << ", " << std::endl;
+      //std::cout << "\tOld: "    << old_pt       << ", " << this_collection_constituent.Eta() << ", " << this_collection_constituent.Phi() << std::endl;
+      //std::cout << "\tNew: "    << new_pt       << ", " << this_collection_constituent.Eta() << ", " << this_collection_constituent.Phi() << std::endl;
+      //std::cout << "\tOld - New: " << v_delta.Pt() << ", " << v_delta.Eta()                     << ", " << v_delta.Phi() << std::endl;
+      //std::cout << "\tDelta(MET) = " << v_delta_met.Pt() << ", " << v_delta_met.Eta()                     << ", " << v_delta_met.Phi() << std::endl;
 
       this_collection_constituent.SetPt(new_pt);
       if ( new_pt >= 1e-6 )
