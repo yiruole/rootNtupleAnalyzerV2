@@ -39,6 +39,8 @@ float PFJet::DeepJetBTagSFLooseUp() { return m_collection->ReadArrayBranch<Float
 float PFJet::DeepJetBTagSFLooseDown() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_down",m_raw_index); }
 float PFJet::DeepJetBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_M",m_raw_index); }
 
+float PFJet::QuarkGluonLikelihood() { return m_collection->ReadArrayBranch<Float_t>("Jet_qgl",m_raw_index); }
+
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 float PFJet::EnergyResScaleFactor (){ 
@@ -94,6 +96,7 @@ std::ostream& operator<<(std::ostream& stream, PFJet& object) {
 	 << "Eta = "      << object.Eta()  << ", "
 	 << "Phi = "      << object.Phi()  << ", "
    << "loose ID = " << object.PassUserID(PFJET_LOOSE) << ", "
-   << "MVABtag = "  << object.CombinedMVABTag();
+   << "MVABtag = "  << object.CombinedMVABTag() << ", "
+   << "QGL = " << object.QuarkGluonLikelihood();
   return stream;
 }

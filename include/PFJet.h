@@ -55,6 +55,8 @@ class PFJet : public Object {
   float DeepJetBTagSFLooseDown();
   float DeepJetBTagSFMedium();
   
+  float QuarkGluonLikelihood();
+
  private:
   bool PassUserID_PFJetLoose (bool verbose);
   bool PassUserID_PFJetMedium(bool verbose);
