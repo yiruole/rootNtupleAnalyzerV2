@@ -952,7 +952,10 @@ void baseClass::runSystematics()
       for(auto& cutName : orderedSystCutNames_) {
         //FIXME: perhaps remove the list of cut names; always have to use the full list!
         if(passedSelection(cutName, systCutName_cut_, combCutNameToPassFail, orderedCutNames_)) {
-          //cout << "[sethlog]: fill syst hist xbin: " << xbin << ", ybin: " << ybin << ", name=" << cutName << endl;
+          //if(cutName == "min_M_ej_LQ1200") {
+          //  cout << "[sethlog]: passed selection " << cutName << "; fill syst hist xbin: " << xbinCoord << ", ybin: " << ybinCoord <<
+          //    ", origWeight=" << systCutName_cut_[cutName].weight << "; systVal=" << systVal << "; new weight= " << systCutName_cut_[cutName].weight*systVal << endl;
+          //}
           if(shiftValue)
             systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName].weight);
           else {
