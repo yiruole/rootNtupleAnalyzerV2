@@ -20,7 +20,7 @@ class Object {
   ~Object();
   
   const std::string Name() const { return m_name; }
-  virtual short GetRawIndex() { return m_raw_index; }
+  virtual short GetRawIndex() const { return m_raw_index; }
   
   float Pt()  const { return m_pt;  }
   float Eta() const { return m_eta; }
