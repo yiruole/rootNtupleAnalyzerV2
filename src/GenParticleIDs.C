@@ -12,8 +12,8 @@ bool GenParticle::PassUserID (ID id, bool verbose){
   else if ( id == GEN_ELE_HARD_SCATTER    ) { return PassUserID_GenEleHardScatter(verbose); }
   else if ( id == GEN_NU_HARD_SCATTER     ) { return PassUserID_GenNuHardScatter (verbose); }
 
-  else if ( id == GEN_MU_HARD_SCATTER     ) { return PassUserID_GenMuHardScatter (verbose); }
-
+  else if ( id == GEN_MU_HARD_SCATTER     ) { return PassUserID_GenMuHardScatter    (verbose); }
+  else if ( id == GEN_QUARK_HARD_SCATTER  ) { return PassUserID_GenQuarkHardScatter (verbose); }
   //else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
   //else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
   else if ( id == GEN_NU_FROM_W  	        ) { return PassUserID_GenNuFromW          (verbose); }
@@ -48,11 +48,16 @@ bool GenParticle::PassUserID_GenMuHardScatter(bool verbose){
   return false;
 }
 
+bool GenParticle::PassUserID_GenQuarkHardScatter(bool verbose) {
+  if ( IsHardProcess() && abs(PdgId()) < 9 && abs(PdgId()) > 0) return true;
+  return false;
+}
+
 bool GenParticle::PassUserID_FromLQ(bool verbose){
   // pythia 8: outgoing hard electron status is 23 (still intermediate)
   // technically, this is not the really final status=1 particle
   //XXX replace with IsHardProcess() ? testing needed
-  if ( !(Status() == 3 || Status() == 23) ) return false;  
+  //if ( !(Status() == 3 || Status() == 23) ) return false;  
   //
   //std::cout << Name() << " " << ": "
 	// << "PDG = "    << PdgId () << ", "
@@ -73,9 +78,13 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 	// << "Eta = "    << meta    << ", "
 	// << "Phi = "    << mphi << std::endl;
   //
-  int mother_pdg_id = MotherIndex() >= 0 ? m_collection->ReadArrayBranch<Int_t>("GenPart_pdgId",MotherIndex()) : -1;
-  if ( abs(mother_pdg_id) != 42 ) return false;
-  return true;
+  int motherIndex = MotherIndex();
+  while(motherIndex > 0) {
+    int mother_pdg_id = m_collection->ReadArrayBranch<Int_t>("GenPart_pdgId", motherIndex);
+    if ( abs(mother_pdg_id) == 42 || abs(mother_pdg_id) == 9000007) return true;
+    motherIndex = m_collection->ReadArrayBranch<Int_t>("GenPart_genPartIdxMother", motherIndex);
+  }
+  return false;
 }
 
 bool GenParticle::PassUserID_FromDY(bool verbose){

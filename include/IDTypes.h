@@ -50,6 +50,7 @@ enum ID {
   MUON_LOOSE               = 52,
 
   GEN_MU_HARD_SCATTER      = 58,
+  GEN_QUARK_HARD_SCATTER   = 59,
 
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h
