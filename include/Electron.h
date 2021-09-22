@@ -108,13 +108,13 @@ class Electron : public Object {
   // EGamma bits
 
   int    PassEGammaIDEoP      ();
-  int    PassEGammaIDLoose    ();
-  int    PassEGammaIDMedium   ();
-  int    PassEGammaIDTight    ();
+  bool   PassEGammaIDLoose    ();
+  bool   PassEGammaIDMedium   ();
+  bool   PassEGammaIDTight    ();
   int    PassEGammaIDTrigTight();
   int    PassEGammaIDTrigWP70 ();
-  int    PassEGammaIDVeto     ();
-  int    PassHEEPID           ();
+  bool   PassEGammaIDVeto     ();
+  bool   PassHEEPID           ();
   
   // Conversion variables		      	
   

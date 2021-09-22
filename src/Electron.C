@@ -34,12 +34,12 @@ float   Electron::SCEnergy           (){ return SCEt()*cosh(SCEta()); }
 // ratio of the calibrated energy/miniaod energy
 float   Electron::ECorr              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_eCorr",m_raw_index);} 
 								      
-// EGamma bits													      
-int    Electron::PassEGammaIDLoose    (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased",m_raw_index); } 
-int    Electron::PassEGammaIDMedium   (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased",m_raw_index); } 
-int    Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased",m_raw_index); } 
-int    Electron::PassEGammaIDVeto     (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased",m_raw_index); } 
-int    Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP",m_raw_index); } 
+// EGamma IDs
+bool Electron::PassEGammaIDVeto     (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased",m_raw_index) > 0; } 
+bool Electron::PassEGammaIDLoose    (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased",m_raw_index) > 1; } 
+bool Electron::PassEGammaIDMedium   (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased",m_raw_index) > 2; } 
+bool Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Int_t>("Electron_cutBased",m_raw_index) > 3; } 
+bool Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP",m_raw_index); } 
 														      
 // ID variables			      	   		      		  	  				      
 bool Electron::PassHEEPIDCut(HEEPIDCut cut) {
