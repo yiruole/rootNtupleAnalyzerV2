@@ -22,12 +22,12 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  const int Nparam=5;   // NUMBER OF PARAMETERS
+  const int Nparam=4;   // NUMBER OF PARAMETERS
 
-  if(argc!=Nparam+1)
+  if(argc<Nparam+1 || argc>Nparam+2)
     {
-      cout << "main() : arcg = " << argc << " is different from " << Nparam+1 <<". Exiting." <<endl;
-      cout << "Usage  : ./main inputList cutFile treeName outputRootFileWithoutExtension outputEfficiencyFileWithoutExtension" << endl;
+      cout << "main() : arcg = " << argc << ", while we expected " << Nparam+1 << " or " << Nparam+2 << " arguments. Exiting." <<endl;
+      cout << "Usage  : ./main inputList cutFile treeName outputRootFileWithoutExtension [outputEfficiencyFileWithoutExtension]" << endl;
       cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt RootTupleMaker data/output/rootFile data/output/cutEfficiencyFile" << endl;
       cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt treeCreator/RootTupleMakerPAT data/output/rootFile data/output/cutEfficiencyFile" << endl;
       cout << "Example: ./main config/inputListExample.txt config/cutFileExample.txt rootTupleTree/tree  data/output/rootFile data/output/cutEfficiencyFile" << endl;
@@ -38,7 +38,9 @@ int main(int argc, char* argv[])
   string * cutFile        = new  string(argv[2]);
   string * treeName       = new  string(argv[3]);
   string * outputFileName = new  string(argv[4]);
-  string * cutEfficFile   = new  string(argv[5]);
+  string * cutEfficFile = outputFileName;
+  if(argc==6)
+    cutEfficFile   = new  string(argv[5]);
 
   analysisClass analysisClass_(inputList, cutFile, treeName, outputFileName, cutEfficFile);
   analysisClass_.Loop();
