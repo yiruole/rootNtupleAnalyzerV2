@@ -1360,21 +1360,27 @@ bool baseClass::writeCutEfficFile()
   int nPrevCuts = savedEventsPassingCuts->FindLastBinAbove(); // first zero bin should be the first new cut
   int allBinCounter = nPrevCuts+1;
 
-  eventCuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
+  eventCuts_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
+  if(nPrevCuts < 1) {
+    eventCutsHist_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
+  }
   ++bincounter;
 
   if (skimWasMade_)
   {
-    eventCuts_->GetXaxis()->SetBinLabel(bincounter,"Skim");
+    eventCuts_->GetXaxis()->SetBinLabel(bincounter, "Skim");
+    if(nPrevCuts < 1) {
+      eventCutsHist_->GetXaxis()->SetBinLabel(bincounter, "Skim");
+      eventCutsEfficHist_->GetXaxis()->SetBinLabel(bincounter, "Skim");
+      allBinCounter = bincounter+1;
+    }
     ++bincounter;
   }
   for (int i=0;i<orderedCutNames_.size();++i)
   {
     eventCuts_->GetXaxis()->SetBinLabel(bincounter,orderedCutNames_[i].c_str());
     ++bincounter;
-    eventCutsHist_->GetXaxis()->SetBinLabel(allBinCounter,orderedCutNames_[i].c_str());
-    eventCutsEfficHist_->GetXaxis()->SetBinLabel(allBinCounter,orderedCutNames_[i].c_str());
-    ++allBinCounter;
   }
 
   bincounter=1;
@@ -1417,33 +1423,46 @@ bool baseClass::writeCutEfficFile()
   os.precision(precision);
   os << "################################## Cuts #########################################################################################################################################################################################################################\n"
      <<"#id                       variableName                min1                max1                min2                max2               level                   N               Npass              EffRel           errEffRel              EffAbs           errEffAbs"<<endl
-     << fixed
-     << setw(3) << cutIdPed
-     << setw(35) << "nocut"
-     << setprecision(4)
-     << setw(mainFieldWidth) << "-" //min1
-     << setw(mainFieldWidth) << "-" //max1
-     << setw(mainFieldWidth) << "-" //min2
-     << setw(mainFieldWidth) << "-" //max2
-     << setw(mainFieldWidth) << "-" //level
-     << setw(mainFieldWidth) << nEntTot //N
-     << setw(mainFieldWidth) << nEntTot //Npass
-    //     << setprecision(11)
-     << setw(mainFieldWidth) << 1. //EffRell
-     << setw(mainFieldWidth) << 0. //errEffRel
-     << setw(mainFieldWidth) << 1. //EffAbs
-     << setw(mainFieldWidth) << 0. //errEffAbs
-     << endl;
+     ;
+  if(nPrevCuts < 1)
+    os << fixed
+      << setw(3) << cutIdPed
+      << setw(35) << "nocut"
+      << setprecision(4)
+      << setw(mainFieldWidth) << "-" //min1
+      << setw(mainFieldWidth) << "-" //max1
+      << setw(mainFieldWidth) << "-" //min2
+      << setw(mainFieldWidth) << "-" //max2
+      << setw(mainFieldWidth) << "-" //level
+      << setw(mainFieldWidth) << nEntTot //N
+      << setw(mainFieldWidth) << nEntTot //Npass
+      //     << setprecision(11)
+      << setw(mainFieldWidth) << 1. //EffRell
+      << setw(mainFieldWidth) << 0. //errEffRel
+      << setw(mainFieldWidth) << 1. //EffAbs
+      << setw(mainFieldWidth) << 0. //errEffAbs
+      << endl;
 
-  double effRel;
-  double effRelErr;
-  double effAbs;
-  double effAbsErr;
+  double effRel = 0;
+  double effRelErr = 0;
+  double effAbs = 0;
+  double effAbsErr = 0;
 
   checkOverflow(eventCuts_.get(),nEntTot);
   eventCuts_->SetBinContent(bincounter,nEntTot);
   eventCuts_->SetBinError(bincounter,sqrt(nEntTot));
   eventCuts_->SetBinEntries(bincounter,nEntTot);
+  if(nPrevCuts < 1) {
+    checkOverflow(eventCutsHist_.get(), nEntTot);
+    eventCutsHist_->SetBinContent(bincounter, nEntTot);
+    eventCutsHist_->SetBinError(bincounter, sqrt(nEntTot));
+    eventCutsEfficHist_->SetBinContent(bincounter, 1.0);
+    eventCutsEfficHist_->SetBinError(bincounter, 0.0);
+    checkOverflow(savedEventsPassingCuts.get(),nEntTot);
+    savedEventsPassingCuts->SetBinContent(bincounter, nEntTot);
+    savedEventsPassingCuts->SetBinError(bincounter, sqrt(nEntTot));
+    savedEventsPassingCuts->SetBinEntries(bincounter, nEntTot);
+  }
   if (optimizeName_cut_.size())
   {
     checkOverflow(h_optimizer_,nEntTot);
@@ -1462,31 +1481,86 @@ bool baseClass::writeCutEfficFile()
     eventCuts_->SetBinContent(bincounter, GetTreeEntries() );
     eventCuts_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
     eventCuts_->SetBinEntries(bincounter, GetTreeEntries() );
-    effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
-    effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
-    effAbs = effRel;
-    effAbsErr = effRelErr;
+    if(nPrevCuts < 1) {
+      checkOverflow(eventCutsHist_.get(),GetTreeEntries());
+      eventCutsHist_->SetBinContent(bincounter, GetTreeEntries() );
+      eventCutsHist_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
+      checkOverflow(savedEventsPassingCuts.get(), GetTreeEntries());
+      savedEventsPassingCuts->SetBinContent(bincounter, GetTreeEntries());
+      savedEventsPassingCuts->SetBinError(bincounter, sqrt(GetTreeEntries()));
+      savedEventsPassingCuts->SetBinEntries(bincounter, GetTreeEntries());
+      effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
+      effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
+      effAbs = effRel;
+      effAbsErr = effRelErr;
+      eventCutsEfficHist_->SetBinContent(bincounter, effAbs);
+      eventCutsEfficHist_->SetBinError(bincounter, effAbsErr);
+      os << fixed
+        << setw(3) << ++cutIdPed
+        << setw(35) << "skim"
+        << setprecision(4)
+        << setw(mainFieldWidth) << "-"
+        << setw(mainFieldWidth) << "-"
+        << setw(mainFieldWidth) << "-"
+        << setw(mainFieldWidth) << "-"
+        << setw(mainFieldWidth) << "-"
+        << setw(mainFieldWidth) << NBeforeSkim_
+        << setw(mainFieldWidth) << GetTreeEntries()
+        << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
+        << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
+        << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
+        << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
+        << fixed << endl;
+      nEvtPassedBeforeWeight_previousCut = GetTreeEntries();
+      nEvtPassed_previousCut = GetTreeEntries();
+    }
+  }
+  // put previous skim cuts in table/plots
+  for(int iBin=1; iBin <= nPrevCuts; ++iBin) {
+    double n = savedEventsPassingCuts->GetBinEntries(iBin);
+    double sumw = savedEventsPassingCuts->GetBinContent(iBin)*n;
+    double sqrtSumw2 = sqrt(savedEventsPassingCuts->GetSumw2()->At(iBin));
+    effRel = sumw / nEvtPassed_previousCut;
+    double N = nEvtPassedBeforeWeight_previousCut;
+    double Np = n;
+    double p = Np / N;
+    double q = 1-p;
+    double w = sumw / n;
+    effRelErr = sqrt(p*q/N)*w;
+    effAbs = sumw / nEntTot;
+    N = nEntTot;
+    p = Np / N;
+    q = 1-p;
+    effAbsErr = sqrt(p*q/N)*w;
     os << fixed
       << setw(3) << ++cutIdPed
-      << setw(35) << "skim"
+      << setw(35) << savedEventsPassingCuts->GetXaxis()->GetBinLabel(iBin)
       << setprecision(4)
       << setw(mainFieldWidth) << "-"
       << setw(mainFieldWidth) << "-"
       << setw(mainFieldWidth) << "-"
       << setw(mainFieldWidth) << "-"
-      << setw(mainFieldWidth) << "-"
-      << setw(mainFieldWidth) << NBeforeSkim_
-      << setw(mainFieldWidth) << GetTreeEntries()
+      << setw(mainFieldWidth) << "-1"
+      << setw(mainFieldWidth) << ( (nEvtPassed_previousCut < minForFixed) ? (scientific) : (fixed) ) << nEvtPassed_previousCut
+      << setw(mainFieldWidth) << ( (sumw          < minForFixed) ? (scientific) : (fixed) ) << sumw
       << setw(mainFieldWidth) << ( (effRel                 < minForFixed) ? (scientific) : (fixed) ) << effRel
       << setw(mainFieldWidth) << ( (effRelErr              < minForFixed) ? (scientific) : (fixed) ) << effRelErr
       << setw(mainFieldWidth) << ( (effAbs                 < minForFixed) ? (scientific) : (fixed) ) << effAbs
       << setw(mainFieldWidth) << ( (effAbsErr              < minForFixed) ? (scientific) : (fixed) ) << effAbsErr
       << fixed << endl;
-    nEvtPassedBeforeWeight_previousCut = GetTreeEntries();
-    nEvtPassed_previousCut = GetTreeEntries();
+    nEvtPassedBeforeWeight_previousCut = n;
+    nEvtPassed_previousCut = sumw;
+    checkOverflow(eventCutsHist_.get(), sumw);
+    eventCutsHist_->SetBinContent(iBin, sumw);
+    eventCutsHist_->SetBinError(iBin, sqrtSumw2);
+    eventCutsEfficHist_->SetBinContent(iBin, effAbs);
+    if(!std::isnan(effAbsErr))
+      eventCutsEfficHist_->SetBinError(iBin, effAbsErr);
+    else
+      eventCutsEfficHist_->SetBinError(iBin, 0.0);
   }
-  int skimBinCounter = nPrevCuts+1;
-  allBinCounter = nPrevCuts+1;
+  allBinCounter = nPrevCuts > 0 ? nPrevCuts+1 : bincounter+1;
+  int skimBinCounter = allBinCounter;
   for (vector<string>::iterator it = orderedCutNames_.begin();
       it != orderedCutNames_.end(); it++)
   {
@@ -1499,6 +1573,7 @@ bool baseClass::writeCutEfficFile()
     checkOverflow(eventCutsHist_.get(),c->nEvtPassed);
     eventCutsHist_->SetBinContent(allBinCounter, c->nEvtPassed);
     eventCutsHist_->SetBinError(allBinCounter, sqrt(c->nEvtPassedErr2));
+    eventCutsHist_->GetXaxis()->SetBinLabel(allBinCounter, (*it).c_str());
     effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
     double N = nEvtPassedBeforeWeight_previousCut;
     double Np = c->nEvtPassedBeforeWeight;
@@ -1516,6 +1591,7 @@ bool baseClass::writeCutEfficFile()
       eventCutsEfficHist_->SetBinError(allBinCounter, effAbsErr);
     else
       eventCutsEfficHist_->SetBinError(allBinCounter, 0.0);
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(allBinCounter,(*it).c_str());
     if(isSkimCut(*c))
     {
       checkOverflow(savedEventsPassingCuts.get(),c->nEvtPassed);
