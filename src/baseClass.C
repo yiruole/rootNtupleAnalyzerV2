@@ -525,6 +525,7 @@ void baseClass::readCutFile()
   }
   gDirectory->cd();
   auto eventsPassingCutsProf = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
+  int nPrevSkimCuts = 2;
   if(!eventsPassingCutsProf)
   {
     // this should be the case when there was no previous skim (besides in nano processing) --> no hist in input root file(s)
@@ -541,20 +542,59 @@ void baseClass::readCutFile()
     // we have a previous skim profile available
     if(produceReducedSkim_ || produceSkim_)
     {
-      for(int i=1; i < 5; ++i)
-        STDOUT("profileReadFromFile: bin=" << i << "; set content=" << eventsPassingCutsProf->GetBinContent(i) << ", error=" << eventsPassingCutsProf->GetBinError(i) << ", entries=" << eventsPassingCutsProf->GetBinContent(i));
       auto newProf = makeNewEventsPassingSkimCutsProfile(eventsPassingCutsProf);
       histsToSave_.erase(find(histsToSave_.begin(), histsToSave_.end(), eventsPassingCutsProf));
       newProf->SetNameTitle("EventsPassingSkimCuts", "Events Passing Skim Cuts");
       histsToSave_.push_back(newProf);
     }
+    nPrevSkimCuts = eventsPassingCutsProf->GetNbinsX();
   }
   eventCuts_ = std::shared_ptr<TProfile>(new TProfile("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize));
   eventCuts_->Sumw2();
-  eventCutsHist_ = std::shared_ptr<TH1D>(new TH1D("EventsPassingCutsHist","Events Passing Cuts",cutsize,0,cutsize));
+  eventCutsHist_ = std::shared_ptr<TH1D>(new TH1D("EventsPassingCutsAllHist","Events Passing Cuts",cutsize+nPrevSkimCuts,0,cutsize+nPrevSkimCuts));
   eventCutsHist_->Sumw2();
-  eventCutsEfficHist_ = std::shared_ptr<TH1D>(new TH1D("EfficiencyPassingCutsHist","Efficiency of Passing Cuts",cutsize,0,cutsize));
+  eventCutsEfficHist_ = std::shared_ptr<TH1D>(new TH1D("EfficiencyPassingCutsAllHist","Abs. Efficiency of Passing Cuts",cutsize+nPrevSkimCuts,0,cutsize+nPrevSkimCuts));
   eventCutsEfficHist_->Sumw2();
+  if(eventsPassingCutsProf) {
+    double noCuts = eventsPassingCutsProf->GetBinEntries(1);
+    for(int iBin=1; iBin <= nPrevSkimCuts; iBin++) {
+      double sumw = eventsPassingCutsProf->GetBinContent(iBin)*eventsPassingCutsProf->GetBinEntries(iBin);
+      double sqrtSumw2 = sqrt(eventsPassingCutsProf->GetSumw2()->At(iBin));
+      eventCutsHist_->GetXaxis()->SetBinLabel(iBin, eventsPassingCutsProf->GetXaxis()->GetBinLabel(iBin));
+      checkOverflow(eventCutsHist_.get(), sumw);
+      eventCutsHist_->SetBinContent(iBin, sumw);
+      eventCutsHist_->SetBinError(iBin, sqrtSumw2);
+      eventCutsEfficHist_->GetXaxis()->SetBinLabel(iBin, eventsPassingCutsProf->GetXaxis()->GetBinLabel(iBin));
+      double N = noCuts;
+      double p = sumw / N;
+      eventCutsEfficHist_->SetBinContent(iBin, p);
+      double q = 1-p;
+      double w = sumw / eventsPassingCutsProf->GetBinEntries(iBin);
+      double effAbsErr = sqrt(p*q/N)*w;
+      eventCutsEfficHist_->SetBinError(iBin, effAbsErr);
+    }
+  }
+  else {
+    Long64_t nEntTot = (skimWasMade_ ? NBeforeSkim_ : GetTreeEntries() );
+    eventCutsHist_->GetXaxis()->SetBinLabel(1, "NoCuts");
+    checkOverflow(eventCutsHist_.get(), nEntTot);
+    eventCutsHist_->SetBinContent(1, nEntTot);
+    eventCutsHist_->SetBinError(1, sqrt(nEntTot));
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(1, "NoCuts");
+    eventCutsEfficHist_->SetBinContent(1, 1.0);
+    eventCutsEfficHist_->SetBinError(1, 0.0);
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(2, "Skim");
+    checkOverflow(eventCutsHist_.get(),GetTreeEntries());
+    eventCutsHist_->SetBinContent(2, GetTreeEntries());
+    eventCutsHist_->SetBinError(2, sqrt(GetTreeEntries()));
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(2, "Skim");
+    double N = nEntTot;
+    double p = GetTreeEntries() / N;
+    eventCutsEfficHist_->SetBinContent(2, p);
+    double q = 1-p;
+    double effAbsErr = sqrt(p*q/N);
+    eventCutsEfficHist_->SetBinError(2, effAbsErr);
+  }
 
   for(auto& systLine : systLines) {
     vector<string> v = split(systLine);
@@ -1317,6 +1357,8 @@ bool baseClass::writeCutEfficFile()
   // Set bin labels for event counter histogram
   int bincounter=1;
   auto savedEventsPassingCuts = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
+  int nPrevCuts = savedEventsPassingCuts->FindLastBinAbove(); // first zero bin should be the first new cut
+  int allBinCounter = nPrevCuts+1;
 
   eventCuts_->GetXaxis()->SetBinLabel(bincounter,"NoCuts");
   ++bincounter;
@@ -1330,9 +1372,10 @@ bool baseClass::writeCutEfficFile()
   {
     eventCuts_->GetXaxis()->SetBinLabel(bincounter,orderedCutNames_[i].c_str());
     ++bincounter;
+    eventCutsHist_->GetXaxis()->SetBinLabel(allBinCounter,orderedCutNames_[i].c_str());
+    eventCutsEfficHist_->GetXaxis()->SetBinLabel(allBinCounter,orderedCutNames_[i].c_str());
+    ++allBinCounter;
   }
-  eventCuts_->GetXaxis()->Copy(*eventCutsHist_->GetXaxis());
-  eventCuts_->GetXaxis()->Copy(*eventCutsEfficHist_->GetXaxis());
 
   bincounter=1;
 
@@ -1401,15 +1444,6 @@ bool baseClass::writeCutEfficFile()
   eventCuts_->SetBinContent(bincounter,nEntTot);
   eventCuts_->SetBinError(bincounter,sqrt(nEntTot));
   eventCuts_->SetBinEntries(bincounter,nEntTot);
-  //checkOverflow(savedEventsPassingCuts.get(),nEntTot);
-  //savedEventsPassingCuts->SetBinContent(bincounter,nEntTot);
-  //savedEventsPassingCuts->SetBinError(bincounter,sqrt(nEntTot));
-  //savedEventsPassingCuts->SetBinEntries(bincounter,nEntTot);
-  checkOverflow(eventCutsHist_.get(), nEntTot);
-  eventCutsHist_->SetBinContent(bincounter,nEntTot);
-  eventCutsHist_->SetBinError(bincounter,sqrt(nEntTot));
-  eventCutsEfficHist_->SetBinContent(bincounter, 1);
-  eventCutsEfficHist_->SetBinError(bincounter, 0);
   if (optimizeName_cut_.size())
   {
     checkOverflow(h_optimizer_,nEntTot);
@@ -1428,15 +1462,10 @@ bool baseClass::writeCutEfficFile()
     eventCuts_->SetBinContent(bincounter, GetTreeEntries() );
     eventCuts_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
     eventCuts_->SetBinEntries(bincounter, GetTreeEntries() );
-    checkOverflow(eventCutsHist_.get(),GetTreeEntries());
-    eventCutsHist_->SetBinContent(bincounter, GetTreeEntries() );
-    eventCutsHist_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
     effRel = (double) GetTreeEntries() / (double) NBeforeSkim_;
     effRelErr = sqrt( (double) effRel * (1.0 - (double) effRel) / (double) NBeforeSkim_ );
     effAbs = effRel;
     effAbsErr = effRelErr;
-    eventCutsEfficHist_->SetBinContent(bincounter, effAbs);
-    eventCutsEfficHist_->SetBinError(bincounter, effAbsErr);
     os << fixed
       << setw(3) << ++cutIdPed
       << setw(35) << "skim"
@@ -1456,7 +1485,8 @@ bool baseClass::writeCutEfficFile()
     nEvtPassedBeforeWeight_previousCut = GetTreeEntries();
     nEvtPassed_previousCut = GetTreeEntries();
   }
-  int skimBinCounter = savedEventsPassingCuts->FindLastBinAbove()+1; // first zero bin should be the first skim cut
+  int skimBinCounter = nPrevCuts+1;
+  allBinCounter = nPrevCuts+1;
   for (vector<string>::iterator it = orderedCutNames_.begin();
       it != orderedCutNames_.end(); it++)
   {
@@ -1467,8 +1497,8 @@ bool baseClass::writeCutEfficFile()
     eventCuts_->SetBinError(bincounter, sqrt(c->nEvtPassedErr2));
     eventCuts_->SetBinEntries(bincounter, c->nEvtPassedBeforeWeight);
     checkOverflow(eventCutsHist_.get(),c->nEvtPassed);
-    eventCutsHist_->SetBinContent(bincounter, c->nEvtPassed);
-    eventCutsHist_->SetBinError(bincounter, sqrt(c->nEvtPassedErr2));
+    eventCutsHist_->SetBinContent(allBinCounter, c->nEvtPassed);
+    eventCutsHist_->SetBinError(allBinCounter, sqrt(c->nEvtPassedErr2));
     effRel = (double) c->nEvtPassed / nEvtPassed_previousCut;
     double N = nEvtPassedBeforeWeight_previousCut;
     double Np = c->nEvtPassedBeforeWeight;
@@ -1481,11 +1511,11 @@ bool baseClass::writeCutEfficFile()
     p = Np / N;
     q = 1-p;
     effAbsErr = sqrt(p*q/N)*w;
-    eventCutsEfficHist_->SetBinContent(bincounter, effAbs);
+    eventCutsEfficHist_->SetBinContent(allBinCounter, effAbs);
     if(!std::isnan(effAbsErr))
-      eventCutsEfficHist_->SetBinError(bincounter, effAbsErr);
+      eventCutsEfficHist_->SetBinError(allBinCounter, effAbsErr);
     else
-      eventCutsEfficHist_->SetBinError(bincounter, 0.0);
+      eventCutsEfficHist_->SetBinError(allBinCounter, 0.0);
     if(isSkimCut(*c))
     {
       checkOverflow(savedEventsPassingCuts.get(),c->nEvtPassed);
@@ -1532,6 +1562,7 @@ bool baseClass::writeCutEfficFile()
       << fixed << endl;
     nEvtPassedBeforeWeight_previousCut = c->nEvtPassedBeforeWeight;
     nEvtPassed_previousCut = c->nEvtPassed;
+    ++allBinCounter;
   }
 
   // Write optimization histograms
@@ -1787,8 +1818,6 @@ void baseClass::saveEventsPassingCuts(const std::string& fileName)
   //  if there is a hist in the file, then it should be added to any existing eventsPassingCuts hist in savedHists
   //    the first hist read can become the saved hist (or a clone of it)
   auto histFromFile = getSavedObjectFromFile<TProfile>(fileName, "EventsPassingSkimCuts");
-  for(int i=1; i < 5; ++i)
-    STDOUT("histFromFile: bin=" << i << "; content=" << histFromFile->GetBinContent(i) << ", error=" << histFromFile->GetBinError(i) << ", entries=" << histFromFile->GetBinEntries(i));
   if(histFromFile)
   {
     auto eventsPassingCutsProf = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
@@ -1804,8 +1833,6 @@ void baseClass::saveEventsPassingCuts(const std::string& fileName)
       histFromFile->GetXaxis()->Copy(*eventsPassingCutsProf->GetXaxis());
     }
     eventsPassingCutsProf->Add(histFromFile.get());
-    for(int i=1; i < 5; ++i)
-      STDOUT("eventsPassingCutsProf after add: bin=" << i << "; content=" << eventsPassingCutsProf->GetBinContent(i) << ", error=" << eventsPassingCutsProf->GetBinError(i) << ", entries=" << eventsPassingCutsProf->GetBinEntries(i));
   }
 }
 
