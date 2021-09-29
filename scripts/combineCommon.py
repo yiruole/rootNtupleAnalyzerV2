@@ -11,12 +11,15 @@ import copy
 from collections import OrderedDict
 import numpy as np
 import ROOT as r
+import faulthandler
+faulthandler.enable()
 
 # FORMAT = "%(levelname)s %(module)s %(funcName)s line:%(lineno)d - %(message)s"
 # logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 intLumi = -1
 xsectionDict = {}
+finalSelectionName = ""
 
 
 def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
@@ -997,12 +1000,11 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
 
 def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeight=1.0):
     # ---Combine histograms using PYROOT
-    tfile = r.TFile(rootFileName)
-    # nHistos = len(file.GetListOfKeys())
-    # print "\tnKeys: " , nHistos
+    tfile = r.TFile.Open(rootFileName)
+    nHistos = len(tfile.GetListOfKeys())
     # print 'list of keys in this rootfile:',file.GetListOfKeys()
     # print
-    # print "INFO: AddHistosFromFile for file: {}".format(rootFileName)
+    #print "INFO: AddHistosFromFile for file: {}: nKeys={}".format(rootFileName, nHistos)
     sys.stdout.flush()
     # loop over histograms in rootfile
     # for h in range(0, nHistos):
@@ -1014,6 +1016,10 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
         htemp = key.ReadObj()
         if not htemp:
             raise RuntimeError("ERROR: failed to get histo named: {} from file: {}".format(histoName, tfile.GetName()))
+        # log XXX DEBUG
+        else:
+            print "INFO: AddHistosFromFile for file: {}: handling histoName={}".format(rootFileName, histoName)
+        # log XXX DEBUG
         r.SetOwnership(htemp, True)
         #
         # temporary
@@ -1032,21 +1038,36 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
                     raise RuntimeError("ERROR: failed to get histo named: {} from file: {}".format(hname, tfile.GetName()))
                 # else:
                 #  print "INFO: found key in subdir named:",hname,"hist name:",htmp.GetName()
+                # log XXX DEBUG
+                else:
+                    print "INFO: AddHistosFromFile for file: {}: in a TDir, about to updateSample for histoName={}".format(rootFileName, hname)
+                    sys.stdout.flush()
+                # log XXX DEBUG
                 r.SetOwnership(htmp, True)
                 updateSample(
                     sampleHistoDict, htmp, h, piece, sample, plotWeight
                 )
                 h += 1
         else:
+            # log XXX DEBUG
+            print "INFO: AddHistosFromFile for file: {}: about to updateSample for histoName={}".format(rootFileName, histoName)
+            sys.stdout.flush()
+            # log XXX DEBUG
             updateSample(
                 sampleHistoDict, htemp, h, piece, sample, plotWeight
             )
             h += 1
+    # print "INFO: AddHistosFromFile for file: {} -- finished updateSample calls".format(rootFileName)
+    # log XXX DEBUG
+    #print "INFO: AddHistosFromFile for file: {} -- finished updateSample calls".format(rootFileName)
+    #sys.stdout.flush()
+    # log XXX DEBUG
     # check TMap consistency
     sampleTMap = next((x.ReadObj() for x in tfile.GetListOfKeys() if x.ReadObj().ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName() == "systematics"), None)
-    CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
+    if comboSystHist is not None:
+        CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
     tfile.Close()
 
 
@@ -1086,10 +1107,11 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
     sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName().endswith("systematics")), None)
-    if comboSystHist is None:
-        print "Could not find comboSystHist in sampleHistoDict"
-        print [x.GetName() for x in sampleHistoDict.values() if "systematics" in x.GetName()]
-    CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
+    # if comboSystHist is None:
+        # print "Could not find comboSystHist in sampleHistoDict"
+        # print [x.GetName() for x in sampleHistoDict.values() if "systematics" in x.GetName()]
+    if comboSystHist is not None:
+        CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
     return sampleHistoDict
 
 
@@ -1179,8 +1201,11 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
                 dictFinalHistoAtSample[h].SetName("tmap__" + sample + "__" + histoName)
             else:
                 dictFinalHistoAtSample[h].SetName(histoName)
+        elif "TObjString" in htemp.ClassName() and "Cut" in htemp.GetName():
+            # skip
+            return dictFinalHistoAtSample
         else:
-            raise RuntimeError("not combining hist with classtype of {}".format(htemp, htemp.ClassName()))
+            raise RuntimeError("not combining hist named '{}' with classtype of {}".format(htemp.GetName(), htemp.ClassName()))
         if "TMap" not in htemp.ClassName():
             dictFinalHistoAtSample[h].Sumw2()
     #  XXX DEBUG
@@ -1389,15 +1414,15 @@ def GetFinalSelection(selectionPoint, doEEJJ):
     if "preselection" not in selectionPoint:
         if doEEJJ:
             if selectionPoint.isdigit():
-                selection = "min_M_ej_LQ"+selectionPoint
+                selection = finalSelectionName+"_LQ"+selectionPoint
             else:
-                selection = "min_M_ej_"+selectionPoint
+                selection = finalSelectionName+"_"+selectionPoint
         else:
             # enujj
             if selectionPoint.isdigit():
-                selection = "MT_LQ"+selectionPoint
+                selection = finalSelectionName+"_LQ"+selectionPoint
             else:
-                selection = "MT_"+selectionPoint
+                selection = finalSelectionName+"_"+selectionPoint
     return selection
 
 
@@ -1472,9 +1497,12 @@ def GetRatesAndErrors(
     scaledHistName = "profile1D__"+sampleName+"__"+histName
     scaledHist = combinedRootFile.Get(scaledHistName)
     if not scaledHist or scaledHist.ClassName() != "TProfile":
-        raise RuntimeError("ERROR: could not find TProfile named '{}' in file: {}".format(scaledHistName, combinedRootFile.GetName()))
+        raise RuntimeError("Could not find TProfile named '{}' in file: {}".format(scaledHistName, combinedRootFile.GetName()))
     selection = GetFinalSelection(selection, doEEJJ)
     selectionBin = scaledHist.GetXaxis().FindFixBin(selection)
+    if selectionBin < 1:
+        raise RuntimeError("Could not find requested selection name '{}' in hist {} in file {}".format(
+            selection, scaledHistName, combinedRootFile.GetName()))
     rate = scaledHist.GetBinContent(selectionBin)*scaledHist.GetBinEntries(selectionBin)
     rateErr = math.sqrt(scaledHist.GetSumw2().At(selectionBin))
     # raw events (without weights or any kind of scaling) will always be the BinEntries in a TProfile, even if scaling/weights are applied
