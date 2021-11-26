@@ -7,7 +7,6 @@ from optparse import OptionParser
 import os.path
 from ROOT import TFile, gROOT
 import re
-import glob
 
 import combineCommon
 
@@ -171,22 +170,17 @@ parser.add_option(
 (options, args) = parser.parse_args()
 
 if len(sys.argv) < 14:
-    print usage
-    sys.exit()
+    raise RuntimeError(usage)
 
 # print options.analysisCode
 
 # ---Check if sampleListForMerging file exists
 if os.path.isfile(options.sampleListForMerging) is False:
-    print "ERROR: file " + options.sampleListForMerging + " not found"
-    print "exiting..."
-    sys.exit()
+    raise RuntimeError("File " + options.sampleListForMerging + " not found")
 
 # ---Check if xsection file exists
 if os.path.isfile(options.xsection) is False:
-    print "ERROR: file " + options.xsection + " not found"
-    print "exiting..."
-    sys.exit()
+    raise RuntimeError("File " + options.xsection + " not found")
 
 print "Launched like:"
 print "python ",
@@ -242,6 +236,17 @@ for key in dictSamples.iterkeys():
 dictFinalTables = {}
 # --- Declare histograms
 dictFinalHisto = {}
+# --- Samples to save in final histo dict
+samplesToSave = []
+if not options.tablesOnly:
+    if options.ttbarBkg:
+        ttbarDataRawSampleName = "TTBarUnscaledRawFromDATA"
+        nonTTbarAMCBkgSampleName = "NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj"
+        samplesToSave.extend([ttbarDataRawSampleName, nonTTbarAMCBkgSampleName])
+    if options.qcdClosure:
+        qcdDataSampleName = "SinglePhoton_all"
+        nonQCDBkgSampleName = "ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson"  # Z, W, TTBar, SingleTop, Diboson, gamma+jets
+        samplesToSave.extend([qcdDataSampleName, nonQCDBkgSampleName])
 
 # check to make sure we have xsections for all samples
 for lin in open(options.inputList):
@@ -258,8 +263,7 @@ for lin in open(options.inputList):
 
 foundAllFiles, dictDatasetsFileNames = combineCommon.FindInputFiles(options.inputList, options.analysisCode, options.inputDir)
 if not foundAllFiles:
-    print "Some files not found. Exiting..."
-    sys.exit()
+    raise RuntimeError("Some files not found.")
 else:
     print "\bDone.  All root/dat files are present."
     print
@@ -365,11 +369,9 @@ for sample, pieceList in dictSamples.iteritems():
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
-            # print "INFO: UpdateHistoDict for file {}".format(rootFilename)
             histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight)
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
-    # done with this sample
     # validation of combining pieces
     piecesAdded = dictSamplesPiecesAdded[sample]
     # if set(piecesAdded) != set(pieceList):
@@ -389,7 +391,7 @@ for sample, pieceList in dictSamples.iteritems():
         print "\tand the pieces added were:"
         print sorted(piecesAdded)
         print "\tRefusing to proceed."
-        exit(-1)
+        raise RuntimeError("sample validation failed")
 
     # ---Create final tables
     combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
@@ -399,12 +401,7 @@ for sample, pieceList in dictSamples.iteritems():
     # write histos
     if not options.tablesOnly:
         combineCommon.WriteHistos(outputTfile, histoDictThisSample, True)
-        # if this is a ttbar/singlephoton/allbkg sample, we do need the hists later
-        if (
-            "tt" in sample.lower()
-            or "singlephoton" in sample.lower()
-            or "allbkg" in sample.lower()
-        ):
+        if sample in samplesToSave:
             dictFinalHisto[sample] = histoDictThisSample
             dictFinalTables[sample] = combinedTableThisSample
         # print "Done"
@@ -414,11 +411,9 @@ if options.ttbarBkg:
     # special actions for TTBarFromData
     # subtract nonTTbarBkgMC from TTbarRaw
     # FIXME: we hardcode the sample names for now
-    ttbarDataRawSampleName = "TTBarUnscaledRawFromDATA"
     ttbarDataPredictionTable = dictFinalTables[ttbarDataRawSampleName]
     # nonTTbarAMCBkgSampleName = 'NONTTBARBKG_amcatnloPt_emujj'
     # move to amcAtNLO diboson
-    nonTTbarAMCBkgSampleName = "NONTTBARBKG_amcatnloPt_amcAtNLODiboson_emujj"
     nonTTbarAMCBkgTable = dictFinalTables[nonTTbarAMCBkgSampleName]
     ttBarPredName = "TTBarFromDATA"
     # Mar17 fixing muon pt and eta-->2.4
@@ -448,9 +443,7 @@ if options.ttbarBkg:
 if options.qcdClosure:
     # special actions for the QCD closure test
     # subtract nonQCD from QCDData yield
-    qcdDataSampleName = "SinglePhoton_all"
     qcdDataTable = dictFinalTables[qcdDataSampleName]
-    nonQCDBkgSampleName = "ALLBKG_powhegTTBar_ZJetWJetPt_amcAtNLODiboson"  # Z, W, TTBar, SingleTop, Diboson, gamma+jets
     nonQCDBkgTable = dictFinalTables[nonQCDBkgSampleName]
     qcdClosureSampleName = "QCDClosureObserved"
     # print "TTBar data-driven: Using non-ttbar background sample:", nonTTbarAMCBkgSampleName
