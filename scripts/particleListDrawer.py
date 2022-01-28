@@ -5,7 +5,7 @@ process = cms.Process("PartListDrawer")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 0
 
-process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(10))
 secFiles = cms.untracked.vstring()
 
 process.source = cms.Source(
@@ -44,8 +44,11 @@ process.source = cms.Source(
     ),
     # eventsToProcess = cms.untracked.VEventRange('1:1764962-1:1764962',),
     # eventsToProcess = cms.untracked.VEventRange('1:93773619-1:93773619',),
-    eventsToProcess = cms.untracked.VEventRange('1:5:851-1:5:851',), # LQToDEle
+    # eventsToProcess = cms.untracked.VEventRange('1:5:851-1:5:851',), # LQToDEle
+    eventsToProcess = cms.untracked.VEventRange('1:5:838',), # LQToDEle
+    # eventsToProcess = cms.untracked.VEventRange('1:11:2019',), # LQToDEle
     # eventsToProcess=cms.untracked.VEventRange("1:227:21273", "1:227:21288"), # LQToBEle
+    #eventsToProcess = cms.untracked.VEventRange('1:1:1-1:1:10',), # some examples
     secondaryFileNames=secFiles,
 )
 
