@@ -76,7 +76,7 @@ if doQuery:
     firstNFiles = [dbsFile['logical_file_name'] for dbsFile in dbsFiles]
     if len(firstNFiles) > filesToUse:
         firstNFiles = firstNFiles[-1*filesToUse:]
-    #print firstNFiles
+    # print firstNFiles
     print 'INFO: using last',len(firstNFiles),'out of',len(dbsFiles),'files in parent dataset as input to GenXSecAnalyzer'
 else:
     print "INFO: not doing DBS query."
