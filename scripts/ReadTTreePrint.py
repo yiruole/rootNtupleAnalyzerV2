@@ -6,7 +6,8 @@ import sys
 import os
 import ROOT as r
 
-treeFilename = "root://eoscms.cern.ch//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2016/nanoAODv7/DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ-v1/200803_164045/0000/DYJetsToLL_Pt-650ToInf_ext2_1.root"
+#treeFilename = "root://eoscms.cern.ch//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2016/nanoAODv7/DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ-v1/200803_164045/0000/DYJetsToLL_Pt-650ToInf_ext2_1.root"
+treeFilename = "/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2018/nanoAODv7/DYJetsToLL_Pt-400To650_TuneCP5_13TeV-amcatnloFXFX-pythia8/LQ-v1/200819_110403/0000/DYJetsToLL_Pt-400To650_1.root"
 filename = "/tmp/scooper/treeLogTest.txt"
 numberOfLargestBranchesToShow = 50
 
