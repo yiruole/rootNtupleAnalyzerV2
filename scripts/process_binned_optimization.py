@@ -3,12 +3,13 @@ import copy
 import math
 import sys
 import numpy
-from ROOT import TFile, TH1F, TF1, TGraph, TCanvas, gROOT
-from prettytable import PrettyTable
+from ROOT import TFile, TH1F, TF1, TGraph, TCanvas, gROOT, gSystem, RooStats
+from tabulate import tabulate
 
-from combineCommon import ParseXSectionFile, lookupXSection, GetUnscaledTotalEvents, FindUnscaledRootFile
+from combineCommon import ParseXSectionFile, lookupXSection, GetUnscaledTotalEvents
 
 gROOT.SetBatch(True)
+# gSystem.Load("libRooFit")
 
 
 def parse_txt_file(verbose=False):
@@ -28,19 +29,30 @@ def parse_txt_file(verbose=False):
             sys.stdout.write("%s\r" % print_str)
             sys.stdout.flush()
 
+        if idx == 0:
+            cutsSplit = line.split()
+            cut_info_template = [" ".join(cutsSplit[i:i+2])+" {}" for i in range(0, len(cutsSplit), 2)]
+            n_cuts = len(cut_info_template)
+            continue
+
         # -----------------------------------------------------------------
         # First, get the important data from the line
         # -----------------------------------------------------------------
+        splitLine = line.split()
 
-        bin_number = int(line.split("Bin = ")[1].split()[0].strip())
+        bin_number = int(splitLine[0])
 
-        cut_string = line.split("Bin = " + str(bin_number))[1].strip()
+        # cut_string = line.split("Bin = " + str(bin_number))[1].strip()
+        # cut_info = cut_string.split()
+        # n_cuts = len(cut_info) / 3  # var, condition, value
+        cutVals = splitLine[1:]
+        cut_string = "\t".join(cut_info_template).format(*cutVals)
         cut_info = cut_string.split()
-        n_cuts = len(cut_info) / 3  # var, condition, value
 
         if verbose:
             print
             print "n_cuts=", n_cuts
+            print "cutVals=", cutVals
             print "cut_string=", cut_string
             print "cut_info=", cut_info
             print "bin_number=", bin_number
@@ -152,7 +164,9 @@ def parse_root_file(d_input, verbose=False):
     d_binNumber_nEnts = {}
 
     sum_hist = TH1F()
+    sum_hist.Sumw2()
     sum_ents_hist = TH1F()
+    sum_ents_hist.Sumw2()
     for sample in d_input.keys():
 
         sample_name = d_input[sample][0]
@@ -225,17 +239,33 @@ def calculateEfficiency(nS, signal_sample, d_signal_totalEvents):
     return 1.0 * (nS / weight) / d_signal_totalEvents[signal_sample]
 
 
-def evaluation(nS, nB, efficiency):
+def evaluation(nS, nB, efficiency, bkgEnts):
+    # see: https://twiki.cern.ch/twiki/bin/view/CMS/FigureOfMerit
+    # and https://arxiv.org/pdf/physics/0702156.pdf [1]
     try:
         # s/sqrt(s+b)
         # value = nS / ( math.sqrt ( nS + nB ) )
+        tau = bkgEnts / nB
         # switch to asymptotic formula
-        if not usePunzi:
+        # NB: this approximation doesn't work well with nB < ~ 5 events
+        if figureOfMerit == "asymptotic":
             value = math.sqrt(2 * ((nS + nB) * math.log(1 + nS / nB) - nS))
-        else:
+        elif figureOfMerit == "punzi":
             # punzi
-            nSigmas = 5
-            value = efficiency / (nSigmas / 2.0 + math.sqrt(nB))
+            a = 2  # nSigmasExclusion
+            b = 5  # nSigmasDiscovery
+            # value = efficiency / (nSigmas / 2.0 + math.sqrt(nB))
+            smin = a**2/8 + 9*b**2/13 + a*math.sqrt(nB) + (b/2)*math.sqrt(b**2 + 4*a*math.sqrt(nB) + 4*nB)
+            value = efficiency / smin
+        elif figureOfMerit == "zbi":
+            value = RooStats.NumberCountingUtils.BinomialWithTauExpZ(nS, nB, tau)
+        elif figureOfMerit == "zpl":  # [1], eqn. 25
+            nOff = bkgEnts
+            nOn = nS + nB
+            nTot = nOff + nOn
+            value = math.sqrt(2)*math.sqrt(nOn*math.log(nOn*(1+tau)/nTot) + nOff*math.log(nOff*(1+tau)/(nTot*tau)))
+        else:
+            raise RuntimeError("Evaluation of '{}' as figure of merit is not implemented".format(figureOfMerit))
     except ZeroDivisionError:
         value = -999
     except ValueError:
@@ -244,16 +274,17 @@ def evaluation(nS, nB, efficiency):
     return value
 
 
-def evaluate(bin_number, d_signal, d_background, signal_sample, d_signal_totalEvents):
+def evaluate(bin_number, d_signal, d_background, signal_sample, d_signal_totalEvents, d_backgroundRawEvents):
     nS = d_signal[bin_number]
     nB = d_background[bin_number]
+    nBEnts = d_backgroundRawEvents[bin_number]
     ## For amc@NLO.
     # if nS < 0:
     #  nS = 0
     if nB < 0:
         nB = 0
     efficiency = calculateEfficiency(nS, signal_sample, d_signal_totalEvents)
-    v = evaluation(nS, nB, efficiency)
+    v = evaluation(nS, nB, efficiency, nBEnts)
     # print 'value=',v
     return v
 
@@ -317,9 +348,10 @@ massPoints = [
     str(i) for i in range(300, 3100, 100)
 ]  # go from 300-2000 in 100 GeV steps
 massPoints.extend(["3500", "4000"])
-# massPoints.remove("2500")  # FIXME 2016
-massPoints.remove("3000")  # FIXME 2017
+massPoints.remove("2500")  # FIXME 2016
+# massPoints.remove("3000")  # FIXME 2017
 signalNameTemplate = "LQToDEle_M-{0}_pair"
+# signalNameTemplate = "LQToBEle_M-{0}_pair"
 xsectionFile = "$LQANA/config/xsection_13TeV_2015.txt"
 # these have rescaling applied
 mc_filepath = (
@@ -333,7 +365,18 @@ mc_filepath = (
     # "$LQDATA/nanoV7/2018/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
     #
     # "$LQDATA/nanoV7/2016/opt/eejj_16oct2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
-    "$LQDATA/nanoV7/2017/opt/eejj_22oct2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2017/opt/eejj_22oct2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # b-tag studies
+    # "$LQDATA/nanoV7/2016/opt/eejj_23jun2021_opt/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_gteOneBtag_btagLoose_9jul2021/output_cutTable_lq_eejj_oneBTag_opt/analysisClass_lq_eejj_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_gteOneBtag_btagMed_9jul2021/output_cutTable_lq_eejj_oneBTag_opt/analysisClass_lq_eejj_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_gteTwoBtags_btagLoose_13jul2021/output_cutTable_lq_eejj_twoBTags_opt/analysisClass_lq_eejj_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_gteTwoBtags_btagMed_13jul2021/output_cutTable_lq_eejj_twoBTags_opt/analysisClass_lq_eejj_oneBTag_plots.root"
+    # other studies
+    # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_addMasym_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_addMasym_addMET_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    "$LQDATA/nanoV7/2016/opt/eejj_opt_egLoose_18jan2022/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
 )
 qcd_data_filepath = (
     # "$LQDATA//nanoV6/2016/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
@@ -343,7 +386,18 @@ qcd_data_filepath = (
     # "$LQDATA/nanoV7/2016/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
     # "$LQDATA/nanoV7/2017/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
     # "$LQDATA/nanoV7/2018/opt/qcdOpt_14sep2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
-    "$LQDATA/nanoV7/2017/opt/qcdOpt_22oct2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2017/opt/qcdOpt_22oct2020/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # b-tag studies
+    # "$LQDATA/nanoV7/2016/opt/eejj_23jun2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_btagLoose_gteOneBTag_13jul2021/output_cutTable_lq_eejj_QCD_oneBTag_opt/analysisClass_lq_eejj_QCD_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_btagMed_gteOneBTag_13jul2021/output_cutTable_lq_eejj_QCD_oneBTag_opt/analysisClass_lq_eejj_QCD_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_btagLoose_gtetwoBTags_13jul2021/output_cutTable_lq_eejj_QCD_twoBTags_opt/analysisClass_lq_eejj_QCD_oneBTag_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_btagMed_gtetwoBTags_13jul2021/output_cutTable_lq_eejj_QCD_twoBTags_opt/analysisClass_lq_eejj_QCD_oneBTag_plots.root"
+    # other studies
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_addMasym_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_addMasym_addMET_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    "$LQDATA/nanoV7/2016/opt/qcd_eejj_optEGLooseFR_17jan2022/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
 )
 txt_file_path_eejj = (
     # "$LQDATA/nanoV6/2016/opt/eejj_10jul2020/condor/optimizationCuts.txt"
@@ -351,7 +405,14 @@ txt_file_path_eejj = (
     # "$LQDATA/nanoV6/2017/opt/prefire_2jul2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
     # "$LQDATA/nanoV6/2018/opt/eejj_2jul2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
     # nanoV7
-    "$LQDATA/nanoV7/2016/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
+    # "$LQDATA/nanoV7/2016/opt/eejj_14sep2020/output_cutTable_lq_eejj_opt/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_23jun2021/optimizationCuts.txt"
+    #
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11aug_loosenMee/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11aug_loosenMee_addMasym/optimizationCuts.txt"
+    # "/tmp/scooper/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11aug_loosenMee_addMasym_addPFMET/optimizationCuts.txt"
+    "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_17jan_egmLooseID/optimizationCuts.txt"
 )
 # # for eejj only
 # ttbar_data_filepath = (
@@ -373,14 +434,15 @@ txt_file_path_enujj = (
 )
 #
 doEEJJ = True
-# if false, uses asymptotic significance formula
-usePunzi = True
+# supported figures of merit: punzi, zbi, zpl, asymptotic
+figureOfMerit = "punzi"
 
 jitter = 2
 
 if "2016" in mc_filepath:
     # wjet = "WJet_amcatnlo_Inc"
-    wjet = "WJet_amcatnlo_jetBinned"
+    # wjet = "WJet_amcatnlo_jetBinned"
+    wjet = "WJet_amcatnlo_ptBinned"
     zjet = "ZJet_amcatnlo_ptBinned"
     # 1/pb
     intLumi = 35867.0  # 2016
@@ -426,11 +488,11 @@ d_eejj_signal_filepaths_list = [{str(mass): [signalNameTemplate.format(mass), mc
 d_enujj_signal_filepaths_list = [{str(mass): [signalNameTemplate.format(mass), mc_filepath_enujj, 1.0]} for mass in massPoints]
 
 searchDir = os.path.dirname(mc_filepath)
-totalEventList = [GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDir, signalNameTemplate.format(mass)))) for mass in massPoints]
+totalEventList = [GetUnscaledTotalEvents(TFile.Open(mc_filepath), signalNameTemplate.format(mass)) for mass in massPoints]
 d_eejj_signal_totalEvents = {signalNameTemplate.format(mass): value for (mass, value) in zip(massPoints, totalEventList)}
 
 xsectionDict = ParseXSectionFile(xsectionFile)
-xsecList = [float(lookupXSection(signalNameTemplate.format(mass), xsectionDict)) for mass in massPoints]
+xsecList = [float(lookupXSection(signalNameTemplate.format(mass))) for mass in massPoints]
 d_signal_crossSections = {signalNameTemplate.format(mass): value for (mass, value) in zip(massPoints, xsecList)}
 
 # for eejj
@@ -442,7 +504,7 @@ if doEEJJ:
     txt_file_path = txt_file_path_eejj
 else:
     searchDirENuJJ = os.path.dirname(mc_filepath_enujj)
-    totalEventListENuJJ = [GetUnscaledTotalEvents(TFile.Open(FindUnscaledRootFile(searchDirENuJJ, signalNameTemplate.format(mass)))) for mass in massPoints]
+    totalEventListENuJJ = [GetUnscaledTotalEvents(TFile.Open(mc_filepath_enujj), signalNameTemplate.format(mass)) for mass in massPoints]
     d_enujj_signal_totalEvents = {signalNameTemplate.format(mass): value for (mass, value) in zip(massPoints, totalEventListENuJJ)}
     d_signal_totalEvents = d_enujj_signal_totalEvents
     d_signal_filepaths_list = d_enujj_signal_filepaths_list
@@ -475,6 +537,8 @@ sys.stdout.flush()
 parse_txt_file()
 print "Parsed."
 
+print "Figure of merit: {}".format(figureOfMerit)
+
 verbose = False
 d_binNumber_nB, d_binNumber_nBErr, d_binNumber_nBMCEnts = parse_root_file(
     d_background_filepaths, verbose
@@ -487,6 +551,8 @@ d_binNumber_nD, d_binNumber_nDErr, d_binNumber_nDEnts = parse_root_file(
 selectedEfficienciesByLQMass = []
 selectedNsByLQMass = []
 selectedNbByLQMass = []
+selectedNbMCEntsByLQMass = []
+selectedValueByLQMass = []
 lqMasses = []
 
 # print 'Checking for signal histograms'
@@ -505,6 +571,7 @@ for signal_sample in d_signal_filepaths_list:
     max_value = -999
     max_nS = -999
     max_nB = -999
+    max_nBMCEnts = -999
     max_nD = -999
     max_string = ""
     max_eff = -1.0
@@ -534,13 +601,14 @@ for signal_sample in d_signal_filepaths_list:
         #  continue
         if verbose:
             print "binNumber=", binNumber,
-            print "evaluated to: nS=", nS, "nB=", nB, ";",
+            print "evaluated to: nS=", nS, "nB=", nB, "MCents=", nBMCEnts, ";",
         value = evaluate(
             binNumber,
             d_binNumber_nS,
             d_binNumber_nB,
             signal_sample.values()[0][0],
             d_signal_totalEvents,
+            d_binNumber_nBMCEnts
         )
         if verbose:
             # print 'final evaluation: nS=',nS,'nB=',nB,'value=',value,
@@ -556,6 +624,7 @@ for signal_sample in d_signal_filepaths_list:
             max_bin = binNumber
             max_nS = nS
             max_nB = nB
+            max_nBMCEnts = nBMCEnts
             max_nD = nD
             max_string = d_binNumber_cutValuesString[max_bin]
             max_eff = calculateEfficiency(
@@ -570,7 +639,7 @@ for signal_sample in d_signal_filepaths_list:
 
     print signal_sample.keys()[0], ": Bin with best value was bin #" + str(
         max_bin
-    ), "\tCut info was:\t" + max_string, "\t v = %.2f" % max_value, " nS = %.2f" % max_nS, ", nB = %.2f" % max_nB  # , ", nD = %d" % max_nD
+    ), "\tCut info was:\t" + max_string, "\t value = %.4f" % max_value, " nS = %.2f" % max_nS, ", nB = %.2f" % max_nB  # , ", nD = %d" % max_nD
     signalSampleName = signal_sample.values()[0][0]
     if "_M-" in signalSampleName:
         signalSampleMass = int(signalSampleName[signalSampleName.find("_M-") + 3: signalSampleName.rfind("_")])
@@ -580,6 +649,8 @@ for signal_sample in d_signal_filepaths_list:
     selectedEfficienciesByLQMass.append(max_eff)
     selectedNsByLQMass.append(max_nS)
     selectedNbByLQMass.append(max_nB)
+    selectedNbMCEntsByLQMass.append(max_nBMCEnts)
+    selectedValueByLQMass.append(max_value)
     lqMasses.append(signalSampleMass)
 
     max_bins = string_to_bins(max_string)
@@ -632,6 +703,7 @@ for signal_sample in d_signal_filepaths_list:
             d_binNumber_nB,
             signal_sample.values()[0][0],
             d_signal_totalEvents,
+            d_binNumber_nBMCEnts
         )
         new_value_upper_jitter = evaluate(
             new_max_binNumber_upper_jitter,
@@ -639,6 +711,7 @@ for signal_sample in d_signal_filepaths_list:
             d_binNumber_nB,
             signal_sample.values()[0][0],
             d_signal_totalEvents,
+            d_binNumber_nBMCEnts
         )
 
         lower_jitter_percent_change = (
@@ -696,30 +769,37 @@ d_cutVariable_yArray = {}
 #
 #    print to_print
 
-columnNames = ["LQ mass"]
+columnNames = ["LQ mass (GeV)"]
 columnNames.extend(
     [signal_sample.keys()[0] for signal_sample in d_signal_filepaths_list]
 )
-table = PrettyTable(columnNames)
-table.float_format = "4.3"
+table = []
 for cut_variable in cut_variables:
     d_cutVariable_yArray[cut_variable] = []
     # to_print = cut_variable + "\t"
     row = [cut_variable]
     for i, signal_sample in enumerate(d_signal_filepaths_list):
         lq_mass = int(signal_sample.keys()[0])
-        cut_value = int(d_cutVariable_maxCutValues[cut_variable][i])
+        # cut_value = int(d_cutVariable_maxCutValues[cut_variable][i])
+        cut_value = round(float(d_cutVariable_maxCutValues[cut_variable][i]), 3)
         # to_print = to_print + str(cut_value ) + "\t"
-        row.append(str(cut_value))
+        row.append(cut_value)
 
         if lq_mass not in x_array:
             x_array.append(float(lq_mass))
         d_cutVariable_yArray[cut_variable].append(float(cut_value))
-    table.add_row(row)
-nbRow = ["nB"] + selectedNbByLQMass
-table.add_row(nbRow)
+    table.append(row)
+nbRow = ["nB"] + [round(nb, 3) for nb in selectedNbByLQMass]
+nbMCEntsRow = ["nBMCEnts"] + [round(nbMC, 3) for nbMC in selectedNbMCEntsByLQMass]
+nsRow = ["nS"] + [round(ns, 3) for ns in selectedNsByLQMass]
+valRow = [figureOfMerit] + [round(val, 4) for val in selectedValueByLQMass]
+table.append(nbRow)
+table.append(nbMCEntsRow)
+table.append(nsRow)
+table.append(valRow)
 
-print table
+print tabulate(table, headers=columnNames, tablefmt="github")
+print tabulate(table, headers=columnNames, tablefmt="latex")
 
 print "\n\n"
 
