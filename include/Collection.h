@@ -68,6 +68,10 @@ class Collection {
     if ( m_trigObj_index > 0 )    return Object1 (*this, m_raw_indices[i], m_trigObj_index); 
     else                          return Object1 (*this, m_raw_indices[i]);
   }
+
+  void RemoveConstituent(unsigned short i) {
+    m_raw_indices.erase(m_raw_indices.begin()+i);
+  }
   
   std::vector<unsigned short> * GetRawIndices() { return &m_raw_indices; } 
   unsigned short                GetSize()       { return  m_raw_indices.size();  } 
@@ -435,22 +439,22 @@ class Collection {
   
   template<class Object1>
     void examine ( const char * name, ID id = NULL_ID, bool verbose = false ){
-    int n_constituents = GetSize();
-    std::cout << "N(" << name << ") = " << n_constituents << std::endl;
-    for (int i = 0; i < n_constituents; ++i ){ 
-      Object1 constituent = GetConstituent<Object1>(i);
-      std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent << std::flush;
-      if      ( id == NULL_ID  ) std::cout << std::endl;
-      else {
-        if ( verbose        ) { 
-          constituent.PassUserID ( id, verbose );
+      int n_constituents = GetSize();
+      std::cout << "N(" << name << ") = " << n_constituents << std::endl;
+      for (int i = 0; i < n_constituents; ++i ){ 
+        Object1 constituent = GetConstituent<Object1>(i);
+        std::cout << "\t" << "Constituent" << "\t#" << i << ":" << "\t" << constituent << std::flush;
+        if ( id != NULL_ID  ) {
+          if ( verbose        ) { 
+            constituent.PassUserID ( id, verbose );
+          }
+          else {
+            std::cout << ", ID = " << constituent.PassUserID ( id );
+          }
         }
-        else {
-          std::cout << ", ID = " << constituent.PassUserID ( id ) << std::endl;
-        }
+        std::cout << ", rawIndex=" << constituent.GetRawIndex() << std::endl;
       }
     }
-  }
 
   //------------------------------------------------------------------------------------------
   // Member variables
