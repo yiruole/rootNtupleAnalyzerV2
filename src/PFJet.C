@@ -39,6 +39,11 @@ float PFJet::DeepJetBTagSFLooseUp() { return m_collection->ReadArrayBranch<Float
 float PFJet::DeepJetBTagSFLooseDown() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_down",m_raw_index); }
 float PFJet::DeepJetBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_M",m_raw_index); }
 
+int PFJet::NElectrons() { return m_collection->ReadArrayBranch<Int_t>("Jet_nElectrons", m_raw_index); }
+int PFJet::NMuons() { return m_collection->ReadArrayBranch<Int_t>("Jet_nMuons", m_raw_index); }
+int PFJet::MatchedGenJetIndex() { return m_collection->ReadArrayBranch<Int_t>("Jet_genJetIdx", m_raw_index); }
+int PFJet::MatchedElectron1Index() { return m_collection->ReadArrayBranch<Int_t>("Jet_electronIdx1", m_raw_index); }
+int PFJet::MatchedElectron2Index() { return m_collection->ReadArrayBranch<Int_t>("Jet_electronIdx2", m_raw_index); }
 float PFJet::QuarkGluonLikelihood() { return m_collection->ReadArrayBranch<Float_t>("Jet_qgl",m_raw_index); }
 
 // Energy resolution scale factors
@@ -96,7 +101,13 @@ std::ostream& operator<<(std::ostream& stream, PFJet& object) {
 	 << "Eta = "      << object.Eta()  << ", "
 	 << "Phi = "      << object.Phi()  << ", "
    << "loose ID = " << object.PassUserID(PFJET_LOOSE) << ", "
-   << "MVABtag = "  << object.CombinedMVABTag() << ", "
-   << "QGL = " << object.QuarkGluonLikelihood();
+   << "MVABtag = "  << object.CombinedMVABTag() << ", ";
+  if(object.MatchedGenJetIndex() >= 0)
+    stream << "matchedGenJetIdx = "  << object.MatchedGenJetIndex() << ", ";
+  if(object.NElectrons() > 0)
+    stream << "matchedElectron1idx = " << object.MatchedElectron1Index() << ", ";
+  if(object.NElectrons() > 1)
+    stream << "matchedElectron2idx = " << object.MatchedElectron2Index() << ", ";
+  stream << "QGL = " << object.QuarkGluonLikelihood();
   return stream;
 }

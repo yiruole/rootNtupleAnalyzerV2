@@ -56,6 +56,11 @@ class PFJet : public Object {
   float DeepJetBTagSFMedium();
   
   float QuarkGluonLikelihood();
+  int NElectrons();
+  int NMuons();
+  int MatchedGenJetIndex();
+  int MatchedElectron1Index();
+  int MatchedElectron2Index();
 
  private:
   bool PassUserID_PFJetLoose (bool verbose);
