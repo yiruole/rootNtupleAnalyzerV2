@@ -28,6 +28,7 @@ class GenParticle : public Object {
   int MotherIndex ();
   int Status      ();
   int NumDaughters();
+  int MotherLQIndex();
 
   int StatusFlags ();
   
@@ -37,6 +38,8 @@ class GenParticle : public Object {
 
  private:
   
+  int m_MotherLQIndex = -1;
+
   bool PassUserID_FromLQ              (bool verbose);
   bool PassUserID_FromDY              (bool verbose);
   bool PassUserID_FromW               (bool verbose);
@@ -49,6 +52,7 @@ class GenParticle : public Object {
   bool PassUserID_GenNuHardScatter    (bool verbose);
   bool PassUserID_GenMuHardScatter    (bool verbose);
   bool PassUserID_GenQuarkHardScatter (bool verbose);
+  bool PassUserID_GenQuarkHardProcess (bool verbose);
 
   bool PassUserID_GenZGammaHardScatter(bool verbose);
   bool PassUserID_GenWHardScatter     (bool verbose);

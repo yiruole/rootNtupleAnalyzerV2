@@ -22,6 +22,7 @@ int    GenParticle::PdgId       (){ return m_collection->ReadArrayBranch<Int_t>(
 int    GenParticle::MotherIndex (){ return m_collection->ReadArrayBranch<Int_t>("GenPart_genPartIdxMother",m_raw_index); }
 int    GenParticle::Status      (){ return m_collection->ReadArrayBranch<Int_t>("GenPart_status",m_raw_index); }
 //int    GenParticle::NumDaughters(){ return m_collection -> GetData() -> GenPartNumDaught  -> at ( m_raw_index ); }
+int  GenParticle::MotherLQIndex(){ return m_MotherLQIndex; }
 
 int    GenParticle::StatusFlags() { return m_collection->ReadArrayBranch<Int_t>("GenPart_statusFlags",m_raw_index); }
 

@@ -14,10 +14,12 @@ bool GenParticle::PassUserID (ID id, bool verbose){
 
   else if ( id == GEN_MU_HARD_SCATTER     ) { return PassUserID_GenMuHardScatter    (verbose); }
   else if ( id == GEN_QUARK_HARD_SCATTER  ) { return PassUserID_GenQuarkHardScatter (verbose); }
+  else if ( id == GEN_QUARK_HARD_PROCESS  ) { return PassUserID_GenQuarkHardProcess (verbose); }
   //else if ( id == GEN_ZGAMMA_HARD_SCATTER ) { return PassUserID_GenZGammaHardScatter(verbose); }
   //else if ( id == GEN_W_HARD_SCATTER      ) { return PassUserID_GenWHardScatter     (verbose); }
   else if ( id == GEN_NU_FROM_W  	        ) { return PassUserID_GenNuFromW          (verbose); }
   //else if ( id == GEN_ELE_FROM_W  	      ) { return PassUserID_GenEleFromW         (verbose); }
+  else if ( id == GEN_FROM_LQ  	          ) { return PassUserID_FromLQ          (verbose); }
   else if ( id == GEN_ELE_HARDPROCESS_FINALSTATE  	      ) { return PassUserID_GenEleHardProcessFinalState(verbose); }
 
   else if ( id == GEN_ELE_FIDUCIAL        ) { return PassUserID_ECALFiducial        (verbose); } 
@@ -53,6 +55,11 @@ bool GenParticle::PassUserID_GenQuarkHardScatter(bool verbose) {
   return false;
 }
 
+bool GenParticle::PassUserID_GenQuarkHardProcess(bool verbose) {
+  if ( IsFromHardProcess() && abs(PdgId()) < 9 && abs(PdgId()) > 0) return true;
+  return false;
+}
+
 bool GenParticle::PassUserID_FromLQ(bool verbose){
   // pythia 8: outgoing hard electron status is 23 (still intermediate)
   // technically, this is not the really final status=1 particle
@@ -81,7 +88,10 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
   int motherIndex = MotherIndex();
   while(motherIndex > 0) {
     int mother_pdg_id = m_collection->ReadArrayBranch<Int_t>("GenPart_pdgId", motherIndex);
-    if ( abs(mother_pdg_id) == 42 || abs(mother_pdg_id) == 9000007) return true;
+    if ( abs(mother_pdg_id) == 42 || abs(mother_pdg_id) == 9000007) {
+      m_MotherLQIndex = motherIndex;
+      return true;
+    }
     motherIndex = m_collection->ReadArrayBranch<Int_t>("GenPart_genPartIdxMother", motherIndex);
   }
   return false;
