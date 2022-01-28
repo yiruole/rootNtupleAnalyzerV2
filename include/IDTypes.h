@@ -30,6 +30,7 @@ enum ID {
   //GEN_W_HARD_SCATTER       = 22,
   GEN_NU_FROM_W  	         = 23,
   //GEN_ELE_FROM_W  	       = 24,
+  GEN_FROM_LQ              = 24,
   GEN_ELE_HARDPROCESS_FINALSTATE  	       = 25,
   GEN_LQ  	               = 26,
   GEN_TOP  	               = 27,
@@ -38,6 +39,8 @@ enum ID {
 
   FAKE_RATE_HEEP_LOOSE     = 30,
   FAKE_RATE_VERY_LOOSE     = 32,
+  FAKE_RATE_EGMLOOSE       = 34,
+  FAKE_RATE_VERY_LOOSE_EGMLOOSE = 36,
 
   EGAMMA_BUILTIN_TIGHT     = 40,
   EGAMMA_BUILTIN_MEDIUM    = 41,
@@ -51,6 +54,7 @@ enum ID {
 
   GEN_MU_HARD_SCATTER      = 58,
   GEN_QUARK_HARD_SCATTER   = 59,
+  GEN_QUARK_HARD_PROCESS   = 60,
 
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h
