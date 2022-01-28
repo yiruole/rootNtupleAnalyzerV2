@@ -62,6 +62,7 @@ class cut : public SimpleCut {
     TH1D histo3;
     TH1D histo4;
     TH1D histo5;
+    TH1D histo6;
     // Filled event by event
     unsigned int arraySize = 0;
     double nEvtInput = -1;
@@ -182,11 +183,11 @@ class baseClass {
     void evaluateCuts(bool verbose = false);
     template<typename T> void evaluateCuts(std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combNameToPassFail, std::vector<std::string>& orderedCutNames, bool verbose = false);
 
-    void fillSkim                           ( bool b ) { fillSkim_                          = b; } 
     void fillAllPreviousCuts                ( bool b ) { fillAllPreviousCuts_               = b; } 
     void fillAllOtherCuts                   ( bool b ) { fillAllOtherCuts_                  = b; } 
     void fillAllSameLevelAndLowerLevelCuts  ( bool b ) { fillAllSameLevelAndLowerLevelCuts_ = b; } 
     void fillAllCuts                        ( bool b ) { fillAllCuts_                       = b; } 
+    void fillAllSameLevelCuts               ( bool b ) { fillAllSameLevelCuts_              = b; } 
 
     // need to define these here
     template <typename T> bool passedCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed) {
@@ -301,6 +302,33 @@ class baseClass {
       return ret;
     }
 
+    template <typename T> bool passedAllOtherCutsAtSameLevel(const std::string& s,  const std::map<std::string, T>& cutNameToCut)
+    {
+      bool ret = true;
+      int cutLevel;
+      auto cc = cutNameToCut.find(s);
+      if( cc == cutNameToCut.end() )
+      {
+        STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
+        return false;
+      }
+      else
+      {
+        cutLevel = cc->second.level_int;
+      }
+      for (std::map<std::string, cut>::const_iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      {
+        const cut * c = & (cc->second);
+        if(c->variableName == s)
+          continue;
+        if(c->level_int == cutLevel)
+        {
+          if( ! (c->filled && c->passed) ) return false;
+        }
+      }
+      return ret;
+    }
+
     template <typename T> std::map<std::string, T> getCutsAtLevel(const int cutLevel, const std::map<std::string, T>& cutNameToCut)
     {
       std::map<std::string, T> cutsAtLevel;
@@ -344,6 +372,7 @@ class baseClass {
     bool passedAllPreviousCuts(const std::string& s) { return passedAllPreviousCuts(s, cutName_cut_, orderedCutNames_); }
     bool passedAllOtherCuts(const std::string& s) { return passedAllOtherCuts(s, cutName_cut_); }
     bool passedAllOtherSameAndLowerLevelCuts(const std::string& s) { return passedAllOtherSameAndLowerLevelCuts(s, cutName_cut_); }
+    bool passedAllOtherCutsAtSameLevel(const std::string& s) { return passedAllOtherCutsAtSameLevel(s, cutName_cut_); }
     bool passedAllCutsAtLevel(const int cutLevel) { return passedAllCutsAtLevel(cutLevel, cutName_cut_); }
     bool passedSelection(const std::string& s) { return passedAllPreviousCuts(s, cutName_cut_, orderedCutNames_); }
     bool variableIsFilled(const std::string& s) { return variableIsFilled(s, cutName_cut_); }
@@ -384,23 +413,23 @@ class baseClass {
     bool haveSystematics() { return !systematics_.empty(); }
     void runSystematics();
 
-    void CreateAndFillUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
-    void CreateUserTH1D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
-    void FillUserTH1D(const char*  nameAndTitle, Double_t value, Double_t weight=1);
-    void FillUserTH1D(const char*  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1);
-    void CreateAndFillUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
-    void CreateUserTH2D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
-    void CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
-    void FillUserTH2D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
-    void FillUserTH2D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
-    void FillUserTH2DLower(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
-    void CreateAndFillUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
-    void CreateUserTH3D(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
-    void CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
-    void FillUserTH3D(const char*   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
-    void FillUserTH3D(const char*  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight=1);
-    void CreateUserTProfile(const char*  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
-    void FillUserTProfile(const char*  nameAndTitle, Double_t x, Double_t y, Double_t weight=1);
+    void CreateAndFillUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
+    void CreateUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
+    void FillUserTH1D(const std::string&  nameAndTitle, Double_t value, Double_t weight=1);
+    void FillUserTH1D(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1);
+    void CreateAndFillUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
+    void CreateUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
+    void CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
+    void FillUserTH2D(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+    void FillUserTH2D(const std::string&  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
+    void FillUserTH2DLower(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+    void CreateAndFillUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
+    void CreateUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
+    void CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
+    void FillUserTH3D(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight=1);
+    void FillUserTH3D(const std::string&  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight=1);
+    void CreateUserTProfile(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
+    void FillUserTProfile(const std::string&  nameAndTitle, Double_t x, Double_t y, Double_t weight=1);
 
     void createOptCutFile();
 
@@ -476,11 +505,11 @@ class baseClass {
     std::map<std::string, int > triggerPrescaleMap_; 
 
     // Which plots to fill
-    bool fillSkim_;
     bool fillAllPreviousCuts_;
     bool fillAllOtherCuts_;
     bool fillAllSameLevelAndLowerLevelCuts_;
     bool fillAllCuts_;
+    bool fillAllSameLevelCuts_;
 
     // Skim stuff
     bool produceSkim_;

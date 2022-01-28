@@ -18,11 +18,11 @@ static_assert(std::numeric_limits<float>::is_iec559, "IEEE 754 required");
 template void baseClass::fillArrayVariableWithValue(const string& s, TTreeReaderArray<Float_t>& reader);
 
 baseClass::baseClass(string * inputList, string * cutFile, string * treeName, string * outputFileName, string * cutEfficFile):
-  fillSkim_                         ( true ) ,
-  fillAllPreviousCuts_              ( true ) ,
-  fillAllOtherCuts_                 ( true ) ,
-  fillAllSameLevelAndLowerLevelCuts_( true ) ,
-  fillAllCuts_                      ( true ) ,
+  fillAllPreviousCuts_              ( !true ) ,
+  fillAllOtherCuts_                 ( !true ) ,
+  fillAllSameLevelAndLowerLevelCuts_( !true ) ,
+  fillAllCuts_                      ( !true ) ,
+  fillAllSameLevelCuts_             ( !true ) ,
   oldKey_                           ( "" ) 
 {
   STDOUT("begins");
@@ -184,10 +184,6 @@ void baseClass::init()
   output_root_ = new TFile(filename.c_str(),"RECREATE", "", 207);
 
   // Skim stuff
-  produceSkim_ = false;
-  NAfterSkim_ = 0;
-  if(int(getSkimPreCutValue("produceSkim"))==1) produceSkim_ = true;
-  
   if(produceSkim_) {
     
     skim_file_ = new TFile((outputFileName_ + "_skim.root").c_str(),"RECREATE", "", 207);
@@ -203,10 +199,6 @@ void baseClass::init()
   }
 
   // Reduced Skim stuff
-  produceReducedSkim_ = false;
-  NAfterReducedSkim_ = 0;
-  if(int(getSkimPreCutValue("produceReducedSkim"))==1) produceReducedSkim_ = true;
-
   if(produceReducedSkim_) {
 
     reduced_skim_file_ = new TFile((outputFileName_ + "_reduced_skim.root").c_str(),"RECREATE", "", 207);
@@ -470,16 +462,19 @@ void baseClass::readCutFile()
       string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
       string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
       string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
+      string s6 = "cutHisto_allOtherSameLevelCuts__" + thisCut.variableName;
       thisCut.histo1 = TH1D (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo2 = TH1D (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo3 = TH1D (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo4 = TH1D (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo5 = TH1D (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
+      thisCut.histo6 = TH1D (s6.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
       thisCut.histo1.Sumw2();
       thisCut.histo2.Sumw2();
       thisCut.histo3.Sumw2();
       thisCut.histo4.Sumw2();
       thisCut.histo5.Sumw2();
+      thisCut.histo6.Sumw2();
       // Filled event by event
       thisCut.filled = false;
       thisCut.value = 0;
@@ -515,6 +510,18 @@ void baseClass::readCutFile()
 
   is.close();
 
+  produceSkim_ = false;
+  NAfterSkim_ = 0;
+  if(int(getSkimPreCutValue("produceSkim"))==1)
+    produceSkim_ = true;
+  produceReducedSkim_ = false;
+  NAfterReducedSkim_ = 0;
+  if(int(getSkimPreCutValue("produceReducedSkim"))==1) {
+    STDOUT("Producing reduced skim!");
+    produceReducedSkim_ = true;
+  }
+
+  
   // Create a histogram that will show events passing cuts
   int cutsize=orderedCutNames_.size()+1;
   int skimCutSize = getCutsAtLevel(SKIM_LEVEL).size()+1;
@@ -528,26 +535,37 @@ void baseClass::readCutFile()
   int nPrevSkimCuts = 2;
   if(!eventsPassingCutsProf)
   {
+    STDOUT("INFO: no pre-existing EventsPassingSkimCuts profile.");
     // this should be the case when there was no previous skim (besides in nano processing) --> no hist in input root file(s)
     if(produceReducedSkim_ || produceSkim_)
     {
+      STDOUT("INFO: doing skim -- creating new EventsPassingSkimCuts profile.");
       gDirectory->cd();
       auto newProf = makeNewEventsPassingSkimCutsProfile();
       newProf->SetNameTitle("EventsPassingSkimCuts", "Events Passing Skim Cuts");
       histsToSave_.push_back(newProf);
     }
+    else
+      STDOUT("INFO: not doing skim -- produceReducedSkim_=" << produceReducedSkim_ << " and produceSkim_=" << produceSkim_ << "; not creating new EventsPassingSkimCuts profile.");
   }
   else
   {
+    STDOUT("INFO: found pre-existing EventsPassingSkimCuts profile.");
     // we have a previous skim profile available
     if(produceReducedSkim_ || produceSkim_)
     {
+      STDOUT("INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.");
       auto newProf = makeNewEventsPassingSkimCutsProfile(eventsPassingCutsProf);
       histsToSave_.erase(find(histsToSave_.begin(), histsToSave_.end(), eventsPassingCutsProf));
       newProf->SetNameTitle("EventsPassingSkimCuts", "Events Passing Skim Cuts");
       histsToSave_.push_back(newProf);
     }
     nPrevSkimCuts = eventsPassingCutsProf->GetNbinsX();
+  }
+  auto savedEventsPassingCuts = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
+  if(!savedEventsPassingCuts) {
+    STDOUT("ERROR: did not find an EventsPassingSkimCuts profile, though we should have by this point!  exiting");
+    exit(-5);
   }
   eventCuts_ = std::shared_ptr<TProfile>(new TProfile("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize));
   eventCuts_->Sumw2();
@@ -1074,6 +1092,9 @@ float baseClass::getPreCutValue1(const string& s)
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
+    STDOUT("precut names:");
+    for( auto& pair : preCutName_cut_)
+      std::cout << pair.first << std::endl;
     exit(-5);
   }
   preCut * c = & (cc->second);
@@ -1288,7 +1309,7 @@ bool baseClass::fillCutHistos()
     cut * c = & (cutName_cut_.find(*it)->second);
     if( c->filled )
     {
-      if ( fillSkim_ ) 
+      if ( produceSkim_ || produceReducedSkim_ ) 
         c->histo1.Fill( c->value, c->weight );
       if ( fillAllPreviousCuts_ ) 
         if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( c->value, c->weight );
@@ -1298,6 +1319,8 @@ bool baseClass::fillCutHistos()
         if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( c->value, c->weight );
       if( fillAllCuts_ ) 
         if( passedCut("all") )                                      c->histo5.Fill( c->value, c->weight );
+      if(fillAllSameLevelCuts_)
+        if( passedAllOtherCutsAtSameLevel(c->variableName) )        c->histo6.Fill( c->value, c->weight );
     }
   }
   return ret;
@@ -1311,12 +1334,13 @@ bool baseClass::writeCutHistos()
        it != orderedCutNames_.end(); it++)
     {
       cut * c = & (cutName_cut_.find(*it)->second);
-      if ( fillSkim_                          ) c->histo1.Write();
-      if ( fillAllPreviousCuts_               ) c->histo2.Write();
-      if ( fillAllOtherCuts_                  ) c->histo4.Write();
+      if ( produceSkim_ || produceReducedSkim_ ) c->histo1.Write();
+      if ( fillAllPreviousCuts_                ) c->histo2.Write();
+      if ( fillAllOtherCuts_                   ) c->histo4.Write();
 #ifdef SAVE_ALL_HISTOGRAMS 
-      if ( fillAllSameLevelAndLowerLevelCuts_ ) c->histo3.Write();
-      if ( fillAllCuts_                       ) c->histo5.Write();
+      if ( fillAllSameLevelAndLowerLevelCuts_  ) c->histo3.Write();
+      if ( fillAllCuts_                        ) c->histo5.Write();
+      if ( fillAllSameLevelCuts_               ) c->histo6.Write();
 #endif // SAVE_ALL_HISTOGRAMS
     }
 
@@ -1357,6 +1381,10 @@ bool baseClass::writeCutEfficFile()
   // Set bin labels for event counter histogram
   int bincounter=1;
   auto savedEventsPassingCuts = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
+  if(!savedEventsPassingCuts) {
+    STDOUT("ERROR: something very bad happened. The EventsPassingSkimCuts hist was not found in savedHists. Exiting.");
+    exit(-5);
+  }
   int nPrevCuts = savedEventsPassingCuts->FindLastBinAbove(); // first zero bin should be the first new cut
   int allBinCounter = nPrevCuts+1;
 
@@ -1912,12 +1940,13 @@ void baseClass::saveEventsPassingCuts(const std::string& fileName)
   }
 }
 
-void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
+// FIXME TODO: use templates for these functions
+void baseClass::CreateAndFillUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH1Ds_.end() )
     {
-      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
+      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
       h->Sumw2();
       h->SetDirectory(0);
       userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -1928,12 +1957,12 @@ void baseClass::CreateAndFillUserTH1D(const char* nameAndTitle, Int_t nbinsx, Do
       nh_h->second->Fill(value, weight);
     }
 }
-void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
+void baseClass::CreateUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
   map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(nameAndTitle);
   if( nh_h == userTH1Ds_.end() )
     {
-      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
+      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
       h->Sumw2();
       h->SetDirectory(0);
       userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -1943,29 +1972,30 @@ void baseClass::CreateUserTH1D(const char* nameAndTitle, Int_t nbinsx, Double_t 
       STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
-void baseClass::FillUserTH1D(const char* nameAndTitle, Double_t value, Double_t weight)
+void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH1Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
     }
   else
     {
       nh_h->second->Fill(value, weight);
     }
 }
-void baseClass::FillUserTH1D(const char* nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight)
+void baseClass::FillUserTH1D(const std::string& nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight)
 {
   FillUserTH1D(nameAndTitle, *reader, weight);
 }
 
-void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
+void baseClass::CreateAndFillUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup));
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
       h->SetDirectory(0);
       userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -1977,12 +2007,12 @@ void baseClass::CreateAndFillUserTH2D(const char* nameAndTitle, Int_t nbinsx, Do
     }
 }
 
-void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
+void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
   map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup));
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
       h->SetDirectory(0);
       userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -1994,12 +2024,12 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
 }
 
 
-void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
+void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
 {
   map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
-      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y ));
+      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, x, nbinsy, y ));
       h->Sumw2();
       h->SetDirectory(0);
       userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -2010,30 +2040,32 @@ void baseClass::CreateUserTH2D(const char* nameAndTitle, Int_t nbinsx, Double_t 
     }
 }
 
-void baseClass::FillUserTH2D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
+void baseClass::FillUserTH2D(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
     }
   else
     {
       nh_h->second->Fill(value_x, value_y, weight);
     }
 }
-void baseClass::FillUserTH2D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight)
+void baseClass::FillUserTH2D(const std::string& nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight)
 {
   FillUserTH2D(nameAndTitle, *xReader, *yReader, weight);
 }
 
 
-void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
+void baseClass::FillUserTH2DLower(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH2Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
     }
   else
   {
@@ -2066,12 +2098,12 @@ void baseClass::FillUserTH2DLower(const char* nameAndTitle, Double_t value_x,  D
 }
 
 
-void baseClass::CreateAndFillUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup,  Double_t value_x,  Double_t value_y, Double_t z, Double_t weight)
+void baseClass::CreateAndFillUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup,  Double_t value_x,  Double_t value_y, Double_t z, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
       h->SetDirectory(0);
       h->Fill(value_x, value_y, weight);
@@ -2083,12 +2115,12 @@ void baseClass::CreateAndFillUserTH3D(const char* nameAndTitle, Int_t nbinsx, Do
     }
 }
 
-void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
+void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
 {
   map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
       h->SetDirectory(0);
       userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -2098,12 +2130,12 @@ void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t 
       STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
-void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z)
+void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z)
 {
   map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
-      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle, nameAndTitle, nbinsx, x, nbinsy, y, nbinsz, z ));
+      std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, x, nbinsy, y, nbinsz, z ));
       h->Sumw2();
       h->SetDirectory(0);
       userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
@@ -2114,29 +2146,30 @@ void baseClass::CreateUserTH3D(const char* nameAndTitle, Int_t nbinsx, Double_t 
     }
 }
 
-void baseClass::FillUserTH3D(const char* nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight)
+void baseClass::FillUserTH3D(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight)
 {
   map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
   if( nh_h == userTH3Ds_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
     }
   else
     {
       nh_h->second->Fill(value_x, value_y, value_z, weight);
     }
 }
-void baseClass::FillUserTH3D(const char* nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight)
+void baseClass::FillUserTH3D(const std::string& nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, TTreeReaderValue<double>& zReader, Double_t weight)
 {
   FillUserTH3D(nameAndTitle, *xReader, *yReader, *zReader, weight);
 }
 
-void baseClass::CreateUserTProfile(const char* nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
+void baseClass::CreateUserTProfile(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup)
 {
   map<std::string , std::unique_ptr<TProfile> >::iterator nh_h = userTProfiles_.find(nameAndTitle);
   if( nh_h == userTProfiles_.end() )
     {
-      std::unique_ptr<TProfile> h(new TProfile(nameAndTitle, nameAndTitle, nbinsx, xlow, xup));
+      std::unique_ptr<TProfile> h(new TProfile(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
       h->Sumw2();
       h->SetDirectory(0);
       userTProfiles_[std::string(nameAndTitle)] = std::move(h);
@@ -2146,12 +2179,13 @@ void baseClass::CreateUserTProfile(const char* nameAndTitle, Int_t nbinsx, Doubl
       STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
     }
 }
-void baseClass::FillUserTProfile(const char* nameAndTitle, Double_t x, Double_t y, Double_t weight)
+void baseClass::FillUserTProfile(const std::string& nameAndTitle, Double_t x, Double_t y, Double_t weight)
 {
   map<std::string , std::unique_ptr<TProfile> >::iterator nh_h = userTProfiles_.find(nameAndTitle);
   if( nh_h == userTProfiles_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
     }
   else
     {
@@ -2195,12 +2229,15 @@ float baseClass::getSkimPreCutValue(const string& s)
 {
   map<string, preCut>::iterator cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
-    {
-      return 0;
-    }
+  {
+    STDOUT("getSkimPreCutValue: (" << s << "): INFO -- did not find the precut string in the map!");
+    return 0;
+  }
   preCut * c = & (cc->second);
   if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  STDOUT("getSkimPreCutValue: (" << s << "): INFO -- found the precut string in the map with value: " << c->value1);
   return (c->value1);
+  return getPreCutValue1(s);
 }
 
 void baseClass::fillSkimTree()
@@ -2485,7 +2522,7 @@ template <typename T> void baseClass::checkOverflow(const TH1* hist, const T bin
     }
   }
   else if(std::string(hist->ClassName()).find("TH1I") != std::string::npos) {
-    float limit = std::numeric_limits<int>::max();
+    int limit = std::numeric_limits<int>::max();
     if(binContent>limit) {
       stringStream << "ERROR: binContent=" << binContent << " will overflow this TH1I bin in histo: " << hist->GetName() << "! Quitting.";
       STDOUT(stringStream.str());
