@@ -5,22 +5,24 @@
 #include "IDTypes.h"
 
 bool Electron::PassUserID (ID id, bool verbose){ 
-  if      ( id == HEEP61                ) return PassUserID_HEEPv6p1          (verbose);
-  else if ( id == HEEP70                ) return PassUserID_BuiltIn_HEEPv7p0  (verbose);
-  else if ( id == HEEP70_MANUAL         ) return PassUserID_HEEP              (verbose);
-  else if ( id == HEEP70_2018           ) return PassUserID_HEEP_2018         (verbose);
-  else if ( id == EGAMMA_BUILTIN_TIGHT  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
-  else if ( id == EGAMMA_BUILTIN_MEDIUM ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
-  else if ( id == EGAMMA_BUILTIN_LOOSE  ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
-  else if ( id == EGAMMA_BUILTIN_VETO   ) return PassUserID_BuiltIn_EGamma    (EGAMMA_VETO  );
-  else if ( id == EGAMMA_TIGHT          ) return PassUserID_EGamma            (EGAMMA_TIGHT , verbose);
-  else if ( id == EGAMMA_MEDIUM         ) return PassUserID_EGamma            (EGAMMA_MEDIUM, verbose);
-  else if ( id == EGAMMA_LOOSE          ) return PassUserID_EGamma            (EGAMMA_LOOSE , verbose);
-  else if ( id == EGAMMA_VETO           ) return PassUserID_EGamma            (EGAMMA_VETO  , verbose);
-  else if ( id == MVA                   ) return PassUserID_MVA               (verbose);
-  else if ( id == ECAL_FIDUCIAL         ) return PassUserID_ECALFiducial      (verbose);
-  else if ( id == FAKE_RATE_HEEP_LOOSE  ) return PassUserID_FakeRateLooseID(verbose);
-  else if ( id == FAKE_RATE_VERY_LOOSE  ) return PassUserID_FakeRateVeryLooseID(verbose);
+  if      ( id == HEEP61                       ) return PassUserID_HEEPv6p1          (verbose);
+  else if ( id == HEEP70                       ) return PassUserID_BuiltIn_HEEPv7p0  (verbose);
+  else if ( id == HEEP70_MANUAL                ) return PassUserID_HEEP              (verbose);
+  else if ( id == HEEP70_2018                  ) return PassUserID_HEEP_2018         (verbose);
+  else if ( id == EGAMMA_BUILTIN_TIGHT         ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
+  else if ( id == EGAMMA_BUILTIN_MEDIUM        ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
+  else if ( id == EGAMMA_BUILTIN_LOOSE         ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
+  else if ( id == EGAMMA_BUILTIN_VETO          ) return PassUserID_BuiltIn_EGamma    (EGAMMA_VETO  );
+  else if ( id == EGAMMA_TIGHT                 ) return PassUserID_EGamma            (EGAMMA_TIGHT , verbose);
+  else if ( id == EGAMMA_MEDIUM                ) return PassUserID_EGamma            (EGAMMA_MEDIUM, verbose);
+  else if ( id == EGAMMA_LOOSE                 ) return PassUserID_EGamma            (EGAMMA_LOOSE , verbose);
+  else if ( id == EGAMMA_VETO                  ) return PassUserID_EGamma            (EGAMMA_VETO  , verbose);
+  else if ( id == MVA                          ) return PassUserID_MVA               (verbose);
+  else if ( id == ECAL_FIDUCIAL                ) return PassUserID_ECALFiducial      (verbose);
+  else if ( id == FAKE_RATE_HEEP_LOOSE         ) return PassUserID_FakeRateLooseID(verbose);
+  else if ( id == FAKE_RATE_VERY_LOOSE         ) return PassUserID_FakeRateVeryLooseID(verbose);
+  else if ( id == FAKE_RATE_EGMLOOSE           ) return PassUserID_FakeRateEGMLooseID(verbose);
+  else if ( id == FAKE_RATE_VERY_LOOSE_EGMLOOSE) return PassUserID_FakeRateVeryLooseEGMLooseID(verbose);
   else return false;
 }
 
@@ -314,6 +316,81 @@ bool Electron::PassUserID_FakeRateVeryLooseID(bool verbose){
     else { 
       std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
       std::cout << "\t\t\tElectron #" << m_raw_index << " PASS FakeRateVeryLooseID" << std::endl; 
+    }
+  }
+  return decision;
+}
+
+bool Electron::PassUserID_FakeRateEGMLooseID(bool verbose){
+  bool pass_missingHits   = PassEGammaIDLooseGsfEleMissingHitsCut();
+  bool pass_sigmaIEtaIEta = false;
+  bool pass_hoe           = false;
+  bool is_barrel = false;
+  bool is_endcap = false;
+
+
+  float hoe = HoE();
+  //XXX SIC remove energy corrections
+  //hoe *= (Pt()/SCPt());
+  hoe *= ECorr();
+
+  if ( fabs(SCEta()) < 1.479 ){
+    is_barrel = true;
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
+    pass_hoe              = bool ( hoe                 < 0.15  );
+  }
+  else {
+    is_endcap = true;
+    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.0425 );
+    pass_hoe              = bool ( hoe                 < 0.10  );
+  }
+
+  bool decision = (
+		    pass_missingHits   && 
+		    pass_sigmaIEtaIEta && 
+		    pass_hoe           );
+  
+  
+  if ( verbose ) { 
+    std::cout << std::endl;
+    if ( !decision ){
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " FAIL FakeRateEGMLooseID" << std::endl; 
+      if ( !pass_missingHits   ) std::cout << "\t\t\tfail missingHits   :\t " << MissingHits()   << std::endl;
+      if ( !pass_sigmaIEtaIEta ) std::cout << "\t\t\tfail sigmaIEtaIEta :\t " << Full5x5SigmaIEtaIEta() << std::endl;
+      if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+    }
+    else { 
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " PASS FakeRateLooseID" << std::endl; 
+    }
+  }
+  
+  return decision;
+
+}
+
+bool Electron::PassUserID_FakeRateVeryLooseEGMLooseID(bool verbose){
+  float hoe = HoE();
+  //XXX SIC remove energy corrections
+  //hoe *= (Pt()/SCPt());
+  hoe *= ECorr();
+
+  bool pass_hoe              = bool ( hoe                 < 0.15  );
+
+  bool decision = ( pass_hoe );
+  
+  
+  if ( verbose ) { 
+    std::cout << std::endl;
+    if ( !decision ){
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " FAIL FakeRateVeryLooseEGMLooseID" << std::endl; 
+      if ( !pass_hoe           ) std::cout << "\t\t\tfail hoe           :\t " << HoE()           << std::endl;
+    }
+    else { 
+      std::cout << "\t\t\tElectron #" << m_raw_index << " Eta: " << Eta() << " Phi: " << Phi() << " Pt: " << Pt() << std::endl;
+      std::cout << "\t\t\tElectron #" << m_raw_index << " PASS FakeRateVeryLooseEGMLooseID" << std::endl; 
     }
   }
   return decision;
