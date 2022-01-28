@@ -95,10 +95,11 @@ def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
             print "ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList)
             print "ERROR: considered these full paths: {}".format(completeNamesTried)
             foundAllFiles = False
-        sampleName = SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
-        dictDatasetsFileNames[dataset_fromInputList] = fileList[0]
-        # print "for dataset {}, found files: {}".format(dataset_fromInputList, fileList[0])
-        datasetsHandled.append(sampleName)
+        else:
+            sampleName = SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
+            dictDatasetsFileNames[dataset_fromInputList] = fileList[0]
+            # print "for dataset {}, found files: {}".format(dataset_fromInputList, fileList[0])
+            datasetsHandled.append(sampleName)
     return foundAllFiles, dictDatasetsFileNames
 
 
@@ -202,8 +203,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
 
         # the rule is that the name of each 'piece' here must match the inputList name and filename
         if len(line.split()) < 2:
-            print "ERROR: GetSamplesToCombineDict(): cannot deal with line which does not contain at least one piece: '"+line+"'"
-            exit(-1)
+            raise RuntimeError("GetSamplesToCombineDict(): cannot deal with line which does not contain at least one piece: '"+line+"'")
         for i, piece in enumerate(line.split()):
             # print "GetSamplesToCombineDict(): i=", i, "  piece= ", piece
             if i == 0:
@@ -228,7 +228,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
                 dictSamples[key].append(piece)
         # print "dictSamples["+key+"]=", dictSamples[key]
     if duplicateKeyError:
-        exit(-1)
+        raise RuntimeError("duplicate key found")
     return dictSamples
 
 
@@ -278,8 +278,7 @@ def ParseXSectionFile(xsectionFile):
         try:
             dataset, xsection_val = string.split(line)
         except ValueError:
-            print 'ERROR: could not split line "', line, '"'
-            exit(-1)
+            raise RuntimeError('ERROR: could not split line "', line, '"')
 
         # print 'ParseXSectionFile: line looked like:"'+line+'"; call SanitizeDatasetNameFromFullDataset on dataset=',dataset
         outputFile = SanitizeDatasetNameFromFullDataset(dataset)
@@ -319,6 +318,7 @@ def ParseDatFile(datFilename):
     with open(datFilename) as datFile:
         # start with line that begins with '#id'
         foundFirstLine = False
+        startIdx = 0
         for j, line in enumerate(datFile):
             # ignore comments
             if re.search("^###", line):
@@ -335,8 +335,10 @@ def ParseDatFile(datFilename):
                 else:
                     for i, piece in enumerate(line.split()):
                         if i == 0:
-                            data[int(piece)] = {}
-                            row = int(piece)
+                            if len(data) == 0:
+                                startIdx = int(piece)
+                            row = int(piece)-startIdx
+                            data[row] = {}
                         else:
                             data[row][column[i]] = piece
                             # print data[row][ column[i] ]
@@ -349,15 +351,14 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
     verbose = True
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
-        print "ERROR: could not open file '{}'. Exiting here.".format(rootFileName)
-        exit(-1)
+        raise RuntimeError("Could not open file '{}'.".format(rootFileName))
     if sampleName:
         histName = "profile1D__{}__EventsPassingCuts".format(sampleName)
     else:
         histName = "EventsPassingCuts"
     eventsPassingHist = tfile.Get(histName)
     if not eventsPassingHist:
-        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'. Exiting here.".format(histName, rootFileName))
+        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'.".format(histName, rootFileName))
     cutHists = []
     for i in range(0, eventsPassingHist.GetNbinsX()):
         iBin = i+1
@@ -418,20 +419,27 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
 def FillTableErrors(table, rootFileName, sampleName=""):
     tfile = r.TFile.Open(rootFileName)
     if not tfile:
-        raise RuntimeError("ERROR: could not open file '{}'. Exiting here.".format(rootFileName))
+        raise RuntimeError("ERROR: could not open file '{}'.".format(rootFileName))
     if sampleName:
-        histName = "profile1D__{}__EventsPassingCuts".format(sampleName)
+        histName = "profile1D__{}__EventsPassingCutsAllHist".format(sampleName)
     else:
-        histName = "EventsPassingCuts"
+        histName = "EventsPassingCutsAllHist"
     eventsPassingHist = tfile.Get(histName)
     if not eventsPassingHist:
-        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'. Exiting here.".format(histName, rootFileName))
+        raise RuntimeError("ERROR: could not find hist '{}' in file '{}'.".format(histName, rootFileName))
 
     for j, line in enumerate(table):
         iBin = j+1
-        errNpassSqr = eventsPassingHist.GetSumw2().At(iBin)
+        # print "Table line {}: {}".format(j, table[j])
+        # print "GetSumw2() in hist={} for iBin={}".format(eventsPassingHist.GetName(), iBin)
+        # sys.stdout.flush()
+        # errNpassSqr = eventsPassingHist.GetSumw2().At(iBin)
+        errNpassSqr = eventsPassingHist.GetBinError(iBin)**2
         if j > 0:
-            errNSqr = eventsPassingHist.GetSumw2().At(iBin-1)
+            # print "GetSumw2() in hist={} for iBin={}".format(eventsPassingHist.GetName(), iBin-1)
+            # sys.stdout.flush()
+            # errNSqr = eventsPassingHist.GetSumw2().At(iBin-1)
+            errNSqr = eventsPassingHist.GetBinError(iBin-1)**2
         else:
             errNSqr = errNpassSqr
         table[j]["errNpassSqr"] = errNpassSqr
@@ -460,7 +468,7 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
                     }
 
         else:
-            # print 'data[j]=',data[j]
+            # print "data[{}]={}".format(j, data[j])
             #N = float(data[j]["N"]) * weight
             ## errN = float(data[j - 1]["errEffAbs"]) * xsection_X_intLumi
             #errNSqr = pow(float(data[j]["errN"]) * weight, 2)
@@ -476,7 +484,10 @@ def CreateWeightedTable(data, weight=1.0, xsection_X_intLumi=1.0):
 
             Npass = float(data[j]["Npass"]) * weight
             # errNpass = float(data[j]["errEffAbs"]) * xsection_X_intLumi
-            errNpassSqr = pow(float(data[j]["errNpass"]) * weight, 2)
+            if "errNpass" in data[j]:
+                errNpassSqr = pow(float(data[j]["errNpass"]) * weight, 2)
+            else:
+                errNpassSqr = float(data[j]["errNpassSqr"]) * pow(weight, 2)
             # print "errNPass " , errNpass
             # print ""
             #if str(errNpassSqr) == "nan":
@@ -556,8 +567,7 @@ def UpdateTable(inputTable, outputTable):
 def SubtractTables(inputTable, outputTable, zeroNegatives=False):
     # subtract the inputTable from the outputTable
     if not outputTable:
-        print "ERROR: no outputTable found! cannot subtract input from nothing; FATAL"
-        exit(-1)
+        raise RuntimeError("No outputTable found! cannot subtract input from nothing")
     else:
         for j, line in enumerate(inputTable):
             # print 'outputTable[int(',j,')][N]=',outputTable[int(j)]['N'],'inputTable[',j,']','[N]=',inputTable[j]['N']
@@ -595,8 +605,7 @@ def SubtractTables(inputTable, outputTable, zeroNegatives=False):
 
 def ScaleTable(inputTable, scaleFactor, errScaleFactor):
     if not inputTable:
-        print "ERROR: no inputTable found! cannot scale nothing; FATAL"
-        exit(-1)
+        raise RuntimeError("No inputTable found! cannot scale nothing")
     else:
         for j, line in enumerate(inputTable):
             nOrig = float(inputTable[int(j)]["N"])
@@ -639,8 +648,7 @@ def ScaleTable(inputTable, scaleFactor, errScaleFactor):
 
 def SquareTableErrorsForEfficiencyCalc(table):
     if not table:
-        print "ERROR: no inputTable found! cannot convert nothing; FATAL"
-        exit(-1)
+        raise RuntimeError("No inputTable found! cannot convert nothing")
     else:
         for j, line in enumerate(table):
             table[int(j)] = {
@@ -977,7 +985,7 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
         histoName = key.GetName()
         htemp = key.ReadObj()
         if not htemp or htemp is None:
-            raise RuntimeError("ERROR: failed to get histo named:", histoName, "from file:", tfile.GetName())
+            raise RuntimeError("failed to get histo named:", histoName, "from file:", tfile.GetName())
         r.SetOwnership(htemp, True)
         if sampleName in histoName:
             if "amcatnlo" in tfileName.lower() and "systematics" in histoName.lower() and "diffs" not in histoName.lower():
@@ -994,7 +1002,7 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
     tfile.Close()
     if len(sampleHistos) < 1:
         raise RuntimeError(
-                "ERROR: GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file! Exiting.".format(
+                "GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file!".format(
                     tfile.GetName(), sampleName))
 
 
@@ -1005,7 +1013,7 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
     # print 'list of keys in this rootfile:',file.GetListOfKeys()
     # print
     #print "INFO: AddHistosFromFile for file: {}: nKeys={}".format(rootFileName, nHistos)
-    sys.stdout.flush()
+    #sys.stdout.flush()
     # loop over histograms in rootfile
     # for h in range(0, nHistos):
     h = 0
@@ -1017,8 +1025,8 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
         if not htemp:
             raise RuntimeError("ERROR: failed to get histo named: {} from file: {}".format(histoName, tfile.GetName()))
         # log XXX DEBUG
-        else:
-            print "INFO: AddHistosFromFile for file: {}: handling histoName={}".format(rootFileName, histoName)
+        #else:
+        #    print "INFO: AddHistosFromFile for file: {}: handling histoName={}".format(rootFileName, histoName)
         # log XXX DEBUG
         r.SetOwnership(htemp, True)
         #
@@ -1039,9 +1047,9 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
                 # else:
                 #  print "INFO: found key in subdir named:",hname,"hist name:",htmp.GetName()
                 # log XXX DEBUG
-                else:
-                    print "INFO: AddHistosFromFile for file: {}: in a TDir, about to updateSample for histoName={}".format(rootFileName, hname)
-                    sys.stdout.flush()
+                #else:
+                #    print "INFO: AddHistosFromFile for file: {}: in a TDir, about to updateSample for histoName={}".format(rootFileName, hname)
+                #    sys.stdout.flush()
                 # log XXX DEBUG
                 r.SetOwnership(htmp, True)
                 updateSample(
@@ -1050,8 +1058,8 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
                 h += 1
         else:
             # log XXX DEBUG
-            print "INFO: AddHistosFromFile for file: {}: about to updateSample for histoName={}".format(rootFileName, histoName)
-            sys.stdout.flush()
+            #print "INFO: AddHistosFromFile for file: {}: about to updateSample for histoName={}".format(rootFileName, histoName)
+            #sys.stdout.flush()
             # log XXX DEBUG
             updateSample(
                 sampleHistoDict, htemp, h, piece, sample, plotWeight
@@ -1079,6 +1087,8 @@ def GetShortHistoName(histName):
 
 
 def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeight=1.0):
+    # print "INFO: UpdateHistoDict for sample {}".format(sample)
+    sys.stdout.flush()
     idx = 0
     for pieceHisto in pieceHistoList:
         pieceHistoName = pieceHisto.GetName()
@@ -1099,8 +1109,8 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
             sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0)
             idx += 1
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight)
-        # if idx == 0:
-        #     print "INFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
+        # if idx < 2:
+        #     print "\tINFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
         #             sample, pieceHisto.GetName(), pieceHisto.GetEntries(), sampleHistoDict[idx].GetName(), sampleHistoDict[idx].GetEntries())
         idx += 1
     # check TMap consistency

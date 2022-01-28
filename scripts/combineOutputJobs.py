@@ -11,6 +11,8 @@ import traceback
 import re
 import ROOT as r
 import combineCommon
+import faulthandler
+faulthandler.enable()
 
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate datasets found in inputList..."
@@ -55,25 +57,34 @@ def CombinePlotsAndTables(args):
         sampleTable = {}
         for currentRootFile in fileList:
             combineCommon.AddHistosFromFile(currentRootFile, sampleHistos, currentRootFile)  # use root filename as piece name--only used for logging
+            # print "INFO: done with AddHistosFromFile for datasetName {} file {}".format(datasetName, currentRootFile)
+            # sys.stdout.flush()
             currentDatFile = currentRootFile.replace(".root", ".dat")
+            # print "INFO: ParseDatFile for datasetName {} file {}".format(datasetName, currentRootFile)
+            # sys.stdout.flush()
             data = combineCommon.ParseDatFile(currentDatFile)
+            # print "INFO: FillTableErrors for datasetName {} file {}".format(datasetName, currentRootFile)
+            # sys.stdout.flush()
             data = combineCommon.FillTableErrors(data, currentRootFile)
+            # print "INFO: UpdateTable for datasetName {} file {}".format(datasetName, currentRootFile)
+            # sys.stdout.flush()
             sampleTable = combineCommon.UpdateTable(data, sampleTable)
+        # print "INFO: CalculateEfficiency for datasetName {}".format(datasetName)
+        # sys.stdout.flush()
         sampleTable = combineCommon.CalculateEfficiency(sampleTable)
         outputTableFilename = options.outputDir + "/" + options.analysisCode + "___" + datasetName + ".dat"
+        # print "INFO: WriteTable for datasetName {}".format(datasetName)
+        # sys.stdout.flush()
         with open(outputTableFilename, "w") as outputTableFile:
             # print "Write table to file:", outputTableFilename
             combineCommon.WriteTable(sampleTable, datasetName, outputTableFile)
         outputTfile = r.TFile(
             outputTableFilename.replace(".dat", ".root"), "RECREATE", "", 207
         )
-        # print "INFO: writing histos for datasetName {} to file {}".format(datasetName, outputTfile.GetName())
+        # print "INFO: opened TFile; writing histos for datasetName {} to file {}".format(datasetName, outputTfile.GetName())
+        # sys.stdout.flush()
         combineCommon.WriteHistos(outputTfile, sampleHistos)
         outputTfile.Close()
-        if not options.saveInputFiles:
-            # print "removing input root files"
-            for rootFile in fileList:
-                os.remove(rootFile)
     except Exception as e:
         print "ERROR: exception in CombinePlotsAndTables for datasetName={}".format(datasetName)
         traceback.print_exc()
@@ -241,6 +252,13 @@ pool.join()
 if len(result_list) < jobCount:
     print "ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list))
     exit(-2)
+
+# don't remove anything until everything looks OK
+if not options.saveInputFiles:
+    for datasetName, fileList in dictDatasetsFileNames.iteritems():
+        # print "removing input root files"
+        for rootFile in fileList:
+            os.remove(rootFile)
 print
 print "Done"
 sys.stdout.flush()
