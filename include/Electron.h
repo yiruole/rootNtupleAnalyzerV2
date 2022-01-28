@@ -37,6 +37,7 @@ class Electron : public Object {
   bool   IsEEFiducial();
   
   // ID variables		
+  unsigned int GetHEEPBitmap();
   // EventsTree.GetBranch('Electron_vidNestedWPBitmapHEEP').Print()
   enum class HEEPIDCut {
     MinPtCut                             = 0,
@@ -50,24 +51,102 @@ class Electron : public Object {
     GsfEleEmHadD1IsoRhoCut               = 8,
     GsfEleDxyCut                         = 9,
     GsfEleMissingHitsCut                 = 10,
-    GsfEleEcalDrivenCut                  = 11,
+    GsfEleEcalDrivenCut                  = 11
   };
-
+  std::string GetHEEPCutName(HEEPIDCut cut) {
+    if(cut==HEEPIDCut::MinPtCut)
+      return "MinPtCut";
+    else if(cut==HEEPIDCut::GsfEleSCEtaMultiRangeCut)
+      return "GsfEleSCEtaMultiRangeCut";
+    else if(cut==HEEPIDCut::GsfEleDEtaInSeedCut)
+      return "GsfEleDEtaInSeedCut";
+    else if(cut==HEEPIDCut::GsfEleDPhiInCut)
+      return "GsfEleDPhiInCut";
+    else if(cut==HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut)
+      return "GsfEleFull5x5SigmaIEtaIEtaWithSatCut";
+    else if(cut==HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut)
+      return "GsfEleFull5x5E2x5OverE5x5WithSatCut";
+    else if(cut==HEEPIDCut::GsfEleHadronicOverEMLinearCut)
+      return "GsfEleHadronicOverEMLinearCut";
+    else if(cut==HEEPIDCut::GsfEleTrkPtIsoCut)
+      return "GsfEleTrkPtIsoCut";
+    else if(cut==HEEPIDCut::GsfEleEmHadD1IsoRhoCut)
+      return "GsfEleEmHadD1IsoRhoCut";
+    else if(cut==HEEPIDCut::GsfEleDxyCut)
+      return "GsfEleDxyCut";
+    else if(cut==HEEPIDCut::GsfEleMissingHitsCut)
+      return "GsfEleMissingHitsCut";
+    else if(cut==HEEPIDCut::GsfEleEcalDrivenCut)
+      return "GsfEleEcalDrivenCut";
+    else
+      return "unknown";
+  }
   bool PassHEEPIDCut(HEEPIDCut cut);
-  bool PassHEEPMinPtCut                            ();
-  bool PassHEEPGsfEleSCEtaMultiRangeCut            (); 
-  bool PassHEEPGsfEleDEtaInSeedCut                 (); 
-  bool PassHEEPGsfEleDPhiInCut                     (); 
-  bool PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(); 
-  bool PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (); 
-  bool PassHEEPGsfEleHadronicOverEMLinearCut       (); 
-  bool PassHEEPGsfEleTrkPtIsoCut                   (); 
-  bool PassHEEPGsfEleEmHadD1IsoRhoCut              (); 
-  bool PassHEEPGsfEleDxyCut                        (); 
-  bool PassHEEPGsfEleMissingHitsCut                (); 
-  bool PassHEEPEcalDrivenCut                       ();
+  bool PassHEEPMinPtCut                            (){ return PassHEEPIDCut(HEEPIDCut::MinPtCut); }
+  bool PassHEEPGsfEleSCEtaMultiRangeCut            (){ return PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut); }
+  bool PassHEEPGsfEleDEtaInSeedCut                 (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDEtaInSeedCut); }
+  bool PassHEEPGsfEleDPhiInCut                     (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDPhiInCut); }
+  bool PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut); }
+  bool PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut); }
+  bool PassHEEPGsfEleHadronicOverEMLinearCut       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut); }
+  bool PassHEEPGsfEleTrkPtIsoCut                   (){ return PassHEEPIDCut(HEEPIDCut::GsfEleTrkPtIsoCut); }
+  bool PassHEEPGsfEleEmHadD1IsoRhoCut              (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEmHadD1IsoRhoCut); }
+  bool PassHEEPGsfEleDxyCut                        (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut); }
+  bool PassHEEPGsfEleMissingHitsCut                (){ return PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut); }
+  bool PassHEEPEcalDrivenCut                       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut); }
   bool PassHEEPGsfEleHadronicOverEMLinearCut2018   ();
   bool PassHEEPGsfEleEmHadD1IsoRhoCut2018          ();
+
+  // ID variables		
+  unsigned int GetEGammaIDBitmap();
+  // EventsTree.GetBranch('Electron_vidNestedWPBitmap').Print()
+  enum class EGammaIDCut {
+    MinPtCut                             = 0,
+    GsfEleSCEtaMultiRangeCut             = 1,
+    GsfEleDEtaInSeedCut                  = 2,
+    GsfEleDPhiInCut                      = 3,
+    GsfEleFull5x5SigmaIEtaIEtaCut        = 4,
+    GsfEleHadronicOverEMEnergyScaledCut  = 5,
+    GsfEleEInverseMinusPInverseCut       = 6,
+    GsfEleRelPFIsoScaledCut              = 7,
+    GsfEleConversionVetoCut              = 8,
+    GsfEleMissingHitsCut                 = 9
+  };
+  std::string GetEGammaIDCutName(EGammaIDCut cut) {
+    if(cut==EGammaIDCut::MinPtCut)
+      return "MinPtCut";
+    else if(cut==EGammaIDCut::GsfEleSCEtaMultiRangeCut)
+      return "GsfEleSCEtaMultiRangeCut";
+    else if(cut==EGammaIDCut::GsfEleDEtaInSeedCut)
+      return "GsfEleDEtaInSeedCut";
+    else if(cut==EGammaIDCut::GsfEleDPhiInCut)
+      return "GsfEleDPhiInCut";
+    else if(cut==EGammaIDCut::GsfEleFull5x5SigmaIEtaIEtaCut)
+      return "GsfEleFull5x5SigmaIEtaIEtaCut";
+    else if(cut==EGammaIDCut::GsfEleHadronicOverEMEnergyScaledCut)
+      return "GsfEleHadronicOverEMEnergyScaledCut";
+    else if(cut==EGammaIDCut::GsfEleEInverseMinusPInverseCut)
+      return "GsfEleEInverseMinusPInverseCut";
+    else if(cut==EGammaIDCut::GsfEleRelPFIsoScaledCut)
+      return "GsfEleRelPFIsoScaledCut";
+    else if(cut==EGammaIDCut::GsfEleConversionVetoCut)
+      return "GsfEleConversionVetoCut";
+    else if(cut==EGammaIDCut::GsfEleMissingHitsCut)
+      return "GsfEleMissingHitsCut";
+    else
+      return "unknown";
+  }
+  bool PassEGammaIDLooseCut(EGammaIDCut cut);
+  bool PassEGammaIDLooseMinPtCut                            (){ return PassEGammaIDLooseCut(EGammaIDCut::MinPtCut); }
+  bool PassEGammaIDLooseGsfEleSCEtaMultiRangeCut            (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleSCEtaMultiRangeCut); }
+  bool PassEGammaIDLooseGsfEleDEtaInSeedCut                 (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleDEtaInSeedCut); }
+  bool PassEGammaIDLooseGsfEleDPhiInCut                     (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleDPhiInCut); }
+  bool PassEGammaIDLooseGsfEleFull5x5SigmaIEtaIEtaCut       (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleFull5x5SigmaIEtaIEtaCut); }
+  bool PassEGammaIDLooseGsfEleHadronicOverEMScaledCut       (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleHadronicOverEMEnergyScaledCut); }
+  bool PassEGammaIDLooseGsfEleEInverseMinusPInverseCut      (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleEInverseMinusPInverseCut); }
+  bool PassEGammaIDLooseGsfEleRelPFIsoScaledCut             (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleRelPFIsoScaledCut); }
+  bool PassEGammaIDLooseGsfEleConversionVetoCut             (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleConversionVetoCut); }
+  bool PassEGammaIDLooseGsfEleMissingHitsCut                (){ return PassEGammaIDLooseCut(EGammaIDCut::GsfEleMissingHitsCut); }
 
   float IsEB                 ();
   float IsEE                 ();
@@ -127,7 +206,8 @@ class Electron : public Object {
   float HcalIsoD1DR03        ();
   float TrkIsoDR03           ();
   
-  float PFChargedHadronIso03 ();
+  float PFRelIso03Charged    ();
+  float PFRelIso03All        ();
   float PFPhotonIso03        ();
   float PFNeutralHadronIso03 ();
   float PFPUIso03            ();
@@ -170,6 +250,8 @@ class Electron : public Object {
   bool   PassUserID_ECALFiducial        (bool verbose);
   bool   PassUserID_FakeRateLooseID     (bool verbose);
   bool   PassUserID_FakeRateVeryLooseID (bool verbose);
+  bool   PassUserID_FakeRateEGMLooseID  (bool verbose);
+  bool   PassUserID_FakeRateVeryLooseEGMLooseID(bool verbose);
 };
 
 std::ostream& operator<< (std::ostream& stream, Electron& object);
