@@ -1,13 +1,78 @@
 #!/usr/bin/env python3
 #
 import os
+import math
 
-from tmvaBDT import LoadChainFromTxtFile, GetSignalTotalEventsHist
+from tmvaBDT import LoadChainFromTxtFile, GetSignalTotalEventsHist, neededBranches
 
 import ROOT
-from ROOT import TMVA, TFile, TString, TCut, TChain, TFileCollection, gROOT, gDirectory, gInterpreter, TEntryList, TH1D, TProfile, RDataFrame
+from ROOT import TMVA, TFile, TString, TCut, TChain, TFileCollection, gROOT, gDirectory, gInterpreter, TEntryList, TH1D, TProfile, RDataFrame, TLorentzVector
 
 gROOT.SetBatch()
+
+
+@ROOT.Numba.Declare(["float","float","float","float"], "float")
+def CalcMAsym(M_e1j1, M_e2j2, M_e1j2, M_e2j1):
+    if math.fabs(M_e1j1-M_e2j2) < math.fabs(M_e1j2-M_e2j1):
+        if M_e1j1 < M_e2j2:
+           M_ej_max = M_e2j2
+           M_ej_min = M_e1j1
+        else:
+           M_ej_max = M_e1j1
+           M_ej_min = M_e2j2
+    else:
+        if M_e1j2 < M_e2j1:
+           M_ej_max = M_e2j1
+           M_ej_min = M_e1j2
+        else:
+           M_ej_max = M_e1j2
+           M_ej_min = M_e2j1
+    masym = (M_ej_max-M_ej_min)/(M_ej_max+M_ej_min)
+    return masym
+
+
+@ROOT.Numba.Declare(["float","float","float","float"], "float")
+def CalcMejMax(M_e1j1, M_e2j2, M_e1j2, M_e2j1):
+    if math.fabs(M_e1j1-M_e2j2) < math.fabs(M_e1j2-M_e2j1):
+        if M_e1j1 < M_e2j2:
+           M_ej_max = M_e2j2
+        else:
+           M_ej_max = M_e1j1
+    else:
+        if M_e1j2 < M_e2j1:
+           M_ej_max = M_e2j1
+        else:
+           M_ej_max = M_e1j2
+    return M_ej_max
+
+
+@ROOT.Numba.Declare(["float","float","float","float"], "float")
+def CalcMejMin(M_e1j1, M_e2j2, M_e1j2, M_e2j1):
+    if math.fabs(M_e1j1-M_e2j2) < math.fabs(M_e1j2-M_e2j1):
+        if M_e1j1 < M_e2j2:
+           M_ej_min = M_e1j1
+        else:
+           M_ej_min = M_e2j2
+    else:
+        if M_e1j2 < M_e2j1:
+           M_ej_min = M_e1j2
+        else:
+           M_ej_min = M_e2j1
+    return M_ej_min
+
+
+ROOT.gInterpreter.Declare('''
+       float CalcMeejj(float Ele1_Pt, float Ele1_Eta, float Ele1_Phi, float Ele2_Pt, float Ele2_Eta, float Ele2_Phi,
+           float Jet1_Pt, float Jet1_Eta, float Jet1_Phi, float Jet2_Pt, float Jet2_Eta, float Jet2_Phi) {
+         TLorentzVector e1, j1, e2, j2, eejj;
+         e1.SetPtEtaPhiM ( Ele1_Pt, Ele1_Eta, Ele1_Phi, 0.0 );
+         e2.SetPtEtaPhiM ( Ele2_Pt, Ele2_Eta, Ele2_Phi, 0.0 );
+         j1.SetPtEtaPhiM ( Jet1_Pt, Jet1_Eta, Jet1_Phi, 0.0 );
+         j2.SetPtEtaPhiM ( Jet2_Pt, Jet2_Eta, Jet2_Phi, 0.0 );
+         eejj = e1 + e2 + j1 + j2; 
+         return eejj.M();
+       }
+''')
 
 
 # datasets
@@ -113,7 +178,7 @@ allSignalDatasetsDict = {
             inputListSignalBase+"LQToDEle_M-300_pair_pythia8.txt",
             ],
 }
-mycuts = TCut("M_e1e2 > 200 && sT_eejj > 400")
+# mycuts = TCut("M_e1e2 > 200 && sT_eejj > 400")
 mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
 
 ####################################################################################################
@@ -121,7 +186,7 @@ mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
 ####################################################################################################
 if __name__ == "__main__":
     allSamplesDict = dict()
-    #allSamplesDict.update(backgroundDatasetsDict)
+    allSamplesDict.update(backgroundDatasetsDict)
     allSamplesDict.update(allSignalDatasetsDict)
     for sample in allSamplesDict.keys():
         for idx, txtFile in enumerate(allSamplesDict[sample]):
@@ -130,12 +195,15 @@ if __name__ == "__main__":
                 continue
             datasetName = os.path.basename(txtFile).strip(".txt")
             df = RDataFrame(tchainBkg)
-            # df = df.Filter(mycutb.GetTitle())  # will work for expressions valid in C++
-            # df = df.Define('BDT', 'BDTv[0]')
-            # tfilepath = "/tmp/scooper/{}.root".format(datasetName)
-            tfilepath = "root://eosuser.cern.ch//eos/user/s/scooper/LQ/NanoV7/2016/analysis/bdtTraining_eejj_finalSels_egLoose_4feb2022/{}.root".format(datasetName)
+            df = df.Filter(mycutb.GetTitle())  # will work for expressions valid in C++
+            df = df.Define("Masym", "Numba::CalcMAsym(M_e1j1, M_e2j2, M_e1j2, M_e2j1)")
+            df = df.Define("MejMax", "Numba::CalcMejMax(M_e1j1, M_e2j2, M_e1j2, M_e2j1)")
+            df = df.Define("MejMin", "Numba::CalcMejMin(M_e1j1, M_e2j2, M_e1j2, M_e2j1)")
+            df = df.Define("Meejj", "CalcMeejj(Ele1_Pt, Ele1_Eta, Ele1_Phi, Ele2_Pt, Ele2_Eta, Ele2_Phi,Jet1_Pt, Jet1_Eta, Jet1_Phi, Jet2_Pt, Jet2_Eta, Jet2_Phi)")
+           
+            tfilepath = "root://eosuser.cern.ch//eos/user/s/scooper/LQ/NanoV7/2016/analysis/bdtTraining_eejj_finalSels_egLoose_4feb2022_mee200st400_mejs_varList/{}.root".format(datasetName)
             print("Writing snapshot to:", tfilepath)
-            df.Snapshot("rootTupleTree/tree", tfilepath)
+            df.Snapshot("rootTupleTree/tree", tfilepath, neededBranches)
             if sample in allSignalDatasetsDict.keys():
                 mass = int(sample[sample.find("M")+2:sample.rfind("_")])
                 eventCounterHist = GetSignalTotalEventsHist(mass, allSignalDatasetsDict)
