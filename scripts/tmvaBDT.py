@@ -15,21 +15,19 @@ import traceback
 import ROOT
 from ROOT import TMVA, TFile, TString, TCut, TChain, TFileCollection, gROOT, gDirectory, gInterpreter, TEntryList, TH1D, TProfile, RDataFrame
 
-gROOT.SetBatch()
-
 
 ####################################################################################################
 # Configurables
 ####################################################################################################
 variableList = [
     "sT_eejj",
-    "PFMET_Type1_Pt",
-    "PFMET_Type1_Phi",
+    # "PFMET_Type1_Pt",
+    # "PFMET_Type1_Phi",
     "M_e1e2",
-    "M_e1j1",
-    "M_e1j2",
-    "M_e2j1",
-    "M_e2j2",
+    # "M_e1j1",
+    # "M_e1j2",
+    # "M_e2j1",
+    # "M_e2j2",
     "Ele1_Pt",
     "Ele2_Pt",
     "Ele1_Eta",
@@ -50,18 +48,29 @@ variableList = [
     "DR_Ele2Jet1",
     "DR_Ele2Jet2",
     "DR_Jet1Jet2",
+    "Masym",
+    "MejMin",
+    "MejMax",
+    "Meejj"
 ]
+# EGM Loose ID
 eventWeightExpression = "Weight*PrefireWeight*puWeight*Ele1_RecoSF*Ele2_RecoSF*Ele1_TrigSF*Ele2_TrigSF*Ele1_EGMLooseIDSF*Ele2_EGMLooseIDSF"
 # HEEP
-# loader.SetBackgroundWeightExpression( "Weight*PrefireWeight*puWeight*Ele1_RecoSF*Ele2_RecoSF*Ele1_TrigSF*Ele2_TrigSF*Ele1_HEEPSF*Ele2_HEEPSF" )
+#eventWeightExpression = "Weight*PrefireWeight*puWeight*Ele1_RecoSF*Ele2_RecoSF*Ele1_TrigSF*Ele2_TrigSF*Ele1_HEEPSF*Ele2_HEEPSF"
+#
 neededBranches = ["Weight", "PrefireWeight", "puWeight", "Ele1_RecoSF", "Ele2_RecoSF", "Ele1_TrigSF", "Ele2_TrigSF"]
 neededBranches.extend(["run", "ls", "event"])
+# loose
 neededBranches.extend(["Ele1_EGMLooseIDSF", "Ele2_EGMLooseIDSF"])
-neededBranches.extend(["Ele1_HEEPSF", "Ele2_HEEPSF"])
-neededBranches.extend(["sT_eejj", "M_e1e2", "M_e1j1", "M_e1j2", "M_e2j1","M_e2j2"])
-neededBranches.extend(["Ele1_Pt", "Ele2_Pt", "Jet1_Pt", "Jet2_Pt", "Jet3_Pt", "Ele1_Eta", "Ele2_Eta", "Jet1_Eta", "Jet2_Eta", "Jet3_Eta"])
-neededBranches.extend(["Ele1_Phi", "Ele2_Phi", "Ele3_Phi", "Jet1_Phi", "Jet2_Phi", "Jet3_Phi"])
-neededBranches.extend(["PFMET_Type1_Pt", "PFMET_Type1_Phi", "DR_Ele1Jet1", "DR_Ele1Jet2", "DR_Ele2Jet1", "DR_Ele2Jet2", "DR_Jet1Jet2"])
+# HEEP
+# neededBranches.extend(["Ele1_HEEPSF", "Ele2_HEEPSF"])
+#
+# neededBranches.extend(["sT_eejj", "M_e1e2", "M_e1j1", "M_e1j2", "M_e2j1","M_e2j2"])
+# neededBranches.extend(["Ele1_Pt", "Ele2_Pt", "Jet1_Pt", "Jet2_Pt", "Jet3_Pt", "Ele1_Eta", "Ele2_Eta", "Jet1_Eta", "Jet2_Eta", "Jet3_Eta"])
+# neededBranches.extend(["Ele1_Phi", "Ele2_Phi", "Ele3_Phi", "Jet1_Phi", "Jet2_Phi", "Jet3_Phi"])
+# neededBranches.extend(["PFMET_Type1_Pt", "PFMET_Type1_Phi", "DR_Ele1Jet1", "DR_Ele1Jet2", "DR_Ele2Jet1", "DR_Ele2Jet2", "DR_Jet1Jet2"])
+# neededBranches.append("Masym")
+neededBranches.extend(variableList)
 # Apply additional cuts on the signal and background samples (can be different)
 # mycuts = TCut()
 # mycutb = TCut()
@@ -69,10 +78,16 @@ mycuts = TCut("M_e1e2 > 200 && sT_eejj > 400")
 mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
     
 ####################################################################################################
-# datasets
-inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_egLoose_4feb2022/"
+# datasets -- preselection skims
+# inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_egLoose_4feb2022/"
+# inputListQCDBase = "$LQANA/config/nanoV7_2016_pskQCDEEJJ_egLoose_24mar2022_comb/"
+# inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_masym/"
+# inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_masym/"
+inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs/"
+inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs/"
+# HEEP
 # inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_heep_2sep2021/"
-inputListQCDBase = "$LQANA/config/nanoV7_2016_pskQCDEEJJ_egLoose_24mar2022_comb/"
+# inputListQCDBase = "$LQANA/config/nanoV7_2016_pskQCDEEJJ_heep_6apr2022_comb/"
 # preselection-skimmed background datasets
 backgroundDatasetsDict = {
         # "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
@@ -99,12 +114,14 @@ backgroundDatasetsDict = {
             inputListQCDBase+"SinglePhoton_Run2016B-02Apr2020_ver2-v1.txt",
             ],
         "DIBOSON_nlo" : [
-            inputListBkgBase+"WWTo4Q.txt",
+            #FIXME: commented out datasets with zero events; should handle this a bit better
+            #       this came from the fact that the makeBDTTrainingTrees script doesn't write out files for trees with zero entries
+            #inputListBkgBase+"WWTo4Q.txt",
             inputListBkgBase+"WWToLNuQQ.txt",
             inputListBkgBase+"WWTo2L2Nu.txt",
             inputListBkgBase+"ZZTo2L2Q_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"ZZTo4L_pythia8.txt",
-            inputListBkgBase+"ZZTo2Q2Nu_amcatnloFXFX_pythia8.txt",
+            #inputListBkgBase+"ZZTo2Q2Nu_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"ZZTo2L2Nu_pythia8.txt",
             inputListBkgBase+"WZTo1L3Nu_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"WZTo3LNu_amcatnloFXFX_pythia8.txt",
@@ -137,7 +154,7 @@ backgroundDatasetsDict = {
         #    inputListBkgBase+"WToLNu_2J_amcatnloFXFX_pythia8.txt",
         #    ],
         "WJet_amcatnlo_ptBinned" : [
-            inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
+            #inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8.txt",
             inputListBkgBase+"WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8.txt",
@@ -145,8 +162,8 @@ backgroundDatasetsDict = {
             inputListBkgBase+"WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8.txt",
             ],
         "PhotonJets_Madgraph" : [
-            inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
-            inputListBkgBase+"GJets_HT-100To200_madgraphMLM.txt",
+            #inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
+            #inputListBkgBase+"GJets_HT-100To200_madgraphMLM.txt",
             inputListBkgBase+"GJets_HT-200To400_madgraphMLM.txt",
             inputListBkgBase+"GJets_HT-400To600_madgraphMLM.txt",
             inputListBkgBase+"GJets_HT-600ToInf_madgraphMLM.txt",
@@ -217,12 +234,12 @@ def log_result(result):
 def LoadChainFromTxtFile(txtFile):
     fc = TFileCollection("dum","",txtFile)
     if fc.GetNFiles() <= 0:
-        raise RuntimeError("Got <= 0 files loaded into the TFileCollection!")
+        raise RuntimeError("Got <= 0 files loaded into the TFileCollection for {}!".format(txtFile))
     ch = TChain("rootTupleTree/tree")
     ch.AddFileInfoList(fc.GetList())
-    ch.SetBranchStatus("*", 0)
-    for branchName in neededBranches:
-        ch.SetBranchStatus(branchName, 1)
+    # ch.SetBranchStatus("*", 0)
+    # for branchName in neededBranches:
+    #     ch.SetBranchStatus(branchName, 1)
     if ch.GetEntries() <= 0:
         print("WARNING: Got <= 0 entries for dataset={}; returning None!".format(txtFile))
         return None
@@ -361,9 +378,9 @@ def TrainBDT(args):
     return True
 
 
-def GetSignalTotalEvents(lqMassToUse):
+def GetSignalTotalEventsHist(lqMassToUse, signalDict):
     signalDatasetName = signalNameTemplate.format(lqMassToUse)
-    txtFiles = allSignalDatasetsDict[signalDatasetName]
+    txtFiles = signalDict[signalDatasetName]
     # profName = "EventsPassingCuts_unscaled"
     hist = None
     histName = "savedHists/EventCounter"
@@ -372,21 +389,29 @@ def GetSignalTotalEvents(lqMassToUse):
         with open(os.path.expandvars(txtFile), "r") as theTxtFile:
             for line in theTxtFile:
                 line = line.strip()
-                # print("Opening file='{}'".format(line))
+                # print("GetSignalTotalEventsHist() Opening file='{}'".format(line))
                 tfile = TFile.Open(os.path.expandvars(line))
                 tfiles.append(tfile)
                 unscaledEvtsHist = tfile.Get(histName)
-                if unscaledEvtsHist.ClassName() != "TH1D":
-                    raise RuntimeError("Excepted class TH1D for object names {} but class is '{}' instead.".format(histName, unscaledEvtsHist.ClassName()))
+                if not unscaledEvtsHist or unscaledEvtsHist.ClassName() != "TH1D":
+                    unscaledEvtsHist = tfile.Get("EventCounter")
+                    if unscaledEvtsHist.ClassName() != "TH1D":
+                        raise RuntimeError("Expected class TH1D for object names {} but class is '{}' instead.".format(histName, unscaledEvtsHist.ClassName()))
+                unscaledEvtsHist.SetDirectory(0)
                 if hist is None:
                     hist = unscaledEvtsHist
                 else:
                     hist.Add(unscaledEvtsHist)
+    for tfile in tfiles:
+        tfile.Close()
+    return hist
+
+
+def GetSignalTotalEvents(lqMassToUse):
+    hist = GetSignalTotalEventsHist(lqMassToUse, allSignalDatasetsDict)
     # for TProfiles
     # unscaledTotalEvts = prof.GetBinContent(1)*prof.GetBinEntries(1)
     unscaledTotalEvts = hist.GetBinContent(1)
-    for tfile in tfiles:
-        tfile.Close()
     return unscaledTotalEvts
 
 
@@ -547,7 +572,13 @@ def OptimizeBDTCut(args):
         #     fom = EvaluateFigureOfMerit(nS, nB, efficiency, 0, "punzi")
         #     fomValueToCutInfoDict[fom] = [cutVal, nS, nB, efficiency]
         # sortedDict = OrderedDict(sorted(fomValueToCutInfoDict.items(), key=lambda t: t[0], reverse=True))
-        sortedDict = OrderedDict(sorted(fomValueToCutInfoDict.items(), key=lambda t: t[1][0], reverse=True))
+        sortedDict = OrderedDict(sorted(fomValueToCutInfoDict.items(), key=lambda t: float(t[1][0]), reverse=True))
+        # idx = 0
+        # for key, value in sortedDict.items():
+        #     print("FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(key, *value))
+        #     if idx > 100:
+        #         break
+        #     idx+=1
         # now the max FOM value should be the first entry
         maxVal = next(iter(sortedDict.items()))
         #print("max FOM: {} with cutVal={}, nS={}, eff={}, nB={}".format(maxVal[0], *maxVal[1]))
@@ -570,80 +601,89 @@ def OptimizeBDTCut(args):
 ####################################################################################################
 # Run
 ####################################################################################################
-train = False
-optimize = True
-parallelize = False
-lqMassesToUse = [1400, 1500, 1600, 1700]
-# lqMassesToUse = [1400]
-weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/train_14-17/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
-
-if train:
-    if parallelize:
-        # ncores = multiprocessing.cpu_count()
-        ncores = 4  # only use 4 parallel jobs to be nice
-        pool = multiprocessing.Pool(ncores)
-        jobCount = 0
-        for mass in lqMassesToUse:
-            try:
-                pool.apply_async(TrainBDT, [[mass]], callback=log_result)
-                jobCount += 1
-            except KeyboardInterrupt:
-                print("\n\nCtrl-C detected: Bailing.")
-                pool.terminate()
-                exit(-1)
-            except Exception as e:
-                print("ERROR: caught exception in job for LQ mass: {}; exiting".format(mass))
-                traceback.print_exc()
+if __name__ == "__main__":
+    gROOT.SetBatch()
+    train = True
+    optimize = True
+    parallelize = False
+    lqMassesToUse = [1400, 1500, 1600, 1700]
+    # lqMassesToUse = [1400]
+    #FIXME this should take the output of the training part
+    # weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/train_14-17/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    # weightFile = "/tmp/scooper/baselineNoMasym/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    # weightFile = "/tmp/scooper/masymResult/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    # weightFile = "/tmp/scooper/removeMinv/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    # weightFile = "/tmp/scooper/recheckBaseline/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    # weightFile = "/tmp/scooper/lookAtMejs/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    weightFile = "/tmp/scooper/removeMET/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
+    
+    if train:
+        if parallelize:
+            # ncores = multiprocessing.cpu_count()
+            ncores = 4  # only use 4 parallel jobs to be nice
+            pool = multiprocessing.Pool(ncores)
+            jobCount = 0
+            for mass in lqMassesToUse:
+                try:
+                    pool.apply_async(TrainBDT, [[mass]], callback=log_result)
+                    jobCount += 1
+                except KeyboardInterrupt:
+                    print("\n\nCtrl-C detected: Bailing.")
+                    pool.terminate()
+                    exit(-1)
+                except Exception as e:
+                    print("ERROR: caught exception in job for LQ mass: {}; exiting".format(mass))
+                    traceback.print_exc()
+                    exit(-2)
+            
+            # now close the pool and wait for jobs to finish
+            pool.close()
+            sys.stdout.write(logString.format(jobCount, len(lqMassesToUse)))
+            sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+            sys.stdout.flush()
+            pool.join()
+            # check results?
+            if len(result_list) < jobCount:
+                print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
                 exit(-2)
-        
-        # now close the pool and wait for jobs to finish
-        pool.close()
-        sys.stdout.write(logString.format(jobCount, len(lqMassesToUse)))
-        sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-        sys.stdout.flush()
-        pool.join()
-        # check results?
-        if len(result_list) < jobCount:
-            print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
-            exit(-2)
-    else:
-        for mass in lqMassesToUse:
-            TrainBDT([mass])
-
-if optimize:
-    if parallelize:
-        # ncores = multiprocessing.cpu_count()
-        ncores = 4  # only use 4 parallel jobs to be nice
-        pool = multiprocessing.Pool(ncores)
-        jobCount = 0
-        for mass in lqMassesToUse:
-            try:
-                pool.apply_async(OptimizeBDTCut, [[weightFile.format(mass), mass]], callback=log_result)
-                jobCount += 1
-            except KeyboardInterrupt:
-                print("\n\nCtrl-C detected: Bailing.")
-                pool.terminate()
-                exit(-1)
-            except Exception as e:
-                print("ERROR: caught exception in job for LQ mass: {}; exiting".format(mass))
-                traceback.print_exc()
+        else:
+            for mass in lqMassesToUse:
+                TrainBDT([mass])
+    
+    if optimize:
+        if parallelize:
+            # ncores = multiprocessing.cpu_count()
+            ncores = 4  # only use 4 parallel jobs to be nice
+            pool = multiprocessing.Pool(ncores)
+            jobCount = 0
+            for mass in lqMassesToUse:
+                try:
+                    pool.apply_async(OptimizeBDTCut, [[weightFile.format(mass), mass]], callback=log_result)
+                    jobCount += 1
+                except KeyboardInterrupt:
+                    print("\n\nCtrl-C detected: Bailing.")
+                    pool.terminate()
+                    exit(-1)
+                except Exception as e:
+                    print("ERROR: caught exception in job for LQ mass: {}; exiting".format(mass))
+                    traceback.print_exc()
+                    exit(-2)
+            
+            # now close the pool and wait for jobs to finish
+            pool.close()
+            sys.stdout.write(logString.format(jobCount, len(lqMassesToUse)))
+            sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+            sys.stdout.flush()
+            pool.join()
+            # check results?
+            if len(result_list) < jobCount:
+                print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
                 exit(-2)
-        
-        # now close the pool and wait for jobs to finish
-        pool.close()
-        sys.stdout.write(logString.format(jobCount, len(lqMassesToUse)))
-        sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-        sys.stdout.flush()
-        pool.join()
-        # check results?
-        if len(result_list) < jobCount:
-            print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
-            exit(-2)
-    else:
-        for mass in lqMassesToUse:
-            # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1700/dataset/weights/TMVAClassification_LQToDEle_M-1700_pair_BDTG.weights.xml", 1700)
-            # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/eejj_feb18_egmLooseID_BDT/mee200sT400/lqm1700/dataset/weights/TMVAClassification_BDTG.weights.xml", 1700)
-            # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/eejj_feb18_egmLooseID_BDT/mee200sT400/lqm1500/dataset/weights/TMVAClassification_BDTG.weights.xml", 1500)
-            # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1500/dataset/weights/TMVAClassification_LQToDEle_M-1500_pair_BDTG.weights.xml", 1500)
-            # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1500_jet3etaPhi/dataset/weights/TMVAClassification_LQToDEle_M-1500_pair_BDTG.weights.xml", 1500)
-            OptimizeBDTCut([weightFile.format(mass), mass])
+        else:
+            for mass in lqMassesToUse:
+                # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1700/dataset/weights/TMVAClassification_LQToDEle_M-1700_pair_BDTG.weights.xml", 1700)
+                # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/eejj_feb18_egmLooseID_BDT/mee200sT400/lqm1700/dataset/weights/TMVAClassification_BDTG.weights.xml", 1700)
+                # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/eejj_feb18_egmLooseID_BDT/mee200sT400/lqm1500/dataset/weights/TMVAClassification_BDTG.weights.xml", 1500)
+                # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1500/dataset/weights/TMVAClassification_LQToDEle_M-1500_pair_BDTG.weights.xml", 1500)
+                # OptimizeBDTCut(os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/lqm1500_jet3etaPhi/dataset/weights/TMVAClassification_LQToDEle_M-1500_pair_BDTG.weights.xml", 1500)
+                OptimizeBDTCut([weightFile.format(mass), mass])
