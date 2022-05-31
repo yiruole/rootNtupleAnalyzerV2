@@ -7,7 +7,8 @@ import os
 import ROOT as r
 
 #treeFilename = "root://eoscms.cern.ch//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2016/nanoAODv7/DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ-v1/200803_164045/0000/DYJetsToLL_Pt-650ToInf_ext2_1.root"
-treeFilename = "/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2018/nanoAODv7/DYJetsToLL_Pt-400To650_TuneCP5_13TeV-amcatnloFXFX-pythia8/LQ-v1/200819_110403/0000/DYJetsToLL_Pt-400To650_1.root"
+#treeFilename = "root://eoscms//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/NanoV7/skims/2016/rskSingleEleL_egLoose_3feb2022/SingleElectron_Run2016G-02Apr2020-v1/SingleElectron_Run2016G-02Apr2020-v1_1_rsk.root"
+treeFilename = "root://eosuser//eos/user/s/scooper/LQ/NanoV7/skims/2016/rskQCD_26nov2021/SingleElectron_Run2016G-02Apr2020-v1/SingleElectron_Run2016G-02Apr2020-v1_1_rsk.root"
 filename = "/tmp/scooper/treeLogTest.txt"
 numberOfLargestBranchesToShow = 50
 
@@ -15,7 +16,8 @@ save = os.dup(sys.stdout.fileno())
 newout = file(filename, "w")
 os.dup2(newout.fileno(), sys.stdout.fileno())
 tfile = r.TFile.Open(treeFilename)
-tree = tfile.Get("Events")
+# tree = tfile.Get("Events")
+tree = tfile.Get("rootTupleTree/tree")
 tree.Print()
 tfile.Close()
 os.dup2(save, sys.stdout.fileno())
