@@ -599,6 +599,9 @@ def GetLastNonzeroSelectionYieldsFromDicts(rateDict, rateErrDict, unscaledRateDi
         err = rateErrDict[lastSelectionName]
         rawEvents = unscaledRateDict[lastSelectionName]
         idx += 1
+        if idx >= len(massPointsRev):
+            print "WARN GetLastNonzeroSelectionYieldsFromDicts: could not find final selection point with nonzero yield for this background; returning preselection"
+            return "preselection", rateDict["preselection"], rateErrDict["preselection"], unscaledRateDict["preselection"]
     return lastSelectionName, rate, err, rawEvents
 
 
@@ -680,11 +683,11 @@ def FillDicts(rootFilename, sampleNames, bkgType):
                 # print 'sampleName={}, sampleRate:',sampleRate,'sampleRateErr=',sampleRateErr,'sampleUnscaledRate=',sampleUnscaledRate
                 if selectionName == "preselection":
                     print "INFO: for sampleName={}, PRESELECTION ------>rate={} rateErr={} unscaledRate={} unscaledTotalEvts={}".format(sampleName, sampleRate, sampleRateErr, sampleUnscaledRate, unscaledTotalEvts)
-                elif selectionName == "LQ300" and "300" in sampleName:
-                    print "INFO: for sampleName={}, LQ300 ------>rate={} rateErr={} unscaledRate={} unscaledTotalEvts={}".format(sampleName, sampleRate, sampleRateErr, sampleUnscaledRate, unscaledTotalEvts)
+                elif selectionName == "LQ1600":
+                    print "INFO: for sampleName={}, LQ1600 ------>rate={} rateErr={} unscaledRate={} unscaledTotalEvts={}".format(sampleName, sampleRate, sampleRateErr, sampleUnscaledRate, unscaledTotalEvts)
                 ratesDict[selectionName] = sampleRate
                 if ratesDict[selectionName] < 0:
-                    print "WARN: for sample {}, selection {}: found negative rate: {}; set to zero.".format(sampleName, selectionName, sampleRate)
+                    print "WARN: for sample {}, selection {}: found negative rate: {}; set to zero. Had {} unscaled events.".format(sampleName, selectionName, sampleRate, sampleUnscaledRate)
                     ratesDict[selectionName] = 0.0
                 rateErrsDict[selectionName] = sampleRateErr
                 unscaledRatesDict[selectionName] = sampleUnscaledRate
@@ -719,7 +722,8 @@ doSystematics = False
 doEEJJ = True
 doRPV = False  # to do RPV, set doEEJJ and doRPV to True
 forceGmNNormBkgStatUncert = False
-cc.finalSelectionName = "sT_eejj"  # "min_M_ej"
+# cc.finalSelectionName = "sT_eejj"  # "min_M_ej"
+cc.finalSelectionName = "BDTOutput"
 # signalNameTemplate = "LQToUE_M-{}_BetaOne"
 signalNameTemplate = "LQToDEle_M-{}_pair"
 year = 2016
@@ -736,20 +740,25 @@ inputLists = {}
 #inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt"
 #inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_16mar2021_comb/inputListAllCurrent.txt"
 #inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_12apr2021/inputListAllCurrent.txt"
-inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_egLoose_22sep2021/inputListAllCurrent.txt"
+#inputLists[2016] = "$LQANA/config/nanoV7_2016_pskEEJJ_egLoose_22sep2021/inputListAllCurrent.txt"
+inputLists[2016] = "$LQANA/config/nanoV7_2016_analysisPreselSkims_egLoose_4feb2022/inputListAllCurrent.txt"
 inputLists[2017] = "$LQANA/config/nanoV7_2017_pskEEJJ_12apr2021/inputListAllCurrent.txt"
 #
 qcdFilePaths = {}
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj_QCD/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_2mar2021_oldOptFinalSels/output_cutTable_lq_eejj_QCD/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcdYield_eejj_23mar2021_oldOptFinalSels/output_cutTable_lq_eejj_QCD/"
+lqMass = 1700
+#qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_BDTLQ{}_EGLooseFR_6apr2022/output_cutTable_lq_eejj_BDT{}_QCD/".format(lqMass, lqMass)
+#qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_BDTLQ{}dedicated_EGLooseFR_12may2022/output_cutTable_lq_eejj_BDT{}_QCD/".format(lqMass, lqMass)
+qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_BDTLQ{}parametrized_EGLooseFR_13may2022/output_cutTable_lq_eejj_BDT_parametrized_QCD/".format(lqMass)
 qcdFilePaths[2017] = "$LQDATA/nanoV7/2017/analysis/qcdYield_eejj_30apr2021_oldOptFinalSels/output_cutTable_lq_eejj_QCD/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_masymFinalSelTest_13aug2021/output_cutTable_lq_eejj_QCD_MasymTest/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_masymFinalSelTestPunzi_31aug2021/output_cutTable_lq_eejj_QCD_MasymTest/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSelTestZPL_1sep2021/output_cutTable_lq_eejj_QCD/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSelTestPunzi_2sep2021/output_cutTable_lq_eejj_QCD/"
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSelTestPunziAddMsym_3sep2021/output_cutTable_lq_eejj_QCD_MasymTest/"
-qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSels_EGLooseFR_19jan2022/output_cutTable_lq_eejj_QCD/"
+#qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSels_EGLooseFR_19jan2022/output_cutTable_lq_eejj_QCD/"
 #
 filePaths = {}
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_20oct2020_optFinalSels/output_cutTable_lq_eejj/"
@@ -762,7 +771,12 @@ filePaths[2017] = "$LQDATA/nanoV7/2017/analysis/precomputePrefire_looserPSK_eejj
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_finalSelsZPL_1sep2021/output_cutTable_lq_eejj/"
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_finalSelsPunzi_2sep2021/output_cutTable_lq_eejj/"
 #filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_finalSelsPunziAddFlatMasym_3sep2021/output_cutTable_lq_eejj_MasymTest/"
-filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_finalSels_egLoose_19jan2022/output_cutTable_lq_eejj/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_finalSels_egLoose_19jan2022/output_cutTable_lq_eejj/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_BDTLQ1400_egLoose_20feb2022/output_cutTable_lq_eejj_BDT1400/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_BDTLQ1600_egLoose_23feb2022/output_cutTable_lq_eejj_BDT1600/"
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_BDTLQ{}_egLoose_23feb2022/output_cutTable_lq_eejj_BDT{}/".format(lqMass, lqMass)
+#filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_BDTLQ{}dedicated_egLoose_12may2022/output_cutTable_lq_eejj_BDT{}/".format(lqMass, lqMass)
+filePaths[2016] = "$LQDATA/nanoV7/2016/analysis/eejj_BDTLQ{}parametrized1-2_egLoose_13may2022/output_cutTable_lq_eejj_BDT_parametrized/".format(lqMass)
 #
 xsecFiles = {}
 # xsecFiles[2016] = "$LQANA/versionsOfAnalysis/2016/nanoV7/eejj/aug26/unscaled/xsection_13TeV_2015_Mee_PAS_TTbar_Mee_PAS_DYJets.txt"
@@ -842,11 +856,13 @@ dataMC_filepath = filePath + (
     if doEEJJ
     else "analysisClass_lq_enujj_MT_plots.root"
 )
-qcd_data_filepath = qcdFilePath + (
-    "analysisClass_lq_eejj_QCD_plots.root"
-    if doEEJJ
-    else "analysisClass_lq_enujj_QCD_plots.root"
-)
+qcd_data_filepath = ""
+if len(qcdFilePath) > 0:
+    qcd_data_filepath = qcdFilePath + (
+        "analysisClass_lq_eejj_QCD_plots.root"
+        if doEEJJ
+        else "analysisClass_lq_enujj_QCD_plots.root"
+    )
 if doEEJJ:
     # ttbar_data_filepath = ttbarFilePath + "analysisClass_lq_ttbarEst_plots.root"
     # SIC 6 Jul 2020 remove
@@ -881,7 +897,8 @@ else:
     ]  # go from 300-2000 in 100 GeV steps
     # mass_points.extend(["3500", "4000"])
     if year == 2016:
-        mass_points.remove("2500")  # FIXME 2016
+        # mass_points.remove("2500")  # FIXME 2016
+        mass_points = [ "1400", "1500", "1600", "1700"]
     elif year == 2017:
         mass_points.remove("3000")  # FIXME 2017
 
@@ -898,7 +915,8 @@ if doEEJJ:
         # signal_names = ['Stop_M100_CTau100','Stop_M125_CTau100','Stop_M150_CTau100','Stop_M175_CTau100','Stop_M200_CTau50'] + signal_names
     else:
         signal_names = [signalNameTemplate]
-    maxLQSelectionMass = 1200  # max background selection point used
+    # maxLQSelectionMass = 1200  # max background selection point used
+    maxLQSelectionMass = 2000  # max background selection point used
     systematicsNamesBackground = [
         "EleTrigSF",
         "Pileup",
@@ -1172,13 +1190,16 @@ for lin in open(inputList):
 print "INFO: Filling background [MC] information..."
 #d_background_rates, d_background_rateErrs, d_background_unscaledRates, d_background_totalEvents, d_background_systs = FillDicts(dataMC_filepath, background_fromMC_names, "MC")
 d_background_rates, d_background_rateErrs, d_background_unscaledRates, d_background_totalEvents, d_background_systs = FillDicts(dataMC_filepath, dictSamples.keys(), "MC")
-print "INFO: Filling background [data] information..."
-bgFromData_rates, bgFromData_rateErrs, bgFromData_unscaledRates, bgFromData_totalEvents, bgFromData_systs = FillDicts(qcd_data_filepath, background_QCDfromData, "DATA")
-d_background_rates.update(bgFromData_rates)
-d_background_rateErrs.update(bgFromData_rateErrs)
-d_background_unscaledRates.update(bgFromData_unscaledRates)
-d_background_totalEvents.update(bgFromData_totalEvents)
-d_background_systs.update(bgFromData_systs)
+if len(qcd_data_filepath) > 0:
+    print "INFO: Filling QCD[data] information..."
+    bgFromData_rates, bgFromData_rateErrs, bgFromData_unscaledRates, bgFromData_totalEvents, bgFromData_systs = FillDicts(qcd_data_filepath, background_QCDfromData, "DATA")
+    d_background_rates.update(bgFromData_rates)
+    d_background_rateErrs.update(bgFromData_rateErrs)
+    d_background_unscaledRates.update(bgFromData_unscaledRates)
+    d_background_totalEvents.update(bgFromData_totalEvents)
+    d_background_systs.update(bgFromData_systs)
+else:
+    background_names.remove("QCDFakes_DATA")
 if doSystematics:
     for sampleName in additionalBkgSystsDict.iterkeys():
         d_background_systs[sampleName].update(additionalBkgSystsDict[sampleName])
@@ -1364,13 +1385,11 @@ for i_signal_name, signal_name in enumerate(signal_names):
                 #   lnN_f = 1.0 + statErr/thisBkgEvts
                 #   forceLogNormBkgStatUncert = True
             else:
-                # print '[datacard] INFO:  for selection:', selectionName, 'and background:', background_name,
-                # 'total unscaled events=', thisBkgTotalEntries, 'rate=', thisBkgEvts
+                print '[datacard] INFO:  for selection:', selectionName, 'and background:', background_name, 'total unscaled events=', thisBkgUnscaledEvts, 'rate=', thisBkgEvts
                 # since we can't compute evts/entries, we find the last selection with at least 1 bkg event and use its scale factor
                 lastNonzeroSelection, bkgRate, bkgErr, bkgUnscaledEvents = GetLastNonzeroSelectionYields(background_name)
-                # if background_name != "PhotonJets_Madgraph":
-                #     print "[datacard] INFO: for background:", background_name, "at selection:", selectionName, "found last selection:", lastSelectionName, "with", bkgEvents, "+/- {} unscaled MC events. use this for the scale factor.".format(bkgErr)
                 gmN_weight = bkgRate / bkgUnscaledEvents
+                print "[datacard] INFO: for background:", background_name, "at selection:", selectionName, "found last selection:", lastNonzeroSelection, "with", bkgUnscaledEvents, "+/- {} unscaled MC events. use this for the scale factor: {}={}/{}".format(bkgErr, gmN_weight, bkgRate, bkgUnscaledEvents)
                 lnN_f = -1
                 # if thisBkgTotalEntries != 0.0 and "TTBarFromDATA" in background_name:
                 #     print "[datacard] WARN: for background:", background_name, "at selection:", selectionName, "setting thisBkgTotalEntries=", thisBkgTotalEntries, "to zero!"
@@ -1683,9 +1702,7 @@ if doEEJJ:
         "MLQ",
         "signal",
         "Z+jets",
-        "ttbar",
-        "QCD(data)",
-        "DIBOSON",
+        "ttbar"] + (["QCD(data)"] if len(qcd_data_filepath) else []) + ["DIBOSON",
         "TRIBOSON",
         "TTW",
         "TTZ",
@@ -1700,9 +1717,7 @@ else:
         "MLQ",
         "signal",
         "W+jets",
-        "ttbar(powheg)",
-        "QCD(data)",
-        "DIBOSON",
+        "ttbar"] + (["QCD(data)"] if len(qcd_data_filepath) else []) + ["DIBOSON",
         "SingleTop",
         "Z+Jets",
         "PhotonJets",
