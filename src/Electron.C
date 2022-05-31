@@ -21,6 +21,7 @@ Electron::Electron (Collection & c, unsigned short i, short j):
 // Kinematic variables
 
 float   Electron::PtHeep             (){ return CaloEnergy()/cosh(SCEta()); }
+float   Electron::PtUncorr           (){ return ECorr() != 0 ? Pt()/ECorr() : Pt(); }
 float   Electron::SCEta              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index)+m_collection->ReadArrayBranch<Float_t>("Electron_eta",m_raw_index); } 
 float   Electron::SCSeedEta          (){ return -1.0; } 
 float   Electron::SCPhi              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scPhi",m_raw_index); } 
@@ -42,21 +43,13 @@ bool Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Int
 bool Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP",m_raw_index); } 
 														      
 // ID variables			      	   		      		  	  				      
-bool Electron::PassHEEPIDCut(HEEPIDCut cut) {
-  return 0x1 & (m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmapHEEP",m_raw_index) >> static_cast<int>(cut));
+unsigned int Electron::GetHEEPBitmap() {
+  return m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmapHEEP",m_raw_index);
 }
-bool Electron::PassHEEPMinPtCut                            (){ return PassHEEPIDCut(HEEPIDCut::MinPtCut); }
-bool Electron::PassHEEPGsfEleSCEtaMultiRangeCut            (){ return PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut); }
-bool Electron::PassHEEPGsfEleDEtaInSeedCut                 (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDEtaInSeedCut); }
-bool Electron::PassHEEPGsfEleDPhiInCut                     (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDPhiInCut); }
-bool Electron::PassHEEPGsfEleFull5x5SigmaIEtaIEtaWithSatCut(){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5SigmaIEtaIEtaWithSatCut); }
-bool Electron::PassHEEPGsfEleFull5x5E2x5OverE5x5WithSatCut (){ return PassHEEPIDCut(HEEPIDCut::GsfEleFull5x5E2x5OverE5x5WithSatCut); }
-bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleHadronicOverEMLinearCut); }
-bool Electron::PassHEEPGsfEleTrkPtIsoCut                   (){ return PassHEEPIDCut(HEEPIDCut::GsfEleTrkPtIsoCut); }
-bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut              (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEmHadD1IsoRhoCut); }
-bool Electron::PassHEEPGsfEleDxyCut                        (){ return PassHEEPIDCut(HEEPIDCut::GsfEleDxyCut); }
-bool Electron::PassHEEPGsfEleMissingHitsCut                (){ return PassHEEPIDCut(HEEPIDCut::GsfEleMissingHitsCut); }
-bool Electron::PassHEEPEcalDrivenCut                       (){ return PassHEEPIDCut(HEEPIDCut::GsfEleEcalDrivenCut); }
+
+bool Electron::PassHEEPIDCut(HEEPIDCut cut) {
+  return 0x1 & (GetHEEPBitmap() >> static_cast<int>(cut));
+}
 bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut2018   () {
   float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
   return bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
@@ -76,6 +69,18 @@ bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut2018          () {
   }
   return pass_caloIsolation;
 }
+
+// EGamma
+unsigned int Electron::GetEGammaIDBitmap() {
+  return m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmap",m_raw_index);
+}
+bool Electron::PassEGammaIDLooseCut(EGammaIDCut cut) {
+  unsigned int result = 0x7 & (GetEGammaIDBitmap() >> (static_cast<int>(cut)*3) );
+  if(result > 1)
+    return true;
+  return false;
+}
+
 
 //bool   Electron::EcalSeed             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronHasEcalDrivenSeed        -> at ( m_raw_index ); }
 //bool   Electron::EcalDriven           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronIsEcalDriven             -> at ( m_raw_index ); }
@@ -133,7 +138,8 @@ int    Electron::MissingHits          (){ return m_collection->ReadArrayBranch<U
 float Electron::EcalIsoDR03          (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03EcalRecHitSumEt"     , m_raw_index); }
 float Electron::HcalIsoD1DR03        (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03HcalDepth1TowerSumEt", m_raw_index); }
 float Electron::TrkIsoDR03           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03TkSumPt"             , m_raw_index); }
-float Electron::PFChargedHadronIso03 (){ return m_collection->ReadArrayBranch<Float_t>("Electron_pfRelIso03_chg"          , m_raw_index); }
+float Electron::PFRelIso03Charged    (){ return m_collection->ReadArrayBranch<Float_t>("Electron_pfRelIso03_chg"          , m_raw_index); }
+float Electron::PFRelIso03All        (){ return m_collection->ReadArrayBranch<Float_t>("Electron_pfRelIso03_all"          , m_raw_index); }
 float Electron::PFPhotonIso03        (){ return -999; }
 float Electron::PFNeutralHadronIso03 (){ return -999; }
 float Electron::PFPUIso03            (){ return -999; }
@@ -205,16 +211,22 @@ std::ostream& operator<<(std::ostream& stream, Electron& object) {
 	 << "Pt = "    << object.Pt ()           << ", "
 	 //<< "PtHeep = "    << object.PtHeep ()           << ", "
 	 << "SC Et = "    << object.SCEt()           << ", "
+	 << "SCEta = "   << object.SCEta()           << ", "
+	 << "Phi = "   << object.Phi()           << ", "
+	 << "Eta = "   << object.Eta()           << ", "
 	 << "SC Energy = "          << object.SCEnergy() << ", "
    << "ECorr (calibEnergy/MiniAODEnergy) = " << object.ECorr() << ", "
 	 << "H/E = "          << object.HoE() << ", "
 	 << "dxy = "          << object.LeadVtxDistXY() << ", "
-	 << "Eta = "   << object.Eta()           << ", "
-	 << "SCEta = "   << object.SCEta()           << ", "
-	 << "Phi = "   << object.Phi()           << ", "
-   << "PassLooseID = " << object.PassUserID(FAKE_RATE_HEEP_LOOSE) << ", "
-   << "PassHEEP (builtin) = " << object.PassHEEPID() //<< ", "
-   //<< "PassHEEP (manual) = " << object.PassUserID(HEEP70_MANUAL,true);
-   ;
+   //<< "PassLooseID = " << object.PassUserID(FAKE_RATE_HEEP_LOOSE) << ", "
+   << "PassEGLooseID = " << object.PassUserID(EGAMMA_BUILTIN_LOOSE) << ", "
+   << "PassHEEP (builtin) = " << object.PassHEEPID() << "; ";
+  // << "Failing HEEP cuts = ";
+  //for(int cut=0; cut < 12; ++cut)
+  //  if(!object.PassHEEPIDCut(static_cast<Electron::HEEPIDCut>(cut)))
+  //    stream << object.GetHEEPCutName(static_cast<Electron::HEEPIDCut>(cut)) << ", ";
+  // //<< "PassHEEP (manual) = " << object.PassUserID(HEEP70_MANUAL,true);
+  //stream << "HEEPCaloIso = " << object.HEEPCaloIsolation() << " < " << 2+0.03*object.SCEt()+0.28*object.RhoForHEEP() << " (bar), ";
+  stream << "EGPFIso = " << object.PFRelIso03All() << " < " << 0.112+0.506/object.Pt() << " (bar)";
   return stream;
 }

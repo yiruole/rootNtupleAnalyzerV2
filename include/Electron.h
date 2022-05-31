@@ -14,6 +14,7 @@ class Electron : public Object {
   // Kinematic variables
   
   float PtHeep               ();
+  float PtUncorr             ();
   float SCEta                (); 
   float SCSeedEta            (); 
   float SCPhi                (); 
