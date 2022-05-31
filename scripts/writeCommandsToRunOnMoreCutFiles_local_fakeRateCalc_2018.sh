@@ -21,10 +21,10 @@ SUBDIR=nanoV6/2018/qcdFakeRateCalc/apr17_attempt1
 # it is suggested to specify the luminosity in the name of the directory
 #------------
 # integrated luminosity in pb-1 to be used for rescaling/merging MC samples
-ILUM=59736 #FIXME: from brilcalc
+ILUM=59399
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
-EXE=mainQCDFR
+EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #------------
 INPUTLIST=config/nanoV6_2018_rskQCD_15apr2020_comb/inputListAllCurrent.txt

@@ -17,22 +17,28 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #------------
 QUEUE=workday
 #------------
-ANANAME=22may2020
+ANANAME=24nov2021
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nanoV6/2016/qcdFakeRateCalc/$ANANAME
-EOSDIR=/eos/user/s/scooper/LQ/NanoV6/2016/qcdFakeRateCalc/$ANANAME
+SUBDIR=nanoV7/2016/qcdFakeRateCalc/$ANANAME
+EOSDIR=/eos/user/s/scooper/LQ/NanoV7/2016/qcdFakeRateCalc/$ANANAME
+#EOSDIR=/eos/cms/store/user/scooper/LQ/nanoV7/2016/qcdFakeRateCalc/$ANANAME
+excludeCombining=""
 
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=41540 #FIXME: this number is just from the Egamma twiki
+ILUM=35867 #TODO
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #CODENAME=analysisClass_lq_eejj_noJets
 #------------
-INPUTLIST=config/nanoV6_2016_rskQCD_18may2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2016_rskQCD_18may2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2016_rskQCD_14jul2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2016_rskQCD_15jul2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2016_rskQCD_17jul2020_comb/inputListAllCurrent.txt
+INPUTLIST=config/nanoV7_2016_rskQCD_23nov2021_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------
@@ -53,26 +59,31 @@ cat >> $COMMANDFILE <<EOF
 
 ####################################################
 #### launch, check and combine cmds for $suffix ####
-
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor -c $file -q $QUEUE -d $EOSDIR -j 1 -n rootTupleTree/tree
+# 1 job per file
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor -c $file -q $QUEUE -d $EOSDIR -j -1 -n rootTupleTree/tree
 
 ./scripts/checkJobs.sh $OUTDIRPATH/$SUBDIR/condor $OUTDIRPATH/$SUBDIR/condor
 
-mkdir $OUTDIRPATH/$SUBDIR/output_$suffix
+mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
+&& time  ./scripts/combineOutputJobs.py \
+    -i $INPUTLIST \
+    -c $CODENAME \
+    -d $OUTDIRPATH/$SUBDIR/condor \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
+    $excludeCombining
 
 time  ./scripts/combinePlots.py \
     -i $INPUTLIST \
     -c $CODENAME \
-    -d $OUTDIRPATH/$SUBDIR/condor \
+    -d $OUTDIRPATH/$SUBDIR/output_$suffix \
     -l  `echo "$ILUM*$FACTOR" | bc` \
     -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s $SAMPLELISTFORMERGING \
-    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log
-
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
 EOF
 done
 

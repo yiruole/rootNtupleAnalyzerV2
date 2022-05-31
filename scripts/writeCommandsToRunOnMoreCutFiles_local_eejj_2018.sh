@@ -37,7 +37,7 @@ SUBDIR=nanoV6/2018/analysis/eejj_5may2020/condor
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=59736 #FIXME: this number is just from brilcalc
+ILUM=59399
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main

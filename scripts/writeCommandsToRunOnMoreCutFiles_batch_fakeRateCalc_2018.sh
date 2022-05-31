@@ -17,7 +17,7 @@ files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/ana
 #------------
 QUEUE=workday
 #------------
-ANANAME=5jun2020
+ANANAME=20jul2020
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 SUBDIR=nanoV6/2018/qcdFakeRateCalc/$ANANAME
 EOSDIR=/eos/user/s/scooper/LQ/NanoV6/2018/qcdFakeRateCalc/$ANANAME
@@ -25,14 +25,15 @@ EOSDIR=/eos/user/s/scooper/LQ/NanoV6/2018/qcdFakeRateCalc/$ANANAME
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ILUM=59736 #FIXME: from brilcalc
+ILUM=59399
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #CODENAME=analysisClass_lq_eejj_noJets
 #------------
-INPUTLIST=config/nanoV6_2018_rskQCD_14may_2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2018_rskQCD_14may_2020_comb/inputListAllCurrent.txt
+INPUTLIST=config/nanoV6_2018_rskQCD_17jul2020_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------
@@ -68,9 +69,9 @@ time  ./scripts/combinePlots.py \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s $SAMPLELISTFORMERGING \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
-&& mv $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log \
-&& mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root \
-&& mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
 EOF
 done
 

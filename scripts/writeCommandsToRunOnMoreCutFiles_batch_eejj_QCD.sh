@@ -15,10 +15,10 @@ die () {
     exit 1
 }
 
-[ "$#" -eq 1 ] || die "must specify year as argument; usage: writeCommandsToRunOnMoreCutFiles_batch_eejj.sh year [doOptimization]"
+[ $# -gt 0 ] || die "must specify year as argument; usage: writeCommandsToRunOnMoreCutFiles_batch_eejj_QCD.sh year [doOptimization]"
 YEAR=$1
 
-if [ "$#" -gt 2 ]; then
+if [ "$#" -gt 1 ]; then
   OPT=1
 else
   OPT=0
@@ -26,24 +26,33 @@ fi
 
 #### INPUTS HERE ####
 #------------
-ANANAME=qcdYield_eejj_23mar2021_oldOptFinalSels
-#ANANAME=qcdYield_eejj_2mar2021_oldOptFinalSels
-#ANANAME=qcdYield_eejj_20oct2020_optFinalSels
-#ANANAME=qcdOpt_14sep2020
-#ANANAME=qcdYield_eejj_23oct2020_optFinalSels
-#ANANAME=qcdYield_eejj_16sep2020_optFinalSels
+#ANANAME=qcdYield_eejj_9aug2021_oldOptFinalSels
+#ANANAME=qcd_eejj_btagMed_8jul2021
+#ANANAME=qcd_eejj_btagLoose_gtetwoBTags_13jul2021
+#ANANAME=qcd_eejj_loosenMee_addMasym_addMET_10aug2021
+#ANANAME=qcd_eejj_finalSelTestPunziAddMsym_3sep2021
+#ANANAME=qcd_eejj_optEGLooseFR_17jan2022
+#ANANAME=qcd_eejj_finalSels_EGLooseFR_19jan2022
+ANANAME=qcd_eejj_BDTLQ1700parametrized_EGLooseFR_13may2022
 #------------
 #inputlist2016=config/oldInputLists/nanoV7/2016/nanoV7_2016_rskQCD_16oct2020_comb/inputList_dataOnly.txt
-inputlist2016=config/nanoV7_2016_rskQCD_22mar2021_comb/inputList_dataOnly.txt
-inputlist2017=config/nanoV7_2017_rskQCD_19oct2020_comb/inputList_dataOnly.txt
-inputlist2018=config/nanoV7_2018_rskQCD_21aug2020_comb/inputList_eGammaOnly.txt
+#inputlist2016=config/nanoV7_2016_rskQCD_22mar2021_comb/inputList_dataOnly.txt
+#inputlist2016=config/nanoV7_2016_rskQCD_26nov2021_comb/inputList_dataOnly.txt
+inputlist2016=config/nanoV7_2016_pskQCDEEJJ_egLoose_24mar2022_comb/inputList_dataOnly.txt
+inputlist2017=config/nanoV7_2017_rskQCD_22apr2021/inputList_dataOnly.txt
+inputlist2018=config/nanoV7_2018_rskQCD_22apr2021/inputList_dataOnly.txt
 #------------
 CODENAME=analysisClass_lq_eejj_QCD
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 # cut files
-cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Analysis/cutTable_lq_eejj_QCD.txt"
+#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Analysis/cutTable_lq_eejj_QCD.txt"
+#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1400_QCD.txt"
+cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT_parametrized_QCD.txt"
+#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj_QCD_MasymTest.txt"
 cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Optimization/cutTable_lq_eejj_QCD_opt.txt"
+#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Optimization/cutTable_lq_eejj_QCD_oneBTag_opt.txt"
+#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Optimization/cutTable_lq_eejj_QCD_twoBTags_opt.txt"
 # ilumi
 ilumi2016=35867 #TODO
 ilumi2017=41540 #FIXME: this number is just from the Egamma twiki
@@ -104,8 +113,7 @@ mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
     -i $INPUTLIST \
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/condor \
-    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
-    -s
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix
 
 time  ./scripts/combinePlots.py \
     -i $INPUTLIST \

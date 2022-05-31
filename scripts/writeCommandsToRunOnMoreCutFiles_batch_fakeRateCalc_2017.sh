@@ -15,9 +15,9 @@
 # analysis - FinalSels
 files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2017/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
 #------------
-QUEUE=longlunch
+QUEUE=tomorrow
 #------------
-ANANAME=14may2020
+ANANAME=20jul2020
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 SUBDIR=nanoV6/2017/qcdFakeRateCalc/$ANANAME
 EOSDIR=/eos/user/s/scooper/LQ/NanoV6/2017/qcdFakeRateCalc/$ANANAME
@@ -32,7 +32,8 @@ EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #CODENAME=analysisClass_lq_eejj_noJets
 #------------
-INPUTLIST=config/nanoV6_2017_rskQCD_29mar2020_comb/inputListAllCurrent.txt
+#INPUTLIST=config/nanoV6_2017_rskQCD_29mar2020_comb/inputListAllCurrent.txt
+INPUTLIST=config/nanoV6_2017_rskQCD_17jul2020_comb/inputListAllCurrent.txt
 #------------
 XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
 #------------
@@ -68,11 +69,10 @@ time  ./scripts/combinePlots.py \
     -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s $SAMPLELISTFORMERGING \
-    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log
-
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root
-mv $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root \
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
 EOF
 done
 
