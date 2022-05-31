@@ -1,19 +1,26 @@
+from __future__ import print_function
+
 from ROOT import (
     gROOT,
     TFile,
     TH2F,
+    TF1,
     TCanvas,
+    TColor,
     kRed,
     kBlue,
     kSpring,
     kAzure,
     TGraphAsymmErrors,
     TH1D,
-    THStack,
     TLegend,
+    TObjArray,
+    TFractionFitter,
     kWhite,
     kGreen,
+    kGray,
 )
+import ROOT
 import numpy as np
 import copy
 import ctypes
@@ -21,27 +28,63 @@ import sys
 import os
 import math
 
+# 12 distinctive colors
+myColors = [
+    "#76be79",
+    "#8049c5",
+    "#86d54b",
+    "#d056a2",
+    "#cab244",
+    "#443058",
+    "#d15739",
+    "#7dc2c1",
+    "#893e44",
+    "#9090c5",
+    "#4d5635",
+    "#cca58a",
+]
+myTColors = [TColor.GetColor(i) for i in myColors]
+
+
+def GetMyColor(idx):
+    return myTColors[idx]
+
+
+def SetDistinctiveTColorPalette():
+    SetTColorPalette(myColors)
+
+
+def SetTColorPalette(colorList):
+    tcolors = [TColor.GetColor(i) for i in colorList]
+    # stupid hack to save custom colors, as must have at least 51 new colors defined for them to save
+    for r in range(0, 60):
+        ci = TColor.GetFreeColorIndex()
+        tcolors.append(TColor(ci, r, r + 1, r + 2))
+    # gStyle.SetPalette(len(tcolors), np.array(tcolors, dtype=np.int32))
+
 
 def GetXBinsFromGraph(graph):
     bins = []
     nPoints = graph.GetN()
-    for i in xrange(nPoints):
-        bins.append(graph.GetPointX(i)-graph.GetErrorXlow(i))
-    bins.append(graph.GetPointX(nPoints-1)+graph.GetErrorXhigh(nPoints-1))
+    for i in range(nPoints):
+        bins.append(graph.GetPointX(i) - graph.GetErrorXlow(i))
+    bins.append(graph.GetPointX(nPoints - 1) + graph.GetErrorXhigh(nPoints - 1))
     return bins
 
 
 def GetCanvasTitle(varName, region, jetBin):
-    titleStr = str(analysisYear)+" FR,"
+    titleStr = str(analysisYear) + " FR,"
     if "post" in varName.lower():
-        titleStr += " Run >= "+varName[varName.lower().find("post")+4:]+","
+        titleStr += " Run >= " + varName[varName.lower().find("post") + 4:] + ","
     elif "pre" in varName.lower():
-        titleStr += " Run < "+varName[varName.lower().find("pre")+3:]+","
+        titleStr += " Run < " + varName[varName.lower().find("pre") + 3:] + ","
     varNameSplit = varName.split("_")
     for token in varNameSplit:
         if "hem" in token.lower():
-            titleStr += " "+token.replace("HEM", "HEM15and16")+","
-    titleStr += " "+region.replace("End2", "Endcap2").replace("End1", "Endcap1").replace("Bar", "Barrel")
+            titleStr += " " + token.replace("HEM", "HEM15and16") + ","
+    titleStr += " " + region.replace("End2", "Endcap2").replace(
+        "End1", "Endcap1"
+    ).replace("Bar", "Barrel")
     if jetBin == "":
         titleStr += ", >= 0 jets"
     elif jetBin == "1Jet_":
@@ -49,199 +92,555 @@ def GetCanvasTitle(varName, region, jetBin):
     elif jetBin == "2Jet_":
         titleStr += ", >= 2 jets"
     else:
-        titleStr += ", "+jetBin
+        titleStr += ", " + jetBin
     # print "Created canvas title:", titleStr, "from var=", varName, "region=", reg, "jets=", jetBin
     return titleStr
 
 
-def GetFakeRate(lowEnd, highEnd, reg, jets, histDict, verbose=False):
+def GetFakeRate(shortVarName, lowEnd, highEnd, reg, jets, histDict, verbose=False):
     verbose = True
-    histo2D_Electrons = histDict[reg]["Electrons"][jets]
-    histo2D_Jets = histDict[reg]["Jets"][jets]
-    histo2D_Data = histDict[reg]["Total"][jets]
+    histo_Electrons = histDict[reg]["Electrons"][jets]
+    histo_Jets = histDict[reg]["Jets"][jets]
+    histo_Data = histDict[reg]["Total"][jets]
     if verbose:
-        print "\t\tGetFakeRate: Considering region=", reg
-        print "\t\tGetFakeRate: Considering jets=", jets
-        print "\t\tGetFakeRate: Considering electron Pt:", str(lowEnd) + "-" + str(highEnd), "GeV"
-        print "\t\tGetFakeRate: Considering histo for electrons=>", histo2D_Electrons.GetName(), "; histo for jets=>", histo2D_Jets.GetName(), "; histo for data=>", histo2D_Data.GetName()
+        print("\t\tGetFakeRate: Considering region=", reg)
+        print("\t\tGetFakeRate: Considering jets=", jets)
+        print(
+            "\t\tGetFakeRate: Considering electron Pt:",
+            str(lowEnd) + "-" + str(highEnd),
+            "GeV",
+        )
+        print(
+            "\t\tGetFakeRate: Considering histo for electrons=>",
+            histo_Electrons.GetName(),
+            "; histo for jets=>",
+            histo_Jets.GetName(),
+            "; histo for data=>",
+            histo_Data.GetName(),
+        )
         sys.stdout.flush()
-    proj_Electrons = histo2D_Electrons.ProjectionY(
-        "ElesTrkIso",
-        histo2D_Electrons.GetXaxis().FindBin(lowEnd),
-        histo2D_Electrons.GetXaxis().FindBin(highEnd) - 1,
-    )
-    proj_Jets = histo2D_Jets.ProjectionY(
-        "JetsTrkIso",
-        histo2D_Jets.GetXaxis().FindBin(lowEnd),
-        histo2D_Jets.GetXaxis().FindBin(highEnd) - 1,
-    )
-    proj_Data = histo2D_Data.ProjectionY(
-        "DataTrkIso",
-        histo2D_Data.GetXaxis().FindBin(lowEnd),
-        histo2D_Data.GetXaxis().FindBin(highEnd) - 1,
-    )
+    if "2D" in histo_Electrons.ClassName():
+        proj_Electrons = histo_Electrons.ProjectionY(
+            "Eles" + shortVarName,
+            histo_Electrons.GetXaxis().FindBin(lowEnd),
+            histo_Electrons.GetXaxis().FindBin(highEnd) - 1,
+        )
+        proj_Jets = histo_Jets.ProjectionY(
+            "Jets" + shortVarName,
+            histo_Jets.GetXaxis().FindBin(lowEnd),
+            histo_Jets.GetXaxis().FindBin(highEnd) - 1,
+        )
+        proj_Data = histo_Data.ProjectionY(
+            "Data" + shortVarName,
+            histo_Data.GetXaxis().FindBin(lowEnd),
+            histo_Data.GetXaxis().FindBin(highEnd) - 1,
+        )
+    else:
+        proj_Electrons = histo_Electrons
+        proj_Data = histo_Data
+        proj_Jets = histo_Jets
     # proj_JetsEle_ = proj_Jets.Clone()
     # proj_JetsEle_.SetName('JetsEleTrkIso')
-    eleErr = ctypes.c_double()
-    ele = proj_Electrons.IntegralAndError(
-        proj_Electrons.GetXaxis().FindBin(10), proj_Electrons.GetXaxis().FindBin(20) - 1, eleErr
+    if "TrkIsoHEEP7" in histo_Electrons.GetName():
+        upperSBLimit = 20  # GeV
+        lowerSBLimit = 10
+        upperSRLimit = 5
+    elif "PFRelIso" in histo_Electrons.GetName():
+        if float(lowEnd) >= 500:
+            lowerSBLimit = 0.15
+            upperSBLimit = 0.2
+        else:
+            lowerSBLimit = 0.25
+            upperSBLimit = 0.45
+        # first take conservative value: largest signal region
+        # this will be the looseID cut threshold derived from the lowest pT value
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Offline_selection_criteria_for_V
+        if "bar" in reg.lower():
+            upperSRLimit = 0.112 + 0.506 / lowEnd
+        else:
+            upperSRLimit = 0.108 + 0.963 / lowEnd
+    else:
+        raise RuntimeError(
+            "Don't know how to determine SR/SB for histo named: {}".format(
+                histo_Electrons.GetName()
+            )
+        )
+    eleSBErr = ctypes.c_double()
+    eleSB = proj_Electrons.IntegralAndError(
+        proj_Electrons.GetXaxis().FindBin(lowerSBLimit),
+        proj_Electrons.GetXaxis().FindBin(upperSBLimit) - 1,
+        eleSBErr,
     )
     # data = proj_Data_.Integral(proj_Data_.GetXaxis().FindBin(10),proj_Data_.GetXaxis().FindBin(20)-1)
     dataErr = ctypes.c_double()
-    data = proj_Data.IntegralAndError(proj_Data.GetXaxis().GetFirst(), proj_Data.GetXaxis().GetLast(), dataErr)
+    data = proj_Data.IntegralAndError(
+        proj_Data.GetXaxis().GetFirst(), proj_Data.GetXaxis().GetLast(), dataErr
+    )
     jets_SBErr = ctypes.c_double()
     jets_SB = proj_Jets.IntegralAndError(
-        proj_Jets.GetXaxis().FindBin(10), proj_Jets.GetXaxis().FindBin(20) - 1, jets_SBErr
+        proj_Jets.GetXaxis().FindBin(lowerSBLimit),
+        proj_Jets.GetXaxis().FindBin(upperSBLimit) - 1,
+        jets_SBErr,
     )
     jets_SRErr = ctypes.c_double()
     jets_SR = proj_Jets.IntegralAndError(
-        proj_Jets.GetXaxis().FindBin(0), proj_Jets.GetXaxis().FindBin(5) - 1, jets_SRErr
+        proj_Jets.GetXaxis().GetFirst(),
+        proj_Jets.GetXaxis().FindBin(upperSRLimit) - 1,
+        jets_SRErr,
     )
     if jets_SB == 0:
         rJets = 0
         if jets_SR == 0:
-            rJetsErr = math.sqrt(jets_SRErr.value**2+jets_SBErr.value**2)
+            rJetsErr = math.sqrt(jets_SRErr.value ** 2 + jets_SBErr.value ** 2)
         else:
-            rJetsErr = jets_SRErr.value/jets_SR
+            rJetsErr = jets_SRErr.value / jets_SR
     else:
-        rJets = (jets_SR / jets_SB)
-        rJetsErr = (jets_SR/jets_SB)*math.sqrt((jets_SRErr.value/jets_SR)**2+(jets_SBErr.value/jets_SB)**2)
-    numerator = rJets * ele
+        rJets = jets_SR / jets_SB
+        rJetsErr = (jets_SR / jets_SB) * math.sqrt(
+            (jets_SRErr.value / jets_SR) ** 2 + (jets_SBErr.value / jets_SB) ** 2
+        )
+    numerator = rJets * eleSB
     try:
-        numeratorErr = numerator*math.sqrt((rJetsErr/rJets)**2+(eleErr.value/ele)**2)
+        numeratorErr = numerator * math.sqrt(
+            (rJetsErr / rJets) ** 2 + (eleSBErr.value / eleSB) ** 2
+        )
     except ZeroDivisionError as e:
-        if ele == 0:
+        if eleSB == 0:
             if rJets != 0:
-                numeratorErr = numerator*math.sqrt((rJetsErr/rJets)**2)
-                print "WARN: GetFakeRate:  Had a ZeroDivisionError in numeratorError; ele==0, so ignore it in error computation"
+                numeratorErr = numerator * math.sqrt((rJetsErr / rJets) ** 2)
+                print(
+                    "WARN: GetFakeRate:  Had a ZeroDivisionError in numeratorError; ele==0, so ignore it in error computation"
+                )
             else:
-                numeratorErr = math.sqrt(rJetsErr**2+eleErr.value**2)
+                numeratorErr = math.sqrt(rJetsErr ** 2 + eleSBErr.value ** 2)
         elif rJets == 0:
-            numeratorErr = numerator*math.sqrt((eleErr.value/ele)**2)
-            print "WARN: GetFakeRate:  Had a ZeroDivisionError in numeratorError; rJets==0, so ignore it in error computation"
+            numeratorErr = numerator * math.sqrt((eleSBErr.value / eleSB) ** 2)
+            print(
+                "WARN: GetFakeRate:  Had a ZeroDivisionError in numeratorError; rJets==0, so ignore it in error computation"
+            )
         else:
-            print "ERROR in GetFakeRate:  Had a ZeroDivisionError in numeratorError; rJets=", rJets, "; ele=", ele
+            print(
+                "ERROR in GetFakeRate:  Had a ZeroDivisionError in numeratorError; rJets=",
+                rJets,
+                "; eleSB=",
+                eleSB,
+            )
             sys.stdout.flush()
             raise e
     if verbose:
-        print "\t\tGetFakeRate: Considering hists:", histo2D_Electrons.GetName(), ",", histo2D_Jets.GetName(), ",", histo2D_Data.GetName()
+        print(
+            "\t\tGetFakeRate: Considering hists:",
+            histo_Electrons.GetName(),
+            ",",
+            histo_Jets.GetName(),
+            ",",
+            histo_Data.GetName(),
+        )
         # print 'endcap1 N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
         # print 'barrel N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
-        print "\t\tGetFakeRate: nHEEPprime=", ele, " +/-", eleErr.value, "; jetsSR=", jets_SR, "+/-", jets_SRErr.value, "; jetsSB=", jets_SB, "+/-", jets_SBErr.value, ";data=", data, "+/-", dataErr.value
+        print(
+            "\t\tGetFakeRate: nEle'SB=",
+            eleSB,
+            " +/-",
+            eleSBErr.value,
+            "; jetsSR=",
+            jets_SR,
+            "+/-",
+            jets_SRErr.value,
+            "; jetsSB=",
+            jets_SB,
+            "+/-",
+            jets_SBErr.value,
+            "; num=",
+            numerator,
+            "+/-",
+            numeratorErr,
+            "; data=",
+            data,
+            "+/-",
+            dataErr.value,
+        )
         sys.stdout.flush()
-        print "\t\tGetFakeRate: FR=", numerator / data
+        print("\t\tGetFakeRate: FR=", numerator / data)
         sys.stdout.flush()
     if writeOutput:
-        suffix = "_"+reg+"_"+jets+"Pt"+str(lowEnd)+"To"+str(highEnd)
-        if not outputFile.cd("TrkIso_Electrons"):
-            outputFile.mkdir("TrkIso_Electrons").cd()
-        proj_Electrons.SetName(proj_Electrons.GetName()+suffix)
+        suffix = "_" + reg + "_" + jets + "Pt" + str(lowEnd) + "To" + str(highEnd)
+        if not outputFile.cd(shortVarName + "_Electrons"):
+            outputFile.mkdir(shortVarName + "_Electrons").cd()
+        proj_Electrons.SetName(proj_Electrons.GetName() + suffix)
         proj_Electrons.Write()
-        if not outputFile.cd("TrkIso_Jets"):
-            outputFile.mkdir("TrkIso_Jets").cd()
-        proj_Jets.SetName(proj_Jets.GetName()+suffix)
+        if not outputFile.cd(shortVarName + "_Jets"):
+            outputFile.mkdir(shortVarName + "_Jets").cd()
+        proj_Jets.SetName(proj_Jets.GetName() + suffix)
         proj_Jets.Write()
-        if not outputFile.cd("TrkIso_Data"):
-            outputFile.mkdir("TrkIso_Data").cd()
-        proj_Data.SetName(proj_Data.GetName()+suffix)
+        if not outputFile.cd(shortVarName + "_Data"):
+            outputFile.mkdir(shortVarName + "_Data").cd()
+        proj_Data.SetName(proj_Data.GetName() + suffix)
         proj_Data.Write()
     return numerator, numeratorErr, data, dataErr.value
 
 
-def GetFakeRateMCSub(lowEnd, highEnd, reg, jets, histDict, verbose=False):
-    if verbose:
-        print "\t\tGetFakeRateMCSub"
-        print "\t\t\tConsidering region=", reg
-        print "\t\t\tConsidering jets=", jets
-        print "\t\t\tConsidering electron Pt:", str(lowEnd) + "-" + str(highEnd), "GeV"
+def GetFakeRateFractionFit(
+    shortVarName, lowEnd, highEnd, reg, jets, histDict, verbose=False
+):
+    verbose = True
+    fractionFitXRangeMax = 0.8
     histo2D_Electrons = histDict[reg]["Electrons"][jets]
-    histo2D_MC = histDict[reg]["MC"][jets]
-    mc2DHists = [histDict[reg][y][jets] for y in mcNames]
+    histo2D_Jets = histDict[reg]["Jets"][jets]
     histo2D_Data = histDict[reg]["Total"][jets]
+    histo2D_DYElectrons = histDict[reg]["ZJets"][jets]
+    histo2D_MC = histDict[reg]["MC"][jets]
+    if verbose:
+        print("\t\tGetFakeRateFractionFit: Considering region=", reg)
+        print("\t\tGetFakeRateFractionFit: Considering jets=", jets)
+        print(
+            "\t\tGetFakeRateFractionFit: Considering electron Pt:",
+            str(lowEnd) + "-" + str(highEnd),
+            "GeV",
+        )
+        print(
+            "\t\tGetFakeRateFractionFit: Considering histo for electrons=>",
+            histo2D_Electrons.GetName(),
+            "; histo for jets=>",
+            histo2D_Jets.GetName(),
+            "; histo for data=>",
+            histo2D_Data.GetName(),
+        )
+        sys.stdout.flush()
     proj_Electrons = histo2D_Electrons.ProjectionY(
-        "ElesTrkIso",
+        "Eles" + shortVarName,
         histo2D_Electrons.GetXaxis().FindBin(lowEnd),
         histo2D_Electrons.GetXaxis().FindBin(highEnd) - 1,
     )
-    proj_MC = histo2D_MC.ProjectionY(
-        "TrkIsoMC",
-        histo2D_MC.GetXaxis().FindBin(lowEnd),
-        histo2D_MC.GetXaxis().FindBin(highEnd) - 1,
+    proj_Jets = histo2D_Jets.ProjectionY(
+        "Jets" + shortVarName,
+        histo2D_Jets.GetXaxis().FindBin(lowEnd),
+        histo2D_Jets.GetXaxis().FindBin(highEnd) - 1,
     )
-    mcProjs = [
-        histo2D.ProjectionY(
-            "TrkIsoProj" + histo2D.GetName(),
-            histo2D.GetXaxis().FindBin(lowEnd),
-            histo2D.GetXaxis().FindBin(highEnd) - 1,
-        )
-        for histo2D in mc2DHists
-    ]
     proj_Data = histo2D_Data.ProjectionY(
-        "DataTrkIso",
+        "Data" + shortVarName,
         histo2D_Data.GetXaxis().FindBin(lowEnd),
         histo2D_Data.GetXaxis().FindBin(highEnd) - 1,
     )
-    # number of HEEP electrons: pass trkIso < 5 GeV
-    eleErr = ctypes.c_double()
-    ele = proj_Electrons.IntegralAndError(
-        proj_Electrons.GetXaxis().FindBin(0), proj_Electrons.GetXaxis().FindBin(5) - 1, eleErr
-    )
-    # denominator is all loose electrons in the region
-    dataErr = ctypes.c_double()
-    data = proj_Data.IntegralAndError(proj_Data.GetXaxis().GetFirst(), proj_Data.GetXaxis().GetLast(), dataErr)
-    # MC for real electron subtraction: also trkIso < 5 GeV
-    realEleErr = ctypes.c_double()
-    realEle = proj_MC.IntegralAndError(
-        proj_MC.GetXaxis().FindBin(0), proj_MC.GetXaxis().FindBin(5) - 1, realEleErr
-    )
-    realEleMCList = [
-        proj.Integral(proj.GetXaxis().FindBin(0), proj.GetXaxis().FindBin(5) - 1)
-        for proj in mcProjs
-    ]
-    numerator = ele - realEle
-    numeratorErr = math.sqrt((eleErr.value)**2+(realEleErr.value)**2)
-    if verbose:
-        print "\t\t\tnumer:ele=", ele, "+/-", eleErr.value, ";numMC=", realEle, "+/-", realEleErr.value, "; numMCSubd=", numerator, "+/-", numeratorErr.value, "; denom:data=", data, "+/-", dataErr.value
-        if realEle > ele:
-            print "\t\t\tbreakdown of MC:"
-            for i, sample in enumerate(mcNames):
-                print "\t\t\t\t" + sample, realEleMCList[i]
-            print "histo2D_Electrons has name:", histo2D_Electrons.GetName()
-            print "histo2D_Electrons has entries:", histo2D_Electrons.GetEntries()
-        print "\t\t\tFR=", numerator / data
-    # make TrkIso for DY MC
-    histo2D_DYElectrons = histDict[reg]["ZJets"][jets]
     proj_DYElectrons = histo2D_DYElectrons.ProjectionY(
-        "DYElesTrkIso",
+        "DYElectrons" + shortVarName,
+        histo2D_DYElectrons.GetXaxis().FindBin(lowEnd),
+        histo2D_DYElectrons.GetXaxis().FindBin(highEnd) - 1,
+    )
+    proj_MC = histo2D_MC.ProjectionY(
+        "MC" + shortVarName,
         histo2D_MC.GetXaxis().FindBin(lowEnd),
         histo2D_MC.GetXaxis().FindBin(highEnd) - 1,
     )
+    if "TrkIsoHEEP7" in histo2D_Electrons.GetName():
+        varSRMax = 5  # 5 GeV for TrkIso
+    elif "PFRelIso" in histo2D_Electrons.GetName():
+        # take conservative value: largest signal region
+        # this will be the looseID cut threshold derived from the lowest pT value
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Offline_selection_criteria_for_V
+        if "bar" in reg.lower():
+            varSRMax = 0.112 + 0.506 / lowEnd
+        else:
+            varSRMax = 0.108 + 0.963 / lowEnd
+    else:
+        raise RuntimeError(
+            "Don't know how to determine SR/SB for histo named: {}".format(
+                histo2D_Electrons.GetName()
+            )
+        )
+    dataErr = ctypes.c_double()
+    data = proj_Data.IntegralAndError(1, proj_Data.GetXaxis().GetLast(), dataErr)
+    # use all MC for electrons
+    proj_MCElectrons = proj_MC
+    # MC amc@NLO can have negative bins
+    for iBin in range(0, proj_MCElectrons.GetNbinsX() + 1):
+        if proj_MCElectrons.GetBinContent(iBin) < 0:
+            print(
+                "INFO: Found negative value in proj_MCElectrons bin:",
+                iBin,
+                "; set to zero",
+            )
+            proj_MCElectrons.SetBinContent(iBin, 0)
+    proj_MCElectrons.SetLineColor(kBlue)
+    proj_MCElectrons.SetMarkerColor(kBlue)
+    proj_MCElectrons.SetMarkerSize(1e-100)
+    proj_MCElectrons.SetLineStyle(3)
+    proj_MCElectrons.SetLineWidth(2)
+
+    myObjArr = TObjArray(2)
+    myObjArr.Add(proj_MCElectrons)
+    myObjArr.Add(proj_Jets)
+    fracFit = TFractionFitter(proj_Electrons, myObjArr)
+    fracFit.Constrain(0, 0.0, 1.0)
+    fracFit.Constrain(1, 0.0, 1.0)
+    fracFit.GetFitter().Config().ParSettings(0).Set("DYElectrons", 0.5, 0.01, 0, 1.0)
+    fracFit.GetFitter().Config().ParSettings(1).Set("Jets", 0.5, 0.01, 0, 1.0)
+    fracFit.SetRangeX(1, proj_MCElectrons.FindBin(fractionFitXRangeMax))
+    status = fracFit.Fit()
+    print("fit status=", status)
+    if status.Status() != 0:
+        print("Fit failed: fit status is {} and not 0.".format(status.Status()))
+        return 0, 0, data, dataErr.value
+    fitPlot = fracFit.GetPlot()
+    fitPlot.SetLineColor(kGray + 2)
+    fitPlot.SetMarkerColor(kGray + 2)
+    fitPlot.SetLineStyle(3)
+    fitPlot.SetLineWidth(2)
+    fitPlot.Draw("esamehist")
+    ROOT.SetOwnership(fracFit, False)
+    eleFrac = ctypes.c_double()
+    eleFracErr = ctypes.c_double()
+    fracFit.GetResult(0, eleFrac, eleFracErr)
+    # print "scale DYEles by {}*{}/{}={}".format(eleFrac.value, heepPrimeHist.Integral(), dyElesHist.Integral(), eleFrac.value*heepPrimeHist.Integral()/dyElesHist.Integral())
+    # proj_MCElectrons.Scale(
+    #     eleFrac.value * proj_Electrons.Integral() / proj_MCElectrons.Integral()
+    # )
+    proj_MCElectrons.Scale(
+        eleFrac.value * proj_Electrons.Integral(1, proj_Electrons.FindFixBin(fractionFitXRangeMax)) / proj_MCElectrons.Integral(1, proj_MCElectrons.FindFixBin(fractionFitXRangeMax))
+    )
+    jetsFrac = ctypes.c_double()
+    jetsFracErr = ctypes.c_double()
+    fracFit.GetResult(1, jetsFrac, jetsFracErr)
+    # print "scale jets by {}*{}/{}={}".format(jetsFrac.value, proj_Electrons.Integral(), jetsHist.Integral(), jetsFrac.value*proj_Electrons.Integral()/jetsHist.Integral())
+    proj_Jets.Scale(
+        jetsFrac.value * proj_Electrons.Integral(1, proj_Electrons.FindFixBin(fractionFitXRangeMax)) / proj_Jets.Integral(1, proj_Jets.FindFixBin(fractionFitXRangeMax))
+    )
+    predEleErr = ctypes.c_double()
+    predEle = proj_MCElectrons.IntegralAndError(1, proj_MCElectrons.FindFixBin(varSRMax) - 1, predEleErr)
+    jetsPredErr = ctypes.c_double()
+    jetsPred = proj_Jets.IntegralAndError(1, proj_Jets.FindFixBin(varSRMax) - 1, jetsPredErr)
+    if verbose:
+        print(
+            "\t\tGetFakeRate: Considering hists:",
+            histo2D_Electrons.GetName(),
+            ",",
+            histo2D_Jets.GetName(),
+            ",",
+            histo2D_Data.GetName(),
+        )
+        # print 'endcap1 N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
+        # print 'barrel N_jet>=0: Nele=',ele,'data=',data,'contam=',ele/data
+        print(
+            "\t\tGetFakeRate: nPredEle=",
+            predEle,
+            " +/-",
+            predEleErr.value,
+            "; jets=",
+            jetsPred,
+            "+/-",
+            jetsPredErr.value,
+            "; data=",
+            data,
+            "+/-",
+            dataErr.value,
+        )
+        print("\t\tGetFakeRate: FR=", predEle / data)
     if writeOutput:
-        suffix = "_"+reg+"_"+jets+"Pt"+str(lowEnd)+"To"+str(highEnd)
-        if not outputFile.cd("TrkIso_DYElectrons"):
-            outputFile.mkdir("TrkIso_DYElectrons").cd()
-        proj_DYElectrons.SetName(proj_DYElectrons.GetName()+suffix)
+        suffix = "_" + reg + "_" + jets + "Pt" + str(lowEnd) + "To" + str(highEnd)
+        if not outputFile.cd(shortVarName + "_Electrons"):
+            outputFile.mkdir(shortVarName + "_Electrons").cd()
+        proj_Electrons.SetName(proj_Electrons.GetName() + suffix)
+        proj_Electrons.Write()
+        if not outputFile.cd(shortVarName + "_Jets"):
+            outputFile.mkdir(shortVarName + "_Jets").cd()
+        proj_Jets.SetName(proj_Jets.GetName() + suffix)
+        proj_Jets.Write()
+        if not outputFile.cd(shortVarName + "_Data"):
+            outputFile.mkdir(shortVarName + "_Data").cd()
+        proj_Data.SetName(proj_Data.GetName() + suffix)
+        proj_Data.Write()
+    return jetsPred, jetsPredErr, data, dataErr.value
+
+
+def GetFakeRateMCSub(shortVarName, lowEnd, highEnd, reg, jets, histDict, verbose=False):
+    if verbose:
+        print("\t\tGetFakeRateMCSub")
+        print("\t\t\tConsidering region=", reg)
+        print("\t\t\tConsidering jets=", jets)
+        print("\t\t\tConsidering electron Pt:", str(lowEnd) + "-" + str(highEnd), "GeV")
+    histo_Electrons = histDict[reg]["Electrons"][jets]
+    histo_MC = histDict[reg]["MC"][jets]
+    mcHists = [histDict[reg][y][jets] for y in mcNames]
+    histo_Data = histDict[reg]["Total"][jets]
+    # make TrkIso for DY MC
+    histo_DYElectrons = histDict[reg]["ZJets"][jets]
+    if verbose:
+        print(
+            '\t\t\thistDict[{}]["Total"][{}]={}'.format(reg, jets, histo_Data.GetName())
+        )
+    if "2D" in histo_Electrons.ClassName():
+        # need to do projections
+        proj_Electrons = histo_Electrons.ProjectionY(
+            "Eles" + shortVarName,
+            histo_Electrons.GetXaxis().FindBin(lowEnd),
+            histo_Electrons.GetXaxis().FindBin(highEnd) - 1,
+        )
+        proj_MC = histo_MC.ProjectionY(
+            shortVarName + "MC",
+            histo_MC.GetXaxis().FindBin(lowEnd),
+            histo_MC.GetXaxis().FindBin(highEnd) - 1,
+        )
+        mcProjs = [
+            histo2D.ProjectionY(
+                shortVarName + "Proj" + histo2D.GetName(),
+                histo2D.GetXaxis().FindBin(lowEnd),
+                histo2D.GetXaxis().FindBin(highEnd) - 1,
+            )
+            for histo2D in mcHists
+        ]
+        proj_Data = histo_Data.ProjectionY(
+            "Data" + shortVarName,
+            histo_Data.GetXaxis().FindBin(lowEnd),
+            histo_Data.GetXaxis().FindBin(highEnd) - 1,
+        )
+        proj_DYElectrons = histo_DYElectrons.ProjectionY(
+            "DYEles" + shortVarName,
+            histo_DYElectrons.GetXaxis().FindBin(lowEnd),
+            histo_DYElectrons.GetXaxis().FindBin(highEnd) - 1,
+        )
+    else:
+        proj_Electrons = histo_Electrons
+        proj_MC = histo_MC
+        proj_Data = histo_Data
+        mcProjs = mcHists
+        proj_DYElectrons = histo_DYElectrons
+    if "TrkIsoHEEP7" in histo_Electrons.GetName():
+        upperSRLimit = 5  # 5 GeV for TrkIso
+    elif "PFRelIso" in histo_Electrons.GetName():
+        # take conservative value: largest signal region
+        # this will be the looseID cut threshold derived from the lowest pT value
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2#Offline_selection_criteria_for_V
+        if "bar" in reg.lower():
+            upperSRLimit = 0.112 + 0.506 / lowEnd
+        else:
+            upperSRLimit = 0.108 + 0.963 / lowEnd
+    else:
+        raise RuntimeError(
+            "Don't know how to determine SR/SB for histo named: {}".format(
+                histo_Electrons.GetName()
+            )
+        )
+    upperSRLimitBin = proj_Electrons.GetXaxis().FindBin(upperSRLimit) - 1
+    lowerSRLimitBin = proj_Electrons.GetXaxis().GetFirst()
+    # denominator is all loose electrons in the region
+    dataErr = ctypes.c_double()
+    data = proj_Data.IntegralAndError(
+        proj_Data.GetXaxis().GetFirst(), proj_Data.GetXaxis().GetLast(), dataErr
+    )
+    # number of ele' in SR
+    eleErr = ctypes.c_double()
+    ele = proj_Electrons.IntegralAndError(lowerSRLimitBin, upperSRLimitBin, eleErr)
+    # MC for real electron subtraction: real eles in same SR
+    realEleErr = ctypes.c_double()
+    realEle = proj_MC.IntegralAndError(lowerSRLimitBin, upperSRLimitBin, realEleErr)
+    realEleMCList = [
+        proj.Integral(lowerSRLimitBin, upperSRLimitBin) for proj in mcProjs
+    ]
+    realEleMCErrList = [
+        ctypes.c_double() for proj in mcProjs
+    ]
+    for idx, proj in enumerate(mcProjs):
+        proj.IntegralAndError(lowerSRLimitBin, upperSRLimitBin, realEleMCErrList[idx])
+    numerator = ele - realEle
+    numeratorErr = math.sqrt((eleErr.value) ** 2 + (realEleErr.value) ** 2)
+    if verbose:
+        print(
+            "\t\t\tnumer:ele=",
+            ele,
+            "+/-",
+            eleErr.value,
+            ";numMC=",
+            realEle,
+            "+/-",
+            realEleErr.value,
+            "; numMCSubd=",
+            numerator,
+            "+/-",
+            numeratorErr,
+            "; denom:data=",
+            data,
+            "+/-",
+            dataErr.value,
+        )
+        if realEle > ele:
+            print("\t\t\tbreakdown of MC:")
+            for i, sample in enumerate(mcNames):
+                print("\t\t\t\t" + sample, realEleMCList[i], "+/-", realEleMCErrList[i].value)
+            print("histo_Electrons has name:", histo_Electrons.GetName())
+            print("histo_Electrons has entries:", histo_Electrons.GetEntries())
+        print("\t\t\tFR=", numerator / data)
+    if writeOutput:
+        suffix = "_" + reg + "_" + jets + "Pt" + str(lowEnd) + "To" + str(highEnd)
+        if not outputFile.Get(shortVarName + "_DYElectrons"):
+            outputFile.mkdir(shortVarName + "_DYElectrons").cd()
+        else:
+            outputFile.cd(shortVarName + "_DYElectrons")
+        proj_DYElectrons.SetName(proj_DYElectrons.GetName() + suffix)
         proj_DYElectrons.Write()
+        if not outputFile.Get(shortVarName + "_MCElectrons"):
+            outputFile.mkdir(shortVarName + "_MCElectrons").cd()
+        else:
+            outputFile.cd(shortVarName + "_MCElectrons")
+        proj_MC.SetName(proj_MC.GetName() + suffix)
+        proj_MC.Write()
     return numerator, numeratorErr, data, dataErr.value
 
 
-def MakeFakeRatePlot(varName, reg, jets, bins, histDict, verbose=False, dataDriven=True):
+def MakeFakeRatePlot(
+    varName, reg, jets, bins, histDict, verbose=False, dataDriven=True, fractionFit=True
+):
     if verbose:
-        print "MakeFakeRatePlot:varName=", varName, "reg=", reg, "jets=", jets, "dataDriven=", dataDriven
+        print(
+            "MakeFakeRatePlot:varName=",
+            varName,
+            "reg=",
+            reg,
+            "jets=",
+            jets,
+            "dataDriven=",
+            dataDriven,
+            "fractionFit=",
+            fractionFit
+        )
         sys.stdout.flush()
-    # if reg == "Bar":
-    #     bins = ptBinsBarrel
-    # else:
-    #     bins = ptBinsEndcap
+    if reg == "Bar":
+        bins = ptBinsBarrel
+    else:
+        bins = ptBinsEndcap
+    typeString = "mcSub"
+    if dataDriven:
+        typeString = "dataDrivenRatio"
+        if fractionFit:
+            typeString = "dataDrivenFracFit"
     histNum = TH1D(
-        varName+"_num_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
-        varName+"_num_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
+        varName
+        + "_num_"
+        + reg
+        + "_"
+        + jets
+        + typeString,
+        varName
+        + "_num_"
+        + reg
+        + "_"
+        + jets
+        + typeString,
         len(bins) - 1,
         np.array(bins, dtype=float),
     )
     histDen = TH1D(
-        varName+"_den_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
-        varName+"_den_" + reg + "_" + jets + ("dataDriven" if dataDriven else "mcSub"),
+        varName
+        + "_den_"
+        + reg
+        + "_"
+        + jets
+        + typeString,
+        varName
+        + "_den_"
+        + reg
+        + "_"
+        + jets
+        + typeString,
         len(bins) - 1,
         np.array(bins, dtype=float),
     )
@@ -250,23 +649,39 @@ def MakeFakeRatePlot(varName, reg, jets, bins, histDict, verbose=False, dataDriv
             break
         binHigh = bins[index + 1]
         if verbose:
-            print "\tMakeFakeRatePlot:look at Pt:", str(binLow) + "-" + str(binHigh)
+            print("\tMakeFakeRatePlot:look at Pt:", str(binLow) + "-" + str(binHigh))
             sys.stdout.flush()
+        shortVarName = varName.split("vs")[0]
         if dataDriven:
-            num, numErr, den, denErr = GetFakeRate(binLow, binHigh, reg, jets, histDict, verbose)
+            if fractionFit:
+                num, numErr, den, denErr = GetFakeRateFractionFit(
+                    shortVarName, binLow, binHigh, reg, jets, histDict, verbose
+                )
+            else:
+                num, numErr, den, denErr = GetFakeRate(
+                    shortVarName, binLow, binHigh, reg, jets, histDict, verbose
+                )
         else:
-            num, numErr, den, denErr = GetFakeRateMCSub(binLow, binHigh, reg, jets, histDict, verbose)
+            num, numErr, den, denErr = GetFakeRateMCSub(
+                shortVarName, binLow, binHigh, reg, jets, histDict, verbose
+            )
         histNum.SetBinContent(histNum.GetXaxis().FindBin(binLow), num)
         histDen.SetBinContent(histDen.GetXaxis().FindBin(binLow), den)
         histNum.SetBinError(histNum.GetXaxis().FindBin(binLow), numErr)
         histDen.SetBinError(histDen.GetXaxis().FindBin(binLow), denErr)
         if verbose:
-            print "\tMakeFakeRatePlot:num=", num, "den=", den
-            print "\tMakeFakeRatePlot:set bin:", histNum.GetXaxis().FindBin(binLow), "to", num
-            print "\tMakeFakeRatePlot:bin content is:", histNum.GetBinContent(
-                histNum.GetXaxis().FindBin(binLow)
-            )
-            sys.stdout.flush()
+            print("\tMakeFakeRatePlot:num=", num, "den=", den)
+            # print(
+            #     "\tMakeFakeRatePlot:set bin:",
+            #     histNum.GetXaxis().FindBin(binLow),
+            #     "to",
+            #     num,
+            # )
+            # print(
+            #     "\tMakeFakeRatePlot:bin content is:",
+            #     histNum.GetBinContent(histNum.GetXaxis().FindBin(binLow)),
+            # )
+            # sys.stdout.flush()
     # c = TCanvas()
     # c.SetName('num'+reg+jets)
     # c.SetTitle('num'+reg+jets)
@@ -282,16 +697,18 @@ def MakeFakeRatePlot(varName, reg, jets, bins, histDict, verbose=False, dataDriv
     graphFR.BayesDivide(histNum, histDen)
     if analysisYear != 2018:
         graphFR.SetName(
-            "fr{reg}_{jets}{dataDriven}".format(
-                reg=reg, jets=jets, dataDriven="template" if dataDriven else "MCsub"
+            "fr{reg}_{jets}{method}".format(
+                reg=reg, jets=jets, method=typeString
             )
         )
     else:
         # a bit nasty to hardcode the varName in the below
         graphFR.SetName(
-            "fr{reg}_{var}_{jets}{dataDriven}".format(
-                reg=reg, var=varName.replace("TrkIsoHEEP7vsHLTPt_", ""),
-                jets=jets, dataDriven="template" if dataDriven else "MCsub"
+            "fr{reg}_{var}_{jets}{method}".format(
+                reg=reg,
+                var=varName.replace("TrkIsoHEEP7vsHLTPt_", ""),
+                jets=jets,
+                method=typeString
             )
         )
     return graphFR, histNum, histDen
@@ -299,20 +716,32 @@ def MakeFakeRatePlot(varName, reg, jets, bins, histDict, verbose=False, dataDriv
 
 def MakeFRCanvas(plotList, titleList, canTitle):
     if len(titleList) != len(plotList):
-        print "ERROR: titleList and plotList passed into MakeFRCanvas are different lengths!"
+        print(
+            "ERROR: titleList and plotList passed into MakeFRCanvas are different lengths!"
+        )
     can = TCanvas()
     can.cd()
     can.SetGridy()
     can.SetTitle(canTitle)
-    can.SetName("y"+canTitle.lower().replace(',', '').replace(' ', '_').replace('>=', 'gte').replace('<', 'lt'))
-    colorList = [1, kSpring-1, kAzure+1, kBlue, kGreen]
-    markerStyleList = [8, 25, 23, 22]
+    can.SetName(
+        "y"
+        + canTitle.lower()
+        .replace(",", "")
+        .replace(" ", "_")
+        .replace(">=", "gte")
+        .replace("<", "lt")
+    )
+    colorList = [1, kSpring - 1, kAzure + 1, kBlue, kGreen]
+    markerStyleList = [8, 25, 23, 22, 21]
     for i, plot in enumerate(plotList):
         if i == 0:
             plot.Draw("ap0")
             plot.GetXaxis().SetRangeUser(0, 1000)
             plot.GetXaxis().SetTitle("E_{T} [GeV]")
-            plot.GetYaxis().SetRangeUser(0, 0.1)
+            if "barrel" in canTitle.lower():
+                plot.GetYaxis().SetRangeUser(0, 0.1)
+            else:
+                plot.GetYaxis().SetRangeUser(0, 0.3)
             plot.GetYaxis().SetNdivisions(510)
             plot.GetYaxis().SetTitle("fake rate")
             plot.SetTitle(canTitle)
@@ -382,8 +811,12 @@ def LoadHistosMC(histos, varName):
                 )
                 hist = tfile.Get(histName)
                 if not hist:
-                    print "ERROR: could not get hist '"+histName+"' from file: "+tfile.GetName()
-                    exit(-1)
+                    raise RuntimeError(
+                        "Could not get hist '"
+                        + histName
+                        + "' from file: "
+                        + tfile.GetName()
+                    )
                 histos[reg][name][jet] = hist
                 if not mcTotalHist:
                     # mcTotalHist = hist.Clone()
@@ -414,16 +847,16 @@ def GetJetBin(histName):
 # so we need to know the eta region here
 def MakeFR2D(frGraph, reg, bins):
     if reg == "Bar":
-        # bins = ptBinsBarrel
+        bins = ptBinsBarrel
         etaToFill = 1
     elif reg == "End1":
-        # bins = ptBinsEndcap
+        bins = ptBinsEndcap
         etaToFill = 1.7
     elif reg == "End2":
-        # bins = ptBinsEndcap
+        bins = ptBinsEndcap
         etaToFill = 2
     else:
-        print "ERROR: could not understand region given:", reg, "; return empty hist"
+        print("ERROR: could not understand region given:", reg, "; return empty hist")
         return
     etaBins = [-2.5, -2.0, -1.566, -1.4442, 0, 1.4442, 1.566, 2.0, 2.5]
     frHist2d = TH2F(
@@ -445,7 +878,9 @@ def MakeFR2D(frGraph, reg, bins):
         y = ctypes.c_double()
         frGraph.GetPoint(iPoint, x, y)
         frHist2d.SetBinContent(
-            frHist2d.GetXaxis().FindBin(etaToFill), frHist2d.GetYaxis().FindBin(x.value), y.value
+            frHist2d.GetXaxis().FindBin(etaToFill),
+            frHist2d.GetYaxis().FindBin(x.value),
+            y.value,
         )
         # TODO set error
     return frHist2d
@@ -455,20 +890,24 @@ def MakeFR2D(frGraph, reg, bins):
 # RUN
 ####################################################################################################
 # filename = "$LQDATA/nanoV6/2016/qcdFakeRateCalc/17jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
-#filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+# filename = "$LQDATA/nanoV6/2017/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+# filename = "$LQDATA/nanoV6/2018/qcdFakeRateCalc/20jul2020/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"
+# filename = "$LQDATA/nanoV7/2016/qcdFakeRateCalc/15nov2021/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"  # for HEEP-based FR
+# filename = "$LQDATA/nanoV7/2016/qcdFakeRateCalc/19nov2021/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"  # also unscaled
+# filename = "$LQDATA/nanoV7/2016/qcdFakeRateCalc/26nov2021/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots_unscaled.root"
+# filename = "$LQDATA/nanoV7/2016/qcdFakeRateCalc/inconsistenIDs_14mar2022/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"  # test for validation
+filename = "$LQDATA/nanoV7/2016/qcdFakeRateCalc/calcFR_egmoose_19mar2022/output_cutTable_lq_QCD_FakeRateCalculation/analysisClass_lq_QCD_FakeRateCalculation_plots.root"  # fixed vloose ID for EGMLoose
 
-print "Opening file:", filename
+print("Opening file:", filename)
 tfile = TFile.Open(filename)
 if not tfile or tfile.IsZombie():
-    print "ERROR: TFile is zombie. Quitting here."
-    exit(-1)
+    raise RuntimeError("TFile is zombie. Quitting here.")
 
-if '2016' in filename:
+if "2016" in filename:
     analysisYear = 2016
-elif '2017' in filename:
+elif "2017" in filename:
     analysisYear = 2017
-elif '2018' in filename:
+elif "2018" in filename:
     analysisYear = 2018
 
 outputFileName = "plots.root"
@@ -477,7 +916,11 @@ pdf_folder = "pdf"
 gROOT.SetBatch(True)
 writeOutput = True
 doMuz = False  # do Muzamil's plots
+plotZprimeFR = True
 doMCSubFR = True
+doDataDrivenFR = True
+doFractionFit = True
+doHEEPBasedFR = False
 
 histoBaseName = "histo2D__{sample}__{type}_{region}_{jets}{varName}"
 dataSampleName = "QCDFakes_DATA"
@@ -488,17 +931,17 @@ regTitleDict = {}
 # jetBins = ["", "1Jet_", "2Jet_", "3Jet_"]
 jetBins = ["", "1Jet_", "2Jet_"]
 # for MC
-if '2016' in filename:
+if "2016" in filename:
     mcSamples = [
-         "ZJet_amcatnlo_ptBinned",
-         # "ZJet_amcatnlo_Inc",
-         # "WJet_amcatnlo_ptBinned",
-         # "WJet_Madgraph_Inc",
-         "WJet_amcatnlo_Inc",
-         "TTbar_powheg",
-         "SingleTop",
-         "PhotonJets_Madgraph",
-         "DIBOSON_nlo",
+        "ZJet_amcatnlo_ptBinned",
+        # "ZJet_amcatnlo_Inc",
+        # "WJet_amcatnlo_ptBinned",
+        # "WJet_Madgraph_Inc",
+        "WJet_amcatnlo_Inc",
+        "TTbar_powheg",
+        "SingleTop",
+        "PhotonJets_Madgraph",
+        "DIBOSON_nlo",
     ]
 else:
     mcSamples = [
@@ -513,11 +956,21 @@ mcNames = ["ZJets", "WJets", "TTBar", "ST", "GJets", "Diboson"]
 
 # varNameList = ["TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsMTenu_PAS"]
 if analysisYear != 2018:
-    varNameList = ["TrkIsoHEEP7vsHLTPt_PAS"]
+    # for heep-based FR
+    if doHEEPBasedFR:
+        varNameList = ["TrkIsoHEEP7vsHLTPt_PAS"]
+    else:
+        varNameList = ["PFRelIsoAllvsPt_PAS"]
+        # varNameList = ["Full5x5SigmaIEtaIEtavsPt_PAS"]
+        # histoBaseName = histoBaseName.replace("histo2D", "histo1D")
 else:
     varNameList = [
-            "TrkIsoHEEP7vsHLTPt_PAS", "TrkIsoHEEP7vsHLTPt_pre319077", "TrkIsoHEEP7vsHLTPt_post319077",
-            "TrkIsoHEEP7vsHLTPt_noHEM_post319077", "TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]
+        "TrkIsoHEEP7vsHLTPt_PAS",
+        "TrkIsoHEEP7vsHLTPt_pre319077",
+        "TrkIsoHEEP7vsHLTPt_post319077",
+        "TrkIsoHEEP7vsHLTPt_noHEM_post319077",
+        "TrkIsoHEEP7vsHLTPt_HEMonly_post319077",
+    ]
 
 # ptBinsBarrel = [
 # #    35,
@@ -563,25 +1016,80 @@ else:
 #      600,
 #      800,
 #      1000,
-#  ]
+# ]
 # ptBinsEndcap = [35, 50, 75, 100, 125, 150, 200, 250, 300, 350, 500, 1000]
 # Z' binning -- 2016
 # ptBinsEndcap = [36, 47, 50, 62, 75, 82, 90, 105, 120, 140, 175, 200, 225, 250, 300, 350, 400, 500, 600, 1000]
 if analysisYear == 2016:
-    ptBinsEndcap = [36, 50, 75, 90, 120, 140, 175, 200, 225, 250, 300, 350, 400, 500, 600, 1000]
+    ptBinsEndcap = [
+        36,
+        50,
+        75,
+        90,
+        120,
+        140,
+        175,
+        200,
+        225,
+        250,
+        300,
+        350,
+        400,
+        500,
+        600,
+        1000,
+    ]
 else:
-    ptBinsEndcap = [36, 50, 75, 90, 120, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 1000]
+    ptBinsEndcap = [
+        36,
+        50,
+        75,
+        90,
+        120,
+        150,
+        175,
+        200,
+        225,
+        250,
+        300,
+        350,
+        400,
+        500,
+        600,
+        1000,
+    ]
 # 2018
-ptBinsEndcapHEM1516Only = [36, 50, 75, 90, 120, 150, 175, 200, 225, 250, 300, 350, 400, 500, 1000]
-# ptBinsBarrel = ptBinsEndcap
+ptBinsEndcapHEM1516Only = [
+    36,
+    50,
+    75,
+    90,
+    120,
+    150,
+    175,
+    200,
+    225,
+    250,
+    300,
+    350,
+    400,
+    500,
+    1000,
+]
+# use same barrel/endcap binning
+ptBinsBarrel = ptBinsEndcap
 ptBinsDict = {}
 for varName in varNameList:
     ptBinsDict[varName] = {}
     for reg in detectorRegions:
         ptBinsDict[varName][reg] = ptBinsEndcap
 if analysisYear == 2018:
-    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End1"] = ptBinsEndcapHEM1516Only
-    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"]["End2"] = ptBinsEndcapHEM1516Only
+    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"][
+        "End1"
+    ] = ptBinsEndcapHEM1516Only
+    ptBinsDict["TrkIsoHEEP7vsHLTPt_HEMonly_post319077"][
+        "End2"
+    ] = ptBinsEndcapHEM1516Only
 
 allHistos = {}
 for varName in varNameList:
@@ -613,8 +1121,7 @@ tfileZPrime = TFile(
     "/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/QCDFakeRate/heepV7p0_2016_reminiAOD_noEleTrig_fakerate.root"
 )
 if tfileZPrime.IsZombie():
-    print "ERROR: zprime tfile is zombie:", tfileZPrime.GetName()
-    exit(-1)
+    raise RuntimeError("zprime tfile is zombie:", tfileZPrime.GetName())
 zprimeHistEnd2ZeroJ = tfileZPrime.Get("frHistEEHigh")
 zprimeHistEnd1ZeroJ = tfileZPrime.Get("frHistEELow")
 zprimeHistBarZeroJ = tfileZPrime.Get("frHistEB")
@@ -626,12 +1133,12 @@ zprimeHistDict["End1"] = {}
 zprimeHistDict["End1"][""] = zprimeHistEnd1ZeroJ
 zprimeHistDict["Bar"] = {}
 zprimeHistDict["Bar"][""] = zprimeHistBarZeroJ
-print zprimeHistBarZeroJ.GetEntries()
+# print(zprimeHistBarZeroJ.GetEntries())
 
 # make list of histos to use for FR
 # histos = [allHistos[varNameList[0]]]
-#if '2018' in filename:
-#    histos = allHistos
+# if '2018' in filename:
+#     histos = allHistos
 
 histDict = {}
 numerHistDict = {}
@@ -650,15 +1157,37 @@ for varName in allHistos:
             histDict[varName][reg][jetBin] = {}
             numerHistDict[varName][reg][jetBin] = {}
             denomHistDict[varName][reg][jetBin] = {}
-            histFR, histNum, histDen = MakeFakeRatePlot(
-                    varName, reg, jetBin, bins, histos
-            )
-            histDict[varName][reg][jetBin]["data"] = histFR
-            numerHistDict[varName][reg][jetBin]["data"] = histNum
-            denomHistDict[varName][reg][jetBin]["data"] = histDen
+            if doDataDrivenFR:
+                histFR, histNum, histDen = MakeFakeRatePlot(
+                    varName,
+                    reg,
+                    jetBin,
+                    bins,
+                    histos,
+                    verbose=True,
+                    dataDriven=True,
+                    fractionFit=False,
+                )
+                histDict[varName][reg][jetBin]["data"] = histFR
+                numerHistDict[varName][reg][jetBin]["data"] = histNum
+                denomHistDict[varName][reg][jetBin]["data"] = histDen
+                if doFractionFit:
+                    histFR, histNum, histDen = MakeFakeRatePlot(
+                        varName,
+                        reg,
+                        jetBin,
+                        bins,
+                        histos,
+                        verbose=True,
+                        dataDriven=True,
+                        fractionFit=True,
+                    )
+                    histDict[varName][reg][jetBin]["dataFracFit"] = histFR
+                    numerHistDict[varName][reg][jetBin]["dataFracFit"] = histNum
+                    denomHistDict[varName][reg][jetBin]["dataFracFit"] = histDen
             if doMCSubFR:
                 histFRMC, histNumMC, histDenMC = MakeFakeRatePlot(
-                        varName, reg, jetBin, bins, histos, dataDriven=False
+                    varName, reg, jetBin, bins, histos, verbose=True, dataDriven=False
                 )
                 histDict[varName][reg][jetBin]["mc"] = histFRMC
                 numerHistDict[varName][reg][jetBin]["mc"] = histNumMC
@@ -667,19 +1196,23 @@ for varName in allHistos:
 for varName in allHistos:
     for reg in detectorRegions:
         for jetBin in jetBins:
-            varRegJetHistList = [histDict[varName][reg][jetBin]["data"]]
-            titleList = ["Data-driven"]
+            varRegJetHistList = []
+            titleList = []
+            if doDataDrivenFR:
+                varRegJetHistList.append(histDict[varName][reg][jetBin]["data"])
+                titleList.append("Ratio")
             if doMCSubFR:
                 varRegJetHistList.append(histDict[varName][reg][jetBin]["mc"])
                 titleList.append("MCSub")
-            if jetBin == "" and varName == "TrkIsoHEEP7vsHLTPt_PAS":
+            if jetBin == "" and (varName == "TrkIsoHEEP7vsHLTPt_PAS" or plotZprimeFR):
                 varRegJetHistList.append(zprimeHistDict[reg][jetBin])
-                titleList.append("2016 Zprime (E_{T}^{HLT})")
+                titleList.append("2016 Zprime (E_{T}^{HLT}, HEEP)")
+            if doDataDrivenFR and doFractionFit:
+                varRegJetHistList.append(histDict[varName][reg][jetBin]["dataFracFit"])
+                titleList.append("FractionFit")
             myCanvases.append(
                 MakeFRCanvas(
-                    varRegJetHistList,
-                    titleList,
-                    GetCanvasTitle(varName, reg, jetBin)
+                    varRegJetHistList, titleList, GetCanvasTitle(varName, reg, jetBin)
                 )
             )
             histList.extend(varRegJetHistList)
@@ -721,8 +1254,109 @@ for canLeg in myCanvases:
     # canLeg[-1][1].Draw() #legend
     if writeOutput:
         canv.Write()
-        canv.Print(pdf_folder + "/" + canv.GetName()+".pdf")
+        canv.Print(pdf_folder + "/" + canv.GetName() + ".pdf")
 
+
+##################################################
+# var vs PU plot
+##################################################
+SetDistinctiveTColorPalette()
+varName = "PFRelIsoAllvsNvtx_PAS"
+sampleNameData = "QCDFakes_DATA"
+categories = ["Total", "Electrons", "Jets"]
+histoName = "histo2D__{sampleName}__{category}_{region}_{jets}" + varName
+shortVarName = varName.split("vs")[0]
+for sample in mcSamples:
+    if "zjet" in sample.lower():
+        sampleNameZJet = sample
+histosPU = {}
+puBins = [1, 10, 20, 30, 40, 50, 60]
+for reg in detectorRegions:
+    # histosPt[reg] = {}
+    # histosPt[reg]["ZElectrons"] = {}
+    # histosPt[reg]["WElectrons"] = {}
+    # histosPt[reg]["DataLooseElectrons"] = {}
+    # histosPt[reg]["DataElectrons"] = {}
+    for jet in jetBins:
+        for cat in categories:
+            histsThisCategory = {}
+            histsThisCategory[sampleNameZJet] = []
+            histsThisCategory[sampleNameData] = []
+            for idx, puBin in enumerate(puBins):
+                histo2D = tfile.Get(
+                    histoName.format(
+                        region=reg, jets=jet, sampleName=sampleNameZJet, category=cat
+                    )
+                )
+                profName = histo2D.GetName().replace("histo2D__", "")
+                highPUBin = puBins[idx + 1]
+                # FIXME name is incorrect
+                proj_Z = histo2D.ProjectionY(
+                    profName + "_PU" + str(puBin) + "to" + str(highPUBin),
+                    histo2D.GetXaxis().FindBin(puBin),
+                    histo2D.GetXaxis().FindBin(highPUBin) - 1,
+                )
+                histsThisCategory[sampleNameZJet].append(proj_Z)
+                # histosPt[reg]["ZElectrons"][jet] = proj_MC
+                # histosPt[reg]["WElectrons"][jet] = proj_MC
+                histo2D = tfile.Get(
+                    histoName.format(
+                        region=reg, jets=jet, sampleName=sampleNameData, category=cat
+                    )
+                )
+                profName = histo2D.GetName().replace("histo2D__", "")
+                proj_data = histo2D.ProjectionY(
+                    profName + "_PU" + str(puBin) + "to" + str(highPUBin),
+                    histo2D.GetXaxis().FindBin(puBin),
+                    histo2D.GetXaxis().FindBin(highPUBin) - 1,
+                )
+                histsThisCategory[sampleNameData].append(proj_data)
+                # print "append proj_data with name={}".format(proj_data.GetName())
+                if writeOutput:
+                    # if not outputFile.cd(shortVarName+"_Electrons_PU"):
+                    #     outputFile.mkdir(shortVarName+"_Electrons_PU").cd()
+                    if not outputFile.cd(shortVarName + "_profiles_PU"):
+                        outputFile.mkdir(shortVarName + "_profiles_PU").cd()
+                    proj_Z.Write()
+                    proj_data.Write()
+                if idx >= len(puBins) - 2:
+                    break
+            if writeOutput:
+                for sample in histsThisCategory.keys():
+                    can = TCanvas("", "", 1400, 800)
+                    can.SetName(sample + "_" + reg + "_" + jet + cat)
+                    can.SetTitle(sample + "_" + reg + "_" + jet + cat)
+                    can.cd()
+                    can.SetLogy()
+                    can.SetTitle(
+                        (
+                            "puOverlay_{sample}_{category}_{region}_{jets}" + varName
+                        ).format(sample=sample, category=cat, region=reg, jets=jet)
+                    )
+                    leg = TLegend(0.65, 0.71, 0.89, 0.88)
+                    leg.SetFillColor(kWhite)
+                    leg.SetFillStyle(1001)
+                    leg.SetBorderSize(0)
+                    leg.SetShadowColor(10)
+                    leg.SetMargin(0.2)
+                    # leg.SetTextFont(132)
+                    for idx, hist in enumerate(histsThisCategory[sample]):
+                        # print "for hist={} GetMyColor({})={}".format(hist.GetName(), idx, GetMyColor(idx))
+                        hist.Rebin(8)
+                        hist.SetStats(0)
+                        hist.GetXaxis().SetTitle(shortVarName)
+                        hist.GetXaxis().SetTitleOffset(1.1)
+                        hist.SetTitle("")
+                        hist.SetLineColor(GetMyColor(idx))
+                        hist.SetMarkerColor(GetMyColor(idx))
+                        if idx == 0:
+                            hist.DrawNormalized()
+                        else:
+                            hist.DrawNormalized("same")
+                        leg.AddEntry(hist, hist.GetName(), "lp")
+                    leg.Draw()
+                    can.Write()
+                    can.Print(pdf_folder + "/" + can.GetName() + ".pdf")
 
 ##################################################
 # make Et plot
@@ -764,11 +1398,14 @@ for reg in detectorRegions:
         histosPt[reg]["DataLooseElectrons"][jet] = proj_data
         # histo2D_data = tfile.Get(histoNameData.format(region=reg,jets=jet))
         histo2D_data = histos[reg]["Electrons"][jet]
-        proj_data = histo2D_data.ProjectionX(
-            "EtData",
-            histo2D_data.GetYaxis().FindBin(0),
-            histo2D_data.GetYaxis().FindBin(5) - 1,
-        )
+        if "2D" in histo2D_data.ClassName():
+            proj_data = histo2D_data.ProjectionX(
+                "EtData",
+                histo2D_data.GetYaxis().FindBin(0),
+                histo2D_data.GetYaxis().FindBin(5) - 1,
+            )
+        else:
+            proj_data = histo2D_data
         histosPt[reg]["DataElectrons"][jet] = proj_data
         # print 'added histo:',hist.GetName(),' to ','['+reg+']['+eType+']['+jet+']'
 
@@ -825,16 +1462,18 @@ canvasEt.Modified()
 canvasEt.Update()
 low = 800
 high = 1000
-print "integrals in 800-1000:"
-print "dataLoose=", histDataLoose.Integral(
-    histDataLoose.FindBin(low), histDataLoose.FindBin(high) - 1
+print("integrals in 800-1000:")
+print(
+    "dataLoose=",
+    histDataLoose.Integral(histDataLoose.FindBin(low), histDataLoose.FindBin(high) - 1),
 )
-print "dataEle=", histData.Integral(histData.FindBin(low), histData.FindBin(high) - 1)
+print("dataEle=", histData.Integral(histData.FindBin(low), histData.FindBin(high) - 1))
 # print "WEle=", histW.Integral(histW.FindBin(low), histW.FindBin(high) - 1)
 # print "ZEle=", histZ.Integral(histZ.FindBin(low), histZ.FindBin(high) - 1)
 
 
 if writeOutput:
+    outputFile.cd()
     endcap2dHists = []
     for hist in histList:
         hist.Write()
