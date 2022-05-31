@@ -26,7 +26,8 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   STDOUT("begins");
-  nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
+  //nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
+  nOptimizerCuts_ = 10000; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
   cutFile_ = cutFile;
   treeName_= treeName;
@@ -532,7 +533,8 @@ void baseClass::readCutFile()
   }
   gDirectory->cd();
   auto eventsPassingCutsProf = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
-  int nPrevSkimCuts = 2;
+  int nSkimCuts = 2;
+  nPreviousSkimCuts_ = 0;
   if(!eventsPassingCutsProf)
   {
     STDOUT("INFO: no pre-existing EventsPassingSkimCuts profile.");
@@ -552,6 +554,7 @@ void baseClass::readCutFile()
   {
     STDOUT("INFO: found pre-existing EventsPassingSkimCuts profile.");
     // we have a previous skim profile available
+    nPreviousSkimCuts_ = eventsPassingCutsProf->GetNbinsX();
     if(produceReducedSkim_ || produceSkim_)
     {
       STDOUT("INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.");
@@ -560,7 +563,7 @@ void baseClass::readCutFile()
       newProf->SetNameTitle("EventsPassingSkimCuts", "Events Passing Skim Cuts");
       histsToSave_.push_back(newProf);
     }
-    nPrevSkimCuts = eventsPassingCutsProf->GetNbinsX();
+    nSkimCuts = eventsPassingCutsProf->GetNbinsX();
   }
   auto savedEventsPassingCuts = dynamic_pointer_cast<TProfile>(findSavedHist("EventsPassingSkimCuts"));
   if(!savedEventsPassingCuts) {
@@ -569,13 +572,13 @@ void baseClass::readCutFile()
   }
   eventCuts_ = std::shared_ptr<TProfile>(new TProfile("EventsPassingCuts","Events Passing Cuts",cutsize,0,cutsize));
   eventCuts_->Sumw2();
-  eventCutsHist_ = std::shared_ptr<TH1D>(new TH1D("EventsPassingCutsAllHist","Events Passing Cuts",cutsize+nPrevSkimCuts,0,cutsize+nPrevSkimCuts));
+  eventCutsHist_ = std::shared_ptr<TH1D>(new TH1D("EventsPassingCutsAllHist","Events Passing Cuts",cutsize+nSkimCuts,0,cutsize+nSkimCuts));
   eventCutsHist_->Sumw2();
-  eventCutsEfficHist_ = std::shared_ptr<TH1D>(new TH1D("EfficiencyPassingCutsAllHist","Abs. Efficiency of Passing Cuts",cutsize+nPrevSkimCuts,0,cutsize+nPrevSkimCuts));
+  eventCutsEfficHist_ = std::shared_ptr<TH1D>(new TH1D("EfficiencyPassingCutsAllHist","Abs. Efficiency of Passing Cuts",cutsize+nSkimCuts,0,cutsize+nSkimCuts));
   eventCutsEfficHist_->Sumw2();
   if(eventsPassingCutsProf) {
     double noCuts = eventsPassingCutsProf->GetBinEntries(1);
-    for(int iBin=1; iBin <= nPrevSkimCuts; iBin++) {
+    for(int iBin=1; iBin <= nSkimCuts; iBin++) {
       double sumw = eventsPassingCutsProf->GetBinContent(iBin)*eventsPassingCutsProf->GetBinEntries(iBin);
       double sqrtSumw2 = sqrt(eventsPassingCutsProf->GetSumw2()->At(iBin));
       eventCutsHist_->GetXaxis()->SetBinLabel(iBin, eventsPassingCutsProf->GetXaxis()->GetBinLabel(iBin));
@@ -1098,7 +1101,7 @@ float baseClass::getPreCutValue1(const string& s)
     exit(-5);
   }
   preCut * c = & (cc->second);
-  if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  if(c->value1 == -999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   return (c->value1);
 }
 
@@ -1112,7 +1115,7 @@ float baseClass::getPreCutValue2(const string& s)
     exit(-5);
   }
   preCut * c = & (cc->second);
-  if(c->value2 == -99999999999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
+  if(c->value2 == -999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
   return (c->value2);
 }
 
@@ -1126,7 +1129,7 @@ float baseClass::getPreCutValue3(const string& s)
     exit(-5);
   }
   preCut * c = & (cc->second);
-  if(c->value3 == -99999999999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
+  if(c->value3 == -999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
   return (c->value3);
 }
 
@@ -1140,7 +1143,7 @@ float baseClass::getPreCutValue4(const string& s)
     exit(-5);
   }
   preCut * c = & (cc->second);
-  if(c->value4 == -99999999999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
+  if(c->value4 == -999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
   return (c->value4);
 }
 
@@ -1385,11 +1388,10 @@ bool baseClass::writeCutEfficFile()
     STDOUT("ERROR: something very bad happened. The EventsPassingSkimCuts hist was not found in savedHists. Exiting.");
     exit(-5);
   }
-  int nPrevCuts = savedEventsPassingCuts->FindLastBinAbove(); // first zero bin should be the first new cut
-  int allBinCounter = nPrevCuts+1;
+  int allBinCounter = nPreviousSkimCuts_+1;
 
   eventCuts_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
-  if(nPrevCuts < 1) {
+  if(nPreviousSkimCuts_ < 1) {
     eventCutsHist_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
     eventCutsEfficHist_->GetXaxis()->SetBinLabel(bincounter, "NoCuts");
   }
@@ -1398,7 +1400,7 @@ bool baseClass::writeCutEfficFile()
   if (skimWasMade_)
   {
     eventCuts_->GetXaxis()->SetBinLabel(bincounter, "Skim");
-    if(nPrevCuts < 1) {
+    if(nPreviousSkimCuts_ < 1) {
       eventCutsHist_->GetXaxis()->SetBinLabel(bincounter, "Skim");
       eventCutsEfficHist_->GetXaxis()->SetBinLabel(bincounter, "Skim");
       allBinCounter = bincounter+1;
@@ -1452,7 +1454,7 @@ bool baseClass::writeCutEfficFile()
   os << "################################## Cuts #########################################################################################################################################################################################################################\n"
      <<"#id                       variableName                min1                max1                min2                max2               level                   N               Npass              EffRel           errEffRel              EffAbs           errEffAbs"<<endl
      ;
-  if(nPrevCuts < 1)
+  if(nPreviousSkimCuts_ < 1)
     os << fixed
       << setw(3) << cutIdPed
       << setw(35) << "nocut"
@@ -1480,7 +1482,7 @@ bool baseClass::writeCutEfficFile()
   eventCuts_->SetBinContent(bincounter,nEntTot);
   eventCuts_->SetBinError(bincounter,sqrt(nEntTot));
   eventCuts_->SetBinEntries(bincounter,nEntTot);
-  if(nPrevCuts < 1) {
+  if(nPreviousSkimCuts_ < 1) {
     checkOverflow(eventCutsHist_.get(), nEntTot);
     eventCutsHist_->SetBinContent(bincounter, nEntTot);
     eventCutsHist_->SetBinError(bincounter, sqrt(nEntTot));
@@ -1509,7 +1511,7 @@ bool baseClass::writeCutEfficFile()
     eventCuts_->SetBinContent(bincounter, GetTreeEntries() );
     eventCuts_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
     eventCuts_->SetBinEntries(bincounter, GetTreeEntries() );
-    if(nPrevCuts < 1) {
+    if(nPreviousSkimCuts_ < 1) {
       checkOverflow(eventCutsHist_.get(),GetTreeEntries());
       eventCutsHist_->SetBinContent(bincounter, GetTreeEntries() );
       eventCutsHist_->SetBinError(bincounter, sqrt(GetTreeEntries()) );
@@ -1544,7 +1546,7 @@ bool baseClass::writeCutEfficFile()
     }
   }
   // put previous skim cuts in table/plots
-  for(int iBin=1; iBin <= nPrevCuts; ++iBin) {
+  for(int iBin=1; iBin <= nPreviousSkimCuts_; ++iBin) {
     double n = savedEventsPassingCuts->GetBinEntries(iBin);
     double sumw = savedEventsPassingCuts->GetBinContent(iBin)*n;
     double sqrtSumw2 = sqrt(savedEventsPassingCuts->GetSumw2()->At(iBin));
@@ -1587,7 +1589,7 @@ bool baseClass::writeCutEfficFile()
     else
       eventCutsEfficHist_->SetBinError(iBin, 0.0);
   }
-  allBinCounter = nPrevCuts > 0 ? nPrevCuts+1 : bincounter+1;
+  allBinCounter = nPreviousSkimCuts_ > 0 ? nPreviousSkimCuts_+1 : bincounter+1;
   int skimBinCounter = allBinCounter;
   for (vector<string>::iterator it = orderedCutNames_.begin();
       it != orderedCutNames_.end(); it++)
@@ -2234,7 +2236,7 @@ float baseClass::getSkimPreCutValue(const string& s)
     return 0;
   }
   preCut * c = & (cc->second);
-  if(c->value1 == -99999999999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  if(c->value1 == -999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   STDOUT("getSkimPreCutValue: (" << s << "): INFO -- found the precut string in the map with value: " << c->value1);
   return (c->value1);
   return getPreCutValue1(s);
@@ -2511,6 +2513,11 @@ bool baseClass::isData() {
   return true;
 }
 
+void baseClass::resetSkimTreeBranchAddress(const std::string& branchName, void* addr) {
+  TBranch* branch = skim_tree_->FindBranch(branchName.c_str());
+  branch->SetAddress(addr);
+}
+
 template <typename T> void baseClass::checkOverflow(const TH1* hist, const T binContent) {
   std::ostringstream stringStream;
   if(std::string(hist->ClassName()).find("TH1F") != std::string::npos) {
@@ -2570,7 +2577,7 @@ shared_ptr<TProfile> baseClass::makeNewEventsPassingSkimCutsProfile(const shared
   if(prevProfFromFile) {
     for(int i=1; i<=nBinsInherited; ++i) {
       profToRet->GetXaxis()->SetBinLabel(i, prevProfFromFile->GetXaxis()->GetBinLabel(i));
-      profToRet->SetBinContent(i,           prevProfFromFile->GetBinEntries(i));
+      profToRet->SetBinContent(i,           prevProfFromFile->GetBinContent(i)*prevProfFromFile->GetBinEntries(i));
       profToRet->SetBinError(i,             sqrt(prevProfFromFile->GetBinSumw2()->At(i)));
       profToRet->SetBinEntries(i,           prevProfFromFile->GetBinEntries(i));
     }

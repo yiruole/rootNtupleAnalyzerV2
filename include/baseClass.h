@@ -39,24 +39,24 @@ class SimpleCut {
     bool passed = false;
     bool evaluatedPreviousCuts = false;
     bool passedPreviousCuts = false;
-    float value = -1;
+    float value = -999;
     float weight = 1;
-    float minValue1 = -1;
-    float maxValue1 = -1;
-    float minValue2 = -1;
-    float maxValue2 = -1;
+    float minValue1 = -999;
+    float maxValue1 = -999;
+    float minValue2 = -999;
+    float maxValue2 = -999;
 };
 
 class cut : public SimpleCut {
   public:
     const static size_t MAX_ARRAY_SIZE = 200;
-    int histoNBins = -1;
-    float histoMin = -1;
-    float histoMax = -1;
+    int histoNBins = -999;
+    float histoMin = -999;
+    float histoMax = -999;
     bool saveVariableInReducedSkim = false;
     bool saveVariableArrayInReducedSkim = false;
     // Not filled from file
-    int id = -1;
+    int id = -999;
     TH1D histo1;
     TH1D histo2;
     TH1D histo3;
@@ -65,11 +65,11 @@ class cut : public SimpleCut {
     TH1D histo6;
     // Filled event by event
     unsigned int arraySize = 0;
-    double nEvtInput = -1;
-    double nEvtPassedBeforeWeight = -1;
-    double nEvtPassed = -1;
-    double nEvtPassedErr2 = -1;
-    bool nEvtPassedBeforeWeight_alreadyFilled = -1;
+    double nEvtInput = -999;
+    double nEvtPassedBeforeWeight = -999;
+    double nEvtPassed = -999;
+    double nEvtPassedErr2 = -999;
+    bool nEvtPassedBeforeWeight_alreadyFilled = -999;
 };
 
 struct preCut {
@@ -78,11 +78,11 @@ struct preCut {
   std::string string2 = "";
   std::string string3 = "";
   std::string string4 = "";
-  float value1 = -1;
-  float value2 = -1;
-  float value3 = -1;
-  float value4 = -1;
-  int level_int = -1;
+  float value1 = -999;
+  float value2 = -999;
+  float value3 = -999;
+  float value4 = -999;
+  int level_int = -999;
   std::string level_str = "";
 };
 
@@ -440,6 +440,8 @@ class baseClass {
 
     bool hasBranch(const std::string& branchName) { return readerTools_->GetTree()->GetBranch(branchName.c_str()); }
 
+    void resetSkimTreeBranchAddress(const std::string& branchName, void* addr);
+
     TFile * output_root_;
 
     std::shared_ptr<TTreeReaderTools> readerTools_;
@@ -477,6 +479,7 @@ class baseClass {
     std::vector<std::string> split(const std::string& s);
     float decodeCutValue(const std::string& s);
     bool skimWasMade_;
+    int nPreviousSkimCuts_;
     double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
     template <typename T> std::shared_ptr<T> getSavedObjectFromFile(const std::string& fileName, const std::string& histName);
     double getGlobalInfoNstart(const std::string& fileName);
