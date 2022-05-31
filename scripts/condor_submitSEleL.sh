@@ -4,7 +4,7 @@ YEAR=$1
 
 if [ "$YEAR" = "2016" ]; then
   echo "Doing 2016!"
-  SKIMNAME=rskSingleEleL_egLoose_21sep2021
+  SKIMNAME=rskSingleEleL_egLoose_3feb2022
   INPUTLIST=config/nanoV7_2016_postProc/inputListAllCurrent.txt
 elif [ "$YEAR" = "2017" ]; then
   SKIMNAME=rskSingleEleL_9apr2021
