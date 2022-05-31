@@ -196,6 +196,7 @@ def parse_root_file(d_input, verbose=False):
             exit(-1)
         print "entries:", histEnts.GetEntries()
         print "entries bin 5836:", histEnts.GetBinContent(5836)
+        print "content bin 5836:", hist.GetBinContent(5836)
 
         if sum_hist.GetEntries() <= 0:
             sum_hist = copy.deepcopy(hist)
@@ -252,11 +253,12 @@ def evaluation(nS, nB, efficiency, bkgEnts):
             value = math.sqrt(2 * ((nS + nB) * math.log(1 + nS / nB) - nS))
         elif figureOfMerit == "punzi":
             # punzi
-            a = 2  # nSigmasExclusion
-            b = 5  # nSigmasDiscovery
+            a = 2.0  # nSigmasExclusion
+            b = 5.0  # nSigmasDiscovery
             # value = efficiency / (nSigmas / 2.0 + math.sqrt(nB))
-            smin = a**2/8 + 9*b**2/13 + a*math.sqrt(nB) + (b/2)*math.sqrt(b**2 + 4*a*math.sqrt(nB) + 4*nB)
+            smin = a**2/8.0 + 9*b**2/13.0 + a*math.sqrt(nB) + (b/2)*math.sqrt(b**2 + 4*a*math.sqrt(nB) + 4*nB)
             value = efficiency / smin
+            # print "evaluation(): nS=", nS, "nB=", nB, "eff=", efficiency, "eval=", value
         elif figureOfMerit == "zbi":
             value = RooStats.NumberCountingUtils.BinomialWithTauExpZ(nS, nB, tau)
         elif figureOfMerit == "zpl":  # [1], eqn. 25
@@ -376,7 +378,15 @@ mc_filepath = (
     # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
     # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_addMasym_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
     # "$LQDATA/nanoV7/2016/opt/eejj_loosenMee_addMasym_addMET_10aug2021/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
-    "$LQDATA/nanoV7/2016/opt/eejj_opt_egLoose_18jan2022/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_opt_egLoose_18jan2022/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1500_egLoose_9feb2022/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1500_egLoose_10feb2022_10kCutPoints_moreInputs/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1500_egLoose_11feb2022_10kCutPoints_moreInputs_noBDTOutputWeight/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1500_egLoose_15feb2022_10kCutPoints_moreInputs_zPeakCut/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1500_egLoose_18feb2022_10kCutPoints_moreInputs/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1700_egLoose_19feb2022_10kCutPoints_moreInputs/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1700Mee200sT400_egLoose_23feb2022/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/eejj_optBDTLQ1400_heepID_25feb2022/output_cutTable_lq_eejj_BDT_opt/analysisClass_lq_eejj_plots.root"
 )
 qcd_data_filepath = (
     # "$LQDATA//nanoV6/2016/opt/qcdOpt_10jul2020/output_cutTable_lq_eejj_opt/analysisClass_lq_eejj_QCD_plots.root"
@@ -397,7 +407,7 @@ qcd_data_filepath = (
     # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
     # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_addMasym_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
     # "$LQDATA/nanoV7/2016/opt/qcd_eejj_loosenMee_addMasym_addMET_10aug2021/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
-    "$LQDATA/nanoV7/2016/opt/qcd_eejj_optEGLooseFR_17jan2022/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
+    # "$LQDATA/nanoV7/2016/opt/qcd_eejj_optEGLooseFR_17jan2022/output_cutTable_lq_eejj_QCD_opt/analysisClass_lq_eejj_QCD_plots.root"
 )
 txt_file_path_eejj = (
     # "$LQDATA/nanoV6/2016/opt/eejj_10jul2020/condor/optimizationCuts.txt"
@@ -412,7 +422,10 @@ txt_file_path_eejj = (
     # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11aug_loosenMee_addMasym/optimizationCuts.txt"
     # "/tmp/scooper/optimizationCuts.txt"
     # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11aug_loosenMee_addMasym_addPFMET/optimizationCuts.txt"
-    "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_17jan_egmLooseID/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_17jan_egmLooseID/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_9feb_egmLooseID_btdg/optimizationCuts.txt"
+    # "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_11feb_egmLooseID_btdg/optimizationCuts.txt"
+    "$LQANA/versionsOfOptimization/nanoV7/2016/eejj_feb18_egmLooseID_BDT/optimizationCuts.txt"
 )
 # # for eejj only
 # ttbar_data_filepath = (
