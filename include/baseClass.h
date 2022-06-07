@@ -483,8 +483,9 @@ class baseClass {
     double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
     template <typename T> std::shared_ptr<T> getSavedObjectFromFile(const std::string& fileName, const std::string& histName);
     double getGlobalInfoNstart(const std::string& fileName);
-    double getSumAMCNLOWeights(const std::string& fileName);
+    double getSumGenWeights(const std::string& fileName);
     double getSumTopPtWeights(const std::string& fileName);
+    double getTreeEntries(const std::string& fileName);
     double getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
     std::vector<double> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch);
     void saveLHEPdfSumw(const std::string& fileName);
@@ -492,7 +493,7 @@ class baseClass {
     std::shared_ptr<TProfile> makeNewEventsPassingSkimCutsProfile(const std::shared_ptr<TProfile> prevProfFromFile = 0);
 
     Long64_t NBeforeSkim_;
-    double sumAMCNLOWeights_;
+    double sumGenWeights_;
     double sumTopPtWeights_;
 
     template <typename T> void checkOverflow(const TH1*, const T);

@@ -68,8 +68,8 @@ baseClass::~baseClass()
       STDOUT("ERROR: writeReducedSkimTree did not complete successfully.");
     }
   output_root_->cd();
-  checkOverflow(h_weightSums_,sumAMCNLOWeights_);
-  h_weightSums_->SetBinContent(1,sumAMCNLOWeights_);
+  checkOverflow(h_weightSums_,sumGenWeights_);
+  h_weightSums_->SetBinContent(1,sumGenWeights_);
   checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
@@ -212,9 +212,9 @@ void baseClass::init()
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
     hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
-    for (map<string, cut>::iterator cc = cutName_cut_.begin(); cc != cutName_cut_.end(); cc++)
-    {
-      cut * c = & (cc->second);
+    for (auto& cutName : orderedCutNames_) {
+      auto c = & (cutName_cut_.find(cutName)->second);
+      //cut * c = & (cc->second);
       if(c->saveVariableInReducedSkim) {
         if (reduced_skim_tree_->FindBranch(c->variableName.c_str()) != nullptr) {
           STDOUT("ERROR: found branch named: '" << c->variableName << "' already specified in cutfile and saved. Please remove it from the cut file. (This could be a size branch for an array variable: if so, it will be saved automatically.) Exiting here.");
@@ -254,9 +254,9 @@ void baseClass::readInputList()
   jsonFileWasUsed_ = false;
   NBeforeSkim_ = 0;
   int NBeforeSkim;
-  sumAMCNLOWeights_ = 0;
+  sumGenWeights_ = 0;
   sumTopPtWeights_ = 0;
-  double tmpSumAMCNLOWeights = 0;
+  double tmpSumGenWeights = 0;
   double tmpSumTopPtWeights = 0;
 
   STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
@@ -279,9 +279,9 @@ void baseClass::readInputList()
       NBeforeSkim = getGlobalInfoNstart(name);
       NBeforeSkim_ = NBeforeSkim_ + NBeforeSkim;
       STDOUT("Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
-      tmpSumAMCNLOWeights = getSumAMCNLOWeights(name);
-      sumAMCNLOWeights_ += tmpSumAMCNLOWeights;
-      STDOUT("amc@NLO weight sum (current,total): = "<<tmpSumAMCNLOWeights<<", "<<sumAMCNLOWeights_);
+      tmpSumGenWeights = getSumGenWeights(name);
+      sumGenWeights_ += tmpSumGenWeights;
+      STDOUT("gen weight sum (current,total): = "<<tmpSumGenWeights<<", "<<sumGenWeights_);
       tmpSumTopPtWeights = getSumTopPtWeights(name);
       sumTopPtWeights_ += tmpSumTopPtWeights;
       //STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
@@ -1355,23 +1355,38 @@ bool baseClass::updateCutEffic()
 {
   bool ret = true;
   for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+      it != orderedCutNames_.end(); it++)
+  {
+    cut * c = & (cutName_cut_.find(*it)->second);
+    if(produceReducedSkim_ || produceSkim_)
     {
-      cut * c = & (cutName_cut_.find(*it)->second);
-      if( passedAllPreviousCuts(c->variableName) )
-	{
-	  if( passedCut(c->variableName) )
-	    {
-	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
-		{
-		  c->nEvtPassedBeforeWeight += 1;
-		  c->nEvtPassedBeforeWeight_alreadyFilled = true;
-		}
-	      c->nEvtPassed+=c->weight;
-	      c->nEvtPassedErr2 += (c->weight)*(c->weight);
-	    }
-	}
+      if(!isSkimCut(*c))
+      {
+        // if not a skim cut, then it passes by construction
+        //if (!(c->nEvtPassedBeforeWeight_alreadyFilled))
+        //{
+        //  c->nEvtPassedBeforeWeight += 1;
+        //  c->nEvtPassedBeforeWeight_alreadyFilled = true;
+        //}
+        //c->nEvtPassed+=c->weight;
+        //c->nEvtPassedErr2 += (c->weight)*(c->weight);
+        return ret;
+      }
     }
+    if( passedAllPreviousCuts(c->variableName) )
+    {
+      if( passedCut(c->variableName) )
+      {
+        if (!(c->nEvtPassedBeforeWeight_alreadyFilled))
+        {
+          c->nEvtPassedBeforeWeight += 1;
+          c->nEvtPassedBeforeWeight_alreadyFilled = true;
+        }
+        c->nEvtPassed+=c->weight;
+        c->nEvtPassedErr2 += (c->weight)*(c->weight);
+      }
+    }
+  }
   return ret;
 }
 
@@ -1743,7 +1758,7 @@ float baseClass::decodeCutValue(const string& s)
 
 double baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin)
 {
-  double NBeforeSkim = 0;
+  double NBeforeSkim = -999;
 
   auto f = std::unique_ptr<TFile>(TFile::Open(fileName.c_str()));
   if(!f)
@@ -1799,17 +1814,35 @@ double baseClass::getInfoFromHist(const std::string& fileName, const std::string
 double baseClass::getGlobalInfoNstart(const std::string& fileName)
 {
   STDOUT(fileName);
-  return getInfoFromHist(fileName, "EventCounter", 1);
+  double initialEvents = getInfoFromHist(fileName, "EventCounter", 1);
+  if(!skimWasMade_)
+    initialEvents = getTreeEntries(fileName);
+  return initialEvents;
 }
 
-double baseClass::getSumAMCNLOWeights(const std::string& fileName)
+double baseClass::getSumGenWeights(const std::string& fileName)
 {
-  return getInfoFromHist(fileName, "EventCounter", 3);
+  double sumGenWeights = getInfoFromHist(fileName, "EventCounter", 3);
+  if(!skimWasMade_)
+    sumGenWeights = getSumWeightFromRunsTree(fileName, "genEventSumw");
+  return sumGenWeights;
 }
 
 double baseClass::getSumTopPtWeights(const std::string& fileName)
 {
   return getInfoFromHist(fileName, "EventCounter", 4);
+}
+
+double baseClass::getTreeEntries(const std::string& fName)
+{
+  auto chain = std::unique_ptr<TChain>(new TChain("Events"));
+  int retVal = chain->AddFile(fName.c_str(), -1);
+  if(!retVal)
+  {
+    STDOUT("ERROR: Something went wrong. Could not find TTree 'Events' in the inputfile '" << fName << "'. Quit here.");
+    exit(-2);
+  }
+  return chain->GetEntries();
 }
 
 double baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::string& weightName, int index)
@@ -2273,11 +2306,11 @@ bool baseClass::writeSkimTree()
   //FIXME topPtWeight
   checkOverflow(hCount_,nEntTot);
   checkOverflow(hCount_,NAfterSkim_);
-  checkOverflow(hCount_,sumAMCNLOWeights_);
+  checkOverflow(hCount_,sumGenWeights_);
   checkOverflow(hCount_,sumTopPtWeights_);
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
-  hCount_->SetBinContent(3,sumAMCNLOWeights_);
+  hCount_->SetBinContent(3,sumGenWeights_);
   hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
   for(auto& hist : histsToSave_)
@@ -2311,11 +2344,11 @@ bool baseClass::writeReducedSkimTree()
   //FIXME topPtWeight
   checkOverflow(hReducedCount_,nEntTot);
   checkOverflow(hReducedCount_,NAfterReducedSkim_);
-  checkOverflow(hReducedCount_,sumAMCNLOWeights_);
+  checkOverflow(hReducedCount_,sumGenWeights_);
   checkOverflow(hReducedCount_,sumTopPtWeights_);
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
-  hReducedCount_->SetBinContent(3,sumAMCNLOWeights_);
+  hReducedCount_->SetBinContent(3,sumGenWeights_);
   hReducedCount_->SetBinContent(4,sumTopPtWeights_);
   hReducedCount_->Write();
   for(auto& hist : histsToSave_)
@@ -2338,14 +2371,17 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
 }
 
 void baseClass::getTriggers(Long64_t entry) {
-  triggerDecisionMap_.clear();
+  //triggerDecisionMap_.clear();
   //FIXME deal with prescale map
   //triggerPrescaleMap_.clear();
-  for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
-    TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
-    std::string branchName = branch->GetName();
-    if(branchName.find("HLT_")!=std::string::npos) {
-      triggerDecisionMap_[branchName] = readerTools_->ReadValueBranch<Bool_t>(branchName.c_str());
+  if(triggerDecisionMap_.empty()) {
+    for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
+      TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
+      std::string branchName = branch->GetName();
+      if(branchName.find("HLT_")!=std::string::npos) {
+        //triggerDecisionMap_[branchName] = readerTools_->ReadValueBranch<Bool_t>(branchName.c_str());
+        triggerDecisionMap_[branchName] = false;
+      }
     }
   }
 }
@@ -2365,7 +2401,8 @@ void baseClass::printFiredTriggers()
   STDOUT( "Fired triggers: ");
   for (; i != i_end; ++i)
   {
-    if(i->second)
+    //if(i->second)
+    if(readerTools_->ReadValueBranch<Bool_t>(i->first.c_str()))
       STDOUT("\t\"" << i -> first << "\"" );
   }
 }
@@ -2384,10 +2421,7 @@ bool baseClass::triggerExists ( const char* name ) {
     }
     return false;
   }
-  else
-  {
-    return true;
-  }
+  return true;
 }
 
 bool baseClass::triggerFired ( const char* name ) {
@@ -2399,42 +2433,28 @@ bool baseClass::triggerFired ( const char* name ) {
     while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
     {
       //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
-      return itr->second;
+      //return itr->second;
+      return readerTools_->ReadValueBranch<Bool_t>(itr->first.c_str());
       ++itr;
     }
     printTriggers();
     STDOUT("ERROR: could not find trigger " << name << " in triggerDecisionMap_!");
     exit(-1);
   }
-  else
-  {
-    //STDOUT("INFO: Found matching trigger: " << i->first << " with result: " << i->second);
-    return i -> second;
-  }
+  return i -> second;
 }
 
 int baseClass::triggerPrescale ( const char* name ) { 
   std::map<std::string, int>::iterator i = triggerPrescaleMap_.find ( name ) ;
   if ( i == triggerPrescaleMap_.end() )
   {
-    // try to look by prefix of given path name
-    auto itr = triggerPrescaleMap_.lower_bound( name );
-    while(itr!=triggerPrescaleMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
-    {
-      //STDOUT("Found matching trigger: " << itr->first << " with prescale=" << itr->second);
-      return itr->second;
-      ++itr;
-    }
     //printTriggers();
     //STDOUT("ERROR: could not find trigger " << name << " in triggerPrescaleMap_ after attempting to match by prefix!");
     //exit(-1);
     //FIXME
     return 1;
   }
-  else {
-    //STDOUT("INFO: Found matching trigger: " << i->first << " with prescale: " << i->second);
-    return i->second;
-  }
+  return i->second;
 }
 
 void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale ) { 
