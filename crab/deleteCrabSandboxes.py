@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import json
 import os
 import pycurl
-from cStringIO import StringIO
+from io import StringIO
 from pprint import pprint
 from CRABClient.UserUtilities import getUsernameFromSiteDB
 
@@ -75,9 +75,9 @@ def main():
           continue
       if 'dry-run' in x:
           continue
-      print 'remove', x
+      print('remove', x)
       h.fileremove(x)
-  print 'deleteCrabSandboxes.py: main() -- done'
+  print('deleteCrabSandboxes.py: main() -- done')
 
 
 if __name__ == '__main__':

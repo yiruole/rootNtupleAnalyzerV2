@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -9,46 +9,46 @@ import shutil
 try:
   from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 except ImportError:
-  print
-  print 'ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:'
-  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  print()
+  print('ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:')
+  print('source /cvmfs/cms.cern.ch/crab3/crab.sh')
   exit(-1)
 try:
   from CRABAPI.RawCommand import crabCommand
 except ImportError:
-  print
-  print 'ERROR: Could not load CRABAPI.RawCommand.  Please source the crab3 setup:'
-  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  print()
+  print('ERROR: Could not load CRABAPI.RawCommand.  Please source the crab3 setup:')
+  print('source /cvmfs/cms.cern.ch/crab3/crab.sh')
   exit(-1)
 
-from httplib import HTTPException
+from http.client import HTTPException
 
 
 def crabSubmit(config,crabDir,dryRun=False):
     maxRetries = 5
-    for trial in xrange(0,maxRetries+1):
+    for trial in range(0,maxRetries+1):
         if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
-          print 'remove already-existing crab project dir:',crabDir
+          print('remove already-existing crab project dir:',crabDir)
           os.system('rm -rf '+workingDir+'crab_'+outputPrefix)
         try:
           if dryRun:
-            print 'crabSubmit(): doing crab3 dryrun'
+            print('crabSubmit(): doing crab3 dryrun')
           #  crabCommand('submit',dryrun=dryRun,config = config)
           #else:
           #  #print "crabSubmit(): calling crabCommand('submit',config=config)"
           #  crabCommand('submit',config = config)
           crabCommand('submit',dryrun=dryRun,config = config)
-        except HTTPException, hte:
-          print '-----> there was a problem. see below.'
-          print hte.headers
+        except HTTPException as hte:
+          print('-----> there was a problem. see below.')
+          print(hte.headers)
           #print 'Quitting here'
           #exit(-1)
-          print 'WARN: Retrying submission;',maxRetries-trial,'attempts remain'
+          print('WARN: Retrying submission;',maxRetries-trial,'attempts remain')
           continue
         # no exception, so we succeeded
         return
     # we finished the loop
-    print 'ERROR: Tried',maxRetries,'times without success; quitting here'
+    print('ERROR: Tried',maxRetries,'times without success; quitting here')
     exit(-1)
     
 def validateOptions(options):
@@ -61,9 +61,9 @@ def validateOptions(options):
     error = 'no output directory found'
 
   if len(error) > 0:
-    print
-    print 'ERROR with specified options:',
-    print error
+    print()
+    print('ERROR with specified options:', end=' ')
+    print(error)
     parser.print_help()
     exit(-1)
 
@@ -147,7 +147,7 @@ if options.eosDir is not None:
   else:
     outputLFN = outputeosdir
 if outputLFN == None:
-  print 'You must specify an output EOS directory; quitting'
+  print('You must specify an output EOS directory; quitting')
   exit(-1)
 
 
@@ -166,8 +166,8 @@ os.system("mkdir -p "+outputmain+"/src/")
 outputPrefix = string.split(outputmain,"/")[-1].split('___')[-1]
 outputPrefix = 'analysisClass___'+outputPrefix
 if len(outputPrefix) > 100:
-  print 'crab cannot handle requestName of more than 100 characters; ours has:',len(outputPrefix)
-  print 'requestName was:',outputPrefix
+  print('crab cannot handle requestName of more than 100 characters; ours has:',len(outputPrefix))
+  print('requestName was:',outputPrefix)
   exit(-1)
 #################################################
 # dataset
@@ -180,9 +180,9 @@ workingDir = outputmain[0:outputmain.rstrip('/').rfind('/')]
 #print 'workingDir=',workingDir
 workingDir+='/crab/'
 if os.path.isdir ( workingDir+'crab_'+outputPrefix ):
-  print 'NOT REMOVING ALREADY-EXISTING dir:',workingDir+'crab_'+outputPrefix
+  print('NOT REMOVING ALREADY-EXISTING dir:',workingDir+'crab_'+outputPrefix)
   exit(-1)
-  print '-->removing already-existing crab project dir:',workingDir+'crab_'+outputPrefix
+  print('-->removing already-existing crab project dir:',workingDir+'crab_'+outputPrefix)
   os.system('rm -rf '+workingDir+'crab_'+outputPrefix)
 os.system("mkdir -p "+workingDir)
 crabDir = workingDir+'crab_'+outputPrefix
@@ -222,7 +222,7 @@ if not os.path.isfile(outputmain+'/'+inputListName):
   if os.path.isfile(os.path.abspath(inputlist)):
     shutil.copy(os.path.abspath(inputlist),outputmain+'/'+inputListName)
   else:
-    print 'could not find file:',os.path.abspath(inputlist)
+    print('could not find file:',os.path.abspath(inputlist))
     exit(-1)
 inputlist = outputmain+'/'+inputListName
 # already done in launch_crab3 script
@@ -300,7 +300,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = False
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'scripts/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
+config.JobType.psetName = 'crab/PSet.py' # apparently still need trivial PSet.py even if cmsRun is not used
 # pass in cutfile, inputlist, and the binary
 config.JobType.inputFiles = [cutfile,inputlist,options.executable]
 # if we gave additional input files, feed them into the sandbox as well
@@ -333,16 +333,16 @@ else:
 submitCERNT2only = options.submitCERNT2only
 maxLengthPath = max(config.Data.userInputFiles, key=len)
 if len(maxLengthPath) <= 255:
-  print 'userInputFiles OK, longest path has:',len(maxLengthPath),'chars'
+  print('userInputFiles OK, longest path has:',len(maxLengthPath),'chars')
 else:
-  print
-  print 'WARNING: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist); will try to reduce length and submit to CERN T2 only'
+  print()
+  print('WARNING: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist); will try to reduce length and submit to CERN T2 only')
   config.Data.userInputFiles = [xrdPath.replace('cms-xrd-global.cern.ch//eos/cms','eoscms/') for xrdPath in config.Data.userInputFiles]
   submitCERNT2only = True
   # now check length again
   maxLengthPath = max(config.Data.userInputFiles, key=len)
   if len(maxLengthPath) > 255:
-    print 'ERROR: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist) after trying to shorten it; crab3 cannot handle this; exiting'
+    print('ERROR: found a file with length > 255 chars:\n"'+maxLengthPath+'"\nin userInputFiles (from inputlist) after trying to shorten it; crab3 cannot handle this; exiting')
     exit(-1)
 
 config.Data.splitting = 'FileBased'
@@ -367,9 +367,9 @@ else:
 #config.Data.outLFNDirBase = '/store/group/phys_exotica/leptonsPlusJets/RootNtuple_skim/RunII/%s/' % (getUsernameFromSiteDB())
 #config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 if not outputLFN.startswith('/store'):
-  print
-  print 'ERROR: eosDir must start with /store and you specified:',outputLFN
-  print 'quit'
+  print()
+  print('ERROR: eosDir must start with /store and you specified:',outputLFN)
+  print('quit')
   exit(-1)
 # add username if not already -- don't do this for now
 #if not getUsernameFromSiteDB() in outputLFN:
@@ -380,7 +380,7 @@ if not outputLFN.startswith('/store'):
 config.Data.outLFNDirBase = outputLFN
 if not config.Data.outLFNDirBase[-1]=='/':
   config.Data.outLFNDirBase+='/'
-print 'Using outLFNDirBase:',config.Data.outLFNDirBase
+print('Using outLFNDirBase:',config.Data.outLFNDirBase)
 
 storagePath=config.Data.outLFNDirBase+config.Data.outputPrimaryDataset+'/'+config.Data.outputDatasetTag+'/'+'YYMMDD_hhmmss/0000/'+outputFilePref
 if options.isReducedSkimTask:
@@ -392,21 +392,21 @@ else:
 #print 'will store (example):',storagePath
 #print '\twhich has length:',len(storagePath)
 if len(storagePath) > 255:
-  print
-  print 'warning: we might have a problem with output path lengths too long (if we want to run crab over these).'
-  print 'example output will look like:'
-  print storagePath
-  print 'which has length:',len(storagePath)
+  print()
+  print('warning: we might have a problem with output path lengths too long (if we want to run crab over these).')
+  print('example output will look like:')
+  print(storagePath)
+  print('which has length:',len(storagePath))
   if options.isReducedSkimTask and not options.overrideOutputLength:
     # for skims, we might run crab over them, so don't allow this
-    print 'cowardly refusing to submit the jobs; exiting'
+    print('cowardly refusing to submit the jobs; exiting')
     exit(-2)
   else:
-    print 'proceeding anyway'
+    print('proceeding anyway')
 else:
-  print 'example output will look like:'
-  print storagePath
-  print 'ok, output files will have length about:',len(storagePath),'chars'
+  print('example output will look like:')
+  print(storagePath)
+  print('ok, output files will have length about:',len(storagePath),'chars')
 
 config.Site.storageSite = 'T2_CH_CERN'
 # XXX SIC Mar9
@@ -423,7 +423,8 @@ else:
   #else:
   #  config.Site.whitelist = ['T2_CH_CERN','T2_FR_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_BE_*','T2_UK_*','T2_US_*']
   #XXX Mar11: Try to run everything at FNAL
-  config.Site.whitelist = ['T3_US_FNALLPC']
+  #config.Site.whitelist = ['T3_US_FNALLPC']
+  pass
 ## default crab server blacklist
 #config.Site.blacklist = ['T2_CH_CSCS', 'T2_UK_SGrid_RALPP', 'T2_FR_GRIF_LLR', 'T2_BE_UCL', 'T2_FR_IPHC', 'T2_DE_DESY', 'T2_IT_Legnaro', 'T2_CH_CERN_AI', 'T2_UK_London_Brunel', 'T2_CH_CSCS_HPC', 'T2_IT_Pisa', 'T2_GR_Ioannina', 'T2_CH_CERN_HLT', 'T2_FR_GRIF_IRFU', 'T2_IT_Bari', 'T2_IT_Rome', 'T2_FR_CCIN2P3', 'T2_ES_CIEMAT', 'T2_PL_Warsaw', 'T2_HU_Budapest', 'T2_DE_RWTH', 'T2_PT_NCG_Lisbon', 'T2_PL_Swierk']
 ## my own additions based on failing jobs
@@ -435,7 +436,7 @@ else:
 config.JobType.scriptExe = scriptname
 # don't run cmsRun in the job (pass in template FrameworkJobReport.xml)
 # https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Miscellaneous#Do_not_run_cmsRun_at_all_in_the
-config.JobType.inputFiles += ['scripts/FrameworkJobReport.xml']
+config.JobType.inputFiles += ['crab/FrameworkJobReport.xml']
 
 ## print out config object
 #attrs = vars(config)

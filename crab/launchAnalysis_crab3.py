@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from optparse import OptionParser
 import os,sys, errno, time
@@ -7,9 +7,9 @@ import re
 try:
   from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 except ImportError:
-  print
-  print 'ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:'
-  print 'source /cvmfs/cms.cern.ch/crab3/crab.sh'
+  print()
+  print('ERROR: Could not load CRABClient.UserUtilities.  Please source the crab3 setup:')
+  print('source /cvmfs/cms.cern.ch/crab3/crab.sh')
   exit(-1)
 
 import deleteCrabSandboxes
@@ -36,7 +36,7 @@ def localizeCutFile(cutfileLines):
       for itemIndex,item in enumerate(lineSp):
         if '/afs' in item:
           if not os.path.isfile( item ) : 
-              print "Error: No file here: " + item
+              print("Error: No file here: " + item)
               sys.exit(-1)
           else :
               os.system ( "cp " + item + " " + options.outputDir )
@@ -45,9 +45,9 @@ def localizeCutFile(cutfileLines):
               lineSp[itemIndex] = item.split('/')[-1]
               extraInputFiles.append(lineSp[itemIndex])
               replacementLine = ''.join(lineSp)
-              print 'INFO: changing cutfile line with afs file specified from "'+cutfileLines[lineIdx].rstrip('\n')+'"'
+              print('INFO: changing cutfile line with afs file specified from "'+cutfileLines[lineIdx].rstrip('\n')+'"')
               cutfileLines[lineIdx] = replacementLine
-              print '\tto "'+cutfileLines[lineIdx].rstrip('\n')+'"'
+              print('\tto "'+cutfileLines[lineIdx].rstrip('\n')+'"')
               with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'w') as myfile:
                 myfile.writelines(cutfileLines)
   return extraInputFiles
@@ -127,92 +127,92 @@ if not options.treeName:
 #--------------------------------------------------------------------------------
 # Delete crab sandboxes
 #--------------------------------------------------------------------------------
-print 'First, delete existing crab sandboxes...',
+print('First, delete existing crab sandboxes...', end=' ')
 try:
   deleteCrabSandboxes.main()
 except deleteCrabSandboxes.Crab3ToolsException:
-  print 'WARNING: Something went wrong deleting the existing crab sandboxes; proceeding anyway but we might run out of quota'
-print '... done '
+  print('WARNING: Something went wrong deleting the existing crab sandboxes; proceeding anyway but we might run out of quota')
+print('... done ')
 
 #--------------------------------------------------------------------------------
 # Make the output directory
 #--------------------------------------------------------------------------------
 
-print "Making the local output directory...",
+print("Making the local output directory...", end=' ')
 
 if not os.path.isdir ( options.outputDir ) : 
     os.system ( "mkdir -p " + options.outputDir )
 
 if not os.path.isdir ( options.outputDir ) : 
-    print "Error: I can't make this folder: " + options.outputDir 
+    print("Error: I can't make this folder: " + options.outputDir) 
     sys.exit() 
 
-print "... done "
+print("... done ")
 
 #--------------------------------------------------------------------------------
 # Look for the cut file.  If it exists, move it to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving the cutfile to the local output directory...",
+print("Moving the cutfile to the local output directory...", end=' ')
 
 if not os.path.isfile ( options.cutfile ) : 
-    print "Error: No cut file here: " + options.cutfile 
+    print("Error: No cut file here: " + options.cutfile) 
     sys.exit() 
 else : 
     os.system ( "cp " + options.cutfile + " " + options.outputDir + "/" )
 
-print "... done "
+print("... done ")
 
 #--------------------------------------------------------------------------------
 # Look for the inputList file
 #--------------------------------------------------------------------------------
 
-print "Moving the inputlist to the local output directory...",
+print("Moving the inputlist to the local output directory...", end=' ')
 
 if not os.path.isfile ( options.inputlist ) : 
-    print "Error: No input list here: " + options.inputlist 
+    print("Error: No input list here: " + options.inputlist) 
     sys.exit() 
 else : 
     os.system ( "cp " + options.inputlist + " " + options.outputDir + "/" )
 
-print "... done "
+print("... done ")
 
 #--------------------------------------------------------------------------------
 # Get any /afs/... files from cut file and copy them to the output directory
 #--------------------------------------------------------------------------------
 
-print "Moving any /afs/... files specified in the cutfile to the local output directory..."
+print("Moving any /afs/... files specified in the cutfile to the local output directory...")
 
 with open(options.outputDir+'/'+options.cutfile.split('/')[-1],'r') as cutfile:
   cutfileLines = cutfile.readlines()
 
 additionalInputFiles = localizeCutFile(cutfileLines)
-print 'INFO: Found additional input files:',additionalInputFiles
+print('INFO: Found additional input files:',additionalInputFiles)
 
-print "... done "
+print("... done ")
                    
 #--------------------------------------------------------------------------------
 # Check if path is a link
 #--------------------------------------------------------------------------------
 
-print "Checking the link to analysisClass.C...",
+print("Checking the link to analysisClass.C...", end=' ')
 
 if not os.path.islink ( "src/analysisClass.C" ) :
-    print "Error: src/analysisClass.C is not a symbolic link"
+    print("Error: src/analysisClass.C is not a symbolic link")
     sys.exit()
 code_name = os.readlink ( "./src/analysisClass.C" ).split("/")[-1].split(".C")[0]
 
-print "... done"
+print("... done")
 
 #--------------------------------------------------------------------------------
 # Launch
 #--------------------------------------------------------------------------------
 
-print "Launching jobs..."
+print("Launching jobs...")
 if options.isSkimTask or options.isReducedSkimTask:
-  print 'INFO: This is a SKIM task'
+  print('INFO: This is a SKIM task')
 else:
-  print 'INFO: This is an ANA task'
+  print('INFO: This is an ANA task')
 
 inputlist_file = file ( options.inputlist,"r" )
 
@@ -257,12 +257,12 @@ for i,line in enumerate(inputlist_file):
         command+=options.outputDir+'/'+item+','
       command = command.rstrip(',')
     
-    print command
+    print(command)
     ret = os.system  ( command ) 
     if ret != 0:
-      print 'ERROR: something went wrong when running the command:'
-      print '\t'+command
-      print 'add to list'
+      print('ERROR: something went wrong when running the command:')
+      print('\t'+command)
+      print('add to list')
       failedCommands+=command
       failedCommands+='\n'
     #time.sleep (  float( options.wait ) ) 
@@ -279,7 +279,7 @@ for i,line in enumerate(inputlist_file):
 
 inputlist_file.close() 
 
-print 'list of failed commands:'
-print failedCommands
+print('list of failed commands:')
+print(failedCommands)
 #print "total jobs =", total_jobs
 
