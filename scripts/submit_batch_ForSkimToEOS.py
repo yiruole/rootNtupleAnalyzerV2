@@ -11,7 +11,8 @@ def PrepareJobScript(outputname):
     with open(outputname, "w") as outputfile:
         outputfile.write("#!/bin/bash\n")
         # hardcoded root is a bit nasty FIXME
-        outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.20.04/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
+        #outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.24.06/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
+        outputfile.write('source /cvmfs/sft.cern.ch/lcg/views/LCG_102rc1/x86_64-centos7-gcc11-opt/setup.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         inputList = inputfilename.split('/')[-1]
@@ -122,7 +123,7 @@ parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
 (options, args) = parser.parse_args()
 
 if len(sys.argv) < 14:
-    print usage
+    print(usage)
     sys.exit()
 
 ################################################
@@ -153,10 +154,10 @@ os.system("mkdir -p "+outputmain+"/output/")
 # os.system("mkdir -p "+outputmain+"/skim/")
 #################################################
 # output prefix
-outputPrefix = string.split(outputmain, "/")[-1]
+outputPrefix = outputmain.split("/")[-1]
 #################################################
 # dataset
-dataset = string.split(outputPrefix, "___")[-1]
+dataset = outputPrefix.split("___")[-1]
 ################################################
 # create eos dir
 ################################################
@@ -164,7 +165,8 @@ outputeosdir = options.eosDir
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
 os.system("/usr/bin/eos mkdir -p "+outputeosdir)
 ################################################
-numfiles = len(file(inputlist).readlines())
+with open(inputlist, "r") as inputFile:
+    numfiles = len(inputFile.readlines())
 ijobmax = int(options.ijobmax)
 if ijobmax < 0:
     ijobmax = numfiles
@@ -211,7 +213,7 @@ condorFileName = outputmain+'/condorSubmit.sub'
 WriteSubmitFile(condorFileName)
 
 failedToSub = False
-print 'submit jobs for', options.output.rstrip("/")
+print(('submit jobs for', options.output.rstrip("/")))
 # FIXME don't cd and use absolute paths in the condor submission instead
 oldDir = os.getcwd()
 os.chdir(outputmain)
@@ -219,7 +221,7 @@ os.chdir(outputmain)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
 # print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
-    print '\texited with '+str(exitCode)+'; try to resubmit'
+    print(('\texited with '+str(exitCode)+'; try to resubmit'))
     exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
     if exitCode != 0:
         failedToSub = True
