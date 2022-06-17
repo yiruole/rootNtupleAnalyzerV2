@@ -224,7 +224,7 @@ condorFileName = outputmain+'/condorSubmit.sub'
 WriteSubmitFile(condorFileName)
 
 failedToSub = False
-print(('submit jobs for', options.output.rstrip("/")))
+print('submit jobs for', options.output.rstrip("/"))
 # FIXME don't cd and use absolute paths in the condor submission instead
 oldDir = os.getcwd()
 os.chdir(outputmain)
@@ -232,7 +232,7 @@ os.chdir(outputmain)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
 # print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
-    print(('\texited with '+str(exitCode)+'; try to resubmit'))
+    print('\texited with '+str(exitCode)+'; try to resubmit')
     exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
     if exitCode != 0:
         failedToSub = True
