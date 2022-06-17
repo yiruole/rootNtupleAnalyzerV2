@@ -9,15 +9,15 @@ import ROOT as r
 #treeFilename = "root://eoscms.cern.ch//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/nanoPostProc/2016/nanoAODv7/DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/LQ-v1/200803_164045/0000/DYJetsToLL_Pt-650ToInf_ext2_1.root"
 #treeFilename = "root://eoscms//store/group/phys_exotica/leptonsPlusJets/LQ/scooper/NanoV7/skims/2016/rskSingleEleL_egLoose_3feb2022/SingleElectron_Run2016G-02Apr2020-v1/SingleElectron_Run2016G-02Apr2020-v1_1_rsk.root"
 #treeFilename = "root://eosuser//eos/user/s/scooper/LQ/NanoV7/skims/2016/rskQCD_26nov2021/SingleElectron_Run2016G-02Apr2020-v1/SingleElectron_Run2016G-02Apr2020-v1_1_rsk.root"
-treeFilename = "/tmp/scooper/8820A566-8764-4C41-8C64-852C8D050E36.root"
+treeFilename = "/tmp/scooper/testNanoSkim_DYJPt0to50_jun17_skim.root"
 filename = "/tmp/scooper/treeContent.txt"
 numberOfLargestBranchesToShow = 50
 
 tfile = r.TFile.Open(treeFilename)
 #treeName = "Events"
-treeName = "Runs"
-# treeName = "rootTupleTree/tree"
-filename = filename.replace(".txt", "_"+treeName+".txt")
+#treeName = "Runs"
+treeName = "rootTupleTree/tree"
+filename = filename.replace(".txt", "_"+treeName.replace("/", "-")+".txt")
 save = os.dup(sys.stdout.fileno())
 newout = file(filename, "w")
 os.dup2(newout.fileno(), sys.stdout.fileno())
