@@ -151,6 +151,67 @@ baseClass::~baseClass()
   }
 }
 
+std::vector<std::string> split(const std::string &s, char delim) {
+  std::stringstream ss(s);
+  std::string item;
+  std::vector<std::string> elems;
+  while (std::getline(ss, item, delim))
+    elems.push_back(std::move(item));
+  return elems;
+}
+
+void baseClass::updateBranchList() {
+  if(!hasPreCut("BranchSelection"))
+    return;
+  string branchSelFile = getPreCutString1("BranchSelection");
+  std::ifstream f(branchSelFile);
+  std::string line;
+  if (f.is_open()) {
+    while (f.good()) {
+      getline (f,line);
+      if(line.empty() || line[0] == '#')
+        continue;
+      vector<string> splitLine = ::split(line, ' ');
+      if(splitLine.size() != 2) {
+        std::cout << "ERROR: Branch selection line '" << line << "' in file " << branchSelFile << " does not have the proper format: " 
+          << " Should be (keep|keepmatch|drop|dropmatch) <branch_pattern>" << std::endl;
+        exit(-2);
+      }
+      string op = splitLine[0];
+      string branch = splitLine[1];
+      if(op == "keep")
+        skim_tree_->SetBranchStatus(branch.c_str(), 1);
+      else if(op == "drop")
+        skim_tree_->SetBranchStatus(branch.c_str(), 0);
+      else if(op == "keepmatch" || op == "dropmatch") {
+        //boost::regex regExp("(:?"+branch+")$");
+        boost::regex regExp(branch);
+        for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
+          TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
+          string branchName = branch->GetName();
+          if(boost::regex_search(branchName, regExp)) {
+            if(op == "keepmatch")
+              skim_tree_->SetBranchStatus(branchName.c_str(), 1);
+            else
+              skim_tree_->SetBranchStatus(branchName.c_str(), 0);
+          }
+        }
+      }
+      else {
+        std::cout << "ERROR: Branch selection line '" << line << "' in file " << branchSelFile << " does not have the proper format: " 
+          << " Should be (keep|keepmatch|drop|dropmatch) <branch_pattern>" << std::endl;
+        exit(-2);
+      }
+
+    }
+    f.close();
+  }
+  else { 
+    std::cout << "ERROR: Branch selection file " << branchSelFile << " does not exist." << std::endl;
+    exit(-1);
+  }
+}
+
 void baseClass::init()
 {
   // set up prefetching
@@ -192,6 +253,7 @@ void baseClass::init()
     skim_file_->mkdir("rootTupleTree");
     skim_file_->cd("rootTupleTree");
     skim_tree_ = tree_->CloneTree(0);
+    updateBranchList();
     hCount_ = new TH1D("EventCounter","Event Counter",4,-0.5,3.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
@@ -1147,6 +1209,11 @@ float baseClass::getPreCutValue4(const string& s)
   return (c->value4);
 }
 
+bool baseClass::hasPreCut(const string& s) {
+  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  return cc != preCutName_cut_.end();
+}
+
 string baseClass::getPreCutString1(const string& s)
 {
   string ret;
@@ -1355,38 +1422,23 @@ bool baseClass::updateCutEffic()
 {
   bool ret = true;
   for (vector<string>::iterator it = orderedCutNames_.begin();
-      it != orderedCutNames_.end(); it++)
-  {
-    cut * c = & (cutName_cut_.find(*it)->second);
-    if(produceReducedSkim_ || produceSkim_)
+       it != orderedCutNames_.end(); it++)
     {
-      if(!isSkimCut(*c))
-      {
-        // if not a skim cut, then it passes by construction
-        //if (!(c->nEvtPassedBeforeWeight_alreadyFilled))
-        //{
-        //  c->nEvtPassedBeforeWeight += 1;
-        //  c->nEvtPassedBeforeWeight_alreadyFilled = true;
-        //}
-        //c->nEvtPassed+=c->weight;
-        //c->nEvtPassedErr2 += (c->weight)*(c->weight);
-        return ret;
-      }
+      cut * c = & (cutName_cut_.find(*it)->second);
+      if( passedAllPreviousCuts(c->variableName) )
+	{
+	  if( passedCut(c->variableName) )
+	    {
+	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
+		{
+		  c->nEvtPassedBeforeWeight += 1;
+		  c->nEvtPassedBeforeWeight_alreadyFilled = true;
+		}
+	      c->nEvtPassed+=c->weight;
+	      c->nEvtPassedErr2 += (c->weight)*(c->weight);
+	    }
+	}
     }
-    if( passedAllPreviousCuts(c->variableName) )
-    {
-      if( passedCut(c->variableName) )
-      {
-        if (!(c->nEvtPassedBeforeWeight_alreadyFilled))
-        {
-          c->nEvtPassedBeforeWeight += 1;
-          c->nEvtPassedBeforeWeight_alreadyFilled = true;
-        }
-        c->nEvtPassed+=c->weight;
-        c->nEvtPassedErr2 += (c->weight)*(c->weight);
-      }
-    }
-  }
   return ret;
 }
 
@@ -2371,77 +2423,56 @@ int baseClass::passJSON (int this_run, int this_lumi, bool this_is_data ) {
 }
 
 void baseClass::getTriggers(Long64_t entry) {
-  //triggerDecisionMap_.clear();
   //FIXME deal with prescale map
   //triggerPrescaleMap_.clear();
-  if(triggerDecisionMap_.empty()) {
+  if(triggerNames_.empty()) {
     for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
       TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
       std::string branchName = branch->GetName();
       if(branchName.find("HLT_")!=std::string::npos) {
-        //triggerDecisionMap_[branchName] = readerTools_->ReadValueBranch<Bool_t>(branchName.c_str());
-        triggerDecisionMap_[branchName] = false;
+        triggerNames_.insert(branchName);
       }
     }
   }
 }
 
 void baseClass::printTriggers(){
-  std::map<std::string, bool>::iterator i     = triggerDecisionMap_.begin();
-  std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
+  std::unordered_set<std::string>::iterator i     = triggerNames_.begin();
+  std::unordered_set<std::string>::iterator i_end = triggerNames_.end();
   STDOUT( "Triggers: ")
-    for (; i != i_end; ++i)
-      std::cout << "\tfired? " << i -> second <<"\t\"" << i -> first << "\"" << std::endl;
+    for (; i != i_end; ++i) {
+      bool decision = readerTools_->ReadValueBranch<Bool_t>(i->c_str());
+      std::cout << "\tfired? " << decision <<"\t\"" << *i << "\"" << std::endl;
+    }
 }
 
 void baseClass::printFiredTriggers()
 {
-  std::map<std::string, bool>::iterator i     = triggerDecisionMap_.begin();
-  std::map<std::string, bool>::iterator i_end = triggerDecisionMap_.end();
+  std::unordered_set<std::string>::iterator i     = triggerNames_.begin();
+  std::unordered_set<std::string>::iterator i_end = triggerNames_.end();
   STDOUT( "Fired triggers: ");
   for (; i != i_end; ++i)
   {
-    //if(i->second)
-    if(readerTools_->ReadValueBranch<Bool_t>(i->first.c_str()))
-      STDOUT("\t\"" << i -> first << "\"" );
+    if(readerTools_->ReadValueBranch<Bool_t>(i->c_str()))
+      STDOUT("\t\"" << *i << "\"" );
   }
 }
 
 bool baseClass::triggerExists ( const char* name ) {
-  std::map<std::string, bool>::iterator i = triggerDecisionMap_.find ( name ) ;
-  if ( i == triggerDecisionMap_.end())
-  {
-    // try to look by prefix of given path name
-    auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
-    {
-      //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
-      return true;
-      ++itr;
-    }
+  std::unordered_set<std::string>::iterator i = triggerNames_.find ( name ) ;
+  if ( i == triggerNames_.end())
     return false;
-  }
   return true;
 }
 
 bool baseClass::triggerFired ( const char* name ) {
-  std::map<std::string, bool>::iterator i = triggerDecisionMap_.find ( name ) ;
-  if ( i == triggerDecisionMap_.end())
-  {
-    // try to look by prefix of given path name
-    auto itr = triggerDecisionMap_.lower_bound( name );
-    while(itr!=triggerDecisionMap_.end() && itr->first.find(name)==0) // check to make sure key actually starts with name
-    {
-      //STDOUT("Found matching trigger: " << itr->first << " with result: " << itr->second);
-      //return itr->second;
-      return readerTools_->ReadValueBranch<Bool_t>(itr->first.c_str());
-      ++itr;
-    }
-    printTriggers();
-    STDOUT("ERROR: could not find trigger " << name << " in triggerDecisionMap_!");
-    exit(-1);
-  }
-  return i -> second;
+  //if (!triggerExists(name))
+  //{
+  //  printTriggers();
+  //  STDOUT("ERROR: could not find trigger " << name << " in triggerNames_!");
+  //  exit(-1);
+  //}
+  return readerTools_->ReadValueBranch<Bool_t>(name);
 }
 
 int baseClass::triggerPrescale ( const char* name ) { 
@@ -2458,8 +2489,9 @@ int baseClass::triggerPrescale ( const char* name ) {
 }
 
 void baseClass::fillTriggerVariable ( const char * hlt_path, const char* variable_name, int extraPrescale ) { 
-  int prescale = triggerPrescale(hlt_path);
-  prescale*=extraPrescale;
+  //int prescale = triggerPrescale(hlt_path);
+  //prescale*=extraPrescale;
+  int prescale = 1;
   if ( triggerFired (hlt_path) ) {
     //STDOUT("INFO: triggerFired! fillVariableWithValue("<<variable_name<<","<<prescale<<") for hlt_path="<<hlt_path);
     fillVariableWithValue(variable_name, prescale      ) ; 
@@ -2587,7 +2619,9 @@ shared_ptr<TProfile> baseClass::makeNewEventsPassingSkimCutsProfile(const shared
     if(isSkimCut(cutName_cut_.find(cutName)->second))
       skimCutNames.push_back(cutName);
   }
-  int nBinsInherited = 2;
+  int nBinsInherited = 1;
+  if(skimWasMade_)
+    nBinsInherited++;
   if(prevProfFromFile)
     nBinsInherited = prevProfFromFile->GetNbinsX();
   int skimCutSize = skimCutNames.size();
@@ -2604,7 +2638,8 @@ shared_ptr<TProfile> baseClass::makeNewEventsPassingSkimCutsProfile(const shared
   }
   else {
     profToRet->GetXaxis()->SetBinLabel(1, "NoCuts");
-    profToRet->GetXaxis()->SetBinLabel(2, "Skim");
+    if(skimWasMade_)
+      profToRet->GetXaxis()->SetBinLabel(2, "Skim");
   }
   // label the rest of the bins with just the current skim cuts
   int skimBinCounter = nBinsInherited+1;

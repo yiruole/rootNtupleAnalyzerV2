@@ -378,6 +378,7 @@ class baseClass {
     bool variableIsFilled(const std::string& s) { return variableIsFilled(s, cutName_cut_); }
     bool isSkimCut(const cut& c) { return c.level_int == SKIM_LEVEL; }
     bool hasCut(const std::string& s) { return hasCut(s, cutName_cut_, combCutName_passed_); }
+    bool hasPreCut(const std::string& s);
     float getVariableValue(const std::string& s);
     float getPreCutValue1(const std::string& s);
     float getPreCutValue2(const std::string& s);
@@ -505,7 +506,7 @@ class baseClass {
 
     // Trigger stuff
     std::string oldKey_; 
-    std::map<std::string, bool> triggerDecisionMap_; 
+    std::unordered_set<std::string> triggerNames_;
     std::map<std::string, int > triggerPrescaleMap_; 
 
     // Which plots to fill
@@ -525,6 +526,7 @@ class baseClass {
     bool writeSkimTree();
     void fillSkimTree();
     void fillReducedSkimTree();
+    void updateBranchList();
 
 
     //Reduced Skim stuff
