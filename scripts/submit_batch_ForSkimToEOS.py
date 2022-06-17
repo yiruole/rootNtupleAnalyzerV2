@@ -17,7 +17,7 @@ def PrepareJobScript(outputname):
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         inputList = inputfilename.split('/')[-1]
         # merge files if reduced skim requested
-        if options.reducedSkim:
+        if options.reducedSkim or options.nanoSkim:
             with open(outputmain+"/input/"+inputList) as f:
                 outFileNames = f.read().splitlines()
             outputfile.write("./haddnano.py inputTree.root %s\n" % (" ".join(outFileNames)))
@@ -64,6 +64,9 @@ def WriteSubmitFile(condorFileName):
         if options.reducedSkim:
             parentDir = os.path.dirname(outputmain)
             filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
+        elif options.nanoSkim:
+            parentDir = os.path.dirname(outputmain)
+            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'+','+options.branchSelFileName
         else:
             filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName
         condorFile.write('transfer_input_files = '+filesToTransfer+'\n')
@@ -111,6 +114,10 @@ parser.add_option("-j", "--json", dest="jsonFileName",
                   help="json filename",
                   metavar="JSONFILE", default="")
 
+parser.add_option("-b", "--branchSel", dest="branchSelFileName",
+                  help="branch selection filename",
+                  metavar="BRANCHSELFILE", default="")
+
 parser.add_option("-e", "--exe", dest="executable",
                   help="executable",
                   metavar="EXECUTABLE", default="")
@@ -118,6 +125,10 @@ parser.add_option("-e", "--exe", dest="executable",
 parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
                   help="is this a reduced skim?",
                   metavar="REDUCEDSKIM", default=False, action="store_true")
+
+parser.add_option("-s", "--nanoSkim", dest="nanoSkim",
+                  help="is this a nanoAOD skim?",
+                  metavar="NANOSKIM", default=False, action="store_true")
 
 
 (options, args) = parser.parse_args()

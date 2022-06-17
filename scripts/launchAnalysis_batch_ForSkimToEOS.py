@@ -211,6 +211,15 @@ parser.add_option(
     action="store_true",
 )
 
+parser.add_option(
+    "-s",
+    "--nanoSkim",
+    dest="nanoSkim",
+    help="is this a nanoAOD skim?",
+    metavar="NANOSKIM",
+    default=False,
+    action="store_true",
+)
 
 (options, args) = parser.parse_args()
 
@@ -225,6 +234,10 @@ if (
     or not options.eosDir
 ):
     print("One of [outputDir,treeName,cutfile,ijobmax,queue,eosDir] not specified")
+    parser.print_help()
+    sys.exit()
+if options.reducedSkim and options.nanoSkim:
+    print("options reducedSkim and nanoSkim are mutually exclusive")
     parser.print_help()
     sys.exit()
 
@@ -262,7 +275,7 @@ print("... done ")
 # ----------------------------------------------------------------------------------------
 # For reduced skims: Check for haddnano.py.  If it exists, move it to the output directory
 # ----------------------------------------------------------------------------------------
-if options.reducedSkim:
+if options.reducedSkim or options.nanoSkim:
     haddnanoPath = "/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/scripts/haddnano.py"
     print("Moving haddnano.py to the local output directory...", end=' ')
 
@@ -319,7 +332,6 @@ print("... done ")
 # --------------------------------------------------------------------------------
 # Get JSON file from cut file and copy it to the output directory
 # --------------------------------------------------------------------------------
-
 print("Moving the JSON file to the local output directory...", end=' ')
 
 cutfile = open(options.cutfile, "r")
@@ -349,6 +361,32 @@ for line in cutfile:
             jsonFile = options.outputDir + "/" + json_file.split("/")[-1]
 
 print("... done ")
+
+# --------------------------------------------------------------------------------
+# Get branch selection file from cut file and copy it to the output directory
+# --------------------------------------------------------------------------------
+cutfile = open(options.cutfile, "r")
+found_branchSelFile = False
+for line in cutfile:
+    if line.strip() == "":
+        continue
+    if line.split()[0] == "#":
+        continue
+    if line.strip().split()[0] == "BranchSelection":
+        if found_branchSelFile is True:
+            print("Error: You are only allowed to have one BranchSelection file per cut file.")
+            print("cut file = " + options.cutfile)
+            sys.exit()
+        branchSel_file = line.split()[1]
+        if not os.path.isfile(branchSel_file):
+            print("Error: No BranchSelection file here: " + branchSel_file)
+            sys.exit()
+        else:
+            print("Moving the branch selection file to the local output directory...", end=' ')
+            os.system("cp " + branchSel_file + " " + options.outputDir)
+            found_branchSelFile = True
+            branchSelFile = options.outputDir + "/" + branchSel_file.split("/")[-1]
+            print("... done ")
 
 # --------------------------------------------------------------------------------
 # Check if path is a link
@@ -425,8 +463,11 @@ with open(options.inputlist, "r") as inputlist_file:
         )
         command = command + " -m " + options.eosHost
         command = command + " -j " + os.path.realpath(jsonFile)
+        command += " -b " + os.path.realpath(branchSelFile)
         if options.reducedSkim:
             command = command + " -r "
+        elif options.nanoSkim:
+            command += " -s "
     
         print(command)
     
