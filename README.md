@@ -32,7 +32,7 @@ NOTE: There are many analysis classes already available in the macros repo.
    6. Compile as in step 4.
 
    7.  Run:
-`./main`
+`build/main`
 This will not work, as you need to specify input arguments.
 
 Note1:
