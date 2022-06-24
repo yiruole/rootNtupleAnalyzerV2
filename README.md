@@ -24,8 +24,9 @@ and make a symbolic link `analysisClass.C`:
 NOTE: There are many analysis classes already available in the macros repo.
 
    4. Compile:
-Clean up any old builds if needed: `cmake --build build --target clean`. Then:
-`cmake -B build -S .`
+Clean up any old builds if needed with `cmake --build build --target clean`.  
+Then:  
+`cmake -B build -S .`  
 `cmake --build build -j4`
 
    5. If you are writing a new analysis class, add your analysis code to the method `Loop()` of analysisClass_myCode.C
