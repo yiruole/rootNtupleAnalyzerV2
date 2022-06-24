@@ -24,6 +24,7 @@ and make a symbolic link `analysisClass.C`:
 NOTE: There are many analysis classes already available in the macros repo.
 
    4. Compile:
+Clean up any old builds if needed: `cmake --build build --target clean`. Then:
 `cmake -B build -S .`
 `cmake --build build -j4`
 
