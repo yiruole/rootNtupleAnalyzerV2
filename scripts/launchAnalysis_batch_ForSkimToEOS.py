@@ -276,7 +276,7 @@ print("... done ")
 # For reduced skims: Check for haddnano.py.  If it exists, move it to the output directory
 # ----------------------------------------------------------------------------------------
 if options.reducedSkim or options.nanoSkim:
-    haddnanoPath = "/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/scripts/haddnano.py"
+    haddnanoPath = os.path.expandvars("$LQANA/scripts/haddnano.py")
     print("Moving haddnano.py to the local output directory...", end=' ')
 
     if not os.path.isfile(haddnanoPath):
@@ -455,7 +455,8 @@ with open(options.inputlist, "r") as inputlist_file:
         command = command + " -t " + options.treeName
         command = command + " -o " + options.outputDir + "/" + code_name + "___" + dataset
         command = command + " -n " + str(jobs_to_submit)
-        command = command + " -q " + options.queue
+        if len(options.queue) > 0:
+          command = command + " -q " + options.queue
         command = command + " -d " + eosPath
         # command = command + " -e " + os.path.realpath(options.executable)
         command = (
