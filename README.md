@@ -90,13 +90,19 @@ One can simply change the sequence of lines in the cut file to have the cuts app
 
 Also, the user can assign to each cut a level (0,1,2,3,4 ... n) and use the function `bool baseClass::passedAllOtherSameLevelCuts(const string& s);` to have the pass/failed info on all other cuts with the same level.
 
-[FIXME update this part] There are also cuts with level=-1. These cuts are not actually evaluated; the corresponding lines in the cut file (`config/cutFileExample.txt`) are used to pass values to the user code (such as fiducial region limits). The user can access these values (and also those of the cuts with level >= 0) by using these functions:
+There are also "pre" cuts with level=-1. These cuts are not actually evaluated; the corresponding lines in the cut file (`config/cutFileExample.txt`) are used to pass values to the user code (such as fiducial region limits). The user can access these values by using these functions:
 ```
-double baseClass::getCutMinValue1(const string& s);
-double baseClass::getCutMaxValue1(const string& s);
-double baseClass::getCutMinValue2(const string& s);
-double baseClass::getCutMaxValue2(const string& s);
+float getPreCutValue1(const std::string& s);
+float getPreCutValue2(const std::string& s);
+float getPreCutValue3(const std::string& s);
+float getPreCutValue4(const std::string& s);
+std::string getPreCutString1(const std::string& s);
+std::string getPreCutString2(const std::string& s);
+std::string getPreCutString3(const std::string& s);
+std::string getPreCutString4(const std::string& s);
 ```
+Float values are string values are supported, as can be seen from the functions above.
+
 #### Automatic histograms for cuts
 
 The following histograms are generated for each cut variable with level >= 0:
@@ -158,9 +164,7 @@ This optimizer will scan 10 different values, evenly distributed over the inclus
 The output of the optimization will be a 10-bin histogram, showing the number of events passing each of the 10 thresholds. Multiple optimization cuts may be applied in the same file. In the case where N optimization cuts are applied, a histogram of 10^N bins will be produced, with each bin corresponding to a unique cut combination.
 
 No more than 6 variables may be optimized at one time (limitation in the number of bins for a TH1F ~ 10^6).
-[FIXME]
-A file (optimizationCuts.txt in the working directory) that lists the cut values applied for each bin can be produced by uncommenting the line
-`#add_compile_options(-DCREATE_OPT_CUT_FILE)` in `CMakeLists.txt`. Since this file can be quite large (10^N lines), by default it is not created.
+A file (optimizationCuts.txt in the working directory) that lists the cut values applied for each bin is produced and is needed for processing the optimization results later.
 
 ### Producing an ntuple skim (Dinko Ferencek):
 The class `baseClass` provides the ability to produce a skimmed version of the input ntuples. In order to produce a skim, the following preliminary cut line has to be added to the cut file
@@ -198,6 +202,7 @@ In order to do so, the following preliminary cut line has to be added to the cut
 
 produceReducedSkim 1 - - - -1
 ```
+If the above preliminary cut line is not present in the cut file, is commented out or its value1 is set to 0, the skim creation will be turned off.
 Then each variable that needs to be included in the new tree has to be flagged with `SAVE` in the cutFile at the end of the line where the variable is defined, as for `pT1stEle` and `pT2ndEle` below:
 ```
 #VariableName minValue1(<) maxValue1(>=) minValue2(<) maxValue2(>=) level histoNbinsMinMax OptionalFlag
@@ -216,11 +221,7 @@ LHEPdfWeight -inf +inf - - 1 16 -0.5 15.5 SAVEARRAY
 ```
 Do not put anything for those variables that do not need to be saved, such as for `nEleFinal` and `invMass_ee`.
 
-[FIXME]
-Finally, call `fillReducedSkimTree()` in the analysisClass for the subset of events that need to be saved, e.g.:
-`if( passedCut("nEleFinal") ) fillReducedSkimTree();`
-
-If the above preliminary cut line is not present in the cut file, is commented out or its value1 is set to 0, the skim creation will be turned off and calling the `fillReducedSkimTree()` method will have no effect.
+Finally, the variables that are cut on as part of the skim, in this case `nEleFinal`, need have level 0.
 
 The new ntuple will be created in a file named as the std output root file with `_reduced_skim` appended before `.root` and the tree name will be as in the input root file.
 
@@ -246,13 +247,12 @@ The new ntuple will be created in a file named as the std output root file with 
 
    3. An input list, which you must make for yourself using a script (see step 6)
 
-6) [FIXME] Make the inputlist for the files you want to run on:
+6) Make the inputlist for the files you want to run on:
 `python createList.py -i /eos/cms/store/group/phys_exotica/leptonsPlusJets/RootNtuple/scooper/RootNtuple-V00-03-11-Summer12MC_DY2JetsToLL_ScaleSysts_MG_20131008_124216/ -o config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MG
 -m root`
 The input list you want will be here:
 `$LQANA/config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/inputListAllCurrent.txt`
-[FIXME]
-The `createList.py` script can be found in the lq1-nano repo: https://github.com/CMSLQ/lq1-nano
+The `createList.py` script can be found in the submitJobsWithCrabV2 repository here: https://github.com/CMSLQ/submitJobsWithCrabV2
 
 7) Link and then compile the analysis class you need:
 `unlink src/analysisClass.C`
