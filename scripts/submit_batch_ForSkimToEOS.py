@@ -50,9 +50,12 @@ def WriteSubmitFile(condorFileName):
         condorFile.write('error       = '+outputmain+'/error/$(Process).err\n')
         condorFile.write('log         = '+outputmain+'/log/$(Process).log\n')
         # http://batchdocs.web.cern.ch/batchdocs/local/submit.html
-        condorFile.write('+JobFlavour = "'+options.queue+'"\n')
-        # require CentOS7
-        condorFile.write('requirements = (OpSysAndVer =?= "CentOS7")\n')
+        #  - cms connect shouldn't use JobFlavor or the requirements
+        #  - assume this is lxbatch if queue option specified
+        if options.queue is not None:
+            condorFile.write('+JobFlavour = "'+options.queue+'"\n')
+            # require CentOS7
+            condorFile.write('requirements = (OpSysAndVer =?= "CentOS7")\n')
         # make sure the job finishes with exit code 0
         # condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
         condorFile.write('max_retries = 3\n')
