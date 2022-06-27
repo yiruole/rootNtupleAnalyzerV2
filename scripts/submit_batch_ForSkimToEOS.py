@@ -30,14 +30,22 @@ def PrepareJobScript(outputname):
         outputfile.write('  echo "./main return error code=$retVal; quitting here."\n')
         outputfile.write('  exit $retVal\n')
         outputfile.write('fi\n')
-        outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
-        outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
+        # for lxbatch
+        if options.queue is not None:
+            outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".root"+" "+outputmain+"/output/"+"\n")
+            outputfile.write("mv -v "+outputPrefix+"_"+str(ijob)+".dat"+" "+outputmain+"/output/"+"\n")
+        else:
+            # try this to get xrd stuff available on cms connect
+            #outputfile.write("source /cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el7-x86_64/setup.sh\n")
+            pass
         if options.reducedSkim:
             outputfile.write("if [ -f "+outputPrefix+"_"+str(ijob)+"_reduced_skim.root ]; then\n")
+            outputfile.write("    xrdfs "+options.eosHost+" mkdir \""+outputeosdir+"\"\n")
             outputfile.write("    xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_reduced_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_rsk.root\"\n")
         else:
             # flat skim
             outputfile.write("if [ -f "+outputPrefix+"_"+str(ijob)+"_skim.root ]; then\n")
+            outputfile.write("    xrdfs "+options.eosHost+" mkdir \""+outputeosdir+"\"\n")
             outputfile.write("    xrdcp -fs "+"\""+outputPrefix+"_"+str(ijob)+"_skim.root\" \""+options.eosHost+outputeosdir+"/"+dataset+"_"+str(ijob)+"_sk.root\"\n")
         outputfile.write("fi\n")
 
@@ -52,15 +60,22 @@ def WriteSubmitFile(condorFileName):
         # http://batchdocs.web.cern.ch/batchdocs/local/submit.html
         #  - cms connect shouldn't use JobFlavor or the requirements
         #  - assume this is lxbatch if queue option specified
-        if options.queue is not None:
+        if options.queue is None:
+            #condorFile.write('Requirements = HAS_CVMFS == TRUE\n')
+            outputRootFile = outputPrefix+"_$(Process).root"
+            outputDatFile = outputPrefix+"_$(Process).dat"
+            outputPath = outputmain+"/output/"
+            condorFile.write('transfer_output_files = '+outputRootFile+','+outputDatFile+'\n')
+            condorFile.write('transfer_output_remaps = "'+outputRootFile+' = '+outputPath+outputRootFile+'; '+outputDatFile+' = '+outputPath+outputDatFile+'"\n')
+        else:
             condorFile.write('+JobFlavour = "'+options.queue+'"\n')
             # require CentOS7
             condorFile.write('requirements = (OpSysAndVer =?= "CentOS7")\n')
+            condorFile.write('transfer_output_files = ""\n')
         # make sure the job finishes with exit code 0
         # condorFile.write('on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)\n')
         condorFile.write('max_retries = 3\n')
         condorFile.write('should_transfer_files = YES\n')
-        condorFile.write('transfer_output_files = ""\n')
         # condorFile.write('stream_output = True\n')
         # condorFile.write('stream_error = True\n')
         # exePath = os.path.dirname(os.path.abspath(options.executable))
@@ -177,7 +192,6 @@ dataset = outputPrefix.split("___")[-1]
 ################################################
 outputeosdir = options.eosDir
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
-os.system("/usr/bin/eos mkdir -p "+outputeosdir)
 ################################################
 with open(inputlist, "r") as inputFile:
     numfiles = len(inputFile.readlines())
@@ -231,7 +245,6 @@ print('submit jobs for', options.output.rstrip("/"))
 # FIXME don't cd and use absolute paths in the condor submission instead
 oldDir = os.getcwd()
 os.chdir(outputmain)
-# os.system('condor_submit '+condorFileName)
 exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
 # print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
