@@ -24,7 +24,7 @@ add_compile_options(-O2)
 #add_compile_options(${USER_CXXFLAGS})
 
 find_package(Boost REQUIRED iostreams regex)
-find_package(ROOT REQUIRED Hist Tree TreePlayer Physics)
+find_package(ROOT REQUIRED Hist Tree TreePlayer Physics TMVA)
 
 #add_library(mylib
 #  src/mylib.cpp
@@ -79,4 +79,5 @@ target_link_libraries(main
   ROOT::Tree
   ROOT::TreePlayer
   ROOT::Physics
+  ROOT::TMVA
 )
