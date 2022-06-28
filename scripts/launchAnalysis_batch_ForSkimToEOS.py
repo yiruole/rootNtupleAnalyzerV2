@@ -229,11 +229,11 @@ if (
     or not options.treeName
     or not options.cutfile
     or not options.ijobmax
-    or not options.queue
+    # or not options.queue
     # or not options.wait
     or not options.eosDir
 ):
-    print("One of [outputDir,treeName,cutfile,ijobmax,queue,eosDir] not specified")
+    print("One of [outputDir,treeName,cutfile,ijobmax,eosDir] not specified")
     parser.print_help()
     sys.exit()
 if options.reducedSkim and options.nanoSkim:
@@ -253,7 +253,9 @@ os.environ["EOS_MGM_URL"] = options.eosHost
 
 print("Making the EOS output directory...", end=' ')
 
-eosPath = eos_mkdir(options.eosDir)
+#eosPath = eos_mkdir(options.eosDir)
+os.system("xrdfs "+options.eosHost+" mkdir \""+options.eosDir+"\"\n")
+eosPath = options.eosDir
 
 print("... done")
 
@@ -288,20 +290,6 @@ if options.reducedSkim or options.nanoSkim:
     print("... done ")
 
 # --------------------------------------------------------------------------------
-# Look for the cut file.  If it exists, move it to the output directory
-# --------------------------------------------------------------------------------
-
-print("Moving the cutfile to the local output directory...", end=' ')
-
-if not os.path.isfile(options.cutfile):
-    print("Error: No cut file here: " + options.cutfile)
-    sys.exit(-1)
-else:
-    os.system("cp " + options.cutfile + " " + options.outputDir + "/")
-
-print("... done ")
-
-# --------------------------------------------------------------------------------
 # Look for the exe file.  If it exists, move it to the output directory
 # --------------------------------------------------------------------------------
 
@@ -314,6 +302,17 @@ else:
     print("Warning: No file here: '" + options.executable + "'" + "; proceeding anyway")
     # sys.exit()
 
+# --------------------------------------------------------------------------------
+# Look for the cut file.  If it exists, move it to the output directory
+# --------------------------------------------------------------------------------
+print("Moving the cutfile to the local output directory...", end=' ')
+if not os.path.isfile(options.cutfile):
+    print("Error: No cut file here: " + options.cutfile)
+    sys.exit(-1)
+else:
+    os.system("cp " + options.cutfile + " " + options.outputDir + "/")
+print("... done ")
+localCutFile = options.outputDir+"/"+os.path.basename(options.cutfile)
 
 # --------------------------------------------------------------------------------
 # Look for the inputList file
@@ -332,61 +331,81 @@ print("... done ")
 # --------------------------------------------------------------------------------
 # Get JSON file from cut file and copy it to the output directory
 # --------------------------------------------------------------------------------
-print("Moving the JSON file to the local output directory...", end=' ')
-
-cutfile = open(options.cutfile, "r")
 found_json = False
-for line in cutfile:
-    if line.strip() == "":
-        continue
-    if line.split()[0] == "#":
-        continue
-    if line.strip()[:4] == "JSON":
-        if found_json is True:
-            print("Error: You are only allowed to have one JSON file per cut file.")
-            print("cut file = " + options.cutfile)
-            sys.exit()
-        if len(line.split()) != 2:
-            print("Error: this line in your cut file does not make sense:")
-            print(line)
-            print("cut file = " + options.cutfile)
-            sys.exit()
-        json_file = line.split()[1]
-        if not os.path.isfile(json_file):
-            print("Error: No JSON file here: " + json_file)
-            sys.exit()
+cutfile_lines = []
+with open(localCutFile, "r") as cutfile:
+    for line in cutfile:
+        if line.strip() == "":
+            cutfile_lines.append(line)
+            continue
+        if line.split()[0] == "#":
+            cutfile_lines.append(line)
+            continue
+        if line.strip()[:4] == "JSON":
+            if found_json is True:
+                print("Error: You are only allowed to have one JSON file per cut file.")
+                print("cut file = " + options.cutfile)
+                sys.exit()
+            if len(line.split()) != 2:
+                print("Error: this line in your cut file does not make sense:")
+                print(line)
+                print("cut file = " + options.cutfile)
+                sys.exit()
+            json_file = line.split()[1]
+            if not os.path.isfile(json_file):
+                print("Error: No JSON file here: " + json_file)
+                sys.exit()
+            else:
+                print("Moving the JSON file to the local output directory...", end=' ')
+                os.system("cp " + json_file + " " + options.outputDir)
+                found_json = True
+                jsonFile = options.outputDir + "/" + json_file.split("/")[-1]
+                print("... done ")
+                json = os.path.basename(jsonFile)
+                cutfile_lines.append(line.replace(json_file, json))
         else:
-            os.system("cp " + json_file + " " + options.outputDir)
-            found_json = True
-            jsonFile = options.outputDir + "/" + json_file.split("/")[-1]
-
-print("... done ")
+            cutfile_lines.append(line)
+if found_json:
+    with open(localCutFile, "w") as cutfile:
+        for line in cutfile_lines:
+            cutfile.write(line)
 
 # --------------------------------------------------------------------------------
 # Get branch selection file from cut file and copy it to the output directory
 # --------------------------------------------------------------------------------
-cutfile = open(options.cutfile, "r")
 found_branchSelFile = False
-for line in cutfile:
-    if line.strip() == "":
-        continue
-    if line.split()[0] == "#":
-        continue
-    if line.strip().split()[0] == "BranchSelection":
-        if found_branchSelFile is True:
-            print("Error: You are only allowed to have one BranchSelection file per cut file.")
-            print("cut file = " + options.cutfile)
-            sys.exit()
-        branchSel_file = line.split()[1]
-        if not os.path.isfile(branchSel_file):
-            print("Error: No BranchSelection file here: " + branchSel_file)
-            sys.exit()
+cutfile_lines = []
+with open(localCutFile, "r") as cutfile:
+    for line in cutfile:
+        if line.strip() == "":
+            cutfile_lines.append(line)
+            continue
+        if line.split()[0] == "#":
+            cutfile_lines.append(line)
+            continue
+        if line.strip().split()[0] == "BranchSelection":
+            if found_branchSelFile is True:
+                print("Error: You are only allowed to have one BranchSelection file per cut file.")
+                print("cut file = " + options.cutfile)
+                sys.exit()
+            branchSel_file = line.split()[1]
+            if not os.path.isfile(branchSel_file):
+                print("Error: No BranchSelection file here: " + branchSel_file)
+                sys.exit()
+            else:
+                print("Moving the branch selection file to the local output directory...", end=' ')
+                os.system("cp " + branchSel_file + " " + options.outputDir)
+                found_branchSelFile = True
+                branchSelFile = options.outputDir + "/" + branchSel_file.split("/")[-1]
+                print("... done ")
+                branchFile = os.path.basename(branchSelFile)
+                cutfile_lines.append(line.replace(branchSel_file, branchFile))
         else:
-            print("Moving the branch selection file to the local output directory...", end=' ')
-            os.system("cp " + branchSel_file + " " + options.outputDir)
-            found_branchSelFile = True
-            branchSelFile = options.outputDir + "/" + branchSel_file.split("/")[-1]
-            print("... done ")
+            cutfile_lines.append(line)
+if found_branchSelFile:
+    with open(localCutFile, "w") as cutfile:
+        for line in cutfile_lines:
+            cutfile.write(line)
 
 # --------------------------------------------------------------------------------
 # Check if path is a link
@@ -416,7 +435,7 @@ with open(options.inputlist, "r") as inputlist_file:
     for line in inputlist_file:
         if not len(line.strip()) > 0:
             continue
-        if line.startswith("#"):
+        if line.strip().startswith("#"):
             continue
     
         dataset = line.strip().split("/")[-1].split(".txt")[0]
@@ -455,7 +474,7 @@ with open(options.inputlist, "r") as inputlist_file:
         command = command + " -t " + options.treeName
         command = command + " -o " + options.outputDir + "/" + code_name + "___" + dataset
         command = command + " -n " + str(jobs_to_submit)
-        if len(options.queue) > 0:
+        if options.queue is not None:
           command = command + " -q " + options.queue
         command = command + " -d " + eosPath
         # command = command + " -e " + os.path.realpath(options.executable)
