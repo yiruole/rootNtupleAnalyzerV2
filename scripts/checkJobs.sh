@@ -11,7 +11,7 @@ localdir=$1
 eosdir=$2
 
 echo "Grepping error files..."
-find $localdir -iname "*.err" -exec grep -ivH "no dict" {} \;
+find $localdir -iname "*.err" -exec sh -c "grep -ivH \"no dict\" {} | grep -iv \"No branch name is matching wildcard\" | grep -iv \"glidein_config\" | grep -iv \"WARNING: While\" | grep -v \"singularity\" " \;
 echo "Done."
 
 echo "Checking .out files..."
@@ -42,7 +42,8 @@ do
   numDatasets+=1
   numSubmitFiles=`find $dir -iname "submit*sh" | wc | awk '{print $1}'`
   if [[ $eosdir == *"eos"* ]]; then
-    numOutputFiles=`EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`
+    #numOutputFiles=`EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`
+    numOutputFiles=`xrdfs root://eosuser.cern.ch ls $eosdir/${dir##*___}| wc -l`
   else
     #echo "find $eosdir/${dir##*/}/output -type f -iname '*.root' | grep -v '.sys.' | wc -l"
     numOutputFiles=`find $eosdir/${dir##*/}/output -type f -iname "*.root" | grep -v '.sys.' | wc -l`
