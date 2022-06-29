@@ -1,1 +1,1 @@
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/config/sampleListForMerging_13TeV_QCD_dataDriven.txt
+sampleListForMerging_13TeV_QCD_dataDriven.txt
