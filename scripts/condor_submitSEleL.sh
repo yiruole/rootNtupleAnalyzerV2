@@ -4,8 +4,9 @@ YEAR=$1
 
 if [ "$YEAR" = "2016" ]; then
   echo "Doing 2016!"
-  SKIMNAME=rskSingleEleL_egLoose_3feb2022
-  INPUTLIST=config/nanoV7_2016_postProc/inputListAllCurrent.txt
+  SKIMNAME=rskSingleEleL_29jun2022
+  #INPUTLIST=config/nanoV7_2016_postProc/inputListAllCurrent.txt
+  INPUTLIST=config/UL16NanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
 elif [ "$YEAR" = "2017" ]; then
   SKIMNAME=rskSingleEleL_9apr2021
   #INPUTLIST=config/nanoV7_2017_postProc/inputListAllCurrent.txt
@@ -23,9 +24,11 @@ fi
 CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
 #EOSDIR=/eos/user/s/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
 #EOSDIR=/eos/cms/store/user/scooper/LQ/NanoV7/skims/${YEAR}/$SKIMNAME
-EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/NanoV7/skims/${YEAR}/$SKIMNAME
-OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/nanoV7/skims/${YEAR}/$SKIMNAME
+EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/${YEAR}/$SKIMNAME
+OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/ultralegacy/skims/${YEAR}/$SKIMNAME
 
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q testmatch -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
-# FIXME do we still need the testmatch queue with more jobs?
+#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q testmatch -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
+# below for nanoSkims
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q testmatch -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
+# FIXME do we still need the testmatch queue?
