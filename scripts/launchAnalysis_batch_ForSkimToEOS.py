@@ -198,7 +198,7 @@ parser.add_option(
     dest="executable",
     help="executable",
     metavar="EXECUTABLE",
-    default="main",
+    default="build/main",
 )
 
 parser.add_option(
@@ -252,6 +252,7 @@ os.environ["EOS_MGM_URL"] = options.eosHost
 # --------------------------------------------------------------------------------
 
 print("Making the EOS output directory...", end=' ')
+sys.stdout.flush()
 
 #eosPath = eos_mkdir(options.eosDir)
 os.system("xrdfs "+options.eosHost+" mkdir \""+options.eosDir+"\"\n")
@@ -264,6 +265,7 @@ print("... done")
 # --------------------------------------------------------------------------------
 
 print("Making the local output directory...", end=' ')
+sys.stdout.flush()
 
 if not os.path.isdir(options.outputDir):
     os.system("mkdir -p " + options.outputDir)
@@ -483,7 +485,8 @@ with open(options.inputlist, "r") as inputlist_file:
         )
         command = command + " -m " + options.eosHost
         command = command + " -j " + os.path.realpath(jsonFile)
-        command += " -b " + os.path.realpath(branchSelFile)
+        if found_branchSelFile:
+            command += " -b " + os.path.realpath(branchSelFile)
         if options.reducedSkim:
             command = command + " -r "
         elif options.nanoSkim:
