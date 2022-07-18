@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.14.0)
 
-set(MY_PROJECT_VERSION 0.0.99 CACHE STRING "project version number")
+set(MY_PROJECT_VERSION 0.9.0 CACHE STRING "project version number")
 
-project(my-project VERSION ${MY_PROJECT_VERSION})
+project(lqAnalysis VERSION ${MY_PROJECT_VERSION})
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
   message(
@@ -19,12 +19,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 add_compile_options(-DSAVE_ALL_HISTOGRAMS)
 add_compile_options(-DUSE_FULL_NTUPLE)
 add_compile_options(-O2)
+add_compile_options(-std=c++17)
 #add_compile_options(-DUSE_EXAMPLE)
 #add_compile_options(-g)
+#add_compile_options(-pg)
 #add_compile_options(${USER_CXXFLAGS})
 
 find_package(Boost REQUIRED iostreams regex)
 find_package(ROOT REQUIRED Hist Tree TreePlayer Physics TMVA)
+find_package(correctionlib REQUIRED)
+find_package(Threads)
+find_package(ZLIB)
 
 #add_library(mylib
 #  src/mylib.cpp
@@ -80,4 +85,5 @@ target_link_libraries(main
   ROOT::TreePlayer
   ROOT::Physics
   ROOT::TMVA
+  correctionlib
 )
