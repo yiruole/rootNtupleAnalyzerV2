@@ -25,13 +25,16 @@ class Object {
   float Pt()  const { return m_pt;  }
   float Eta() const { return m_eta; }
   float Phi() const { return m_phi; }
+  float PtOrignal() const { return m_originalPt; }
 
   void SetPt(float pt) { m_pt = pt; }
   void SetEta(float eta) { m_eta = eta; }
   void SetPhi(float phi) { m_phi = phi; }
 
   virtual float EnergyResScaleFactor() { return 1.0; }
+  virtual float EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) { return -1.0; }
   virtual float EnergyRes           () { return -1.0; }
+  virtual float EnergyResFromCorrection(const correction::Correction* correction) { return -1.0; }
   virtual float EnergyScaleFactor   () { return 1.0; } 
   virtual float EnergyResScaleError () { return 0.0; }
   
@@ -106,6 +109,7 @@ class Object {
   void initP4();
 
   float m_pt, m_eta, m_phi;
+  float m_originalPt;
 };
 
 

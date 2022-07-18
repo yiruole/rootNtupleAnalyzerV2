@@ -66,13 +66,11 @@ void Object::initP4() {
     uncorrectPt = true;
   }
   m_pt = m_collection->ReadArrayBranch<Float_t>(name+"_pt",m_raw_index);
+  m_originalPt = m_pt;
   m_eta = m_collection->ReadArrayBranch<Float_t>(name+"_eta",m_raw_index);
   m_phi = m_collection->ReadArrayBranch<Float_t>(name+"_phi",m_raw_index);
   if(name=="Muon")
-    // stock nano
     m_pt = m_collection->ReadArrayBranch<Float_t>("Muon_tunepRelPt", m_raw_index)*m_collection->ReadArrayBranch<Float_t>("Muon_pt", m_raw_index);
-    //// custom nano
-    //m_pt = m_collection->ReadArrayBranch<Float_t>("Muon_ptTuneP",m_raw_index);
   if(uncorrectPt)
     m_pt/=m_collection->ReadArrayBranch<Float_t>(name+"_eCorr",m_raw_index);
 }
