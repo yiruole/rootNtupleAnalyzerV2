@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 from optparse import OptionParser
 import os
@@ -255,7 +255,7 @@ print("Making the EOS output directory...", end=' ')
 sys.stdout.flush()
 
 #eosPath = eos_mkdir(options.eosDir)
-os.system("xrdfs "+options.eosHost+" mkdir \""+options.eosDir+"\"\n")
+os.system("xrdfs "+options.eosHost+" mkdir -p \""+options.eosDir+"\"\n")
 eosPath = options.eosDir
 
 print("... done")
