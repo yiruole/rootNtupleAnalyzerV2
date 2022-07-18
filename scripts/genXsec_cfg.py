@@ -36,7 +36,7 @@ if doQuery:
         print 'DBS: query for parent of dataset='+datasetpath+'...',
         
         try:
-            api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader/')
+            api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader')
             parents = api.listDatasetParents(dataset=datasetpath)
         except dbsClientException, ex:
             print
@@ -60,7 +60,7 @@ if doQuery:
     print 'DBS: query for files in dataset...',
     
     try:
-        api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader/')
+        api = DbsApi(url = 'https://cmsweb.cern.ch/dbs/prod/global/DBSReader')
         #dbsFiles = api.listFiles(dataset=datasetpath)
         dbsFiles = api.listFiles(dataset=parentDataset)
     except dbsClientException, ex:
@@ -74,6 +74,11 @@ if doQuery:
     # get first N LFNs
     filesToUse = 100
     firstNFiles = [dbsFile['logical_file_name'] for dbsFile in dbsFiles]
+    # if needed
+    filesToSkip = ["A5BFC697-3A86-9A4D-B090-01D0291ADDDD"]
+    # filesToSkip = []
+    for skipFile in filesToSkip:
+        firstNFiles[:] = [x for x in firstNFiles if skipFile not in x]
     if len(firstNFiles) > filesToUse:
         firstNFiles = firstNFiles[-1*filesToUse:]
     # print firstNFiles
