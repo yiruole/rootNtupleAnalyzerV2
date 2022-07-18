@@ -10,50 +10,32 @@ class PFJet : public Object {
   PFJet ();
   PFJet (Collection& collection, unsigned int index, short j = 0);
 
-  // Kinematic variables
-  
-  float Energy  ();
-  
-  // JER/JES
-  float PtJESTotalUp   ();
-  float PtJESTotalDown ();
-  float PtJERUp   ();
-  float PtJERDown ();
-
   // Energy resolution scale factors
-  float EnergyRes            ();
-  float EnergyResScaleFactor ();
-  float EnergyResScaleError  ();
-  float EnergyScaleFactor    ();
+  float EnergyResFromCorrection(const correction::Correction* correction) override;
+  float EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) override;
+  float EnergyRes();
+  float EnergyResScaleError();
+  float EnergyResScaleFactor();
+  float EnergyScaleFactor();
   
   // IDs 
   
-  bool   PassUserID ( ID id, bool verbose = false );
+  bool   PassUserID ( ID id, bool verbose = false ) override;
   int    JetID();
   
   // ID variables
   
+  int    HadronFlavor();
   float NeutralHadronEnergyFraction ();
   float NeutralEmEnergyFraction     ();
-  int    NeutralHadronMultiplicity   ();
-  int    NeutralMultiplicity         ();
   int    NConstituents               ();
   float ChargedHadronEnergyFraction ();
-  int    ChargedMultiplicity         ();
   float ChargedEmEnergyFraction     ();
   
   // BTag variables
   
-  float CombinedInclusiveSecondaryVertexBTag();
-  float CombinedMVABTag();
   float DeepCSVBTag();
-  float DeepCSVBTagSFLoose();
-  float DeepCSVBTagSFMedium();
   float DeepJetBTag();
-  float DeepJetBTagSFLoose();
-  float DeepJetBTagSFLooseUp();
-  float DeepJetBTagSFLooseDown();
-  float DeepJetBTagSFMedium();
   
   float QuarkGluonLikelihood();
   int NElectrons();
@@ -61,6 +43,8 @@ class PFJet : public Object {
   int MatchedGenJetIndex();
   int MatchedElectron1Index();
   int MatchedElectron2Index();
+
+  float FixedGridRhoAll();
 
  private:
   bool PassUserID_PFJetLoose (bool verbose);

@@ -11,33 +11,16 @@ PFJet::PFJet (Collection& c, unsigned int i, short j):
   Object ( c,i, "PFJet" )
 {}
                                      
-float PFJet::Energy                     () { return -1.0; }
-
-float PFJet::PtJESTotalUp   () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jesTotalUp" ,m_raw_index); }
-float PFJet::PtJESTotalDown () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jesTotalDown" ,m_raw_index); }
-float PFJet::PtJERUp   () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jerUp" ,m_raw_index); }
-float PFJet::PtJERDown () { return m_collection->ReadArrayBranch<Float_t>("Jet_pt_jerDown" ,m_raw_index); }
-                                     
 float PFJet::NeutralHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_neHEF" ,m_raw_index); } 
 float PFJet::NeutralEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_neEmEF",m_raw_index); } 
-int    PFJet::NeutralHadronMultiplicity () { return -1; }
-int    PFJet::NeutralMultiplicity       () { return -1; }
 int    PFJet::NConstituents             () { return m_collection->ReadArrayBranch<Int_t>("Jet_nConstituents"  , m_raw_index); } 
 float PFJet::ChargedHadronEnergyFraction() { return m_collection->ReadArrayBranch<Float_t>("Jet_chHEF"         , m_raw_index); } 
-int    PFJet::ChargedMultiplicity       () { return -1; } 
 float PFJet::ChargedEmEnergyFraction    () { return m_collection->ReadArrayBranch<Float_t>("Jet_chEmEF"        , m_raw_index); } 
 
 int PFJet::JetID() { return m_collection->ReadArrayBranch<Int_t>("Jet_jetId",m_raw_index); }
-float PFJet::CombinedInclusiveSecondaryVertexBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCSVV2",m_raw_index); }
-float PFJet::CombinedMVABTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagCMVA",m_raw_index); }
+int PFJet::HadronFlavor() { return m_collection->ReadArrayBranch<Int_t>("Jet_hadronFlavour",m_raw_index); }
 float PFJet::DeepCSVBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepB",m_raw_index); }
-float PFJet::DeepCSVBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepcsv_L",m_raw_index); }
-float PFJet::DeepCSVBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepcsv_M",m_raw_index); }
 float PFJet::DeepJetBTag() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagDeepFlavB",m_raw_index); }
-float PFJet::DeepJetBTagSFLoose() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L",m_raw_index); }
-float PFJet::DeepJetBTagSFLooseUp() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_up",m_raw_index); }
-float PFJet::DeepJetBTagSFLooseDown() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_L_down",m_raw_index); }
-float PFJet::DeepJetBTagSFMedium() { return m_collection->ReadArrayBranch<Float_t>("Jet_btagSF_deepjet_M",m_raw_index); }
 
 int PFJet::NElectrons() { return m_collection->ReadArrayBranch<Int_t>("Jet_nElectrons", m_raw_index); }
 int PFJet::NMuons() { return m_collection->ReadArrayBranch<Int_t>("Jet_nMuons", m_raw_index); }
@@ -46,6 +29,7 @@ int PFJet::MatchedElectron1Index() { return m_collection->ReadArrayBranch<Int_t>
 int PFJet::MatchedElectron2Index() { return m_collection->ReadArrayBranch<Int_t>("Jet_electronIdx2", m_raw_index); }
 float PFJet::QuarkGluonLikelihood() { return m_collection->ReadArrayBranch<Float_t>("Jet_qgl",m_raw_index); }
 
+float PFJet::FixedGridRhoAll() { return m_collection->ReadValueBranch<Float_t>("fixedGridRhoFastjetAll"); }
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
 float PFJet::EnergyResScaleFactor (){ 
@@ -95,13 +79,22 @@ float PFJet::EnergyRes(){
   return -1.0;
 }
 
+
+float PFJet::EnergyResFromCorrection(const correction::Correction* correction) {
+  return correction->evaluate({Eta(), Pt(), FixedGridRhoAll()});
+}
+
+float PFJet::EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) {
+  return correction->evaluate({Eta(), variation});
+}
+
 std::ostream& operator<<(std::ostream& stream, PFJet& object) {
   stream            << object.Name() << " : "
 	 << "Pt = "       << object.Pt ()  << ", "
 	 << "Eta = "      << object.Eta()  << ", "
 	 << "Phi = "      << object.Phi()  << ", "
    << "loose ID = " << object.PassUserID(PFJET_LOOSE) << ", "
-   << "MVABtag = "  << object.CombinedMVABTag() << ", ";
+   << "DeepJetBtag = "  << object.DeepJetBTag() << ", ";
   if(object.MatchedGenJetIndex() >= 0)
     stream << "matchedGenJetIdx = "  << object.MatchedGenJetIndex() << ", ";
   if(object.NElectrons() > 0)
