@@ -114,7 +114,7 @@ else
 fi
 SUBDIR=nanoV7/${YEAR}/$DIRSTR/$ANANAME
 EOSDIR=/eos/user/s/scooper/LQ/NanoV7/${YEAR}/$DIRSTR/$ANANAME
-COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_${YEAR}_${DIRSTR}_batch_`hostname -s`.txt
+COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_${YEAR}_${DIRSTR}_batch_$(hostname -s).txt
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj_${YEAR}.txt
 #------------
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
@@ -130,7 +130,7 @@ echo "" > $COMMANDFILE
 
 for file in $files
 do
-suffix=`basename $file`
+  suffix=$(basename $file)
 suffix=${suffix%\.*}
 cat >> $COMMANDFILE <<EOF
 ####################################################
@@ -145,7 +145,7 @@ mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
     -i $INPUTLIST \
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/condor \
-    -l  `echo "$ILUM*$FACTOR" | bc` \
+    -l  $(echo "$ILUM*$FACTOR" | bc) \
     -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s $SAMPLELISTFORMERGING \
