@@ -1421,24 +1421,23 @@ bool baseClass::writeCutHistos()
 bool baseClass::updateCutEffic()
 {
   bool ret = true;
-  for (vector<string>::iterator it = orderedCutNames_.begin();
-       it != orderedCutNames_.end(); it++)
+  for(const auto& cName : orderedCutNames_)
+  {
+    cut& c = cutName_cut_.at(cName);
+    if( passedAllPreviousCuts(cName) )
     {
-      cut * c = & (cutName_cut_.find(*it)->second);
-      if( passedAllPreviousCuts(c->variableName) )
-	{
-	  if( passedCut(c->variableName) )
-	    {
-	      if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
-		{
-		  c->nEvtPassedBeforeWeight += 1;
-		  c->nEvtPassedBeforeWeight_alreadyFilled = true;
-		}
-	      c->nEvtPassed+=c->weight;
-	      c->nEvtPassedErr2 += (c->weight)*(c->weight);
-	    }
-	}
+      if( passedCut(cName) )
+      {
+        if ( c.nEvtPassedBeforeWeight_alreadyFilled == false)
+        {
+          c.nEvtPassedBeforeWeight += 1;
+          c.nEvtPassedBeforeWeight_alreadyFilled = true;
+        }
+        c.nEvtPassed+=c.weight;
+        c.nEvtPassedErr2 += (c.weight)*(c.weight);
+      }
     }
+  }
   return ret;
 }
 
@@ -2552,17 +2551,18 @@ void baseClass::createOptCutFile() {
 }
 
 bool baseClass::isData() {
-  // if tree has isData branch, we know the answer
+  if(GetCurrentEntry() > 0)
+    return isData_;
+
+  isData_ = true;
   if(tree_->GetBranch("isData")) {
     if(readerTools_->ReadValueBranch<Float_t>("isData") < 1)
-      return false;
-    else
-      return true;
+      isData_ = false;
   }
   // if no isData branch (like in nanoAOD output), check for Weight or genWeight branches
   else if(tree_->GetBranch("Weight") || tree_->GetBranch("genWeight"))
-    return false;
-  return true;
+    isData_ = false;
+  return isData_;
 }
 
 void baseClass::resetSkimTreeBranchAddress(const std::string& branchName, void* addr) {

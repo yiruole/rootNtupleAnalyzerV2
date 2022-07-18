@@ -204,7 +204,7 @@ class baseClass {
       STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutNameToCut nor combCutNameToPassed. Returning false.");
       return (ret=false);
     }
-    template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string> orderedCutNames) {
+    template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string>& orderedCutNames) {
       auto cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() ) {
         STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
@@ -492,6 +492,7 @@ class baseClass {
     void saveLHEPdfSumw(const std::string& fileName);
     void saveEventsPassingCuts(const std::string& fileName);
     std::shared_ptr<TProfile> makeNewEventsPassingSkimCutsProfile(const std::shared_ptr<TProfile> prevProfFromFile = 0);
+    bool isData_;
 
     Long64_t NBeforeSkim_;
     double sumGenWeights_;
