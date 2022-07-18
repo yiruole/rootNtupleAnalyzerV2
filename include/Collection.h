@@ -13,6 +13,8 @@
 #include "IDTypes.h"
 #include "analysisClass.h"
 
+#include "correction.h"
+
 template<class Object1>
   void examineVec ( std::vector<Object1> objVec, const char * name, ID id = NULL_ID, bool verbose = false ){
   int n_constituents = objVec.size();
@@ -301,7 +303,9 @@ class Collection {
   //------------------------------------------------------------------------------------------
 
   template <class Object1, class Object2>
-    std::vector<Object1> MatchAndSmearEnergy ( const CollectionPtr matching_collection, double max_dr, TRandom3 * engine, TLorentzVector & v_delta_met, bool verbose=false){
+    std::vector<Object1> MatchAndSmearEnergy ( const CollectionPtr matching_collection, double max_dr, TRandom3 * engine, TLorentzVector & v_delta_met,
+        const correction::Correction* correctionPtRes = nullptr, const correction::Correction* correctionJERSF = nullptr, std::string variation = "nom",
+        bool verbose=false) {
     unsigned short this_collection_size = GetSize();
     std::vector<Object1> smearedObjVec;
     smearedObjVec.reserve(this_collection_size);
@@ -312,8 +316,8 @@ class Collection {
       if(verbose)
         std::cout << "MatchAndSmearEnergy(): Obj " << this_collection_constituent.Name() << " constituent #" << i << "/" << this_collection_size << ":" << std::endl;
       Object2 matched_object;
-      double resolution = this_collection_constituent.EnergyRes();
-      double res_scale_factor   = this_collection_constituent.EnergyResScaleFactor();
+      double resolution = correctionPtRes ? this_collection_constituent.EnergyResFromCorrection(correctionPtRes) : this_collection_constituent.EnergyRes();
+      double res_scale_factor   = correctionJERSF ? this_collection_constituent.EnergyResScaleFactorFromCorrection(correctionJERSF, variation) : this_collection_constituent.EnergyResScaleFactor();
       double old_pt = this_collection_constituent.Pt();
       bool matched = this_collection_constituent.template MatchByDRAndDPt < Object2 > ( matching_collection, matched_object, max_dr, 3*resolution*old_pt );
       double new_pt = -1.0;
@@ -345,7 +349,7 @@ class Collection {
       }
       else {
         // not well-matched to GenParticle
-        double scale_factor = this_collection_constituent.EnergyResScaleFactor();
+        double scale_factor   = correctionJERSF ? this_collection_constituent.EnergyResScaleFactorFromCorrection(correctionJERSF, variation) : this_collection_constituent.EnergyResScaleFactor();
         double sigma = resolution * std::sqrt(scale_factor * scale_factor - 1);
         smearFactor = 1. + engine->Gaus(0.0, sigma);
         //std::cout << "Not well-matched jet" << std::endl;
