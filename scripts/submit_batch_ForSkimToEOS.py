@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import os
 import sys
@@ -12,12 +12,13 @@ def PrepareJobScript(outputname):
         outputfile.write("#!/bin/bash\n")
         # hardcoded root is a bit nasty FIXME
         #outputfile.write('source /cvmfs/sft.cern.ch/lcg/app/releases/ROOT/6.24.06/x86_64-centos7-gcc48-opt/bin/thisroot.sh\n')
-        outputfile.write('source /cvmfs/sft.cern.ch/lcg/views/LCG_102rc1/x86_64-centos7-gcc11-opt/setup.sh\n')
+        outputfile.write('source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
         inputList = inputfilename.split('/')[-1]
-        # merge files if reduced skim requested
-        if options.reducedSkim or options.nanoSkim:
+        # merge files if nano skim requested
+        #if options.reducedSkim or options.nanoSkim:
+        if options.nanoSkim:
             with open(outputmain+"/input/"+inputList) as f:
                 outFileNames = f.read().splitlines()
             outputfile.write("./haddnano.py inputTree.root %s\n" % (" ".join(outFileNames)))
