@@ -9,7 +9,7 @@ The main program (`src/main.C`) receives the configuration parameters (such as t
 
 ### Instructions
    1. Environment setup:
-`source /cvmfs/sft.cern.ch/lcg/views/LCG_102rc1/x86_64-centos7-gcc11-opt/setup.sh`
+`source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh`
 
    2. Check out the code (in a directory outside of any CMSSW areas):
 `git clone git@github.com:CMSLQ/rootNtupleAnalyzerV2 Leptoquarks/rootNtupleAnalyzerV2`
