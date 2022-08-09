@@ -56,6 +56,7 @@ add_executable(main
   src/analysisClass.C
   src/baseClass.C
   src/Collection.C
+  src/CorrectionHandler.C
   src/Electron.C
   src/ElectronIDs.C
   src/GenJet.C
