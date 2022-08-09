@@ -26,16 +26,16 @@ def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
     # ---Loop over datasets in the inputlist to check if dat/root files are there
     foundAllFiles = True
     dictDatasetsFileNames = dict()
-    print
-    print "Checking for root/dat files from samples in inputList...",
+    print()
+    print("Checking for root/dat files from samples in inputList...", end=' ')
     sys.stdout.flush()
     datasetsHandled = []
     for lin in open(inputList):
-        lin = string.strip(lin, "\n")
+        lin = lin.strip("\n")
         # print 'lin=',lin
         if lin.startswith("#"):
             continue
-        dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
+        dataset_fromInputList = lin.split("/")[-1].split(".")[0]
         if skipSimilarDatasets and SanitizeDatasetNameFromInputList(dataset_fromInputList) in datasetsHandled:
             continue  # in the case where we already combined similar datasets, skip similiar dataset entries in the inputlist
         # strip off the slashes and the .txt at the end
@@ -87,13 +87,13 @@ def FindInputFiles(inputList, analysisCode, inputDir, skipSimilarDatasets=True):
         #     fileList = glob.glob(newPathToTry)
         #     completeNamesTried.append(newPathToTry)
         if len(fileList) < 1:
-            print
-            print "ERROR: could not find root file for dataset:", dataset_fromInputList
-            print "ERROR: tried these full paths:", completeNamesTried
+            print()
+            print("ERROR: could not find root file for dataset:", dataset_fromInputList)
+            print("ERROR: tried these full paths:", completeNamesTried)
             foundAllFiles = False
         elif len(fileList) > 1:
-            print "ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList)
-            print "ERROR: considered these full paths: {}".format(completeNamesTried)
+            print("ERROR: found {} root files for dataset: {}".format(len(fileList), dataset_fromInputList))
+            print("ERROR: considered these full paths: {}".format(completeNamesTried))
             foundAllFiles = False
         else:
             sampleName = SanitizeDatasetNameFromInputList(dataset_fromInputList.replace("_tree", ""))
@@ -114,12 +114,12 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     dataset_fromInputList = dataset_fromInputList.replace("_reduced_skim", "")
     # in rare cases, replace __ by _
     dataset_fromInputList = dataset_fromInputList.replace("__", "_")
-    if dataset_fromInputList.endswith("_pythia8"):
-        dataset_fromInputList = dataset_fromInputList[
-            0: dataset_fromInputList.find("_pythia8")
-        ]
-    # if '__' in dataset_fromInputList:
-    #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
+    # if dataset_fromInputList.endswith("_pythia8"):
+    #     dataset_fromInputList = dataset_fromInputList[
+    #         0: dataset_fromInputList.find("_pythia8")
+    #     ]
+    # # if '__' in dataset_fromInputList:
+    # #  dataset_fromInputList = dataset_fromInputList[0:dataset_fromInputList.find('__')]
     if dataset_fromInputList.endswith("_tree"):
         dataset_fromInputList = dataset_fromInputList[
             0: dataset_fromInputList.find("_tree")
@@ -128,14 +128,15 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
     #     print 'found ZToEE in dataset='+dataset_fromInputList
     #     dataset_fromInputList = dataset_fromInputList.replace('TuneCP5_', '').replace('13TeV-', '')
     # dataset_fromInputList = dataset_fromInputList.replace("ext2_", "").replace("ext1_", "").replace("ext_", "").replace("ext1", "").replace("ext", "")
-    dataset_fromInputList = re.sub("ext[0-9_]*", "", dataset_fromInputList)
-    dataset_fromInputList = re.sub("EXT[0-9_]*", "", dataset_fromInputList)
-    dataset_fromInputList = dataset_fromInputList.replace("backup_", "")
-    dataset_fromInputList = dataset_fromInputList.replace("_backup", "")
-    dataset_fromInputList = re.sub("newPMX[_]*", "", dataset_fromInputList)
-    # dataset_fromInputList = re.sub("NNPDF[0-9_]*", "", dataset_fromInputList)
-    dataset_fromInputList = dataset_fromInputList.rstrip("_")
+    #dataset_fromInputList = re.sub("ext[0-9_]*", "", dataset_fromInputList)
+    #dataset_fromInputList = re.sub("EXT[0-9_]*", "", dataset_fromInputList)
+    #dataset_fromInputList = dataset_fromInputList.replace("backup_", "")
+    #dataset_fromInputList = dataset_fromInputList.replace("_backup", "")
+    #dataset_fromInputList = re.sub("newPMX[_]*", "", dataset_fromInputList)
+    ## dataset_fromInputList = re.sub("NNPDF[0-9_]*", "", dataset_fromInputList)
     # print '1) SanitizeDatasetNameFromInputList() result is:'+dataset_fromInputList
+    dataset_fromInputList = dataset_fromInputList.strip("_APV")
+    dataset_fromInputList = dataset_fromInputList.rstrip("_")
     return dataset_fromInputList
 
 
@@ -144,44 +145,46 @@ def SanitizeDatasetNameFromFullDataset(dataset):
     # this logic is somewhat copied from the submission script for the ntuples:
     #    https://github.com/CMSLQ/submitJobsWithCrabV2/blob/master/createAndSubmitJobsWithCrab3.py
     if "Run20" not in dataset:
-        outputFileNames = []
-        outputFileNames.append(dataset[1: dataset.find("_Tune")])
-        outputFileNames.append(dataset[1: dataset.find("_13TeV")])
-        try:
-            outputFileNames.append(dataset.split("/")[1])
-        except IndexError:
-            print "ERROR: SanitizeDatasetNameFromFullDataset(): IndexError trying to split('/') dataset:", dataset, "; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile"
-            raise
-        # use the one with the shortest filename
-        outputFile = sorted(outputFileNames, key=len)[0]
+        # outputFileNames = []
+        # outputFileNames.append(dataset[1: dataset.find("_Tune")])
+        # outputFileNames.append(dataset[1: dataset.find("_13TeV")])
+        # try:
+        #     outputFileNames.append(dataset.split("/")[1])
+        # except IndexError:
+        #     print("ERROR: SanitizeDatasetNameFromFullDataset(): IndexError trying to split('/') dataset:", dataset, "; this can happen if this is a piece (not a full dataset) containing multiple samples that has not been defined earlier in the sampleListToCombineFile")
+        #     raise
+        # # use the one with the shortest filename
+        # outputFile = sorted(outputFileNames, key=len)[0]
         # ignore all ext files, or rather, treat them the same as non-ext
         #if "ext" in dataset:
         #    extN = dataset[dataset.find("_ext") + 4]
         #    outputFile = outputFile + "_ext" + extN
-        if "madgraphMLM" in dataset:
-            outputFile += "_madgraphMLM"
-        elif "amcatnloFXFX" in dataset or "amcnloFXFX" in dataset:
-            outputFile += "_amcatnloFXFX"
-        if 'ZToEE' in dataset:
-            # print 'found ZToEE in dataset='+dataset
-            outputFile = dataset.split("/")[1].replace('TuneCP5_', '').replace('13TeV-', '')
+        # if "madgraphMLM" in dataset:
+        #     outputFile += "_madgraphMLM"
+        # elif "amcatnloFXFX" in dataset or "amcnloFXFX" in dataset:
+        #     outputFile += "_amcatnloFXFX"
+        # if 'ZToEE' in dataset:
+        #     # print 'found ZToEE in dataset='+dataset
+        #     outputFile = dataset.split("/")[1].replace('TuneCP5_', '').replace('13TeV-', '')
         # print 'SanitizeDatasetNameFromFullDataset:', dataset, 'shortened to:', outputFile
         # print 'choices were:',outputFileNames
+        outputFile = dataset.split("/")[1]
     else:
-        # outputFile = dataset[1:].replace('/','__')
-        # outputFile = outputFile.split('__')[0]+'__'+outputFile.split('__')[1]
-        outputFile = dataset[1:].replace("/", "_")
-        # if(len(outputFile.split('_')) == 3):
-        #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]
-        # elif(len(outputFile.split('_')) == 4):
-        #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]+'_'+outputFile.split('_')[2]
-        outputFileSplit = outputFile.split("_")
-        outputFile = ""
-        for i in xrange(0, len(outputFileSplit) - 1):
-            outputFile += outputFileSplit[i] + "_"
-        outputFile = outputFile[:-1]
+        # # outputFile = dataset[1:].replace('/','__')
+        # # outputFile = outputFile.split('__')[0]+'__'+outputFile.split('__')[1]
+        # outputFile = dataset[1:].replace("/", "_")
+        # # if(len(outputFile.split('_')) == 3):
+        # #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]
+        # # elif(len(outputFile.split('_')) == 4):
+        # #  outputFile = outputFile.split('_')[0]+'_'+outputFile.split('_')[1]+'_'+outputFile.split('_')[2]
+        # outputFileSplit = outputFile.split("_")
+        # outputFile = ""
+        # for i in range(0, len(outputFileSplit) - 1):
+        #     outputFile += outputFileSplit[i] + "_"
+        # outputFile = outputFile[:-1]
         # print '2 outputFile=',outputFile
         # print 'outputFile.split("_")=',outputFile.split('_')
+        outputFile = "_".join(dataset.split("/")[1:3])
     return outputFile
 
 
@@ -192,7 +195,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
         # ignore comments
         if line.startswith("#"):
             continue
-        line = string.strip(line, "\n")
+        line = line.strip("\n")
         # ignore empty lines
         if len(line) <= 0:
             continue
@@ -208,9 +211,9 @@ def GetSamplesToCombineDict(sampleListForMerging):
             # print "GetSamplesToCombineDict(): i=", i, "  piece= ", piece
             if i == 0:
                 key = piece
-                if key in dictSamples.keys():
-                    print "ERROR: GetSamplesToCombineDict(): key '{}' in line #{} has already been defined earlier in the sampleListForMerging file!".format(key, l+1)
-                    print "\toffending line #{} looks like '{}'".format(l+1, line)
+                if key in list(dictSamples.keys()):
+                    print("ERROR: GetSamplesToCombineDict(): key '{}' in line #{} has already been defined earlier in the sampleListForMerging file!".format(key, l+1))
+                    print("\toffending line #{} looks like '{}'".format(l+1, line))
                     duplicateKeyError = True
                     break
                 dictSamples[key] = []
@@ -258,7 +261,7 @@ def ExpandPieces(pieceList, dictSamples):
 
 def ExpandSampleDict(dictSamples):
     outputDict = dict()
-    for sampleName, sampleList in dictSamples.items():
+    for sampleName, sampleList in list(dictSamples.items()):
         outputDict[sampleName] = ExpandPieces(sampleList, dictSamples)
     return outputDict
 
@@ -269,20 +272,26 @@ def ParseXSectionFile(xsectionFile):
         # ignore comments
         if line.startswith("#"):
             continue
-        line = string.strip(line, "\n")
+        line = line.strip("\n")
         line = line.split("#")[0]  # strip off anything after any '#' if present
         # ignore empty lines
         if len(line) <= 0:
             continue
 
         try:
-            dataset, xsection_val = string.split(line)
+            dataset, xsection_val = line.split()
         except ValueError:
             raise RuntimeError('ERROR: could not split line "', line, '"')
+        if "Run20" in dataset:
+            # for data, add secondary dataset info
+            dataset="_".join(dataset.split("/")[1:3])
+            xsectionDict[dataset] = xsection_val
+        else:
+            xsectionDict[dataset.split("/")[1]] = xsection_val
 
         # print 'ParseXSectionFile: line looked like:"'+line+'"; call SanitizeDatasetNameFromFullDataset on dataset=',dataset
-        outputFile = SanitizeDatasetNameFromFullDataset(dataset)
-        xsectionDict[outputFile] = xsection_val
+        # outputFile = SanitizeDatasetNameFromFullDataset(dataset)
+        # xsectionDict[outputFile] = xsection_val
         # print outputFile + " " + xsection_val
 
 
@@ -291,20 +300,23 @@ def lookupXSection(datasetNameFromInputList):
     datasetNameFromInputList = SanitizeDatasetNameFromInputList(datasetNameFromInputList)
     if len(xsectionDict) <= 0:
         raise RuntimeError("xsectionDict is empty. Cannot lookupXSection for "+datasetNameFromInputList)
-    for dataset in xsectionDict.keys():
-        if verbose and "LQ" in dataset:
-            print 'INFO: dataset in xsec file:', dataset, ' starts with the one we are asking for:', datasetNameFromInputList, '?'
-        if dataset.startswith(datasetNameFromInputList):
-            if verbose:
-                print 'INFO: dataset in xsec file:', dataset, 'starts with the one we are asking for:', datasetNameFromInputList
-            # check to make sure dataset in xsec file up to first underscore matches the datasetNameFromInputList
-            # this should catch a case where we have TT as the datasetNameFromInputList [e.g., powheg] and it would otherwise match TTJets in the xsec file
-            if datasetNameFromInputList.startswith(dataset.split("_")[0]):
-                # print 'INFO: found dataset in xsec file:', dataset, 'that starts with the one we are asking for:', datasetNameFromInputList
-                return xsectionDict[dataset]
-    # for key in sorted(xsectionDict.iterkeys()):
-    #  print 'sample=',key,'xsection=',xsectionDict[key]
-    raise RuntimeError("xsectionDict does not have an entry for " + datasetNameFromInputList + ", i.e., no dataset in xsectionDict starts with this.")
+    # for key in sorted(xsectionDict.keys()):
+    #     print('sample=',key,'xsection=',xsectionDict[key])
+    return xsectionDict[datasetNameFromInputList]
+    #for dataset in list(xsectionDict.keys()):
+    #    if verbose and "LQ" in dataset:
+    #        print('INFO: dataset in xsec file:', dataset, ' starts with the one we are asking for:', datasetNameFromInputList, '?')
+    #    if dataset.startswith(datasetNameFromInputList):
+    #        if verbose:
+    #            print('INFO: dataset in xsec file:', dataset, 'starts with the one we are asking for:', datasetNameFromInputList)
+    #        # check to make sure dataset in xsec file up to first underscore matches the datasetNameFromInputList
+    #        # this should catch a case where we have TT as the datasetNameFromInputList [e.g., powheg] and it would otherwise match TTJets in the xsec file
+    #        if datasetNameFromInputList.startswith(dataset.split("_")[0]):
+    #            # print 'INFO: found dataset in xsec file:', dataset, 'that starts with the one we are asking for:', datasetNameFromInputList
+    #            return xsectionDict[dataset]
+    ## for key in sorted(xsectionDict.iterkeys()):
+    ##  print 'sample=',key,'xsection=',xsectionDict[key]
+    #raise RuntimeError("xsectionDict does not have an entry for " + datasetNameFromInputList + ", i.e., no dataset in xsectionDict starts with this.")
 
 
 def ParseDatFile(datFilename):
@@ -323,7 +335,7 @@ def ParseDatFile(datFilename):
             # ignore comments
             if re.search("^###", line):
                 continue
-            line = string.strip(line, "\n")
+            line = line.strip("\n")
             if line.strip().startswith("#id"):
                 foundFirstLine = True
             # print "---> lineCounter: " , lineCounter
@@ -386,23 +398,23 @@ def FillTableEfficiencies(table, rootFileName, weight, sampleName=""):
             table[i]["errNSqr"] = table[i]["errNpassSqr"]
         else:
             if verbose:
-                print "--> FillTableEfficiencies(): i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName())
-                print "FillTableEfficiencies(): hist: GetBinContent(1) = {} +/- {}".format(hist.GetBinContent(1), hist.GetBinError(1))
-                print "FillTableEfficiencies(): cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1))
-                print "FillTableEfficiencies(): noCutHist: GetBinContent(1) = {} +/- {}".format(noCutHist.GetBinContent(1), noCutHist.GetBinError(1))
-                print "- Creating TEfficiencyRel"
+                print("--> FillTableEfficiencies(): i={}; FillTableEfficiencies() -- hist {}".format(i, hist.GetName()))
+                print("FillTableEfficiencies(): hist: GetBinContent(1) = {} +/- {}".format(hist.GetBinContent(1), hist.GetBinError(1)))
+                print("FillTableEfficiencies(): cutHists[i-1]: GetBinContent(1) = {} +/- {}".format(cutHists[i-1].GetBinContent(1), cutHists[i-1].GetBinError(1)))
+                print("FillTableEfficiencies(): noCutHist: GetBinContent(1) = {} +/- {}".format(noCutHist.GetBinContent(1), noCutHist.GetBinError(1)))
+                print("- Creating TEfficiencyRel")
                 sys.stdout.flush()
             r.gErrorIgnoreLevel = 0
             if(hist.GetBinContent(1) > cutHists[i-1].GetBinContent(1)):
                 # here, passed > total, so root will complain; this can happen if we remove a negative weight event with this cut
-                print "\tINFO: passed > pass(N-1); attempting to silence error messages!"
+                print("\tINFO: passed > pass(N-1); attempting to silence error messages!")
                 sys.stdout.flush()
                 r.gErrorIgnoreLevel = r.kError+1
                 # r.gErrorIgnoreLevel = 3001
                 #r.gROOT.ProcessLine("gErrorIgnoreLevel = 3001;")
             table[i]["TEfficiencyRel"] = r.TEfficiency(hist, cutHists[i-1])
             table[i]["TEfficiencyRel"].SetWeight(weight)
-            print "- Creating TEfficiencyAbs"
+            print("- Creating TEfficiencyAbs")
             sys.stdout.flush()
             # r.gErrorIgnoreLevel = r.kInfo+1
             table[i]["TEfficiencyAbs"] = r.TEfficiency(hist, noCutHist)
@@ -864,115 +876,115 @@ def CombineEfficiencies(tableList):
 
 
 def WriteTable(table, name, file, printToScreen=False):
-    print >> file, "### "+name
-    print >> file, "#id".rjust(4, " "),
-    print >> file, "variableName".rjust(35),
-    print >> file, "min1".rjust(15),
-    print >> file, "max1".rjust(15),
-    print >> file, "min2".rjust(15),
-    print >> file, "max2".rjust(15),
-    print >> file, "Npass".rjust(17),
-    print >> file, "errNpass".rjust(17),
-    print >> file, "EffRel".rjust(15),
-    print >> file, "errEffRel".rjust(15),
-    print >> file, "EffAbs".rjust(15),
-    print >> file, "errEffAbs".rjust(15)
+    print("### "+name, file=file)
+    print("#id".rjust(4, " "), end=' ', file=file)
+    print("variableName".rjust(35), end=' ', file=file)
+    print("min1".rjust(15), end=' ', file=file)
+    print("max1".rjust(15), end=' ', file=file)
+    print("min2".rjust(15), end=' ', file=file)
+    print("max2".rjust(15), end=' ', file=file)
+    print("Npass".rjust(17), end=' ', file=file)
+    print("errNpass".rjust(17), end=' ', file=file)
+    print("EffRel".rjust(15), end=' ', file=file)
+    print("errEffRel".rjust(15), end=' ', file=file)
+    print("EffAbs".rjust(15), end=' ', file=file)
+    print("errEffAbs".rjust(15), file=file)
 
     for j, line in enumerate(table):
-        print >> file, str(j).rjust(4, " "),
-        print >> file, table[j]["variableName"].rjust(35),
-        print >> file, table[j]["min1"].rjust(15),
-        print >> file, table[j]["max1"].rjust(15),
-        print >> file, table[j]["min2"].rjust(15),
-        print >> file, table[j]["max2"].rjust(15),
+        print(str(j).rjust(4, " "), end=' ', file=file)
+        print(table[j]["variableName"].rjust(35), end=' ', file=file)
+        print(table[j]["min1"].rjust(15), end=' ', file=file)
+        print(table[j]["max1"].rjust(15), end=' ', file=file)
+        print(table[j]["min2"].rjust(15), end=' ', file=file)
+        print(table[j]["max2"].rjust(15), end=' ', file=file)
         ###
         if table[j]["Npass"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["Npass"]).rjust(17),
+            print(("%.04f" % table[j]["Npass"]).rjust(17), end=' ', file=file)
         else:
-            print >> file, ("%.04e" % table[j]["Npass"]).rjust(17),
+            print(("%.04e" % table[j]["Npass"]).rjust(17), end=' ', file=file)
         ###
         if table[j]["errNpass"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["errNpass"]).rjust(17),
+            print(("%.04f" % table[j]["errNpass"]).rjust(17), end=' ', file=file)
         else:
-            print >> file, ("%.04e" % table[j]["errNpass"]).rjust(17),
+            print(("%.04e" % table[j]["errNpass"]).rjust(17), end=' ', file=file)
         ###
         if table[j]["EffRel"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["EffRel"]).rjust(15),
+            print(("%.04f" % table[j]["EffRel"]).rjust(15), end=' ', file=file)
         else:
-            print >> file, ("%.04e" % table[j]["EffRel"]).rjust(15),
+            print(("%.04e" % table[j]["EffRel"]).rjust(15), end=' ', file=file)
         ###
         if table[j]["errEffRel"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["errEffRel"]).rjust(15),
+            print(("%.04f" % table[j]["errEffRel"]).rjust(15), end=' ', file=file)
         else:
-            print >> file, ("%.04e" % table[j]["errEffRel"]).rjust(15),
+            print(("%.04e" % table[j]["errEffRel"]).rjust(15), end=' ', file=file)
         ###
         if table[j]["EffAbs"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["EffAbs"]).rjust(15),
+            print(("%.04f" % table[j]["EffAbs"]).rjust(15), end=' ', file=file)
         else:
-            print >> file, ("%.04e" % table[j]["EffAbs"]).rjust(15),
+            print(("%.04e" % table[j]["EffAbs"]).rjust(15), end=' ', file=file)
         ###
         if table[j]["errEffAbs"] >= 0.1:
-            print >> file, ("%.04f" % table[j]["errEffAbs"]).rjust(15)
+            print(("%.04f" % table[j]["errEffAbs"]).rjust(15), file=file)
         else:
-            print >> file, ("%.04e" % table[j]["errEffAbs"]).rjust(15)
+            print(("%.04e" % table[j]["errEffAbs"]).rjust(15), file=file)
         ###
 
-    print >> file, "\n"
+    print("\n", file=file)
 
     # --- print to screen
     if printToScreen:
-        print "\n"
-        print "### "+name
-        print "#id".rjust(4, " "),
-        print "variableName".rjust(35),
-        print "min1".rjust(15),
-        print "max1".rjust(15),
-        print "min2".rjust(15),
-        print "max2".rjust(15),
-        print "Npass".rjust(17),
-        print "errNpass".rjust(17),
-        print "EffRel".rjust(15),
-        print "errEffRel".rjust(15),
-        print "EffAbs".rjust(15),
-        print "errEffAbs".rjust(15)
+        print("\n")
+        print("### "+name)
+        print("#id".rjust(4, " "), end=' ')
+        print("variableName".rjust(35), end=' ')
+        print("min1".rjust(15), end=' ')
+        print("max1".rjust(15), end=' ')
+        print("min2".rjust(15), end=' ')
+        print("max2".rjust(15), end=' ')
+        print("Npass".rjust(17), end=' ')
+        print("errNpass".rjust(17), end=' ')
+        print("EffRel".rjust(15), end=' ')
+        print("errEffRel".rjust(15), end=' ')
+        print("EffAbs".rjust(15), end=' ')
+        print("errEffAbs".rjust(15))
 
         for j, line in enumerate(table):
-            print str(j).rjust(4, " "),
-            print table[j]["variableName"].rjust(35),
-            print table[j]["min1"].rjust(15),
-            print table[j]["max1"].rjust(15),
-            print table[j]["min2"].rjust(15),
-            print table[j]["max2"].rjust(15),
+            print(str(j).rjust(4, " "), end=' ')
+            print(table[j]["variableName"].rjust(35), end=' ')
+            print(table[j]["min1"].rjust(15), end=' ')
+            print(table[j]["max1"].rjust(15), end=' ')
+            print(table[j]["min2"].rjust(15), end=' ')
+            print(table[j]["max2"].rjust(15), end=' ')
             ###
             if table[j]["Npass"] >= 0.1:
-                print ("%.04f" % table[j]["Npass"]).rjust(17),
+                print(("%.04f" % table[j]["Npass"]).rjust(17), end=' ')
             else:
-                print ("%.04e" % table[j]["Npass"]).rjust(17),
+                print(("%.04e" % table[j]["Npass"]).rjust(17), end=' ')
             ###
             if table[j]["errNpass"] >= 0.1:
-                print ("%.04f" % table[j]["errNpass"]).rjust(17),
+                print(("%.04f" % table[j]["errNpass"]).rjust(17), end=' ')
             else:
-                print ("%.04e" % table[j]["errNpass"]).rjust(17),
+                print(("%.04e" % table[j]["errNpass"]).rjust(17), end=' ')
             ###
             if table[j]["EffRel"] >= 0.1:
-                print ("%.04f" % table[j]["EffRel"]).rjust(15),
+                print(("%.04f" % table[j]["EffRel"]).rjust(15), end=' ')
             else:
-                print ("%.04e" % table[j]["EffRel"]).rjust(15),
+                print(("%.04e" % table[j]["EffRel"]).rjust(15), end=' ')
             ###
             if table[j]["errEffRel"] >= 0.1:
-                print ("%.04f" % table[j]["errEffRel"]).rjust(15),
+                print(("%.04f" % table[j]["errEffRel"]).rjust(15), end=' ')
             else:
-                print ("%.04e" % table[j]["errEffRel"]).rjust(15),
+                print(("%.04e" % table[j]["errEffRel"]).rjust(15), end=' ')
             ###
             if table[j]["EffAbs"] >= 0.1:
-                print ("%.04f" % table[j]["EffAbs"]).rjust(15),
+                print(("%.04f" % table[j]["EffAbs"]).rjust(15), end=' ')
             else:
-                print ("%.04e" % table[j]["EffAbs"]).rjust(15),
+                print(("%.04e" % table[j]["EffAbs"]).rjust(15), end=' ')
             ###
             if table[j]["errEffAbs"] >= 0.1:
-                print ("%.04f" % table[j]["errEffAbs"]).rjust(15)
+                print(("%.04f" % table[j]["errEffAbs"]).rjust(15))
             else:
-                print ("%.04e" % table[j]["errEffAbs"]).rjust(15)
+                print(("%.04e" % table[j]["errEffAbs"]).rjust(15))
             ###
 
 
@@ -993,8 +1005,8 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
                 yBinLabels = htemp.GetYaxis().GetLabels()
                 lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data()]
                 if len(lhePdfWeightLabels) == 102:
-                    print "INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
-                            len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName)
+                    print("INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
+                            len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName))
                     htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
             if htemp.InheritsFrom("TH1"):
                 htemp.SetDirectory(0)
@@ -1072,8 +1084,8 @@ def AddHistosFromFile(rootFileName, sampleHistoDict, piece, sample="", plotWeigh
     # log XXX DEBUG
     # check TMap consistency
     sampleTMap = next((x.ReadObj() for x in tfile.GetListOfKeys() if x.ReadObj().ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
-    comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
-    comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName() == "systematics"), None)
+    comboTMap = next((x for x in list(sampleHistoDict.values()) if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboSystHist = next((x for x in list(sampleHistoDict.values()) if x.GetName() == "systematics"), None)
     if comboSystHist is not None:
         CheckSystematicsTMapConsistency(comboTMap, sampleTMap, list(comboSystHist.GetYaxis().GetLabels()))
     tfile.Close()
@@ -1115,8 +1127,8 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
         idx += 1
     # check TMap consistency
     sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
-    comboTMap = next((x for x in sampleHistoDict.values() if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
-    comboSystHist = next((x for x in sampleHistoDict.values() if x.GetName().endswith("systematics")), None)
+    comboTMap = next((x for x in list(sampleHistoDict.values()) if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+    comboSystHist = next((x for x in list(sampleHistoDict.values()) if x.GetName().endswith("systematics")), None)
     # if comboSystHist is None:
         # print "Could not find comboSystHist in sampleHistoDict"
         # print [x.GetName() for x in sampleHistoDict.values() if "systematics" in x.GetName()]
@@ -1246,8 +1258,8 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
             systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
             systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
             if len(systsNotInTempHist) > 0:
-                print "\tINFO: some systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
-                        piece, sample, systsNotInTempHist)
+                print("\tINFO: some systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
+                        piece, sample, systsNotInTempHist))
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
                 sys.stdout.flush()
@@ -1258,8 +1270,8 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight):
             # it can also happen that new systematics appear in htemp that aren't in the dict hist
             systsNotInDictHist = [label for label in systematicsListFromTempHist if label not in systematicsListFromDictHist]
             if len(systsNotInDictHist) > 0:
-                print "\tINFO: some systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
-                        sample, piece, systsNotInDictHist)
+                print("\tINFO: some systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
+                        sample, piece, systsNotInDictHist))
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
                 # sys.stdout.flush()
@@ -1291,9 +1303,9 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
     outputTfile.cd()
     nHistos = len(sampleHistoDict)
     if verbose:
-        print "Writing", nHistos, "histos...",
+        print("Writing", nHistos, "histos...", end=' ')
     sys.stdout.flush()
-    for histo in sampleHistoDict.itervalues():  # for each hist contained in the sample's dict
+    for histo in sampleHistoDict.values():  # for each hist contained in the sample's dict
         nbytes = 0
         if histo.ClassName() == "TMap":
             nbytes = histo.Write(histo.GetName(), r.TObject.kSingleKey)
@@ -1307,7 +1319,7 @@ def WriteHistos(outputTfile, sampleHistoDict, verbose=False):
             raise RuntimeError("Error writing into the output file '{}': wrote {} bytes to file when writing object '{}'.".format(
                 outputTfile.GetName(), nbytes, histo.GetName()))
     if verbose:
-        print "Done."
+        print("Done.")
     sys.stdout.flush()
 
 
@@ -1351,7 +1363,7 @@ def CheckSystematicsTMapConsistency(combinedSampleMap, mapToCheck, systematicsLi
             sampleItr = r.TIter(mapToCheck)
             sampleKey = sampleItr.Next()
             while sampleKey:
-                print "sampleKey: '{}'".format(sampleKey.GetName())
+                print("sampleKey: '{}'".format(sampleKey.GetName()))
                 sampleKey = sampleItr.Next()
             raise RuntimeError("could not find syst '{}' in sampleMap. systematics TMap in combined sample is inconsistent in input root file".format(
                 combKey.GetName()))
@@ -1446,7 +1458,7 @@ def GetRatesAndErrors(
         ):
     verbose = False
     if verbose or isTTBarFromData:
-        print "GetRatesAndErrors(", combinedRootFile.GetName(), sampleName, selection, doEEJJ, isDataOrQCD, isTTBarFromData, ")"
+        print("GetRatesAndErrors(", combinedRootFile.GetName(), sampleName, selection, doEEJJ, isDataOrQCD, isTTBarFromData, ")")
     histName = "EventsPassingCuts"
     # special case of TTBar from data
     # if isTTBarFromData:
@@ -1629,5 +1641,5 @@ def SetDistinctiveTColorPalette():
 
 def SetTColorPalette(colorList):
     tcolors = [r.TColor.GetColor(i) for i in colorList]
-    print "tcolors=", tcolors
+    print("tcolors=", tcolors)
     r.gStyle.SetPalette(len(tcolors), np.array(tcolors, dtype=np.int32))

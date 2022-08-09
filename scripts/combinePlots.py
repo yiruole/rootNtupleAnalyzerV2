@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # ---Import
 import sys
@@ -17,11 +17,11 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.
         plotWeight = 1.0
         xsection_X_intLumi = Ntot
         sumWeights = -1
-        print "\t[data]",
+        print("\t[data]", end=' ')
         sys.stdout.flush()
     else:
         xsection_X_intLumi = float(xsection_val) * float(intLumi)
-        print "\t[MC]",
+        print("\t[MC]", end=' ')
         sys.stdout.flush()
 
         # removed 2018 March 2
@@ -32,7 +32,7 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.
         #  xsection_X_intLumi/=avgTopPtWeight
 
         if pdfReweight:
-            print "\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights)
+            print("\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights))
             sumWeights = lhePdfWeightSumw
 
         # now calculate the actual weight
@@ -42,7 +42,7 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.
         # else:
         #     print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
         #     weight = xsection_X_intLumi / sumWeights
-        print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
+        print("\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList)
         weight = xsection_X_intLumi / sumWeights
         plotWeight = weight / 1000.0
     return weight, plotWeight, xsection_X_intLumi
@@ -182,15 +182,15 @@ if os.path.isfile(options.sampleListForMerging) is False:
 if os.path.isfile(options.xsection) is False:
     raise RuntimeError("File " + options.xsection + " not found")
 
-print "Launched like:"
-print "python ",
+print("Launched like:")
+print("python ", end=' ')
 for arg in sys.argv:
-    print " " + arg,
-print
+    print(" " + arg, end=' ')
+print()
 
 doPDFReweight2016LQSignals = False
 if doPDFReweight2016LQSignals:
-    print "Doing PDF reweighting for 2016 LQ B/D signal samples"
+    print("Doing PDF reweighting for 2016 LQ B/D signal samples")
 
 # check logfile for errors if given
 # FIXME: this seems obsolete
@@ -229,7 +229,7 @@ xsectionDict = combineCommon.ParseXSectionFile(options.xsection)
 
 dictSamples = combineCommon.GetSamplesToCombineDict(options.sampleListForMerging)
 dictSamplesPiecesAdded = {}
-for key in dictSamples.iterkeys():
+for key in dictSamples.keys():
     dictSamplesPiecesAdded[key] = []
 
 # --- Declare efficiency tables
@@ -250,10 +250,10 @@ if not options.tablesOnly:
 
 # check to make sure we have xsections for all samples
 for lin in open(options.inputList):
-    lin = string.strip(lin, "\n")
+    lin = lin.strip("\n")
     if lin.startswith("#"):
         continue
-    dataset_fromInputList = string.split(string.split(lin, "/")[-1], ".")[0]
+    dataset_fromInputList = lin.split("/")[-1].split(".")[0]
     dataset_fromInputList = dataset_fromInputList.replace("_tree", "")
     xsection_val = combineCommon.lookupXSection(
         combineCommon.SanitizeDatasetNameFromInputList(
@@ -265,8 +265,8 @@ foundAllFiles, dictDatasetsFileNames = combineCommon.FindInputFiles(options.inpu
 if not foundAllFiles:
     raise RuntimeError("Some files not found.")
 else:
-    print "\bDone.  All root/dat files are present."
-    print
+    print("\bDone.  All root/dat files are present.")
+    print()
 
 if not os.path.isdir(options.outputDir):
     os.makedirs(options.outputDir)
@@ -276,8 +276,8 @@ outputTableFile = open(
 )
 
 # loop over samples defined in sampleListForMerging
-for sample, pieceList in dictSamples.iteritems():
-    print "-->Look at sample named:", sample, "with piecelist=", pieceList
+for sample, pieceList in dictSamples.items():
+    print("-->Look at sample named:", sample, "with piecelist=", pieceList)
     sys.stdout.flush()
 
     histoDictThisSample = {}
@@ -288,15 +288,15 @@ for sample, pieceList in dictSamples.iteritems():
 
     # ---Loop over datasets in the inputlist
     # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-    for dataset_fromInputList, rootFilename in dictDatasetsFileNames.iteritems():
+    for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
         if len(dictSamplesPiecesAdded[sample]) == len(piecesToAdd):
             break  # we're done!
         toBeUpdated = False
         matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
             dataset_fromInputList.replace("_tree", "")
         )
-        # print "INFO: possible matchingPiece from inputList=", matchingPiece
-        # print "INFO: piecesToAdd=", piecesToAdd
+        # print("INFO: possible matchingPiece from inputList=", matchingPiece)
+        # print("INFO: piecesToAdd=", piecesToAdd)
         if matchingPiece in piecesToAdd:
             toBeUpdated = True
             # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
@@ -317,21 +317,21 @@ for sample, pieceList in dictSamples.iteritems():
             continue
 
         # prepare to combine
-        print "\tfound matching dataset:", matchingPiece + " ... ",
+        print("\tfound matching dataset:", matchingPiece + " ... ", end=' ')
         sys.stdout.flush()
 
         inputDatFile = rootFilename.replace(".root", ".dat")
         sampleHistos = []
-        print "with file: {}".format(rootFilename)
+        print("with file: {}".format(rootFilename))
         sys.stdout.flush()
         combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos)
 
-        print "\tlooking up xsection...",
+        print("\tlooking up xsection...", end=' ')
         sys.stdout.flush()
         xsection_val = combineCommon.lookupXSection(
             matchingPiece
         )
-        print "found", xsection_val, "pb"
+        print("found", xsection_val, "pb")
         sys.stdout.flush()
 
         # print "inputDatFile="+inputDatFile
@@ -357,9 +357,9 @@ for sample, pieceList in dictSamples.iteritems():
             Ntot, xsection_val, options.intLumi, sumWeights, lhePdfWeightSumw, doPDFReweight
         )
         # print "xsection: " + xsection_val,
-        print "\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/",
+        print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ')
         sys.stdout.flush()
-        print str(sumWeights)
+        print(str(sumWeights))
         sys.stdout.flush()
 
         # ---Update table
@@ -379,18 +379,18 @@ for sample, pieceList in dictSamples.iteritems():
         # print
         # print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
         # print 'are they equal?',
-        print
+        print()
         # print 'ERROR: for sample',sample,'the pieces added were:'
         # print sorted(piecesAdded)
-        print "ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:"
+        print("ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:")
         # print list(set(piecesAdded).symmetric_difference(set(pieceList)))
-        print list(set(piecesAdded).symmetric_difference(set(piecesToAdd)))
-        print "\twhile the pieces indicated as part of the sample were:"
+        print(list(set(piecesAdded).symmetric_difference(set(piecesToAdd))))
+        print("\twhile the pieces indicated as part of the sample were:")
         # print sorted(pieceList)
-        print sorted(piecesToAdd)
-        print "\tand the pieces added were:"
-        print sorted(piecesAdded)
-        print "\tRefusing to proceed."
+        print(sorted(piecesToAdd))
+        print("\tand the pieces added were:")
+        print(sorted(piecesAdded))
+        print("\tRefusing to proceed.")
         raise RuntimeError("sample validation failed")
 
     # ---Create final tables
@@ -419,8 +419,8 @@ if options.ttbarBkg:
     # Mar17 fixing muon pt and eta-->2.4
     Rfactor = 0.418559  # Ree,emu = Nee/Nemu[TTbarMC]
     errRfactor = 0.002474
-    print "TTBar data-driven: Using Rfactor =", Rfactor, "+/-", errRfactor
-    print "TTBar data-driven: Using non-ttbar background sample:", nonTTbarAMCBkgSampleName
+    print("TTBar data-driven: Using Rfactor =", Rfactor, "+/-", errRfactor)
+    print("TTBar data-driven: Using non-ttbar background sample:", nonTTbarAMCBkgSampleName)
     # print '0) WHAT DOES THE RAW DATA TABLE LOOK LIKE?'
     # WriteTable(ttbarDataPredictionTable, ttbarDataRawSampleName, outputTableFile)
     # remove the x1000 from the nonTTbarBkgMC
@@ -471,7 +471,7 @@ if not options.tablesOnly:
         # subtract nonTTbarBkgMC from TTbarRaw
         ttbarDataPredictionHistos = dictFinalHisto[ttbarDataRawSampleName]
         # print 'ttbarDataPredictionHistos:',ttbarDataPredictionHistos
-        for n, histo in ttbarDataPredictionHistos.iteritems():
+        for n, histo in ttbarDataPredictionHistos.items():
             # subtract the nonTTBarBkgMC from the ttbarRawData
             # find nonTTbarMCBkg histo; I assume they are in the same order here
             histoToSub = dictFinalHisto[nonTTbarAMCBkgSampleName][n]
@@ -498,7 +498,7 @@ if not options.tablesOnly:
         # subtract nonQCDBkgMC from data
         qcdClosureHistos = dictFinalHisto[qcdDataSampleName]
         # print 'qcdClosureHistos:',qcdClosureHistos
-        for n, histo in qcdClosureHistos.iteritems():
+        for n, histo in qcdClosureHistos.items():
             # find nonTTbarMCBkg histo; assume they are in the same order here
             histoToSub = dictFinalHisto[nonQCDBkgSampleName][n]
             ## also write histos that are subtracted
@@ -517,9 +517,9 @@ if not options.tablesOnly:
             histoQCDClosure.Write()
 
     outputTfile.Close()
-    print "output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root"
+    print("output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root")
 
-print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat"
+print("output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat")
 
 # ---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
@@ -527,7 +527,7 @@ print "output tables at: ", options.outputDir + "/" + options.analysisCode + "_t
 if doProfiling:
     prof.disable()  # don't profile the generation of stats
     prof.dump_stats("mystats.stats")
-    print "profiling: dump stats to mystats_output.txt"
+    print("profiling: dump stats to mystats_output.txt")
     with open("mystats_output.txt", "wt") as output:
         stats = Stats("mystats.stats", stream=output)
         stats.sort_stats("cumulative", "time")
