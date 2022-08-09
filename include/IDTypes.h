@@ -47,6 +47,7 @@ enum ID {
   EGAMMA_BUILTIN_LOOSE     = 42,
   EGAMMA_BUILTIN_VETO      = 43,
   HEEP70_MANUAL            = 44,
+  EGAMMA_LOOSE_HEEPETACUT  = 45,
 
   HIGH_PT_MUON_TRKRELISO01 = 50, // keep for compatibility
   MUON_LOOSE_PFISO04LOOSE  = 51,

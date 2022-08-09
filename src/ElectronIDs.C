@@ -12,6 +12,7 @@ bool Electron::PassUserID (ID id, bool verbose){
   else if ( id == EGAMMA_BUILTIN_TIGHT         ) return PassUserID_BuiltIn_EGamma    (EGAMMA_TIGHT );
   else if ( id == EGAMMA_BUILTIN_MEDIUM        ) return PassUserID_BuiltIn_EGamma    (EGAMMA_MEDIUM);
   else if ( id == EGAMMA_BUILTIN_LOOSE         ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE );
+  else if ( id == EGAMMA_LOOSE_HEEPETACUT      ) return PassUserID_BuiltIn_EGamma    (EGAMMA_LOOSE) && PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut);
   else if ( id == EGAMMA_BUILTIN_VETO          ) return PassUserID_BuiltIn_EGamma    (EGAMMA_VETO  );
   else if ( id == EGAMMA_TIGHT                 ) return PassUserID_EGamma            (EGAMMA_TIGHT , verbose);
   else if ( id == EGAMMA_MEDIUM                ) return PassUserID_EGamma            (EGAMMA_MEDIUM, verbose);
