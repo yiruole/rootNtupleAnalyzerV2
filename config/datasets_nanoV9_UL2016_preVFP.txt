@@ -86,7 +86,7 @@
 # dasgoclient -query="dataset=/TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16NanoAOD*v9-106*/NANOAODSIM"
 /TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
 # dasgoclient -query="dataset=/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16NanoAOD*v9-10*/NANOAODSIM"
-/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSI
+/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
 
 # G+Jets
 # dasgoclient -query="dataset=/GJets_DR-0p4_HT-*_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAOD*v9-106X*/NANOAODSIM"
