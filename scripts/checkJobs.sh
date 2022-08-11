@@ -41,7 +41,9 @@ do
   #txtOut=$txtOut"${dir##*___} `find $dir -iname \"submit*sh\" | wc -l` `EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`\n"
   numDatasets+=1
   numSubmitFiles=`find $dir -iname "submit*sh" | wc | awk '{print $1}'`
-  if [[ $eosdir == *"eos"* ]]; then
+  if [[ $eosdir == *"eos/cms"* ]]; then
+    numOutputFiles=`xrdfs root://eoscms.cern.ch ls $eosdir/${dir##*___}| wc -l`
+  elif [[ $eosdir == *"eos/user"* ]]; then
     #numOutputFiles=`EOS_MGM_URL=root://eosuser.cern.ch eos find -f $eosdir/${dir##*___} | grep -v '.sys.' | wc -l`
     numOutputFiles=`xrdfs root://eosuser.cern.ch ls $eosdir/${dir##*___}| wc -l`
   else
