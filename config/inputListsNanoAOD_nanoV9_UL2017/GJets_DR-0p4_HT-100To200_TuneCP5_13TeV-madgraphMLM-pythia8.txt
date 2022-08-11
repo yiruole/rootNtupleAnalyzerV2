@@ -1,0 +1,9 @@
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/130000/06D3C02F-D4E5-E648-AFE4-26AE557ED794.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/01E85189-2655-3740-BB0C-66E8089C16F5.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/F79B41AF-E320-9346-A8C4-881B5A697F84.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/2484E290-4412-0645-87D4-FCB86BFCD196.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/75165785-9C43-C84B-9C27-CE08018645EE.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/C4EE04A8-E843-8145-B580-BC4B6D63011B.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/ED8B5BDE-E426-1449-B761-FF9C08FAF1EA.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/130000/1F3772DD-4CDD-3C4A-9BD4-477C14634451.root
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL17NanoAODv9/GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/130000/925ABA88-CAEF-D446-B0D2-E6C6B0F749CA.root
