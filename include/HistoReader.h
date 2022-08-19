@@ -11,12 +11,12 @@ class HistoReader {
   
   void addHistoBarrel  ( TH2F* histo ) { histoBarrel = std::unique_ptr<TH2F>(histo); };
   void addHistoEndcap  ( TH2F* histo ) { histoEndcap = std::unique_ptr<TH2F>(histo); };
-  float LookupValueError(const float eta, const float et, bool verbose=false) { return DoLookup(eta, et, true, verbose); }
-  float LookupValue(const float eta, const float et, bool verbose=false) { return DoLookup(eta, et, false, verbose); }
+  double LookupValueError(const double eta, const double et, bool verbose=false) { return DoLookup(eta, et, true, verbose); }
+  double LookupValue(const double eta, const double et, bool verbose=false) { return DoLookup(eta, et, false, verbose); }
 
  private:
-  float DoLookup(const float eta, const float et, bool returnError, bool verbose);
-  int GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose);
+  double DoLookup(const double eta, const double et, bool returnError, bool verbose);
+  int GetLookupBin(const TH2F& histRef, bool isXaxis, double& rawValue, bool verbose);
 
   std::unique_ptr<TH2F> histoBarrel;
   std::unique_ptr<TH2F> histoEndcap;

@@ -27,7 +27,7 @@ HistoReader::~HistoReader()
 }
 
 // make sure that we don't ask for an Et that is beyond the max x range of the histogram
-int HistoReader::GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue, bool verbose)
+int HistoReader::GetLookupBin(const TH2F& histRef, bool isXaxis, double& rawValue, bool verbose)
 {
   int lookupBin = -1;
   bool changedBin = false;
@@ -68,10 +68,10 @@ int HistoReader::GetLookupBin(const TH2F& histRef, bool isXaxis, float& rawValue
   return lookupBin;
 }
 
-float HistoReader::DoLookup(const float eta, const float et, bool returnError, bool verbose) {
-  float value = -1.0;
-  float etLookup = et;
-  float etaLookup = isAbsEta ? fabs(eta) : eta;
+double HistoReader::DoLookup(const double eta, const double et, bool returnError, bool verbose) {
+  double value = -1.0;
+  double etLookup = et;
+  double etaLookup = isAbsEta ? fabs(eta) : eta;
   bool isBarrel = true;
   int etLookupBin = -1;
   int etaLookupBin = -1;
