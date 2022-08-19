@@ -11,12 +11,12 @@ class PFJet : public Object {
   PFJet (Collection& collection, unsigned int index, short j = 0);
 
   // Energy resolution scale factors
-  float EnergyResFromCorrection(const correction::Correction* correction) override;
-  float EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) override;
-  float EnergyRes();
-  float EnergyResScaleError();
-  float EnergyResScaleFactor();
-  float EnergyScaleFactor();
+  double EnergyResFromCorrection(const correction::Correction* correction) override;
+  double EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) override;
+  double EnergyRes() override;
+  double EnergyResScaleError() override;
+  double EnergyResScaleFactor() override;
+  double EnergyScaleFactor() override;
   
   // IDs 
   

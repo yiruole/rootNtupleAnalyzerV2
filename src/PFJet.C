@@ -32,7 +32,7 @@ float PFJet::QuarkGluonLikelihood() { return m_collection->ReadArrayBranch<Float
 float PFJet::FixedGridRhoAll() { return m_collection->ReadValueBranch<Float_t>("fixedGridRhoFastjetAll"); }
 // Energy resolution scale factors
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
-float PFJet::EnergyResScaleFactor (){ 
+double PFJet::EnergyResScaleFactor (){ 
   return -1.0;
   //return m_collection->ReadArrayBranch<Float_t>("") PFJetJERResSFAK4CHS -> at ( m_raw_index );
   //float fabs_eta = fabs ( Eta () );
@@ -52,8 +52,8 @@ float PFJet::EnergyResScaleFactor (){
 }
 
 // see: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
-float PFJet::EnergyResScaleError  (){ 
-  float fabs_eta = fabs ( Eta () );
+double PFJet::EnergyResScaleError  (){ 
+  double fabs_eta = fabs ( Eta () );
   if      ( fabs_eta > 0.0 && fabs_eta <= 0.5 ) return 0.008;
   else if ( fabs_eta > 0.5 && fabs_eta <= 0.8 ) return 0.013;
   else if ( fabs_eta > 0.8 && fabs_eta <= 1.1 ) return 0.013;
@@ -70,21 +70,21 @@ float PFJet::EnergyResScaleError  (){
 }
 
 // JES uncertainties already in the ntuple
-float PFJet::EnergyScaleFactor (){ 
+double PFJet::EnergyScaleFactor (){ 
   return -1.0;
 }
 
-float PFJet::EnergyRes(){
+double PFJet::EnergyRes(){
   //return m_collection->ReadArrayBranch<Float_t>("") PFJetJERResAK4CHS -> at ( m_raw_index );
   return -1.0;
 }
 
 
-float PFJet::EnergyResFromCorrection(const correction::Correction* correction) {
+double PFJet::EnergyResFromCorrection(const correction::Correction* correction) {
   return correction->evaluate({Eta(), Pt(), FixedGridRhoAll()});
 }
 
-float PFJet::EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) {
+double PFJet::EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) {
   return correction->evaluate({Eta(), variation});
 }
 
