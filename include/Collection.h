@@ -47,7 +47,7 @@ class Collection {
   //-------------------------------------------------------------
   
   Collection ( std::shared_ptr<TTreeReaderTools> tools);
-  Collection ( std::shared_ptr<TTreeReaderTools> tools, size_t size );
+  Collection ( std::shared_ptr<TTreeReaderTools> tools, unsigned short size );
   Collection ( Collection & c );
   
   //-------------------------------------------------------------
@@ -350,8 +350,10 @@ class Collection {
       else {
         // not well-matched to GenParticle
         double scale_factor   = correctionJERSF ? this_collection_constituent.EnergyResScaleFactorFromCorrection(correctionJERSF, variation) : this_collection_constituent.EnergyResScaleFactor();
-        double sigma = resolution * std::sqrt(scale_factor * scale_factor - 1);
-        smearFactor = 1. + engine->Gaus(0.0, sigma);
+        if(scale_factor < 0)
+          scale_factor = 0;
+        double sigma = resolution;
+        smearFactor = 1. + engine->Gaus(0.0, sigma) * std::sqrt(std::max(scale_factor * scale_factor - 1, 0.0));
         //std::cout << "Not well-matched jet" << std::endl;
         //std::cout << "\t" << "old RECO pt          = " << old_pt               << std::endl;
         //std::cout << "\t" << "scale factor         = " << scale_factor         << std::endl;
@@ -403,7 +405,6 @@ class Collection {
     std::vector<Object1> scaledObjVec;
     scaledObjVec.reserve(this_collection_size);
     TLorentzVector v_old, v_new, v_delta;
-    std::vector<short> indices_of_zero_pt_constituents;
     for (unsigned short i = 0; i < this_collection_size ; ++i) {    
       Object1 this_collection_constituent = GetConstituent<Object1>(i);
       
@@ -443,7 +444,7 @@ class Collection {
   
   template<class Object1>
     void examine ( const char * name, ID id = NULL_ID, bool verbose = false ){
-      int n_constituents = GetSize();
+      unsigned short int n_constituents = GetSize();
       std::cout << "N(" << name << ") = " << n_constituents << std::endl;
       for (int i = 0; i < n_constituents; ++i ){ 
         Object1 constituent = GetConstituent<Object1>(i);

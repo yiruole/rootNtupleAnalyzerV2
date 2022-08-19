@@ -9,7 +9,7 @@ Collection::Collection (std::shared_ptr<TTreeReaderTools> tools):
   m_trigObj_index ( -1 )
 {} 
 
-Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, size_t size ):
+Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, unsigned short int size ):
   m_readerTools (tools),
   m_trigObj_index ( -1 )
 {
