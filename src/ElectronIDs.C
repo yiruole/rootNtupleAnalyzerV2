@@ -253,14 +253,14 @@ bool Electron::PassUserID_FakeRateLooseID(bool verbose){
 
   if ( fabs(SCEta()) < 1.5 ){
     is_barrel = true;
-    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
-    pass_hoe              = bool ( hoe                 < 0.15  );
+    pass_sigmaIEtaIEta    = Full5x5SigmaIEtaIEta()       < 0.013;
+    pass_hoe              = hoe                 < 0.15;
   }
 
   else if ( pass_scEta ){
     is_endcap = true;
-    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.034 );
-    pass_hoe              = bool ( hoe                 < 0.10  );
+    pass_sigmaIEtaIEta    = Full5x5SigmaIEtaIEta()       < 0.034;
+    pass_hoe              = hoe                 < 0.10;
   }
 
   bool decision = ( pass_ecalDriven    && 
@@ -297,10 +297,9 @@ bool Electron::PassUserID_FakeRateVeryLooseID(bool verbose){
 
   float hoe = HoE();
   //XXX SIC remove energy corrections
-  //hoe *= (Pt()/SCPt());
   hoe *= ECorr();
 
-  bool pass_hoe              = bool ( hoe                 < 0.15  );
+  bool pass_hoe              = hoe                 < 0.15;
 
   bool decision = ( pass_ecalDriven    && 
 		    pass_hoe           );
@@ -323,6 +322,7 @@ bool Electron::PassUserID_FakeRateVeryLooseID(bool verbose){
 }
 
 bool Electron::PassUserID_FakeRateEGMLooseID(bool verbose){
+  bool pass_scEta         = PassHEEPIDCut(HEEPIDCut::GsfEleSCEtaMultiRangeCut);
   bool pass_missingHits   = PassEGammaIDLooseGsfEleMissingHitsCut();
   bool pass_sigmaIEtaIEta = false;
   bool pass_hoe           = false;
@@ -337,16 +337,17 @@ bool Electron::PassUserID_FakeRateEGMLooseID(bool verbose){
 
   if ( fabs(SCEta()) < 1.479 ){
     is_barrel = true;
-    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.013 );
-    pass_hoe              = bool ( hoe                 < 0.15  );
+    pass_sigmaIEtaIEta    = Full5x5SigmaIEtaIEta()       < 0.013;
+    pass_hoe              = hoe                 < 0.15;
   }
   else {
     is_endcap = true;
-    pass_sigmaIEtaIEta    = bool ( Full5x5SigmaIEtaIEta()       < 0.0425 );
-    pass_hoe              = bool ( hoe                 < 0.10  );
+    pass_sigmaIEtaIEta    = Full5x5SigmaIEtaIEta()       < 0.0425;
+    pass_hoe              = hoe                 < 0.10;
   }
 
   bool decision = (
+        pass_scEta         &&
 		    pass_missingHits   && 
 		    pass_sigmaIEtaIEta && 
 		    pass_hoe           );
@@ -377,7 +378,7 @@ bool Electron::PassUserID_FakeRateVeryLooseEGMLooseID(bool verbose){
   //hoe *= (Pt()/SCPt());
   hoe *= ECorr();
 
-  bool pass_hoe              = bool ( hoe                 < 0.15  );
+  bool pass_hoe              = hoe                 < 0.15;
 
   bool decision = ( pass_hoe );
   
