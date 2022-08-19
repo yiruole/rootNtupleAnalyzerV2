@@ -14,6 +14,62 @@ endif()
 ### compile_commands.json DB
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
+# for warnings
+#message(STATUS "Enabling more warnings")
+#
+### From cpp-best-practices
+### https://github.com/cpp-best-practices/cpp_starter_project/blob/master/cmake/CompilerWarnings.cmake
+#option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+#
+#set(COMMON_WARNINGS
+#    -Wall
+#    #-Wextra                  # reasonable and standard
+#    #-Wshadow                 # warn the user if a variable declaration shadows one from a
+#                             # parent context
+#    -Wcast-align             # warn for potential performance problem casts
+#    #-Wunused                 # warn on anything being unused
+#    -Wpedantic               # warn if non-standard C++ is used
+#    -Wconversion             # warn on type conversions that may lose data
+#    -Wsign-conversion        # warn on sign conversions
+#    -Wnull-dereference       # warn if a null dereference is detected
+#    #-Wdouble-promotion       # warn if float is implicit promoted to double
+#    -Wformat=2               # warn on security issues around functions that format output
+#                             # (ie printf)
+#    -Wimplicit-fallthrough   # warn on statements that
+#)
+#set(GCC_WARNINGS
+#    ${COMMON_WARNINGS}
+#    -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
+#    -Wduplicated-cond        # warn if if / else chain has duplicated conditions
+#    -Wduplicated-branches    # warn if if / else branches have duplicated code
+#    -Wlogical-op             # warn about logical operations being used where bitwise were probably wanted
+#    # -Wuseless-cast           # warn if you perform a cast to the same type
+#)
+#
+#set(GCC_CXX_WARNINGS
+#    ${COMMON_CXX_WARNINGS}
+#    # -Wuseless-cast           # warn if you perform a cast to the same type
+#)
+#
+#if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+#    set(PROJECT_WARNINGS ${CLANG_WARNINGS})
+#    set(PROJECT_CXX_WARNINGS ${CLANG_CXX_WARNINGS})
+#elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#    set(PROJECT_WARNINGS ${GCC_WARNINGS})
+#    set(PROJECT_CXX_WARNINGS ${GCC_CXX_WARNINGS})
+#else()
+#    message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+#endif()
+#
+#message(AUTHOR_WARNING "Setting compiler warnings for '${CMAKE_C_COMPILER_ID}' to ${PROJECT_WARNINGS}.")
+#message(AUTHOR_WARNING "Setting additional compiler warnings for '${CMAKE_CXX_COMPILER_ID}' to ${PROJECT_CXX_WARNINGS}.")
+#
+#add_compile_options(${PROJECT_WARNINGS})
+#
+#foreach(CXX_WARNING ${PROJECT_CXX_WARNINGS})
+#  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${CXX_WARNING}>)
+#endforeach()
+
 #add_compile_options(-fno-omit-frame-pointer -fsanitize=address,undefined,leak)
 #add_link_options(-fsanitize=address,undefined,leak)
 add_compile_options(-DSAVE_ALL_HISTOGRAMS)
