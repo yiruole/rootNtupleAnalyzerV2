@@ -7,7 +7,7 @@ Object::Object():
   m_name ("NO_NAME"),
   m_collection(0),
   m_raw_index ( -1 ),
-  m_trigObj_index (-1)
+  m_trigObj_index ( -1 )
 {}
 
 Object::Object(const Object & o):
@@ -94,7 +94,7 @@ bool Object::IsGenEBFiducial       () { return bool ( fabs(Eta()) < 1.4442 ); }
 bool Object::IsGenEEFiducial       () { return bool ( ( fabs(Eta()) > 1.566 ) && ( fabs(Eta()) < 2.50 ) ); }
 bool Object::IsGenElectronFiducial () { return ( IsGenEBFiducial() || IsGenEEFiducial() ); }
 bool Object::IsMuonFiducial     () { return bool (fabs(Eta()) < 2.1); }
-bool Object::IsNULL             () { return bool ( m_raw_index < 0 ); }
+bool Object::IsNULL             () { return bool ( m_raw_index < 0 ); }  // a bit dangerous but probably OK. should probably use a dedicated bool flag for this
 
 // reduce to [-pi,pi]
 template <typename T>

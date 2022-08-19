@@ -12,10 +12,8 @@ class Object {
  public:
   Object();
   Object( const Object & );
-  //Object( Collection& collection, short raw_index);
   Object( Collection& collection, short raw_index, const char* name);
 
-  //Object( Collection& collection, short raw_index,  short trigObj_index);
   Object( Collection& collection, short raw_index,  short trigObj_index, const char* name);
   ~Object();
   
@@ -31,12 +29,12 @@ class Object {
   void SetEta(float eta) { m_eta = eta; }
   void SetPhi(float phi) { m_phi = phi; }
 
-  virtual float EnergyResScaleFactor() { return 1.0; }
-  virtual float EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) { return -1.0; }
-  virtual float EnergyRes           () { return -1.0; }
-  virtual float EnergyResFromCorrection(const correction::Correction* correction) { return -1.0; }
-  virtual float EnergyScaleFactor   () { return 1.0; } 
-  virtual float EnergyResScaleError () { return 0.0; }
+  virtual double EnergyResScaleFactor() { return 1.0; }
+  virtual double EnergyResScaleFactorFromCorrection(const correction::Correction* correction, const std::string& variation) { return -1.0; }
+  virtual double EnergyRes           () { return -1.0; }
+  virtual double EnergyResFromCorrection(const correction::Correction* correction) { return -1.0; }
+  virtual double EnergyScaleFactor   () { return 1.0; } 
+  virtual double EnergyResScaleError () { return 0.0; }
   
   virtual bool   PassUserID ( ID id, bool verbose ) = 0;
     
@@ -54,10 +52,10 @@ class Object {
 
   template <class AnotherObject>
     bool MatchByDR ( CollectionPtr c, AnotherObject & best_match, float max_dr ) { 
-      short size = c -> GetSize();
+      unsigned short size = c -> GetSize();
       float min_dr = 9999.;
       bool match = false;
-      for (short i = 0; i < size ; ++i){
+      for (unsigned short i = 0; i < size ; ++i){
         AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
         float dr = DeltaR ( & constituent );
         if ( dr < max_dr ) { 
@@ -73,10 +71,10 @@ class Object {
 
   template<class AnotherObject>
     bool MatchByDRAndDPt ( CollectionPtr c, AnotherObject & best_match, float max_dr, float max_dpt ) { 
-      short size = c -> GetSize();
+      unsigned short size = c -> GetSize();
       double min_dR = 9999.;
       bool match = false;
-      for (short i = 0; i < size ; ++i){
+      for (unsigned short i = 0; i < size ; ++i){
         AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
         float dr = DeltaR ( & constituent );
 
