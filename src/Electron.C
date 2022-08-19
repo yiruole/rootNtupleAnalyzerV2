@@ -29,7 +29,7 @@ float   Electron::SCEt               (){ return (m_collection->ReadArrayBranch<F
 float   Electron::IsEB               (){ return fabs(Eta()) < 1.5; } 
 float   Electron::IsEE               (){ return fabs(Eta()) < 2.5; } 
 
-float   Electron::Charge             (){ return m_collection->ReadArrayBranch<Int_t>("Electron_charge",m_raw_index); } 
+int     Electron::Charge             (){ return m_collection->ReadArrayBranch<Int_t>("Electron_charge",m_raw_index); } 
 float   Electron::R9                 (){ return m_collection->ReadArrayBranch<Float_t>("Electron_r9",m_raw_index); } 
 float   Electron::SCEnergy           (){ return SCEt()*cosh(SCEta()); } 
 // ratio of the calibrated energy/miniaod energy
@@ -43,7 +43,7 @@ bool Electron::PassEGammaIDTight    (){ return m_collection->ReadArrayBranch<Int
 bool Electron::PassHEEPID           (){ return m_collection->ReadArrayBranch<Bool_t>("Electron_cutBased_HEEP",m_raw_index); } 
 														      
 // ID variables			      	   		      		  	  				      
-unsigned int Electron::GetHEEPBitmap() {
+int Electron::GetHEEPBitmap() {
   return m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmapHEEP",m_raw_index);
 }
 
@@ -71,7 +71,7 @@ bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut2018          () {
 }
 
 // EGamma
-unsigned int Electron::GetEGammaIDBitmap() {
+int Electron::GetEGammaIDBitmap() {
   return m_collection->ReadArrayBranch<Int_t>("Electron_vidNestedWPBitmap",m_raw_index);
 }
 bool Electron::PassEGammaIDLooseCut(EGammaIDCut cut) {
@@ -145,7 +145,7 @@ float Electron::PFNeutralHadronIso03 (){ return -999; }
 float Electron::PFPUIso03            (){ return -999; }
 
 // GEN matching
-UInt_t Electron::NumGenParticles() { return 1; } //FIXME: this is either 1 matched particle or nothing matched
+int Electron::NumGenParticles() { return 1; } //FIXME: this is either 1 matched particle or nothing matched
 int    Electron::MatchedGenParticleIdx(){ return m_collection->ReadArrayBranch<Int_t>("Electron_genPartIdx",m_raw_index); }
 bool   Electron::IsValidGenParticleIdx(int index) {
   if(MatchedGenParticleIdx() < NumGenParticles() && MatchedGenParticleIdx() >= 0)
@@ -157,9 +157,9 @@ float  Electron::MatchedGenParticleEta(){ if(IsValidGenParticleIdx(MatchedGenPar
 float  Electron::MatchedGenParticlePhi(){ if(IsValidGenParticleIdx(MatchedGenParticleIdx())) return m_collection->ReadArrayBranch<Float_t>("GenPart_phi",m_raw_index); else return -1;}
 
 float Electron::HEEPCaloIsolation(){ return EcalIsoDR03() + HcalIsoD1DR03(); }
-float Electron::HEEPCorrIsolation(){ return (HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
+double Electron::HEEPCorrIsolation(){ return (HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
 float Electron::HEEP70TrackIsolation(){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03TkSumPtHEEP",m_raw_index); }
-float Electron::TrackPt          (){
+double Electron::TrackPt          (){
   float px = m_collection->ReadArrayBranch<Float_t>("Electron_trkPx",m_raw_index);
   float py = m_collection->ReadArrayBranch<Float_t>("Electron_trkPy",m_raw_index);
   float pz = m_collection->ReadArrayBranch<Float_t>("Electron_trkPz",m_raw_index);
@@ -167,7 +167,7 @@ float Electron::TrackPt          (){
   v1.SetXYZ(px,py,pz);
   return v1.Pt();
 }
-float Electron::TrackEta         (){
+double Electron::TrackEta         (){
   float px = m_collection->ReadArrayBranch<Float_t>("Electron_trkPx",m_raw_index);
   float py = m_collection->ReadArrayBranch<Float_t>("Electron_trkPy",m_raw_index);
   float pz = m_collection->ReadArrayBranch<Float_t>("Electron_trkPz",m_raw_index);
@@ -177,29 +177,29 @@ float Electron::TrackEta         (){
 }
 
 // Fiduciality
-bool   Electron::IsEBFiducial     (){ return bool  ( fabs(SCEta()) < 1.442 );}
-bool   Electron::IsEEFiducial     (){ return bool (( fabs(SCEta()) > 1.560 ) && 
-						   ( fabs(SCEta()) < 2.500 ));}
+bool   Electron::IsEBFiducial     (){ return fabs(SCEta()) < 1.442;}
+bool   Electron::IsEEFiducial     (){ return ( fabs(SCEta()) > 1.560 ) && 
+						   ( fabs(SCEta()) < 2.500 );}
 
-float Electron::EnergyRes (){
+double Electron::EnergyRes (){
   // SIC: from https://arxiv.org/pdf/1502.02701v1.pdf
   //      page 23. SIM worst case: sqrt(2)*2.93/90.75 GeV = 4.6%
   return 0.05;
 }
 // Energy resolution scale factors
 //FIXME
-float Electron::EnergyResScaleFactor (){ 
+double Electron::EnergyResScaleFactor (){ 
   // SIC: changed May 12, 2015 to 10% as per LQ1 2012 CWR comment; see EGM-13-001 and email thread
   if      ( IsEBFiducial() ) return 1.1;
   else if ( IsEEFiducial() ) return 1.1;
   else                       return 1.000;
 }
 
-float Electron::EnergyResScaleError  (){ 
+double Electron::EnergyResScaleError  (){ 
   return 0.000;
 }
 
-float Electron::EnergyScaleFactor (){ 
+double Electron::EnergyScaleFactor (){ 
   // SIC: changed May 12, 2015 to 2% as per LQ1 2012 CWR comment; see EGM-13-001 and email thread
   if      ( IsEBFiducial() ) return 0.02;
   else if ( IsEEFiducial() ) return 0.02;

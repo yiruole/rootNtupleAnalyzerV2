@@ -21,15 +21,15 @@ class Electron : public Object {
   float SCEt                 (); 
   float SCEnergy             (); 
   float ECorr                ();
-  float Charge               (); 
+  int Charge                 (); 
   float R9                   ();
 
   // Energy resolution scale factors
 
-  float EnergyRes ();
-  float EnergyResScaleFactor ();
-  float EnergyResScaleError  ();
-  float EnergyScaleFactor    ();
+  double EnergyRes () override;
+  double EnergyResScaleFactor () override;
+  double EnergyResScaleError  () override;
+  double EnergyScaleFactor    () override;
   
   // IDs 
 
@@ -38,7 +38,7 @@ class Electron : public Object {
   bool   IsEEFiducial();
   
   // ID variables		
-  unsigned int GetHEEPBitmap();
+  int GetHEEPBitmap();
   // EventsTree.GetBranch('Electron_vidNestedWPBitmapHEEP').Print()
   enum class HEEPIDCut {
     MinPtCut                             = 0,
@@ -99,7 +99,7 @@ class Electron : public Object {
   bool PassHEEPGsfEleEmHadD1IsoRhoCut2018          ();
 
   // ID variables		
-  unsigned int GetEGammaIDBitmap();
+  int GetEGammaIDBitmap();
   // EventsTree.GetBranch('Electron_vidNestedWPBitmap').Print()
   enum class EGammaIDCut {
     MinPtCut                             = 0,
@@ -219,7 +219,7 @@ class Electron : public Object {
   
   
   // GEN matching
-  UInt_t NumGenParticles();
+  int    NumGenParticles();
   int    MatchedGenParticleIdx();
   bool   IsValidGenParticleIdx(int index);
   float  MatchedGenParticlePt (); 
@@ -232,10 +232,10 @@ class Electron : public Object {
   // Isolation variables
 
   float HEEPCaloIsolation    ();
-  float HEEPCorrIsolation    ();
+  double HEEPCorrIsolation    ();
   float HEEP70TrackIsolation ();
-  float TrackPt              ();
-  float TrackEta             ();
+  double TrackPt              ();
+  double TrackEta             ();
 
  private:
 
