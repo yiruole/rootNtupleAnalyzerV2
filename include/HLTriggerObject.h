@@ -24,7 +24,7 @@ class HLTriggerObject : public Object {
   bool PassedPathL3Filter(std::string pathName);
   bool PassedPathLastFilter(std::string pathName);
   std::string GetCollectionName();
-  int GetPathIndex(std::string pathName);
+  long int GetPathIndex(std::string pathName);
 
   // IDs 
 

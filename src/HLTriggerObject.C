@@ -26,7 +26,7 @@ std::vector<std::string> HLTriggerObject::GetPathNames() { return std::vector<st
 std::string HLTriggerObject::GetCollectionName() { return "undefined"; }
 
 
-int HLTriggerObject::GetPathIndex(std::string pathName)
+long int HLTriggerObject::GetPathIndex(std::string pathName)
 {
   std::vector<std::string> pathNames = GetPathNames();
   std::vector<std::string>::iterator pathItr = std::find(pathNames.begin(),pathNames.end(),pathName);
