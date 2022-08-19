@@ -95,8 +95,8 @@ struct Systematic {
   std::map<std::string, bool> cutNamesToSystFilled;
   int length = 0;
 
-  Systematic(const std::string& systName, int length = 1) :
-    name(systName), length(length) {}
+  Systematic(const std::string& systName, int systLength = 1) :
+    name(systName), length(systLength) {}
   bool affectsCut(std::string cutName) {
     return cutNamesToBranchNames.count(cutName);
   }
@@ -106,7 +106,7 @@ struct Systematic {
 class Optimize {
   public:
     Optimize(){count=0; variableName=""; minvalue=0; maxvalue=0; testgreater=false; level_int=-10;};
-    Optimize(int x0, std::string& x1, float x2, float x3, bool x4, int x5, int x6)
+    Optimize(int x0, std::string& x1, double x2, double x3, bool x4, int x5, int x6)
     {
       count=x0;
       variableName=x1;
@@ -118,7 +118,7 @@ class Optimize {
         maxvalue=x2;
         minvalue=x3;
       }
-      increment=(maxvalue-minvalue)/(nCuts - 1);
+      increment=(maxvalue-minvalue)/static_cast<double>(nCuts - 1);
       if (increment<=0)
         increment=1;
       testgreater=x4;
@@ -129,12 +129,12 @@ class Optimize {
     int nCuts;
     int count; // store number for ordering of optimization cuts
     std::string variableName; // store name of variable
-    float minvalue; // minimum threshold value to test
-    float maxvalue; // maximum threshold to test
-    float increment; // max-min, divided into 10 parts
+    double minvalue; // minimum threshold value to test
+    double maxvalue; // maximum threshold to test
+    double increment; // max-min, divided into 10 parts
     bool testgreater; // tests whether value should be greater or less than threshold
     int level_int; // cut level -- not used?
-    float value;  // value to check against threshold
+    double value;  // value to check against threshold
 
     bool Compare(int counter)
     {
@@ -144,13 +144,13 @@ class Optimize {
       bool passed=false;
       if (testgreater)
       {
-        float thresh=minvalue+increment*counter; // convert counter # to physical threshold
+        double thresh=minvalue+increment*static_cast<double>(counter); // convert counter # to physical threshold
         value > thresh ? passed=true: passed=false;
       }
       // if testing that value is less than threshold, start with largest threshold first.  This keep the number of \events "monotonically decreasing" over a series of 10 cuts.
       else
       {
-        float thresh=maxvalue-increment*counter;
+        double thresh=maxvalue-increment*static_cast<double>(counter);
         value < thresh ? passed=true : passed = false;
       }
       return passed;
@@ -242,9 +242,9 @@ class baseClass {
         return false;
       }
 
-      for (std::map<std::string, cut>::iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      for (std::map<std::string, cut>::iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
       {
-        cut * c = & (cc->second);
+        cut * c = & (ccl->second);
         if( c->variableName == s )
         {
           continue;
@@ -273,9 +273,9 @@ class baseClass {
         cutLevel = cc->second.level_int;
       }
 
-      for (std::map<std::string, cut>::iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      for (std::map<std::string, cut>::iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
       {
-        cut * c = & (cc->second);
+        cut * c = & (ccl->second);
         if( c->level_int > cutLevel || c->variableName == s )
         {
           continue;
@@ -316,9 +316,9 @@ class baseClass {
       {
         cutLevel = cc->second.level_int;
       }
-      for (std::map<std::string, cut>::const_iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      for (std::map<std::string, cut>::const_iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
       {
-        const cut * c = & (cc->second);
+        const cut * c = & (ccl->second);
         if(c->variableName == s)
           continue;
         if(c->level_int == cutLevel)
