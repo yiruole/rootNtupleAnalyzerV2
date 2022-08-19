@@ -16,7 +16,7 @@ Muon::Muon (Collection& c, unsigned int i, short j, Long64_t current_entry ):
 float Muon::PtError                 (){ return CocktailPtError(); } 
 //float & Muon::EtaError                (){ return CocktailEtaError(); } 
 //float & Muon::PhiError                (){ return CocktailPhiError(); } 
-float Muon::Charge                  (){ return m_collection->ReadArrayBranch<Int_t>("Muon_charge", m_raw_index); } 
+int Muon::Charge                  (){ return m_collection->ReadArrayBranch<Int_t>("Muon_charge", m_raw_index); } 
 						   				   
 float Muon::PFPt                    (){ return m_collection->ReadArrayBranch<Float_t>("Muon_pt",     m_raw_index); } 
 float Muon::PFPtError               (){ return m_collection->ReadArrayBranch<Float_t>("Muon_ptErr",  m_raw_index); } 

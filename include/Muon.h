@@ -31,7 +31,7 @@ class Muon : public Object {
   float CocktailPt              ();
   float CocktailPtError         ();
 
-  float   Charge                  ();
+  int   Charge                  ();
 
 
   // IDs 
