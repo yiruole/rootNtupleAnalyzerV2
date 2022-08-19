@@ -98,7 +98,7 @@ bool GenParticle::PassUserID_FromLQ(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromDY(bool verbose){
-  if ( !IsHardProcess() && !Status()==3 ) return false;
+  if ( !IsHardProcess() && !(Status()==3) ) return false;
   if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
   int mother_pdg_id = MotherIndex() >= 0 ? m_collection->ReadArrayBranch<Int_t>("GenPart_pdgId",MotherIndex()) : -1;
   if ( abs(mother_pdg_id) != 22 && 
@@ -107,7 +107,7 @@ bool GenParticle::PassUserID_FromDY(bool verbose){
 }
 
 bool GenParticle::PassUserID_FromW(bool verbose){
-  if ( !IsHardProcess() && !Status()==3 ) return false;
+  if ( !IsHardProcess() && !(Status()==3) ) return false;
   if ( MotherIndex()<0) return false; // can't tell if it's from W if mother index not set
   if(verbose) {
     std::cout << "GenParticle::PassUserID_FromW" << Name() << " " << ": "
