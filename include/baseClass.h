@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <math.h>
 #include <stdlib.h>
+#include <variant>
 
 #include <TChain.h>
 #include <TFile.h>
@@ -30,6 +31,7 @@
 
 class SimpleCut {
   public:
+    typedef std::variant<float, int, unsigned long long int, unsigned int, unsigned char> ValueType;
     virtual ~SimpleCut() = default;
 
     std::string variableName = "";
@@ -39,12 +41,113 @@ class SimpleCut {
     bool passed = false;
     bool evaluatedPreviousCuts = false;
     bool passedPreviousCuts = false;
-    float value = -999;
+    ValueType value;
     float weight = 1;
     float minValue1 = -999;
     float maxValue1 = -999;
     float minValue2 = -999;
     float maxValue2 = -999;
+    char branchType = 'x';
+
+    std::string getValueTypeName() const {
+      return std::visit( [](auto&&x)->decltype(auto){ return typeid(x).name(); }, value);
+    }
+
+    std::string getStringValue() const {
+      return std::visit( [](auto&&x)->decltype(auto){ return std::to_string(x); }, value);
+    }
+
+    template <typename T>
+      const T& getValue() const {
+        return std::get<T>(value);
+      }
+
+    bool evaluateCut() {
+      return std::visit( [this](auto&&val)->bool{
+          using T = std::decay_t<decltype(val)>;
+          if constexpr (std::is_same_v<float, T>) {
+          if(filled && (minValue1 < val && val <= maxValue1
+                || minValue2 < val && val <= maxValue2 ) )
+          return true;
+          }
+          else if constexpr (std::is_same_v<int, T>) {
+          if(filled && (minValue1 < val && val <= maxValue1
+                || minValue2 < val && val <= maxValue2 ) )
+          return true;
+          }
+          else if constexpr (std::is_same_v<unsigned long long int, T>) {
+          if(filled && (minValue1 < val && val <= maxValue1
+                || minValue2 < val && val <= maxValue2 ) )
+          return true;
+          }
+          else if constexpr (std::is_same_v<unsigned int, T>) {
+          if(filled && (minValue1 < val && val <= maxValue1
+                || minValue2 < val && val <= maxValue2 ) )
+          return true;
+          }
+          else if constexpr (std::is_same_v<unsigned char, T>) {
+          if(filled && (minValue1 < val && val <= maxValue1
+                || minValue2 < val && val <= maxValue2 ) )
+          return true;
+          }
+          else {
+            STDOUT("ERROR: value type '" << getValueTypeName() << "' for saved variable named '" << variableName << "' is not one supported. Must add support for additional branch types.");
+            exit(-2);
+          }
+          return false;
+
+          }, value);
+    }
+
+    template <typename T>
+      void setValue(const T& newValue) {
+        // in this case, we are reading branches only and haven't read the branch once yet
+        if(branchType == 'x') {
+          if constexpr (std::is_same_v<T, double>)
+            value = static_cast<float>(newValue);
+          else if constexpr (std::is_same_v<T, bool>)
+            value = static_cast<unsigned char>(newValue);
+          else
+            value = newValue;
+          branchType = 'y';
+        }
+        if constexpr (std::is_same_v<T, double>)
+          value = static_cast<float>(newValue);
+        else if constexpr (std::is_same_v<T, bool>)
+          value = static_cast<unsigned char>(newValue);
+        else if (!valueIsType<T>()) {
+          std::string varTypeName = getValueTypeName();
+          STDOUT("ERROR: Trying to set value of variable " << variableName << " which is of type " << varTypeName << " to a value of different type " << typeid(T).name() << "; can't do this.");
+          exit(-10);
+        }
+        else
+          value = newValue;
+      }
+
+    template <typename T>
+      bool valueIsType() const noexcept {
+        return std::holds_alternative<T>(value);
+      }
+
+    void resetValue() {
+      if(valueIsType<float>()) {
+        value = float(0.0);
+      }
+      else if(valueIsType<int>())
+        value = int(0);
+      else if(valueIsType<unsigned long long int>())
+        value = static_cast<unsigned long long int>(0);
+      else if(valueIsType<unsigned int>())
+        value = static_cast<unsigned int>(0);
+      else if(valueIsType<unsigned char>()) {
+        value = static_cast<unsigned char>(0);
+      }
+      else {
+        STDOUT("ERROR: value type '" << getValueTypeName() << "' for saved variable named '" << variableName << "' is not one supported. Must add support for additional branch types.");
+        exit(-2);
+      }
+    }
+
 };
 
 class cut : public SimpleCut {
@@ -163,7 +266,7 @@ class baseClass {
     enum CUTLEVELS { SKIM_LEVEL=0 };
     std::map<std::string, bool> combCutName_passed_;
 
-    int passJSON(int run, int ls, bool isData);
+    bool passJSON(int run, int ls, bool isData);
     bool triggerExists   ( const char* name);
     bool triggerFired    ( const char* name );
     int  triggerPrescale ( const char* name );
@@ -176,9 +279,27 @@ class baseClass {
 
     void resetCuts(const std::string& s = "newEvent");
     void fillSystVariableWithValue(const std::string&, const std::string&, const float&);
-    void fillVariableWithValue(const std::string&, const float&, const float& w = 1.);
-    void fillVariableWithValue(const std::string&, TTreeReaderValue<float>&, const float& w = 1.);
-    void fillArrayVariableWithValue(const std::string&, float*);
+    template<typename T = float> void fillVariableWithValue(const std::string& s, const T& d, const float& w = 1.)
+    {
+      auto&& cc = cutName_cut_.find(s);
+      if( cc == cutName_cut_.end() )
+      {
+        STDOUT("ERROR: variableName = "<< s << " not found in cutName_cut_. Exiting.");
+        exit(-5);
+      }
+      else
+      {
+        cc->second.setValue(d);
+        cc->second.filled = true;
+        cc->second.weight = w;
+      }
+      fillOptimizerWithValue(s, d);
+    }
+    template<typename T = float> void fillVariableWithValue(const std::string& s, TTreeReaderValue<T>& reader, const float& w = 1.)
+    {
+      fillVariableWithValue(s, *reader, w);
+    }
+    template<typename T = float> void fillArrayVariableWithValue(const std::string&, float*);
     template <typename T> void fillArrayVariableWithValue(const std::string& s, TTreeReaderArray<T>& reader);
     void evaluateCuts(bool verbose = false);
     template<typename T> void evaluateCuts(std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combNameToPassFail, std::vector<std::string>& orderedCutNames, bool verbose = false);
@@ -192,11 +313,11 @@ class baseClass {
     // need to define these here
     template <typename T> bool passedCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed) {
       bool ret = false;
-      auto cc = cutNameToCut.find(s);
+      auto const& cc = cutNameToCut.find(s);
       if( cc != cutNameToCut.end() )
       {
-        auto c = & (cc->second);
-        return (c->filled && c->passed);
+        auto const& c = cc->second;
+        return (c.filled && c.passed);
       }
       std::map<std::string, bool>::iterator cp = combCutNameToPassed.find(s);
       if( cp != combCutNameToPassed.end() )
@@ -205,7 +326,7 @@ class baseClass {
       return (ret=false);
     }
     template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string>& orderedCutNames) {
-      auto cc = cutNameToCut.find(s);
+      auto&& cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() ) {
         STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
         return false;
@@ -235,23 +356,23 @@ class baseClass {
       //STDOUT("Examining variableName = "<<s);
       bool ret = true;
 
-      auto cc = cutNameToCut.find(s);
+      auto&& cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() )
       {
         STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
         return false;
       }
 
-      for (std::map<std::string, cut>::iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
+      for (auto const& ccl : cutNameToCut)
       {
-        cut * c = & (ccl->second);
-        if( c->variableName == s )
+        auto const& c = ccl.second;
+        if( c.variableName == s )
         {
           continue;
         }
         else
         {
-          if( ! (c->filled && c->passed) ) return false;
+          if( ! (c.filled && c.passed) ) return false;
         }
       }
       return ret;
@@ -273,16 +394,16 @@ class baseClass {
         cutLevel = cc->second.level_int;
       }
 
-      for (std::map<std::string, cut>::iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
+      for (auto& ccl : cutNameToCut)
       {
-        cut * c = & (ccl->second);
-        if( c->level_int > cutLevel || c->variableName == s )
+        auto& c = ccl.second;
+        if( c.level_int > cutLevel || c.variableName == s )
         {
           continue;
         }
         else
         {
-          if( ! (c->filled && c->passed) ) return false;
+          if( ! (c.filled && c.passed) ) return false;
         }
       }
       return ret;
@@ -291,12 +412,12 @@ class baseClass {
     template <typename T> bool passedAllCutsAtLevel(const int cutLevel,  const std::map<std::string, T>& cutNameToCut)
     {
       bool ret = true;
-      for (std::map<std::string, cut>::const_iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      for (auto const& cc : cutNameToCut)
       {
-        const cut * c = & (cc->second);
-        if(c->level_int == cutLevel)
+        auto const& c = cc.second;
+        if(c.level_int == cutLevel)
         {
-          if( ! (c->filled && c->passed) ) return false;
+          if( ! (c.filled && c.passed) ) return false;
         }
       }
       return ret;
@@ -316,14 +437,14 @@ class baseClass {
       {
         cutLevel = cc->second.level_int;
       }
-      for (std::map<std::string, cut>::const_iterator ccl = cutNameToCut.begin(); ccl != cutNameToCut.end(); ccl++)
+      for (auto const& ccl :cutNameToCut)
       {
-        const cut * c = & (ccl->second);
-        if(c->variableName == s)
+        auto const& c = ccl.second;
+        if(c.variableName == s)
           continue;
-        if(c->level_int == cutLevel)
+        if(c.level_int == cutLevel)
         {
-          if( ! (c->filled && c->passed) ) return false;
+          if( ! (c.filled && c.passed) ) return false;
         }
       }
       return ret;
@@ -332,11 +453,11 @@ class baseClass {
     template <typename T> std::map<std::string, T> getCutsAtLevel(const int cutLevel, const std::map<std::string, T>& cutNameToCut)
     {
       std::map<std::string, T> cutsAtLevel;
-      for (std::map<std::string, cut>::const_iterator cc = cutNameToCut.begin(); cc != cutNameToCut.end(); cc++)
+      for (auto const& cc : cutNameToCut)
       {
-        const cut * c = & (cc->second);
-        if(c->level_int == cutLevel)
-          cutsAtLevel.insert(*cc);
+        auto const& c = cc.second;
+        if(c.level_int == cutLevel)
+          cutsAtLevel.insert(cc);
       }
       return cutsAtLevel;
     }
@@ -346,20 +467,20 @@ class baseClass {
     template <typename T> bool passedSelection(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed, std::vector<std::string>& orderedCutNames) {
       return passedAllPreviousCuts(s, cutNameToCut, orderedCutNames) && passedCut(s, cutNameToCut, combCutNameToPassed);
     }
-    template <typename T> bool variableIsFilled(const std::string& s, std::map<std::string, T>& cutNameToCut)
+    template <typename T> bool variableIsFilled(const std::string& s, std::map<std::string, T>& cutNameToCut) const
     {
-      auto cc = cutNameToCut.find(s);
+      auto&& cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() )
       {
         STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning");
       }
-      cut * c = & (cc->second);
-      return (c->filled);
+      auto const& c = cc->second;
+      return c.filled;
     }
 
-    template <typename T> bool hasCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed)
+    template <typename T> bool hasCut(const std::string& s, std::map<std::string, T>& cutNameToCut, std::map<std::string, bool>& combCutNameToPassed) const
     {
-      auto cc = cutNameToCut.find(s);
+      auto&& cc = cutNameToCut.find(s);
       if( cc != cutNameToCut.end() )
         return true;
       // check the comb map for completeness
@@ -379,7 +500,27 @@ class baseClass {
     bool isSkimCut(const cut& c) { return c.level_int == SKIM_LEVEL; }
     bool hasCut(const std::string& s) { return hasCut(s, cutName_cut_, combCutName_passed_); }
     bool hasPreCut(const std::string& s);
-    float getVariableValue(const std::string& s);
+    template <typename T = float> T getVariableValue(const std::string& s)
+    {
+      auto&& cc = cutName_cut_.find(s);
+      if( cc == cutName_cut_.end() )
+      {
+        STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_.");
+        exit(-5);
+      }
+      auto const& c = cc->second;
+      if( !variableIsFilled(s) )
+      {
+        STDOUT("ERROR: requesting value of not filled variable "<<s);
+        exit(-5);
+      }
+      if(!c.valueIsType<T>()) {
+        STDOUT("ERROR: Trying to get value of variable " << s << " which is of type " << c.getValueTypeName() << " and not " << typeid(T).name() << "; can't do this.");
+        exit(-5);
+      }
+      //return *std::get_if<T>(&c.value);
+      return c.template getValue<T>();
+    }
     float getPreCutValue1(const std::string& s);
     float getPreCutValue2(const std::string& s);
     float getPreCutValue3(const std::string& s);
@@ -555,7 +696,7 @@ class baseClass {
     // systematics
     std::vector<Systematic> systematics_;
     TList systFormulas_;
-    std::map<std::string, SimpleCut> systCutName_cut_;
+    std::map<std::string, cut> systCutName_cut_;
 };
 
 #endif

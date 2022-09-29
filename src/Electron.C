@@ -157,9 +157,9 @@ float  Electron::MatchedGenParticleEta(){ if(IsValidGenParticleIdx(MatchedGenPar
 float  Electron::MatchedGenParticlePhi(){ if(IsValidGenParticleIdx(MatchedGenParticleIdx())) return m_collection->ReadArrayBranch<Float_t>("GenPart_phi",m_raw_index); else return -1;}
 
 float Electron::HEEPCaloIsolation(){ return EcalIsoDR03() + HcalIsoD1DR03(); }
-double Electron::HEEPCorrIsolation(){ return (HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
+float Electron::HEEPCorrIsolation(){ return (HEEPCaloIsolation() - (2.0 + ( 0.03 * Pt() ) + (0.28 * RhoForHEEP()))); }
 float Electron::HEEP70TrackIsolation(){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03TkSumPtHEEP",m_raw_index); }
-double Electron::TrackPt          (){
+float Electron::TrackPt          (){
   float px = m_collection->ReadArrayBranch<Float_t>("Electron_trkPx",m_raw_index);
   float py = m_collection->ReadArrayBranch<Float_t>("Electron_trkPy",m_raw_index);
   float pz = m_collection->ReadArrayBranch<Float_t>("Electron_trkPz",m_raw_index);
@@ -167,7 +167,7 @@ double Electron::TrackPt          (){
   v1.SetXYZ(px,py,pz);
   return v1.Pt();
 }
-double Electron::TrackEta         (){
+float Electron::TrackEta         (){
   float px = m_collection->ReadArrayBranch<Float_t>("Electron_trkPx",m_raw_index);
   float py = m_collection->ReadArrayBranch<Float_t>("Electron_trkPy",m_raw_index);
   float pz = m_collection->ReadArrayBranch<Float_t>("Electron_trkPz",m_raw_index);

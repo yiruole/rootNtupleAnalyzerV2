@@ -232,10 +232,10 @@ class Electron : public Object {
   // Isolation variables
 
   float HEEPCaloIsolation    ();
-  double HEEPCorrIsolation    ();
+  float HEEPCorrIsolation    ();
   float HEEP70TrackIsolation ();
-  double TrackPt              ();
-  double TrackEta             ();
+  float TrackPt              ();
+  float TrackEta             ();
 
  private:
 
