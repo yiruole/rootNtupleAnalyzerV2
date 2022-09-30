@@ -62,7 +62,7 @@ def WriteSubmitFile(condorFileName):
         #  - cms connect shouldn't use JobFlavor or the requirements
         #  - assume this is lxbatch if queue option specified
         if options.queue is None:
-            #condorFile.write('Requirements = HAS_CVMFS == TRUE\n')
+            condorFile.write('use_x509userproxy = true\n')
             outputRootFile = outputPrefix+"_$(Process).root"
             outputDatFile = outputPrefix+"_$(Process).dat"
             outputPath = outputmain+"/output/"
