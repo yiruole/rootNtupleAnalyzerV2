@@ -5,7 +5,6 @@ import sys
 import string
 from optparse import OptionParser
 import os.path
-from ROOT import *
 import re
 import subprocess
 import math
