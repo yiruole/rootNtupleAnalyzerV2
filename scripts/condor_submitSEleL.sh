@@ -4,20 +4,26 @@ YEAR=$1
 
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"
-  SKIMNAME=rskSingleEleL_15jul2022
-  INPUTLIST=config/UL16preVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
-  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_loose.txt
+  SKIMNAME=test_rskSingleEleL_30sep2022
+  #INPUTLIST=config/UL16preVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
+  INPUTLIST=config/inputListNanoSkim_test_UL2016_preVFP/inputListAllCurrent.txt
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_noSkim_loose.txt
+  #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_loose.txt
+  #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_heep.txt
 elif [ "$YEAR" = "2016postVFP" ]; then
   echo "Doing 2016postVFP!"
-  SKIMNAME=rskSingleEleL_15jul2022
-  INPUTLIST=config/UL16postVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
-  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_loose.txt
+  SKIMNAME=test_rskSingleEleL_30sep2022
+  #INPUTLIST=config/UL16postVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
+  INPUTLIST=config/inputListNanoSkim_test_UL2016_postVFP/inputListAllCurrent.txt
+  CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_noSkim_loose.txt
+  #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_loose.txt
+  #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_heep.txt
 elif [ "$YEAR" = "2017" ]; then
-  SKIMNAME=rskSingleEleL_7jul2022
+  SKIMNAME=rskSingleEleL_notDoneYet
   INPUTLIST=config/UL17NanoV9_nanoSkim_1jul2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
 elif [ "$YEAR" = "2018" ]; then
-  SKIMNAME=rskSingleEleL_9apr2021
+  SKIMNAME=rskSingleEleL_notDoneYet
   #INPUTLIST=config/nanoV7_2018_postProc/inputListAllCurrent.txt
   INPUTLIST=config/nanoV7_2018_postProc/inputList_jun10.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt
@@ -33,7 +39,7 @@ EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/
 OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/ultralegacy/skims/${YEAR}/$SKIMNAME
 
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
-#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q testmatch -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
+#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -j -1 -q workday -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
 # below for nanoSkims
-python3 scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q testmatch -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
-# FIXME do we still need the testmatch queue?
+#python3 scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Evemts -c $CUTFILE -d $EOSDIR -s
