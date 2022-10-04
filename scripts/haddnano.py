@@ -39,18 +39,34 @@ of.cd()
 
 for e in fileHandles[0].GetListOfKeys() :
         name=e.GetName()
+        if name=='rootTupleTree':
+            obj=fileHandles[0].Get("rootTupleTree/tree")
+            obj.SetTitle("tree")
+            obj.SetName("tree")
+        else:
+            obj=e.ReadObj()
         print("Merging" ,name)
-        obj=e.ReadObj()
-        cl=ROOT.TClass.GetClass(e.GetClassName())
         inputs=ROOT.TList()
+        inputs.SetName("inputsList")
+        dirInputs=dict()
+        #isDir=ROOT.TClass.GetClass(e.GetClassName())=='TDirectoryFile'
+        isDir=obj.IsA().InheritsFrom(ROOT.TDirectoryFile.Class())
+        if isDir:
+            for dirObj in obj.GetListOfKeys():
+                thisObj = dirObj.ReadObj()
+                dirInputs[thisObj.GetName()] = ROOT.TList()
+                dirInputs[thisObj.GetName()].SetName(thisObj.GetName()+"list")
         isTree= obj.IsA().InheritsFrom(ROOT.TTree.Class())
         if isTree:
-                obj=obj.CloneTree(-1,"fast" if goFast else "")
                 branchNames=set([x.GetName() for x in obj.GetListOfBranches()])
+                obj=obj.CloneTree(-1,"fast" if goFast else "")
         for fh in fileHandles[1:] :
-                otherObj=fh.GetListOfKeys().FindObject(name).ReadObj()
+                if name!='rootTupleTree':
+                    otherObj=fh.GetListOfKeys().FindObject(name).ReadObj()
+                else:
+                    otherObj=fh.Get("rootTupleTree/tree")
                 inputs.Add(otherObj)
-                if isTree and obj.GetName()=='Events'  :        
+                if isTree and (obj.GetName()=='Events' or obj.GetName()=='tree'): 
                         otherObj.SetAutoFlush(0)
                         otherBranches=set([ x.GetName() for x in otherObj.GetListOfBranches() ])
                         missingBranches=list(branchNames-otherBranches)
@@ -81,9 +97,26 @@ for e in fileHandles[0].GetListOfKeys() :
                 if isTree:
                         obj.Merge(inputs,"fast" if goFast else "")
                         inputs.Clear()
+                if isDir:
+                    for objName in dirInputs.keys():
+                        otherDirObj = otherObj.GetListOfKeys().FindObject(objName).ReadObj()
+                        dirInputs[objName].Add(otherDirObj)
         
-        if isTree  :
-                obj.Write()     
+        if isTree  and obj.GetTitle()=="tree":
+            of.mkdir("rootTupleTree")
+            of.cd("rootTupleTree")
+            obj.Write()
+            of.cd()
+        elif isTree:
+            obj.Write()
+        elif isDir:
+            of.mkdir(e.GetName())
+            of.cd(e.GetName())
+            for dirObj in obj.GetListOfKeys():
+                thisObj = dirObj.ReadObj()
+                thisObj.Merge(dirInputs[thisObj.GetName()])
+                thisObj.Write()
+            of.cd()
         elif obj.IsA().InheritsFrom(ROOT.TH1.Class()) :         
                 obj.Merge(inputs)
                 obj.Write()
