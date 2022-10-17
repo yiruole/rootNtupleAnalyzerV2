@@ -2555,7 +2555,7 @@ bool baseClass::isData() {
 
   isData_ = true;
   if(tree_->GetBranch("isData")) {
-    if(readerTools_->ReadValueBranch<UChar_t>("isData") < 1)
+    if(readerTools_->ReadValueBranch<Bool_t>("isData") < 1)
       isData_ = false;
   }
   // if no isData branch (like in nanoAOD output), check for Weight or genWeight branches

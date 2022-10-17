@@ -1,6 +1,7 @@
 #include "HLTriggerObject.h"
 #include "Object.h"
 #include "IDTypes.h"
+#include <bitset>
 
 HLTriggerObject::HLTriggerObject ():
   Object()
@@ -19,6 +20,7 @@ HLTriggerObject::HLTriggerObject (Collection& c, unsigned int i, unsigned int j)
 //}
 
 int HLTriggerObject::ObjectID () { return m_collection->ReadArrayBranch<Int_t>("TrigObj_id",m_raw_index); }
+int HLTriggerObject::FilterBits() { return m_collection->ReadArrayBranch<Int_t>("TrigObj_filterBits",m_raw_index); }
 
 // HLT
 std::vector<std::string> HLTriggerObject::GetFilterNames() { return std::vector<std::string>(); }
@@ -36,15 +38,8 @@ long int HLTriggerObject::GetPathIndex(std::string pathName)
     return std::distance(pathNames.begin(),pathItr);
 }
 
-bool HLTriggerObject::PassedPathL3Filter(std::string pathName)
-{
-  return true;
-}
-
-bool HLTriggerObject::PassedPathLastFilter(std::string pathName)
-{
-  //FIXME
-  return false;
+bool HLTriggerObject::PassedFilterBit(unsigned int bitNumber) {
+    return (FilterBits() >> bitNumber) & 0x1;
 }
 
 bool HLTriggerObject::PassUserID(ID id, bool verbose)
@@ -58,6 +53,7 @@ std::ostream& operator<<(std::ostream& stream, HLTriggerObject& object) {
     << "ID = {" << object.ObjectID() << "}, "
     << "Pt = "  << object.Pt ()       << ", "
     << "Eta = " << object.Eta()       << ", "
-    << "Phi = " << object.Phi();
+    << "Phi = " << object.Phi()       << ", "
+    << "filterBits = " << std::bitset<32>(object.FilterBits());
   return stream;
 }

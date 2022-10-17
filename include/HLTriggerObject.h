@@ -21,15 +21,15 @@ class HLTriggerObject : public Object {
   // HLT info
   std::vector<std::string> GetFilterNames();
   std::vector<std::string> GetPathNames();
-  bool PassedPathL3Filter(std::string pathName);
-  bool PassedPathLastFilter(std::string pathName);
   std::string GetCollectionName();
   long int GetPathIndex(std::string pathName);
+  bool PassedFilterBit(unsigned int bitNumber);
 
   // IDs 
 
   bool   PassUserID ( ID id, bool verbose = false );
   int ObjectID ();
+  int FilterBits();
 
 };
 
