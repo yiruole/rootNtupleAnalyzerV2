@@ -10,6 +10,8 @@ ofname=sys.argv[1]
 files=sys.argv[2:]
 
 def zeroFill(tree,brName,brObj,allowNonBool=False) :
+        #print("--> zeroFill(brName={}, brObj={}".format(brName, brObj))
+        #print("\tbrObjName={}".format(brObj.GetName()))
         # typename: (numpy type code, root type code)
         branch_type_dict = {'Bool_t':('?','O'), 'Float_t':('f4','F'), 'UInt_t':('u4','i'), 'Long64_t':('i8','L'), 'Double_t':('f8','D')}
         brType = brObj.GetLeaf(brName).GetTypeName()
@@ -59,6 +61,7 @@ for e in fileHandles[0].GetListOfKeys() :
         isTree= obj.IsA().InheritsFrom(ROOT.TTree.Class())
         if isTree:
                 branchNames=set([x.GetName() for x in obj.GetListOfBranches()])
+                obj.SetBranchStatus("*", 1)  # need to explicitly activate branches which have no entries for CloneTree
                 obj=obj.CloneTree(-1,"fast" if goFast else "")
         for fh in fileHandles[1:] :
                 if name!='rootTupleTree':
@@ -102,7 +105,7 @@ for e in fileHandles[0].GetListOfKeys() :
                         otherDirObj = otherObj.GetListOfKeys().FindObject(objName).ReadObj()
                         dirInputs[objName].Add(otherDirObj)
         
-        if isTree  and obj.GetTitle()=="tree":
+        if isTree and obj.GetTitle()=="tree":
             of.mkdir("rootTupleTree")
             of.cd("rootTupleTree")
             obj.Write()
@@ -120,11 +123,13 @@ for e in fileHandles[0].GetListOfKeys() :
         elif obj.IsA().InheritsFrom(ROOT.TH1.Class()) :         
                 obj.Merge(inputs)
                 obj.Write()
+                inputs.Clear()
         elif obj.IsA().InheritsFrom(ROOT.TObjString.Class()) :  
                 for st in inputs:
                         if  st.GetString()!=obj.GetString():
                                 print("Strings are not matching")
                 obj.Write()
+                inputs.Clear()
         else:
                 print("Cannot handle ", obj.IsA().GetName())
         
