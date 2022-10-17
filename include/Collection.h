@@ -74,6 +74,12 @@ class Collection {
   void RemoveConstituent(unsigned short i) {
     m_raw_indices.erase(m_raw_indices.begin()+i);
   }
+  template<class Object1> void RemoveConstituent(Object1& obj) { 
+    auto it = std::find ( m_raw_indices.begin(), m_raw_indices.end(), obj.GetRawIndex() ) ;
+    if(it != m_raw_indices.end())
+      RemoveConstituent(std::distance(m_raw_indices.begin(), it));
+  }
+
   
   std::vector<unsigned short> * GetRawIndices() { return &m_raw_indices; } 
   unsigned short                GetSize()       { return  m_raw_indices.size();  } 
