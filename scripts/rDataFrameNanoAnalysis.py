@@ -23,8 +23,8 @@ if doPreVFP:
     filePath = "/tmp/scooper/preVFP/"
     #filePath = os.getenv("LQANA")+"/config/UL16preVFP_nanoV9_nanoSkim_29jun2022/"
     fileListsDYJ = [filePath+"DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt", filePath+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt", filePath+"DYJetsToEE_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_APV.txt"]
-    fileListData = filePath+"SingleElectron_Run2016{}-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt"
-    fileListDataRunB = filePath+"SingleElectron_Run2016B-{}_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt"
+    fileListData = filePath+"{}_Run2016{}-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt"
+    fileListDataRunB = filePath+"{}_Run2016B-{}_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt"
     electronSFJSON = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/EGM/2016preVFP_UL/electron.json.gz"
     era = "2016preVFP"
 else:
@@ -33,10 +33,11 @@ else:
     #filePath = os.getenv("LQANA")+"/config/UL16postVFP_nanoV9_nanoSkim_29jun2022/"
     #filePath = "/tmp/scooper/checkAgainstNanoSkim/"
     fileListsDYJ = [filePath+"DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt", filePath+"DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8.txt", filePath+"DYJetsToEE_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos.txt"]
-    fileListData = filePath+"SingleElectron_Run2016{}-UL2016_MiniAODv2_NanoAODv9-v1.txt"
+    fileListData = filePath+"{}_Run2016{}-UL2016_MiniAODv2_NanoAODv9-v1.txt"
     electronSFJSON = "/cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/EGM/2016postVFP_UL/electron.json.gz"
     era = "2016postVFP"
-dyjSamples = ["DYJ_amcatnlo"]#, "DYJ_MLM", "DYJToEE"]
+#dyjSamples = ["DYJ_amcatnlo"]#, "DYJ_MLM", "DYJToEE"]
+dyjSamples = []
 
 dyjCrossSectionDict = {}
 dyjCrossSectionDict["DYJ_amcatnlo"] = 6077.22
@@ -56,27 +57,34 @@ for index, sample in enumerate(dyjSamples):
     chEventsDYJ.AddFileInfoList(fcDYJ.GetList())
     chainDYJDict[sample] = chEventsDYJ
 
-chEventsData = ROOT.TChain(treeName)
+dataDatasetNames = ["SingleElectron", "SinglePhoton"]
+chEventsData = dict()
 fcDataList = []
 if doPreVFP:
-    for x in ("C", "D", "E", "F"):
-        fcData = ROOT.TFileCollection("fcData", "", fileListData.format(x))
-        fcDataList.append(fcData)
-        chEventsData.AddFileInfoList(fcDataList[-1].GetList())
-    for x in ("ver1", "ver2"):
-        fcData = ROOT.TFileCollection("fcData", "", fileListDataRunB.format(x))
-        fcDataList.append(fcData)
-        chEventsData.AddFileInfoList(fcDataList[-1].GetList())
+    for datasetName in dataDatasetNames:
+        chEventsData[datasetName] = ROOT.TChain(treeName)
+        #for x in ("ver1", "ver2"):
+        #    fcData = ROOT.TFileCollection("fcData", "", fileListDataRunB.format(datasetName, x))
+        #    fcDataList.append(fcData)
+        #    chEventsData[datasetName].AddFileInfoList(fcDataList[-1].GetList())
+        #for x in ("C", "D", "E", "F"):
+        for x in ("E"):  # XXX only one file for testing
+            fcData = ROOT.TFileCollection("fcData", "", fileListData.format(datasetName, x))
+            fcDataList.append(fcData)
+            chEventsData[datasetName].AddFileInfoList(fcDataList[-1].GetList())
 else:
-    for x in ("F", "G", "H"):
-    #for x in ("F"):  # XXX only one file for testing
-        fcData = ROOT.TFileCollection("fcData", "", fileListData.format(x))
-        fcDataList.append(fcData)
-        chEventsData.AddFileInfoList(fcDataList[-1].GetList())
+    for datasetName in dataDatasetNames:
+        chEventsData[datasetName] = ROOT.TChain(treeName)
+        for x in ("F", "G", "H"):
+        #for x in ("F"):  # XXX only one file for testing
+            fcData = ROOT.TFileCollection("fcData", "", fileListData.format(x))
+            fcDataList.append(fcData)
+            chEventsData[datasetName].AddFileInfoList(fcDataList[-1].GetList())
 
 # Create a ROOT dataframe for each dataset
 df = {}
-df["data"] = ROOT.RDataFrame(chEventsData)
+for datasetName in dataDatasetNames:
+    df[datasetName] = ROOT.RDataFrame(chEventsData[datasetName])
 for sample in dyjSamples:
     df[sample] = ROOT.RDataFrame(chainDYJDict[sample])
 processes = list(df.keys())
@@ -103,7 +111,9 @@ else:
 #for p in ["ggH", "VBF"]:
 #    df[p] = df[p].Define("weight",
 #            "scaleFactor_PHOTON * scaleFactor_PhotonTRIGGER * scaleFactor_PILEUP * mcWeight");
-df["data"] = df["data"].Define("genWeight", "1.0")
+#df["data"] = df["data"].Define("genWeight", "1.0")
+for datasetName in dataDatasetNames:
+    df[datasetName] = df[datasetName].Define("genWeight", "1.0")
  
 # Select the events for the analysis
 for p in processes:
@@ -111,7 +121,8 @@ for p in processes:
     df[p] = df[p].Define("Electron_hoeUncorr", "Electron_hoe*Electron_eCorr")
     df[p] = df[p].Define("vlooseElectrons", "Electron_hoeUncorr < 0.15")
     df[p] = df[p].Filter("Sum(vlooseElectrons) > 0", "Require >= 1 vloose electrons - Passing uncorrected H/E < 0.15")
-    df[p] = df[p].Define("Electron_ptUncorr", "Electron_pt/Electron_eCorr")
+    #df[p] = df[p].Define("Electron_ptUncorr", "Electron_pt/Electron_eCorr")
+    df[p] = df[p].Define("Electron_ptUncorr", "Where(Electron_pt != 0, Electron_pt/Electron_eCorr, Electron_pt)")
     df[p] = df[p].Define("vlooseElectronsPtCut", "Electron_ptUncorr[vlooseElectrons] >= 10")
     df[p] = df[p].Filter("Sum(vlooseElectronsPtCut) > 0", "Require >= 1 vloose electron with pT >= 10 GeV")
     df[p] = df[p].Define("Electron_scEta", "Electron_deltaEtaSC+Electron_eta")
@@ -122,14 +133,19 @@ for p in processes:
     df[p] = df[p].Define("Electron_passHoE", "(abs(Electron_scEta) < 1.479 && Electron_hoeUncorr < 0.15) || (abs(Electron_scEta) >= 1.479 && Electron_hoeUncorr < 0.10)")
     df[p] = df[p].Define("looseElectrons", "Electron_passHEEP_scEta && Electron_passEGMMissingHits && Electron_passSigmaIetaIeta && Electron_passHoE")
     df[p] = df[p].Filter("Sum(looseElectrons) > 0", "Require >= 1 loose electron")
-    df[p] = df[p].Define("looseElectronsPtCut", "Electron_ptUncorr[looseElectrons] > 40")
-    df[p] = df[p].Filter("Sum(looseElectronsPtCut) > 0", "Require >= 1 loose electron with pT > 40 GeV")
+    #df[p] = df[p].Define("looseElectronsPtCut", "Electron_ptUncorr[looseElectrons] > 40")
+    #df[p] = df[p].Filter("Sum(looseElectronsPtCut) > 0", "Require >= 1 loose electron with uncorrected pT > 40 GeV")
+    df[p] = df[p].Filter("Electron_ptUncorr[looseElectrons][0] > 40", "Require lead loose electron uncorrected pT > 40 GeV")
 
-    if "data" in p:
+    if p in dataDatasetNames:
         df[p] = df[p].Filter(jsonhelper, ["run", "luminosityBlock"], "jsonhelper")
-
-    # trigger
-    df[p] = df[p].Filter("HLT_Ele27_WPTight_Gsf", "Pass Ele27_WPTight")
+        # trigger
+        if "Electron" in p:
+            df[p] = df[p].Filter("HLT_Ele27_WPTight_Gsf && !HLT_Photon175", "Pass Ele27_WPTight and not Photon175")
+        else:
+            df[p] = df[p].Filter("HLT_Photon175", "Pass Photon175")
+    else:
+            df[p] = df[p].Filter("HLT_Ele27_WPTight_Gsf || HLT_Photon175", "Pass Ele27_WPTight or Photon175")
  
     # Find two good barrel electrons
     #df[p] = df[p].Define("goodElectrons", "Electron_cutBased > 1 && abs(Electron_eta) < 1.4442")\
@@ -161,13 +177,15 @@ for p in processes:
     #df[p] = df[p].Define("m_ee", "ComputeInvariantMass(Electron_pt[goodElectrons], Electron_eta[goodElectrons], Electron_phi[goodElectrons], Electron_mass[goodElectrons])")
     df[p] = df[p].Define("m_ee", "ComputeInvariantMass(Electron_pt[goodElectrons], Electron_eta[goodElectrons], Electron_phi[goodElectrons], Electron_mass[goodElectrons])")
  
+    df[p] = df[p].Filter("m_ee > 50", "M(ee) > 50 GeV")
     # Make additional kinematic cuts and select mass window
     #df[p] = df[p].Filter("photon_pt[goodphotons][0] / 1000.0 / m_yy > 0.35")\
     #             .Filter("photon_pt[goodphotons][1] / 1000.0 / m_yy > 0.25")\
     #             .Filter("m_yy > 105 && m_yy < 160")
-    df[p] = df[p].Filter("m_ee > 80 && m_ee < 100", "80 < M(ee) < 100 GeV")\
-                 .Filter("abs(Electron_eta[goodElectrons][0]) < 1.4442", "Lead electron in barrel")\
-                 .Filter("abs(Electron_eta[goodElectrons][1]) < 1.4442", "Sublead electron in barrel")
+    #df[p] = df[p].Filter("m_ee > 80 && m_ee < 100", "80 < M(ee) < 100 GeV")\
+    #             .Filter("abs(Electron_eta[goodElectrons][0]) < 1.4442", "Lead electron in barrel")\
+    #             .Filter("abs(Electron_eta[goodElectrons][1]) < 1.4442", "Sublead electron in barrel")
+    df[p] = df[p].Filter("m_ee > 140 && m_ee < 220", "140 < M(ee) < 220 GeV")
 
     if "data" in p:
         df[p] = df[p].Define("totWeight", "1.0")
@@ -201,7 +219,7 @@ for p in processes:
 # concurrently. This results in an improved usage of the available resources
 # if each separate RDataFrame can not utilize all available resources, e.g.,
 # because not enough data is available.
-ROOT.RDF.RunGraphs([hists[s] for s in dyjSamples+["data"]])
+ROOT.RDF.RunGraphs([hists[s] for s in dyjSamples+dataDatasetNames])
 
 cols = ROOT.vector('string')()
 cols.push_back("run")
@@ -218,17 +236,22 @@ cols.push_back("elIDSFLead")
 cols.push_back("elIDSFSublead")
 #display = df["DYJ_amcatnlo"].Display(cols, 10)  # 10 rows to show
 #print(display.AsString())
-print(100*"="+" Report on DYJ amc@NLO:")
-df["DYJ_amcatnlo"].Report().Print()
-print(100*"="+" Report on data:")
-df["data"].Report().Print()
+if "DYJ_amcatnlo" in df.keys():
+    print(100*"="+" Report on DYJ amc@NLO:")
+    df["DYJ_amcatnlo"].Report().Print()
+for datasetName in dataDatasetNames:
+    print(100*"="+" Report on {}:".format(datasetName))
+    df[datasetName].Report().Print()
 #print("After report.Print()")
  
 #dyj = hists["dyj"].GetValue()
 dyjHists = {}
 for sample in dyjSamples:
     dyjHists[sample] = hists[sample].GetValue()
-data = hists["data"].GetValue()
+# sum of all data
+data = TH1D()
+for datasetName in dataDatasetNames:
+    data.Add(hists[datasetName].GetValue())
  
 ROOT.gStyle.SetAxisColor(1, "XYZ")
 ROOT.gStyle.SetStripDecimals(True)
