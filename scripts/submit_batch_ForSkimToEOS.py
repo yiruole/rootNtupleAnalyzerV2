@@ -78,14 +78,21 @@ def WriteSubmitFile(condorFileName):
         # condorFile.write('stream_output = True\n')
         # condorFile.write('stream_error = True\n')
         # exePath = os.path.dirname(os.path.abspath(options.executable))
+        inputFilesToTransfer = [cutfile,options.executable,outputmain+'/input/input_$(Process).list']
+        if len(options.jsonFileName):
+            inputFilesToTransfer.append(options.jsonFileName)
         if options.reducedSkim:
             parentDir = os.path.dirname(outputmain)
-            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
+            inputFilesToTransfer.append(parentDir+'/haddnano.py')
+            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
         elif options.nanoSkim:
             parentDir = os.path.dirname(outputmain)
-            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'+','+options.branchSelFileName
-        else:
-            filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName
+            inputFilesToTransfer.append(parentDir+'/haddnano.py')
+            inputFilesToTransfer.append(options.branchSelFileName)
+            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'+','+options.branchSelFileName
+        #else:
+            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName
+        filesToTransfer = ",".join(inputFilesToTransfer)
         condorFile.write('transfer_input_files = '+filesToTransfer+'\n')
         condorFile.write('queue $(N)\n')
 

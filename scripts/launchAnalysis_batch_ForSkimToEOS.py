@@ -484,7 +484,8 @@ with open(options.inputlist, "r") as inputlist_file:
             command + " -e " + options.outputDir + "/" + options.executable.split("/")[-1]
         )
         command = command + " -m " + options.eosHost
-        command = command + " -j " + os.path.realpath(jsonFile)
+        if found_json:
+            command = command + " -j " + os.path.realpath(jsonFile)
         if found_branchSelFile:
             command += " -b " + os.path.realpath(branchSelFile)
         if options.reducedSkim:
