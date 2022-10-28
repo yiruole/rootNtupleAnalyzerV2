@@ -390,8 +390,8 @@ void baseClass::readCutFile()
       if ( v.size() == 0 ) continue;
 
       if ( v[0] == "SYST" ) {
-        if ( v.size() < 3 || v.size() > 4 ){
-          STDOUT("ERROR: In your cutfile, SYST line must have the syntax: \"SYST name [regex=]/branchName/formula/value cutVariable(s)\"");
+        if ( v.size() < 2 || v.size() > 4 ){
+          STDOUT("ERROR: In your cutfile, SYST line must have the syntax: \"SYST name [[regex=]/branchName/formula/value] [cutVariable(s)]\"");
           exit(-6);
         }
         else {
@@ -712,22 +712,28 @@ void baseClass::readCutFile()
   for(auto& systLine : systLines) {
     vector<string> v = split(systLine);
     Systematic syst(v[1]);
-    // regexp to match with branch pattern
-    if (v[2].find("regex=")==0) {
-      size_t firstQuote = v[2].find_first_of("\"")+1;
-      size_t lastQuote = v[2].find_last_of("\"");
-      syst.regex = v[2].substr(firstQuote, lastQuote-firstQuote);
-      syst.length = 1;
-    }
-    else {
-      syst.formula.reset(new TTreeFormula(syst.name.c_str(), v[2].c_str(), readerTools_->GetTree().get()));
-      if(!syst.formula->GetNdim()) {
-        STDOUT("ERROR: syst named '" << syst.name << "' has invalid formula: '" << v[2] << "', Check syntax (TFormula) and make sure that any branches used exist in the tree.");
-        exit(-6);
+    if(v.size() > 2) {
+      // regexp to match with branch pattern
+      if (v[2].find("regex=")==0) {
+        size_t firstQuote = v[2].find_first_of("\"")+1;
+        size_t lastQuote = v[2].find_last_of("\"");
+        syst.regex = v[2].substr(firstQuote, lastQuote-firstQuote);
+        syst.length = 1;
       }
-      syst.length = syst.formula->GetNdata();
-      STDOUT("for syst named: " << syst.name << "; syst.length = " << syst.length);
+      else if (v[2].find("bdt=")==0) {
+
+      }
+      // tformula-compatible string
+      else {
+        syst.formula.reset(new TTreeFormula(syst.name.c_str(), v[2].c_str(), readerTools_->GetTree().get()));
+        if(!syst.formula->GetNdim()) {
+          STDOUT("ERROR: syst named '" << syst.name << "' has invalid formula: '" << v[2] << "', Check syntax (TFormula) and make sure that any branches used exist in the tree.");
+          exit(-6);
+        }
+        syst.length = syst.formula->GetNdata();
+      }
     }
+    STDOUT("for syst named: " << syst.name << "; syst.length = " << syst.length);
     // parse cut variables affected by syst
     if(v.size() > 3) {
       istringstream iss(v[3]);
@@ -738,12 +744,18 @@ void baseClass::readCutFile()
         boost::regex regExp(syst.regex);
         // try to find the regex-matching branch for this cutVar
         string matchingBranch;
+        bool foundMatchingBranch = false;
         for(unsigned int i=0; i<tree_->GetListOfBranches()->GetEntries(); ++i) {
           TBranch* branch = static_cast<TBranch*>(tree_->GetListOfBranches()->At(i));
           branchName = branch->GetName();
           if(branchName.find(cutVar)!=string::npos) {
             if(boost::regex_search(branchName, regExp)) {
+              if(foundMatchingBranch) {
+                STDOUT("ERROR: Already found matching branch for syst name="+v[1]+" with "+v[2]+": "+matchingBranch+" but found another matching branch: "+branchName+". Can't handle this.");
+                exit(-6);
+              }
               matchingBranch = branchName;
+              foundMatchingBranch = true;
             }
           }
         }
@@ -779,12 +791,14 @@ void baseClass::readCutFile()
     }
     for (int i=0;i<orderedCutNames_.size();++i) {
       auto&& cc = cutName_cut_.find(orderedCutNames_[i]);
-      if(cc->second.level_int < 2)
+      if(cc->second.level_int < 1)
         continue;
       orderedSystCutNames_.push_back(cc->first);
     }
     int nCutsForSysts = orderedSystCutNames_.size();
+    STDOUT("Making systematics 2D hist with " << nCutsForSysts << " x bins");
     histsToSave_.push_back(std::shared_ptr<TH2D>(new TH2D("systematics", "systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
+    STDOUT("Saved systematics 2D hist");
     auto theHist = dynamic_pointer_cast<TH2D>(histsToSave_.back());
     theHist->Sumw2();
     theHist->SetDirectory(0);
@@ -858,6 +872,21 @@ void baseClass::fillSystVariableWithValue(const string& s, const string& cutVar,
       syst.cutNamesToSystValues[cutVar] = d;
       syst.cutNamesToSystFilled[cutVar] = true;
       systFound = true;
+      break;
+    }
+  }
+}
+
+void baseClass::fillSystVariableWithValue(const string& s, const float& d) {
+  if(!haveSystematics())
+    return;
+  bool systFound = false;
+  for(auto& syst : systematics_) {
+    if(syst.name==s) {
+      syst.value = d;
+      syst.filled = true;
+      systFound = true;
+      break;
     }
   }
 }
@@ -1075,7 +1104,7 @@ void baseClass::runSystematics()
   }
   float ybinCoord = 0.5;
   for(auto& syst : systematics_) {
-    int currentLength = syst.formula ? syst.formula->GetNdata() : 1;
+    int currentLength = syst.formula ? syst.formula->GetNdata() : syst.length;
     if(syst.length!=currentLength) {
       string msg = "For systematic named: " + syst.name + ", length in event " + to_string(GetCurrentEntry()) + " is: " + to_string(currentLength) +
         " != initial length of: " + to_string(syst.length) + "." +
@@ -1086,7 +1115,7 @@ void baseClass::runSystematics()
     map<string, bool> combCutNameToPassFail;
     bool shiftValue = !syst.cutNamesToBranchNames.empty();
     for(int i=0; i < currentLength; ++i) {
-      float systVal = syst.formula ? syst.formula->EvalInstance(i) : 0;
+      float systVal = syst.value;
       if(shiftValue) {
         for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
           auto cutName = cutNameBranch.first;
@@ -1108,13 +1137,24 @@ void baseClass::runSystematics()
               systCut.filled = true;
             }
             else {
-              STDOUT("ERROR: syst value for cut named: " << cutName << " was not filled for systematic " << syst.name << "! can't compute systematic for this cut. Quitting.");
+              STDOUT("ERROR: syst value for cut named: " << cutName << " was not filled for systematic " << syst.name <<
+                  "! No regex matching branches specified in cutfile for this cut, so must be filled manually with fillSystVariableWithValue()." <<
+                  " Can't compute systematic for this cut. Quitting.");
               exit(-6);
             }
           }
         }
         // reevaluate since cuts were updated
         evaluateCuts(systCutName_cut_, combCutNameToPassFail, orderedSystCutNames_);
+      }
+      else {
+        if(syst.formula)
+          systVal = syst.formula->EvalInstance(i);
+        else if(!syst.filled) {
+          STDOUT("ERROR: For systematic " << syst.name << ", no formula was given and no filled value was found either! Did you forget to call fillSystVariableWithValue()?" <<
+              " Can't compute systematic for this cut. Quitting.");
+          exit(-6);
+        }
       }
       float xbinCoord = 0.5;
       for(auto& cutName : orderedSystCutNames_) {

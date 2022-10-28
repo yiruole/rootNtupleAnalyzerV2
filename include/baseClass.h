@@ -62,6 +62,11 @@ class SimpleCut {
         return std::get<T>(value);
       }
 
+    template <typename T>
+      T* getValueAddress() const {
+        return &std::get<T>(value);
+      }
+
     bool evaluateCut() {
       return std::visit( [this](auto&&val)->bool{
           using T = std::decay_t<decltype(val)>;
@@ -197,9 +202,11 @@ struct Systematic {
   std::map<std::string, float> cutNamesToSystValues;
   std::map<std::string, bool> cutNamesToSystFilled;
   int length = 0;
+  float value;
+  bool filled;
 
   Systematic(const std::string& systName, int systLength = 1) :
-    name(systName), length(systLength) {}
+    name(systName), length(systLength), value(0.0), filled(false) {}
   bool affectsCut(std::string cutName) {
     return cutNamesToBranchNames.count(cutName);
   }
@@ -279,6 +286,7 @@ class baseClass {
 
     void resetCuts(const std::string& s = "newEvent");
     void fillSystVariableWithValue(const std::string&, const std::string&, const float&);
+    void fillSystVariableWithValue(const std::string&, const float&);
     template<typename T = float> void fillVariableWithValue(const std::string& s, const T& d, const float& w = 1.)
     {
       auto&& cc = cutName_cut_.find(s);
