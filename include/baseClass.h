@@ -32,7 +32,6 @@
 class SimpleCut {
   public:
     typedef std::variant<float, int, unsigned long long int, unsigned int, unsigned char> ValueType;
-    virtual ~SimpleCut() = default;
 
     std::string variableName = "";
     int level_int = -1;
@@ -561,12 +560,14 @@ class baseClass {
     bool isOptimizationEnabled() { return optimizeName_cut_.size()>0; }
 
     bool haveSystematics() { return !systematics_.empty(); }
+    unsigned int getNumSystematics() { return systematics_.size(); }
     void runSystematics();
 
-    void CreateAndFillUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1);
-    void CreateUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup);
-    void FillUserTH1D(const std::string&  nameAndTitle, Double_t value, Double_t weight=1);
-    void FillUserTH1D(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1);
+    void CreateAndFillUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1, bool systematics=true, std::string selection="");
+    void CreateUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics=false);
+    void CreateUserTH1DWithSysts(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup) { CreateUserTH1D(nameAndTitle, nbinsx, xlow, xup, true); }
+    void FillUserTH1D(const std::string&  nameAndTitle, Double_t value, Double_t weight=1, std::string selection="");
+    void FillUserTH1D(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1, std::string selection="");
     void CreateAndFillUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
     void CreateUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
     void CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
@@ -704,7 +705,8 @@ class baseClass {
     // systematics
     std::vector<Systematic> systematics_;
     TList systFormulas_;
-    std::map<std::string, cut> systCutName_cut_;
+    std::map<std::string, SimpleCut> systCutName_cut_;
+    std::unique_ptr<TH2D> currentSystematicsHist_;
 };
 
 #endif
