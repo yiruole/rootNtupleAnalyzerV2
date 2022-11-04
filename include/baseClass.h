@@ -29,6 +29,8 @@
   std::cout << __FILE__ <<" - Line "<<__LINE__<<" - "<<__FUNCTION__<<": "<< STRING <<std::endl;   \
 }
 
+static const std::string SYSTHISTSUFFIX = "WithSysts";
+
 class SimpleCut {
   public:
     typedef std::variant<float, int, unsigned long long int, unsigned int, unsigned char> ValueType;
@@ -574,6 +576,7 @@ class baseClass {
     void FillUserTH2D(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
     void FillUserTH2D(const std::string&  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
     void FillUserTH2DLower(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
+    void CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
     void CreateAndFillUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
     void CreateUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
     void CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
@@ -618,6 +621,7 @@ class baseClass {
     std::map<std::string , std::unique_ptr<TH2D> > userTH2Ds_;
     std::map<std::string , std::unique_ptr<TH3D> > userTH3Ds_;
     std::map<std::string , std::unique_ptr<TProfile> > userTProfiles_;
+    std::map<std::string , std::unique_ptr<TH2D> > user1DHistsWithSysts_;
     void init();
     void readInputList();
     void readCutFile();

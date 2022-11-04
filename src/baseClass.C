@@ -2078,14 +2078,13 @@ void baseClass::saveEventsPassingCuts(const std::string& fileName)
 void baseClass::CreateAndFillUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight, bool systematics, std::string selection)
 {
   if(systematics && haveSystematics() && selection!="") {
-    // in this case, we sneakily use the 2-D collection
-    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-    if( nh_h == userTH2Ds_.end() ) {
+    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+    if( nh_h == user1DHistsWithSysts_.end() ) {
       std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY()));
       h->Sumw2();
       h->SetDirectory(0);
       currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
-      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
+      user1DHistsWithSysts_[std::string(nameAndTitle)] = std::move(h);
       // systematics
       float selectionBin = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
       float yBinCoord = 0.5;
@@ -2109,6 +2108,7 @@ void baseClass::CreateAndFillUserTH1D(const std::string& nameAndTitle, Int_t nbi
     }
   }
   else {
+    // no systematics
     map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
     if( nh_h == userTH1Ds_.end() ) {
       std::unique_ptr<TH1D> h(new TH1D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
@@ -2125,10 +2125,7 @@ void baseClass::CreateAndFillUserTH1D(const std::string& nameAndTitle, Int_t nbi
 void baseClass::CreateUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics)
 {
   if(systematics && haveSystematics()) {
-    // in this case, we sneakily use the 2-D collection
-    CreateUserTH2D(nameAndTitle, nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY());
-    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-    currentSystematicsHist_->GetYaxis()->Copy(*nh_h->second->GetYaxis());
+    CreateUserTH2DForSysts(nameAndTitle, nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY());
   }
   else {
     map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(nameAndTitle);
@@ -2147,8 +2144,28 @@ void baseClass::CreateUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Double_t weight, std::string selection)
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() ) {
+  if(selection!="") {
+    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+    if( nh_h == user1DHistsWithSysts_.end() ) {
+      STDOUT("ERROR: trying to fill histogram wth systs "<<nameAndTitle<<" that was not defined.");
+      exit(-4);
+    }
+    else {
+      //STDOUT("INFO: trying to fill histogram "<<nameAndTitle<<" with systematics and selection=" << selection);
+      // systematics
+      float selectionBinCoord = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
+      unsigned int selectionBin = currentSystematicsHist_->GetXaxis()->FindFixBin(selectionBinCoord);
+      for(unsigned int yBin = 1; yBin <= currentSystematicsHist_->GetNbinsY(); ++yBin) {
+        float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBin);
+        float yBinCoord = currentSystematicsHist_->GetYaxis()->GetBinCenter(yBin);
+        //if(nh_h->second->GetXaxis()->FindFixBin(value)==347 && yBin==1)
+        //  STDOUT("INFO: for syst="<<currentSystematicsHist_->GetYaxis()->GetBinLabel(yBin)<<", binX=" << selectionBin << ", binY=" << yBin << ", systWeight="<<systWeight<<", weight="<<weight<<", bin in var dist="<<nh_h->second->GetXaxis()->FindFixBin(value));
+        if(systWeight != 0)
+          nh_h->second->Fill(value, yBinCoord, systWeight*weight);
+      }
+    }
+  }
+  else {
     map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
     if( nh_h == userTH1Ds_.end() ) {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
@@ -2156,24 +2173,6 @@ void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Do
     }
     else {
       nh_h->second->Fill(value, weight);
-    }
-  }
-  else {
-    if(selection=="") {
-      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" with systematics, but no selection was specified.");
-      exit(-4);
-    }
-    //STDOUT("INFO: trying to fill histogram "<<nameAndTitle<<" with systematics and selection=" << selection);
-    // systematics
-    float selectionBinCoord = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
-    unsigned int selectionBin = currentSystematicsHist_->GetXaxis()->FindFixBin(selectionBinCoord);
-    for(unsigned int yBin = 1; yBin <= currentSystematicsHist_->GetNbinsY(); ++yBin) {
-      float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBin);
-      float yBinCoord = currentSystematicsHist_->GetYaxis()->GetBinCenter(yBin);
-      //if(nh_h->second->GetXaxis()->FindFixBin(value)==347 && yBin==1)
-      //  STDOUT("INFO: for syst="<<currentSystematicsHist_->GetYaxis()->GetBinLabel(yBin)<<", binX=" << selectionBin << ", binY=" << yBin << ", systWeight="<<systWeight<<", weight="<<weight<<", bin in var dist="<<nh_h->second->GetXaxis()->FindFixBin(value));
-      if(systWeight != 0)
-        nh_h->second->Fill(value, yBinCoord, systWeight*weight);
     }
   }
 }
@@ -2215,6 +2214,23 @@ void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Do
     }
 }
 
+void baseClass::CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
+{
+  std::string histTitle = nameAndTitle+SYSTHISTSUFFIX;
+  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(nameAndTitle);
+  if( nh_h == user1DHistsWithSysts_.end() )
+    {
+      std::unique_ptr<TH2D> h(new TH2D(histTitle.c_str(), histTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
+      h->Sumw2();
+      h->SetDirectory(0);
+      currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
+      user1DHistsWithSysts_[nameAndTitle] = std::move(h);
+    }
+  else
+    {
+      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+    }
+}
 
 void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
 {
@@ -2398,6 +2414,12 @@ bool baseClass::writeUserHistos()
       uh_h->second->Write();
     }
   for (map<std::string, std::unique_ptr<TH2D> >::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
+    {
+      //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
+      output_root_->cd();
+      uh_h->second->Write();
+    }
+  for (map<std::string, std::unique_ptr<TH2D> >::iterator uh_h = user1DHistsWithSysts_.begin(); uh_h != user1DHistsWithSysts_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       output_root_->cd();
