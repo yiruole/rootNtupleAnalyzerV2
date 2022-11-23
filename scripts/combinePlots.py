@@ -4,6 +4,7 @@
 import sys
 import string
 from optparse import OptionParser
+import os
 import os.path
 from ROOT import TFile, gROOT
 import re
@@ -276,7 +277,9 @@ outputTableFile = open(
 )
 
 # loop over samples defined in sampleListForMerging
-for sample, pieceList in dictSamples.items():
+for sample, sampleInfo in dictSamples.items():
+    pieceList = sampleInfo["pieces"]
+    corrLHESysts = sampleInfo["correlateLHESystematics"]
     print("-->Look at sample named:", sample, "with piecelist=", pieceList)
     sys.stdout.flush()
 
@@ -369,7 +372,7 @@ for sample, pieceList in dictSamples.items():
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
-            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight)
+            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts)
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
     # validation of combining pieces
