@@ -336,6 +336,9 @@ for sample, sampleInfo in dictSamples.items():
         )
         print("found", xsection_val, "pb")
         sys.stdout.flush()
+        isData = False
+        if float(xsection_val) < 0:
+            isData = True
 
         # print "inputDatFile="+inputDatFile
 
@@ -372,7 +375,7 @@ for sample, sampleInfo in dictSamples.items():
         tablesThisSample.append(data)
 
         if not options.tablesOnly:
-            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts)
+            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
         dictSamplesPiecesAdded[sample].append(matchingPiece)
 
     # validation of combining pieces
@@ -403,7 +406,7 @@ for sample, sampleInfo in dictSamples.items():
 
     # write histos
     if not options.tablesOnly:
-        combineCommon.WriteHistos(outputTfile, histoDictThisSample, True)
+        combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, True)
         if sample in samplesToSave:
             dictFinalHisto[sample] = histoDictThisSample
             dictFinalTables[sample] = combinedTableThisSample
