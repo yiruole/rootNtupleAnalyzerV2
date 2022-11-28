@@ -1,0 +1,1 @@
+root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToDEle_M-2900_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/50000/19ED652C-CC58-5D4F-B54B-FA0FE98B72B6.root
