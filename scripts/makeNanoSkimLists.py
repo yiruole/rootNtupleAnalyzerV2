@@ -44,9 +44,9 @@ def ReadDatasetList(datasetFile):
     datasetList = list()
     with open(datasetFile, "r") as theFile:
         for line in theFile:
-            if not len(line.strip()) > 0:
-                continue
-            if line.strip().startswith("#"):
+            if "#" in line:
+              line = line.split("#")[0]
+            if len(line.strip()) <= 0:
                 continue
             datasetList.append(line.strip())
     return datasetList
@@ -94,7 +94,7 @@ if (
     parser.print_help()
     sys.exit()
 outputDir = options.outputDir.rstrip("/") + "/"
-os.makedirs(outputDir)
+os.makedirs(outputDir, exist_ok=True)  # don't complain if dir exists already
 
 prefix="root://cmsxrootd.fnal.gov/"
 outputFileName = outputDir + "inputListAllCurrent.txt"
