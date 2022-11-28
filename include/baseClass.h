@@ -29,7 +29,7 @@
   std::cout << __FILE__ <<" - Line "<<__LINE__<<" - "<<__FUNCTION__<<": "<< STRING <<std::endl;   \
 }
 
-static const std::string SYSTHISTSUFFIX = "WithSysts";
+static const std::string SYSTHISTSUFFIX = "WithSystematics";
 
 class SimpleCut {
   public:
