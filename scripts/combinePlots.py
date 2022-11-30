@@ -5,14 +5,17 @@ import sys
 import string
 from optparse import OptionParser
 import os
-import os.path
 from ROOT import TFile, gROOT
 import re
+import multiprocessing
+import traceback
+import subprocess
+import time
 
 import combineCommon
 
 
-def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.0, pdfReweight=False):
+def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw=0.0, pdfReweight=False):
     if xsection_val == "-1":
         weight = 1.0
         plotWeight = 1.0
@@ -49,6 +52,155 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, lhePdfWeightSumw=0.
     return weight, plotWeight, xsection_X_intLumi
 
 
+def log_result(result):
+    # This is called whenever foo_pool(i) returns a result.
+    # result_list is modified only by the main process, not the pool workers.
+    result_list.append(result)
+    sys.stdout.write("\r"+logString.format(jobCount, sampleCount))
+    sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+    sys.stdout.flush()
+
+
+def MakeCombinedSample(args):
+    try:
+        sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, tfileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables = args
+        outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
+        histoDictThisSample = {}
+        tablesThisSample = []
+        sampleTable = {}
+        piecesAdded = []
+
+        combineCommon.ParseXSectionFile(options.xsection)
+        piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
+
+        # ---Loop over datasets in the inputlist
+        # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
+        for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
+            if len(piecesAdded) == len(piecesToAdd):
+                break  # we're done!
+            toBeUpdated = False
+            matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
+                dataset_fromInputList.replace("_tree", "")
+            )
+            if matchingPiece in piecesToAdd:
+                toBeUpdated = True
+                # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
+            # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
+            elif matchingPiece.endswith("_reduced_skim"):
+                matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
+                if matchingPieceNoRSK in piecesToAdd:
+                    toBeUpdated = True
+                    matchingPiece = matchingPieceNoRSK
+                    # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
+            # elif matchingPiece.endswith("_ext1"):
+            #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
+            #     if matchingPieceNoExt1 in pieceList:
+            #         toBeUpdated = True
+            #         matchingPiece = matchingPieceNoExt1
+            #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
+            if not toBeUpdated:
+                continue
+
+            # prepare to combine
+            print("\tfound matching dataset:", matchingPiece + " ... ", end=' ')
+            sys.stdout.flush()
+
+            inputDatFile = rootFilename.replace(".root", ".dat")
+            sampleHistos = []
+            print("with file: {}".format(rootFilename))
+            sys.stdout.flush()
+            combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos)
+
+            print("\tlooking up xsection...", end=' ')
+            sys.stdout.flush()
+            xsection_val = combineCommon.lookupXSection(
+                matchingPiece
+            )
+            print("found", xsection_val, "pb")
+            sys.stdout.flush()
+            isData = False
+            if float(xsection_val) < 0:
+                isData = True
+
+            # print "inputDatFile="+inputDatFile
+
+            # ---Read .dat table for current dataset
+            data = combineCommon.ParseDatFile(inputDatFile)
+
+            # ---Calculate weight
+            sumWeights = 0
+            lhePdfWeightSumw = 0
+            for hist in sampleHistos:
+                if "SumOfWeights" in hist.GetName():
+                    sumWeights = hist.GetBinContent(1)
+                elif "LHEPdfSumw" in hist.GetName():
+                    lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
+            Ntot = float(data[0]["Npass"])
+            doPDFReweight = False
+            # FIXME
+            # if "2016" in inputRootFile:
+            #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
+            #         doPDFReweight = doPDFReweight2016LQSignals
+            weight, plotWeight, xsection_X_intLumi = CalculateWeight(
+                Ntot, xsection_val, options.intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw, doPDFReweight
+            )
+            # print "xsection: " + xsection_val,
+            print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ')
+            sys.stdout.flush()
+            print(str(sumWeights))
+            sys.stdout.flush()
+
+            # ---Update table
+            data = combineCommon.FillTableErrors(data, rootFilename)
+            data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
+            sampleTable = combineCommon.UpdateTable(data, sampleTable)
+            tablesThisSample.append(data)
+
+            if not options.tablesOnly:
+                histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
+            piecesAdded.append(matchingPiece)
+
+        # validation of combining pieces
+        # if set(piecesAdded) != set(pieceList):
+        if set(piecesAdded) != set(piecesToAdd):
+            # print
+            # print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
+            # print 'are they equal?',
+            print()
+            # print 'ERROR: for sample',sample,'the pieces added were:'
+            # print sorted(piecesAdded)
+            print("ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:")
+            # print list(set(piecesAdded).symmetric_difference(set(pieceList)))
+            print(list(set(piecesAdded).symmetric_difference(set(piecesToAdd))))
+            print("\twhile the pieces indicated as part of the sample were:")
+            # print sorted(pieceList)
+            print(sorted(piecesToAdd))
+            print("\tand the pieces added were:")
+            print(sorted(piecesAdded))
+            print("\tRefusing to proceed.")
+            raise RuntimeError("sample validation failed")
+
+        # ---Create final tables
+        combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
+        # for writing tables later
+        dictFinalTables[sample] = combinedTableThisSample
+
+        # write histos
+        if not options.tablesOnly:
+            combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, True)
+            if sample in samplesToSave:
+                dictFinalHisto[sample] = histoDictThisSample
+        outputTfile.Close()
+    except Exception as e:
+        print("ERROR: exception in MakeCombinedSample for sample={}".format(sample))
+        traceback.print_exc()
+        raise e
+    return True
+
+
+####################################################################################################
+# RUN
+####################################################################################################
 doProfiling = False
 # for profiling
 if doProfiling:
@@ -158,14 +310,6 @@ parser.add_option(
     help="do the QCD observed 1 pass HEEP 1 fail HEEP yield (cej), subtracting non-QCD processes from data using MC; don't write out any other plots",
     metavar="QCDCLOSURE",
 )
-parser.add_option(
-    "-f",
-    "--logFile",
-    dest="logFile",
-    default="",
-    help="log file from the analysis (used to look for errors)",
-    metavar="LOGFILE",
-)
 
 
 (options, args) = parser.parse_args()
@@ -193,35 +337,15 @@ doPDFReweight2016LQSignals = False
 if doPDFReweight2016LQSignals:
     print("Doing PDF reweighting for 2016 LQ B/D signal samples")
 
-# check logfile for errors if given
-# FIXME: this seems obsolete
-# if os.path.isfile(options.logFile):
-#     foundError = False
-#     with open(options.logFile, "r") as logFile:
-#         for line in logFile:
-#             if (
-#                 "error" in line
-#                 or "ERROR" in line
-#                 and "ERROR in cling::CIFactory::createCI(): cannot extract standard library include paths!"
-#                 not in line
-#             ):
-#                 print "Found error line in logfile:", line
-#                 foundError = True
-#     if foundError:
-#         print "WARNING: FOUND ERRORS IN THE LOGFILE! bailing out..."
-#         sys.exit(-2)
-#     else:
-#         print "Great! Logfile was checked and was completely clean!"
-# else:
-#     print "WARNING: cannot open log file named '" + options.logFile + "'; not checking it"
+ncores = 8
+pool = multiprocessing.Pool(ncores)
+result_list = []
+logString = "INFO: running {} parallel jobs for {} separate samples found in samplesToCombineFile..."
+jobCount = 0
+sampleCount = 0
 
 if not os.path.exists(options.outputDir):
     os.makedirs(options.outputDir)
-
-if not options.tablesOnly:
-    outputTfile = TFile(
-        options.outputDir + "/" + options.analysisCode + "_plots.root", "RECREATE", "", 207
-    )
 
 xsectionDict = combineCommon.ParseXSectionFile(options.xsection)
 # print 'Dataset      XSec'
@@ -233,12 +357,13 @@ dictSamplesPiecesAdded = {}
 for key in dictSamples.keys():
     dictSamplesPiecesAdded[key] = []
 
+manager = multiprocessing.Manager()
 # --- Declare efficiency tables
-dictFinalTables = {}
+dictFinalTables = manager.dict()
 # --- Declare histograms
-dictFinalHisto = {}
+dictFinalHisto = manager.dict()
 # --- Samples to save in final histo dict
-samplesToSave = []
+samplesToSave = manager.list()
 if not options.tablesOnly:
     if options.ttbarBkg:
         ttbarDataRawSampleName = "TTBarUnscaledRawFromDATA"
@@ -275,144 +400,66 @@ if not os.path.isdir(options.outputDir):
 outputTableFile = open(
     options.outputDir + "/" + options.analysisCode + "_tables.dat", "w"
 )
+tfilePrefix = options.outputDir + "/" + options.analysisCode
+sampleTFileNameTemplate = tfilePrefix+"_{}_plots.root"
 
 # loop over samples defined in sampleListForMerging
 for sample, sampleInfo in dictSamples.items():
     pieceList = sampleInfo["pieces"]
     corrLHESysts = sampleInfo["correlateLHESystematics"]
-    print("-->Look at sample named:", sample, "with piecelist=", pieceList)
-    sys.stdout.flush()
+    #print("-->Look at sample named:", sample, "with piecelist=", pieceList)
+    #sys.stdout.flush()
+    #MakeCombinedSample([sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate])
+    # combine
+    try:
+        pool.apply_async(MakeCombinedSample, [[sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables]], callback=log_result)
+        jobCount += 1
+        sampleCount += 1
+    except KeyboardInterrupt:
+        print("\n\nCtrl-C detected: Bailing.")
+        pool.terminate()
+        sys.exit(1)
+    except Exception as e:
+        print("ERROR: caught exception in job for sample: {}; exiting".format(sample))
+        exit(-2)
 
-    histoDictThisSample = {}
-    tablesThisSample = []
-    sampleTable = {}
+# now close the pool and wait for jobs to finish
+pool.close()
+sys.stdout.write(logString.format(jobCount, sampleCount))
+sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+sys.stdout.flush()
+pool.join()
+# check results?
+if len(result_list) < jobCount:
+    print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
+    exit(-2)
+print()
+print("INFO: Done with individual samples")
 
-    piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
+if not options.tablesOnly:
+    print("INFO: hadding individual samples using {} cores...".format(ncores), end=' ')
+    outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
+    # hadd -fk207 -j4 outputFileComb.root [inputFiles]
+    args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
+    args.extend([sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()])
+    #print("DEBUG: command={}".format(" ".join(args)))
+    timeStarted = time.time()
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    timeDelta = time.time() - timeStarted
+    if proc.returncode != 0:
+        raise RuntimeError("ERROR: hadd command '{}' finished with error: '{}'; output looks like '{}'".format(" ".join(args), stderr, stdout))
+    else:
+        print("INFO: Finished hadd in "+str(round(timeDelta/60.0, 2))+" mins.")
+    outputTfile = TFile.Open(outputTFileName)
+    outputTfile.cd()
+# TODO: remove individual sample files
 
-    # ---Loop over datasets in the inputlist
-    # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-    for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
-        if len(dictSamplesPiecesAdded[sample]) == len(piecesToAdd):
-            break  # we're done!
-        toBeUpdated = False
-        matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
-            dataset_fromInputList.replace("_tree", "")
-        )
-        # print("INFO: possible matchingPiece from inputList=", matchingPiece)
-        # print("INFO: piecesToAdd=", piecesToAdd)
-        if matchingPiece in piecesToAdd:
-            toBeUpdated = True
-            # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
-        # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
-        elif matchingPiece.endswith("_reduced_skim"):
-            matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
-            if matchingPieceNoRSK in piecesToAdd:
-                toBeUpdated = True
-                matchingPiece = matchingPieceNoRSK
-                # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
-        # elif matchingPiece.endswith("_ext1"):
-        #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
-        #     if matchingPieceNoExt1 in pieceList:
-        #         toBeUpdated = True
-        #         matchingPiece = matchingPieceNoExt1
-        #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
-        if not toBeUpdated:
-            continue
+# --- Write tables
+for sample in dictSamples.keys():
+   combineCommon.WriteTable(dictFinalTables[sample], sample, outputTableFile)
 
-        # prepare to combine
-        print("\tfound matching dataset:", matchingPiece + " ... ", end=' ')
-        sys.stdout.flush()
-
-        inputDatFile = rootFilename.replace(".root", ".dat")
-        sampleHistos = []
-        print("with file: {}".format(rootFilename))
-        sys.stdout.flush()
-        combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos)
-
-        print("\tlooking up xsection...", end=' ')
-        sys.stdout.flush()
-        xsection_val = combineCommon.lookupXSection(
-            matchingPiece
-        )
-        print("found", xsection_val, "pb")
-        sys.stdout.flush()
-        isData = False
-        if float(xsection_val) < 0:
-            isData = True
-
-        # print "inputDatFile="+inputDatFile
-
-        # ---Read .dat table for current dataset
-        data = combineCommon.ParseDatFile(inputDatFile)
-
-        # ---Calculate weight
-        sumWeights = 0
-        lhePdfWeightSumw = 0
-        for hist in sampleHistos:
-            if "SumOfWeights" in hist.GetName():
-                sumWeights = hist.GetBinContent(1)
-            elif "LHEPdfSumw" in hist.GetName():
-                lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
-        Ntot = float(data[0]["Npass"])
-        doPDFReweight = False
-        # FIXME
-        # if "2016" in inputRootFile:
-        #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
-        #         doPDFReweight = doPDFReweight2016LQSignals
-        weight, plotWeight, xsection_X_intLumi = CalculateWeight(
-            Ntot, xsection_val, options.intLumi, sumWeights, lhePdfWeightSumw, doPDFReweight
-        )
-        # print "xsection: " + xsection_val,
-        print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ')
-        sys.stdout.flush()
-        print(str(sumWeights))
-        sys.stdout.flush()
-
-        # ---Update table
-        data = combineCommon.FillTableErrors(data, rootFilename)
-        data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
-        sampleTable = combineCommon.UpdateTable(data, sampleTable)
-        tablesThisSample.append(data)
-
-        if not options.tablesOnly:
-            histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
-        dictSamplesPiecesAdded[sample].append(matchingPiece)
-
-    # validation of combining pieces
-    piecesAdded = dictSamplesPiecesAdded[sample]
-    # if set(piecesAdded) != set(pieceList):
-    if set(piecesAdded) != set(piecesToAdd):
-        # print
-        # print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
-        # print 'are they equal?',
-        print()
-        # print 'ERROR: for sample',sample,'the pieces added were:'
-        # print sorted(piecesAdded)
-        print("ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:")
-        # print list(set(piecesAdded).symmetric_difference(set(pieceList)))
-        print(list(set(piecesAdded).symmetric_difference(set(piecesToAdd))))
-        print("\twhile the pieces indicated as part of the sample were:")
-        # print sorted(pieceList)
-        print(sorted(piecesToAdd))
-        print("\tand the pieces added were:")
-        print(sorted(piecesAdded))
-        print("\tRefusing to proceed.")
-        raise RuntimeError("sample validation failed")
-
-    # ---Create final tables
-    combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
-    # --- Write tables
-    combineCommon.WriteTable(combinedTableThisSample, sample, outputTableFile)
-
-    # write histos
-    if not options.tablesOnly:
-        combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, True)
-        if sample in samplesToSave:
-            dictFinalHisto[sample] = histoDictThisSample
-            dictFinalTables[sample] = combinedTableThisSample
-        # print "Done"
-
-
+# now handle special backgrounds
 if options.ttbarBkg:
     # special actions for TTBarFromData
     # subtract nonTTbarBkgMC from TTbarRaw
