@@ -4,17 +4,15 @@ YEAR=$1
 
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"
-  SKIMNAME=test_rskSingleEleL_30sep2022
-  #INPUTLIST=config/UL16preVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
-  INPUTLIST=config/inputListNanoSkim_test_UL2016_preVFP/inputListAllCurrent.txt
+  SKIMNAME=rskSingleEleL_12oct2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_preVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_noSkim_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_heep.txt
 elif [ "$YEAR" = "2016postVFP" ]; then
   echo "Doing 2016postVFP!"
-  SKIMNAME=test_rskSingleEleL_30sep2022
-  #INPUTLIST=config/UL16postVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
-  INPUTLIST=config/inputListNanoSkim_test_UL2016_postVFP/inputListAllCurrent.txt
+  SKIMNAME=rskSingleEleL_12oct2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_postVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_noSkim_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_heep.txt
@@ -40,6 +38,7 @@ OUTPUTDIR=/afs/cern.ch/user/s/scooper/work/private/data/Leptoquarks/ultralegacy/
 
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 20 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Events -c $CUTFILE -d $EOSDIR -r
 #python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -j -1 -q workday -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
+#python scripts/launchAnalysis_batch_ForSkimToEOS.py -j -1 -q workday -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n rootTupleTree/tree -c $CUTFILE -d $EOSDIR -r
 # below for nanoSkims
 #python3 scripts/launchAnalysis_batch_ForSkimToEOS.py -j 50 -q tomorrow -i $INPUTLIST -o $OUTPUTDIR -n Evemts -c $CUTFILE -d $EOSDIR -s

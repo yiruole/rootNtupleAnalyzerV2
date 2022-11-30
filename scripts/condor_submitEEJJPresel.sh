@@ -5,16 +5,13 @@ YEAR=$1
 
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"
-  SKIMNAME=pskEEJJ_10aug2022
-  #INPUTLIST=config/inputListsRSK_UL16preVFP_SEleL_5aug2022/inputListAllCurrent.txt
-  INPUTLIST=config/inputListsRSK_UL16preVFP_SEleL_10aug2022/inputListAllCurrent.txt
+  SKIMNAME=pskEEJJ_19oct2022
+  INPUTLIST=config/inputListsRSK_UL16preVFP_SEleL_12oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/FlatNTupleSkims/cutTable_lq_eejj_preselection_skim.txt
 elif [ "$YEAR" = "2016postVFP" ]; then
   echo "Doing 2016postVFP!"
-  SKIMNAME=pskEEJJ_10aug2022
-  #INPUTLIST=config/inputListsRSK_UL16postVFP_SEleL_5aug2022/inputListAllCurrent.txt
-  #INPUTLIST=config/inputListsRSK_UL16postVFP_SEleL_heep_5aug2022/inputListAllCurrent.txt
-  INPUTLIST=config/inputListsRSK_UL16postVFP_SEleL_10aug2022/inputListAllCurrent.txt
+  SKIMNAME=pskEEJJ_19oct2022
+  INPUTLIST=config/inputListsRSK_UL16postVFP_SEleL_12oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/FlatNTupleSkims/cutTable_lq_eejj_preselection_skim.txt
 elif [ "$YEAR" = "2017" ]; then
   #INPUTLIST=config/nanoV7_2017_rskSingleEleL_9apr2021/inputListAllCurrent.txt
