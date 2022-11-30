@@ -45,7 +45,7 @@ fi
 # ANANAME=eejj_optBDT_LQ1700_Mee200sT400_egLoose_6apr2022
 #ANANAME=eejj_nextTry_3aug2022
 #ANANAME=eejj_looseWithHeepEta_9aug2022
-ANANAME=eejj_test_2oct2022_noJetReqsNoDRNoSTNoPtEE_Pt30Pt10_eleSFs_noPrefireWeightNoPUWeight
+ANANAME=eejj_2nov2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_meeBkgSystHist
 #------------
 # inputlist2016=config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt
 # inputlist2016=config/nanoV7_2016_pskEEJJ_4jan2021_comb/inputListAllCurrent.txt
@@ -59,8 +59,12 @@ ANANAME=eejj_test_2oct2022_noJetReqsNoDRNoSTNoPtEE_Pt30Pt10_eleSFs_noPrefireWeig
 #inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_22sep2021/inputListAllCurrent.txt
 #inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_4feb2022/inputListAllCurrent.txt
 #
-inputlist2016pre=config/inputListsTest_RSK_UL16preVFP_SEleL_30sep2022/inputListAllCurrent.txt
-inputlist2016post=config/inputListsTest_RSK_UL16postVFP_SEleL_30sep2022/inputListAllCurrent.txt
+inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_19oct2022/inputListAllCurrent.txt
+inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_19oct2022/inputListAllCurrent.txt
+#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_6oct2022/inputListAllCurrent.txt
+#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_6oct2022/inputListAllCurrent.txt
+#inputlist2016pre=config/inputListsTest_RSK_UL16preVFP_SEleL_30sep2022/inputListAllCurrent.txt
+#inputlist2016post=config/inputListsTest_RSK_UL16postVFP_SEleL_30sep2022/inputListAllCurrent.txt
 #inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_22sep2022/inputListAllCurrent.txt
 #inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_22sep2022/inputListAllCurrent.txt
 #inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_9sep2022/inputListAllCurrent.txt
@@ -86,10 +90,12 @@ CODENAME=analysisClass_lq_eejj
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 # cut files
-cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj_loosePresel.txt"
+cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_preselOnly.txt"
+#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_looserPresel.txt"
+#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj_loosePresel.txt"
 #cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel.txt"
 #cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel_noJetRequirements.txt"
-cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel_noJetRequirements_noPtEE.txt"
+#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel_noJetRequirements_noPtEE.txt"
 #cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj.txt"
 #cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Analysis/cutTable_lq_eejj.txt"
 #cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1400.txt"
@@ -191,9 +197,20 @@ mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
 && mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}_unscaled.log \
 && mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root \
-&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat
-
-mkdir -p $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR} && cd $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR} && python $LQMACRO/plotting2016/makeStackHistoTemplateV2_eejj.py dummy.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root ${YEAR}
+&& mv -v $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables.dat $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_tables_unscaled.dat \
+&& mkdir -p $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR} && cd $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR} && python $LQMACRO/plotting2016/makeStackHistoTemplateV2_eejj.py dummy.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root ${YEAR} \
+&& python $LQMACRO/plotting2016/calc_DYJetsAndTTBarRescale_And_xsecFile.py dummy.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots_unscaled.root ${YEAR} > rescale.log \
+&& cd $LQANA \
+&& time  ./scripts/combinePlots.py \
+    -i $INPUTLIST \
+    -c $CODENAME \
+    -d $OUTDIRPATH/$SUBDIR/condor \
+    -l $(echo "$ILUM*$FACTOR" | bc) \
+    -x $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR}/xsection_13TeV_2022_Mee_BkgControlRegion_gteTwoBtaggedJets_TTbar_Mee_BkgControlRegion_DYJets.txt \
+    -o $OUTDIRPATH/$SUBDIR/output_$suffix \
+    -s $SAMPLELISTFORMERGING \
+    | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
+&& mkdir -p $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR}/scaled && cd $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR}/scaled && python $LQMACRO/plotting2016/makeStackHistoTemplateV2_eejj.py dummy.root $OUTDIRPATH/$SUBDIR/output_$suffix/${CODENAME}_plots.root ${YEAR}
 EOF
 #cat >> $COMMANDFILE <<EOF
 #
