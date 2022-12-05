@@ -220,7 +220,6 @@ if doProfiling:
 gROOT.ProcessLine("gErrorIgnoreLevel=2001;")
 
 # ---Option Parser
-# --- TODO: WHY PARSER DOES NOT WORK IN CMSSW ENVIRONMENT? ---#
 usage = "usage: %prog [options] \nExample: \n./combinePlots.py -i /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/inputListAllCurrent.txt -c analysisClass_genStudies -d /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -l 100 -x /home/santanas/Data/Leptoquarks/RootNtuples/V00-00-06_2008121_163513/xsection_pb_default.txt -o /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/data/output -s /home/santanas/Workspace/Leptoquarks/rootNtupleAnalyzer/config/sampleListForMerging.txt"
 
 parser = OptionParser(usage=usage)
@@ -311,6 +310,15 @@ parser.add_option(
     metavar="QCDCLOSURE",
 )
 
+parser.add_option(
+    "-k",
+    "--keepInputFiles",
+    action="store_true",
+    dest="keepInputFiles",
+    default=False,
+    help="Don't delete individual sample root files (intermediate outputs); defaults to False",
+    metavar="KEEPINPUTFILES",
+)
 
 (options, args) = parser.parse_args()
 
@@ -441,7 +449,8 @@ if not options.tablesOnly:
     outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
-    args.extend([sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()])
+    sampleFiles = [sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()]
+    args.extend(sampleFiles)
     #print("DEBUG: command={}".format(" ".join(args)))
     timeStarted = time.time()
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -453,7 +462,9 @@ if not options.tablesOnly:
         print("INFO: Finished hadd in "+str(round(timeDelta/60.0, 2))+" mins.")
     outputTfile = TFile.Open(outputTFileName)
     outputTfile.cd()
-# TODO: remove individual sample files
+    if not options.keepInputFiles:
+        for fileName in sampleFiles:
+            os.remove(fileName)
 
 # --- Write tables
 for sample in dictSamples.keys():
