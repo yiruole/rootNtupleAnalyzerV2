@@ -2168,8 +2168,15 @@ void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Do
   else {
     map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
     if( nh_h == userTH1Ds_.end() ) {
-      STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
-      exit(-4);
+      map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+      if( nh_h != user1DHistsWithSysts_.end() ) {
+        STDOUT("ERROR: trying to fill histogram which has systs "<<nameAndTitle<<" without passing the cut corresponding to the selection to FillUserTH1D().");
+        exit(-4);
+      }
+      else {
+        STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
+        exit(-4);
+      }
     }
     else {
       nh_h->second->Fill(value, weight);
