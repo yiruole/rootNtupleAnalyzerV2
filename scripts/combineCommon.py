@@ -9,7 +9,7 @@ import re
 import glob
 import copy
 from collections import OrderedDict
-import json
+from ruamel.yaml import YAML
 import numpy as np
 import ROOT as r
 import faulthandler
@@ -132,21 +132,22 @@ def SanitizeDatasetNameFromFullDataset(dataset):
 
 def GetSamplesToCombineDict(sampleListForMerging):
     dictSamples = OrderedDict()
-    with open(sampleListForMerging, "r") as json_file:
-        json_data = json.load(json_file)
-        for sample in json_data:
-            pieces = sample["pieces"]
-            if len(pieces) < 1:
-                raise RuntimeError("GetSamplesToCombineDict(): cannot deal with sample which does not contain at least one piece: '"+sample+"'")
-            key = sample["name"]
-            if key in list(dictSamples.keys()):
-                print("ERROR: GetSamplesToCombineDict(): name '{}' has already been defined earlier in the sampleListForMerging file!".format(key))
-                print("\toffending part looks like '{}'".format(sample))
-                raise RuntimeError("duplicate key found")
-            dictSamples[key] = {}
-            dictSamples[key]["pieces"] = pieces
-            dictSamples[key]["correlateLHESystematics"] = sample["correlateLHESystematics"] if "correlateLHESystematics" in sample.keys() else True
-        # print "dictSamples["+key+"]=", dictSamples[key]
+    with open(sampleListForMerging, "r") as yaml_file:
+        data = YAML().load(yaml_file)
+    data = dict(data)
+    for sample in data.keys():
+        values = dict(data[sample])
+        pieces = values["pieces"]
+        if len(pieces) < 1:
+            raise RuntimeError("GetSamplesToCombineDict(): cannot deal with sample which does not contain at least one piece: '"+sample+"'")
+        if sample in list(dictSamples.keys()):
+            print("ERROR: GetSamplesToCombineDict(): name '{}' has already been defined earlier in the sampleListForMerging file!".format(sample))
+            print("\toffending part looks like '{}'".format(sample))
+            raise RuntimeError("duplicate key found")
+        dictSamples[sample] = {}
+        dictSamples[sample]["pieces"] = pieces
+        dictSamples[sample]["correlateLHESystematics"] = values["correlateLHESystematics"] if "correlateLHESystematics" in values.keys() else True
+    # print "dictSamples["+key+"]=", dictSamples[key]
     return dictSamples
 
 
@@ -1263,8 +1264,7 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
 def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, correlateLHESystematics, isData, systNameToBranchTitleDict):
     histoName = htemp.GetName()
     histoTitle = htemp.GetTitle()
-    if "systematics" in histoName.lower() or "Mee_BkgControlRegion"==histoName:  # XXX FIXME FOR TESTING
-    #if "systematics" in histoName.lower() or "WithSysts" in histoName:
+    if "systematics" in histoName.lower():
         if h in dictFinalHistoAtSample:
             if list(dictFinalHistoAtSample[h].GetYaxis().GetLabels()) != list(htemp.GetYaxis().GetLabels()):
                 if IsHistEmpty(dictFinalHistoAtSample[h]):
@@ -1378,17 +1378,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
             # CheckSystematicsTMapConsistency(dictFinalHistoAtSample[h], htemp)
             # no-op
             return dictFinalHistoAtSample
-        if ("systematics" in histoName.lower() or "Mee_BkgControlRegion"==histoName) and not IsHistEmpty(htemp) and not isData:  # XXX FIXME FOR TESTING
-        #if ("systematics" in histoName.lower() or "WithSystematics" in histoName) and not IsHistEmpty(htemp) and not isData:
-            # XXX FIXME TODO
-            #if "amcatnlo" in tfileName.lower() and "systematics" in histoName.lower() and "diffs" not in histoName.lower():
-            #    # in this case, we check if there are 102 LHEPdfWeights in the y bins, and if so, we remove index 100 and 101 (alpha_S weights)
-            #    yBinLabels = htemp.GetYaxis().GetLabels()
-            #    lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data()]
-            #    if len(lhePdfWeightLabels) == 102:
-            #        print("INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
-            #                len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName))
-            #        htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
+        if "systematics" in histoName.lower() and not IsHistEmpty(htemp) and not isData:
             labelsToAdd = ["LHEPdfWeightMC_UpComb", "LHEPdfWeightMC_DownComb", "LHEPdfWeightHessian_NominalComb"]
             hessianNominalYields = np.zeros(htemp.GetNbinsX()+2)
             pdfSystDeltasUp = np.zeros(htemp.GetNbinsX()+2)
@@ -1461,8 +1451,8 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
             systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
             systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
             if len(systsNotInTempHist) > 0:
-                print("\tINFO: some systematics absent from piece {}; removing them from the systematics histo for combined sample {}. Missing systematics: {}".format(
-                        piece, sample, systsNotInTempHist))
+                print("\tINFO: some systematics absent from piece {}; removing them from {} for combined sample {}. Missing systematics: {}".format(
+                        htemp.GetName(), piece, sample, systsNotInTempHist))
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
                 sys.stdout.flush()
@@ -1473,24 +1463,24 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
             # it can also happen that new systematics appear in htemp that aren't in the dict hist
             systsNotInDictHist = [label for label in systematicsListFromTempHist if label not in systematicsListFromDictHist]
             if len(systsNotInDictHist) > 0:
-                print("\tINFO: some systematics absent from combined sample {}; removing them from the systematics histo for piece {}. Missing systematics: {}".format(
-                        sample, piece, systsNotInDictHist))
+                print("\tINFO: some systematics absent from combined sample {}; removing them from {} for piece {}. Missing systematics: {}".format(
+                        sample, htemp.GetName(), piece, systsNotInDictHist))
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
                 # sys.stdout.flush()
                 # remove systs that are missing from htemp
                 htemp = RemoveHistoBins(htemp, "y", systsNotInDictHist)
             if htemp.GetNbinsX() != dictFinalHistoAtSample[h].GetNbinsX() or htemp.GetNbinsY() != dictFinalHistoAtSample[h].GetNbinsY():
-                raise RuntimeError("htemp to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
-                    htemp.GetNbinsX(), htemp.GetNbinsY(),
+                raise RuntimeError("htemp {} to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
+                    htemp.GetName(), htemp.GetNbinsX(), htemp.GetNbinsY(),
                     dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY()))
             if list(htemp.GetYaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetYaxis().GetLabels()):
-                raise RuntimeError("htemp to be added has y-axis bin labels {} which are inconsistent with existing hist: {}".format(
-                    list(htemp.GetYaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())))
+                raise RuntimeError("htemp {} to be added has y-axis bin labels {} which are inconsistent with existing hist: {}".format(
+                    htemp.GetName(), list(htemp.GetYaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())))
             if dictFinalHistoAtSample[h].GetXaxis().GetLabels():
                 if list(htemp.GetXaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetXaxis().GetLabels()):
-                    raise RuntimeError("htemp to be added has x-axis bin labels {} which are inconsistent with existing hist: {}".format(
-                        list(htemp.GetXaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
+                    raise RuntimeError("htemp {} to be added has x-axis bin labels {} which are inconsistent with existing hist: {}".format(
+                        htemp.GetName(), list(htemp.GetXaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
                 
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
@@ -1529,8 +1519,7 @@ def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, verbose=Fals
         nbytes = 0
         if histo.ClassName() == "TMap":
             nbytes = histo.Write(histo.GetName(), r.TObject.kSingleKey)
-        #elif "TH2" in histo.ClassName() and "systematics" in histo.GetName().lower():
-        elif "TH2" in histo.ClassName() and ("systematics" in histo.GetName().lower() or "Mee_BkgControlRegion" in histo.GetName()): # XXX FIXME for testing only
+        elif "TH2" in histo.ClassName() and "systematics" in histo.GetName().lower():
             pdfWeightLabels = [label.GetString().Data() for label in histo.GetYaxis().GetLabels() if "LHEPdfWeight" in label.GetString().Data() and "comb" not in label.GetString().Data().lower()]
             pdfWeightBins = [histo.GetYaxis().FindFixBin(label) for label in pdfWeightLabels]
             pdfMCVarLabels = ["LHEPdfWeightMC_UpComb", "LHEPdfWeightMC_DownComb"]
