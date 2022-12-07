@@ -2144,7 +2144,7 @@ void baseClass::CreateUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Double_t weight, std::string selection)
 {
-  if(selection!="") {
+  if(selection!="" && haveSystematics()) {
     map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
     if( nh_h == user1DHistsWithSysts_.end() ) {
       STDOUT("ERROR: trying to fill histogram wth systs "<<nameAndTitle<<" that was not defined.");
