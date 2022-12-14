@@ -1219,9 +1219,14 @@ def GetShortHistoName(histName):
 def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeight=1.0, correlateLHESystematics=False, isData=False):
     # print "INFO: UpdateHistoDict for sample {}".format(sample)
     # sys.stdout.flush()
-    sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
-    sampleSystHist = next((x for x in pieceHistoList if x.GetName() == "systematics"), None)
-    systNameToBranchTitleDict = ExtractBranchTitles(sampleSystHist, sampleTMap)
+    systNameToBranchTitleDict = {}
+    if not isData:
+        sampleTMap = next((x for x in pieceHistoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
+        sampleSystHist = next((x for x in pieceHistoList if x.GetName() == "systematics"), None)
+        if sampleSystHist is not None:
+            systNameToBranchTitleDict = ExtractBranchTitles(sampleSystHist, sampleTMap)
+        else:
+            print("WARN: Did not find systematics hist for the sample {}, though it's not data.".format(sample))
     idx = 0
     for pieceHisto in pieceHistoList:
         pieceHistoName = pieceHisto.GetName()
@@ -1253,7 +1258,7 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
     # if comboSystHist is None:
         # print "Could not find comboSystHist in sampleHistoDict"
         # print [x.GetName() for x in sampleHistoDict.values() if "systematics" in x.GetName()]
-    if comboSystHist is not None:
+    if not isData and comboSystHist is not None:
         # ignore pdf/scale weight bins, since we handle them specially
         binLabels = list(comboSystHist.GetYaxis().GetLabels())
         binLabels = [label for label in binLabels if "pdf" not in label.GetString().Data().lower() and "scale" not in label.GetString().Data().lower()]
@@ -1502,13 +1507,16 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
     return dictFinalHistoAtSample
 
 
-def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, verbose=False):
+def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, hasMC=True, verbose=False):
     histoList = sampleHistoDict.values()
     sampleTMap = next((x for x in histoList if x.ClassName() == "TMap" and "systematicNameToBranchesMap" in x.GetName()), None)
     sampleSystHist = next((x for x in histoList if "systematics" == x.GetName().split("__")[-1] ), None)
     #systObjects = [obj.GetName() for obj in sampleHistoDict.values() if "syst" in obj.GetName().lower()]
     #print("for sample={}. found systObjects: {}".format(sample, systObjects))
-    systNameToBranchTitleDict = ExtractBranchTitles(sampleSystHist, sampleTMap)
+    systNameToBranchTitleDict = {}
+    if hasMC:
+        if sampleSystHist is not None:
+            systNameToBranchTitleDict = ExtractBranchTitles(sampleSystHist, sampleTMap)
     outputTfile.cd()
     nHistos = len(sampleHistoDict)
     if verbose:
