@@ -73,6 +73,7 @@ def MakeCombinedSample(args):
         combineCommon.ParseXSectionFile(options.xsection)
         piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
 
+        hasMC = False
         # ---Loop over datasets in the inputlist
         # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
         for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
@@ -121,6 +122,8 @@ def MakeCombinedSample(args):
             isData = False
             if float(xsection_val) < 0:
                 isData = True
+            else:
+                hasMC = True
 
             # print "inputDatFile="+inputDatFile
 
@@ -187,7 +190,7 @@ def MakeCombinedSample(args):
 
         # write histos
         if not options.tablesOnly:
-            combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, True)
+            combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, hasMC, True)
             if sample in samplesToSave:
                 dictFinalHisto[sample] = histoDictThisSample
         outputTfile.Close()
@@ -429,6 +432,8 @@ for sample, sampleInfo in dictSamples.items():
         sys.exit(1)
     except Exception as e:
         print("ERROR: caught exception in job for sample: {}; exiting".format(sample))
+        traceback.print_exc()
+        pool.terminate()
         exit(-2)
 
 # now close the pool and wait for jobs to finish
@@ -443,9 +448,11 @@ if len(result_list) < jobCount:
     exit(-2)
 print()
 print("INFO: Done with individual samples")
+sys.stdout.flush()
 
 if not options.tablesOnly:
     print("INFO: hadding individual samples using {} cores...".format(ncores), end=' ')
+    sys.stdout.flush()
     outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
