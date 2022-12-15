@@ -4,15 +4,17 @@ YEAR=$1
 
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"
-  SKIMNAME=rskSingleEleL_12oct2022
-  INPUTLIST=config/inputListsNanoSkim_UL2016_preVFP_4oct2022/inputListAllCurrent.txt
+  SKIMNAME=rskSingleEleL_1dec2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_preVFP_22nov2022_LQOnly/inputListAllCurrent.txt
+  #INPUTLIST=config/inputListsNanoSkim_UL2016_preVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_noSkim_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_SingleEle_heep.txt
 elif [ "$YEAR" = "2016postVFP" ]; then
   echo "Doing 2016postVFP!"
-  SKIMNAME=rskSingleEleL_12oct2022
-  INPUTLIST=config/inputListsNanoSkim_UL2016_postVFP_4oct2022/inputListAllCurrent.txt
+  SKIMNAME=rskSingleEleL_1dec2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_postVFP_22nov2022_LQOnly/inputListAllCurrent.txt
+  #INPUTLIST=config/inputListsNanoSkim_UL2016_postVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_noSkim_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_loose.txt
   #CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_SingleEle_heep.txt

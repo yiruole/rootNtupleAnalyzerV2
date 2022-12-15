@@ -4,13 +4,13 @@ YEAR=$1
 
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"
-  SKIMNAME=rskQCD_9aug2022
-  INPUTLIST=config/UL16preVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
+  SKIMNAME=rskQCD_2dec2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_preVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/preVFP/cutTable_lq1_skim_QCD.txt
 elif [ "$YEAR" = "2016postVFP" ]; then
   echo "Doing 2016postVFP!"
-  SKIMNAME=rskQCD_9aug2022
-  INPUTLIST=config/UL16postVFP_nanoV9_nanoSkim_29jun2022/inputListAllCurrent.txt
+  SKIMNAME=rskQCD_2dec2022
+  INPUTLIST=config/inputListsNanoSkim_UL2016_postVFP_4oct2022/inputListAllCurrent.txt
   CUTFILE=/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/ReducedSkims/postVFP/cutTable_lq1_skim_QCD.txt
 elif [ "$YEAR" = "2017" ]; then
   SKIMNAME=rskQCD_9aug2022
