@@ -680,7 +680,7 @@ def FillDicts(rootFilename, sampleNames, bkgType):
 ###################################################################################################
 
 blinded = True
-doSystematics = True
+doSystematics = False
 doQCD = False
 doEEJJ = True
 doRPV = False  # to do RPV, set doEEJJ and doRPV to True
@@ -690,25 +690,26 @@ cc.finalSelectionName = "BDTOutput"
 # signalNameTemplate = "LQToUE_M-{}_BetaOne"
 signalNameTemplate = "LQToDEle_M-{}_pair"
 year = "2016preVFP"
+assumedBDTLQMass = 1100
 
-sampleListForMerging = "$LQANA/config/sampleListForMerging_13TeV_eejj_{}.txt"
+sampleListForMerging = "$LQANA/config/sampleListForMerging_13TeV_eejj_{}.yaml"
 #
-sampleListsForMergingQCD = {}
-sampleListsForMergingQCD[2016] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2016.txt"
-sampleListsForMergingQCD[2017] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
-sampleListsForMergingQCD[2018] = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_2017.txt"
+sampleListsForMergingQCD = "$LQANA/config/sampleListForMerging_13TeV_QCD_dataDriven_{}.yaml"
 #
 inputLists = {}
-inputLists["2016preVFP"] = "$LQANA/config/inputListsPSKEEJJ_UL16preVFP_19oct2022/inputListAllCurrent.txt"
+inputLists["2016preVFP"] = "$LQANA/config/inputListsPSKEEJJ_UL16preVFP_1dec2022/inputListAllCurrent.txt"
 #
 qcdFilePaths = {}
+qcdFilePaths["2016preVFP"] = "$LQDATA/ultralegacy/analysis/2016preVFP/qcd_eejj_EGLooseFR_bdtParamFinalSels_7dec2022/output_cutTable_lq_eejj_BDT{}_QCD/".format(assumedBDTLQMass)
 #lqMass = 1700
 #qcdFilePaths[2016] = "$LQDATA/nanoV7/2016/analysis/qcd_eejj_finalSels_EGLooseFR_19jan2022/output_cutTable_lq_eejj_QCD/"
 #
 #dataDir = "$LQDATA/ultralegacy/analysis/2016preVFP/eejj_27oct2022_looserPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK/output_cutTable_lq_eejj_looserPresel/"
 #analysisDir = "$LQANA/versionsOfAnalysis/2016/eejj/eejj_27oct2022_looserPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/"
-dataDir = "$LQDATA/ultralegacy/analysis/2016preVFP/eejj_19oct2022_tighterPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK/output_cutTable_lq_eejj_preselOnly/"
-analysisDir = "$LQANA/versionsOfAnalysis/2016/eejj/eejj_19oct2022_tighterPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/"
+#dataDir = "$LQDATA/ultralegacy/analysis/2016preVFP/eejj_19oct2022_tighterPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK/output_cutTable_lq_eejj_preselOnly/"
+#analysisDir = "$LQANA/versionsOfAnalysis/2016/eejj/eejj_19oct2022_tighterPresel_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/"
+dataDir = "$LQDATA/ultralegacy/analysis/2016preVFP/eejj_7dec2022_bdtParamFinalSels_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK/output_cutTable_lq_eejj_BDT{}/".format(assumedBDTLQMass)
+analysisDir = "$LQANA/versionsOfAnalysis/2016/eejj/eejj_7dec2022_bdtParamFinalSels_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/"
 filePaths = {}
 filePaths["2016preVFP"] = dataDir
 #
@@ -723,7 +724,7 @@ if doEEJJ:
     # )
     inputList = os.path.expandvars(inputLists[year])
     if doQCD:
-        sampleListForMergingQCD = os.path.expandvars(sampleListsForMergingQCD[year])
+        sampleListForMergingQCD = os.path.expandvars(sampleListsForMergingQCD.format(year))
         qcdFilePath = os.path.expandvars(qcdFilePaths[year])
     filePath = os.path.expandvars(filePaths[year])
     xsection = os.path.expandvars(xsecFiles[year])
@@ -825,13 +826,11 @@ else:
     mass_points = []
     #mass_points = [
     #    str(i) for i in range(300, 3100, 100)
-    #]  # go from 300-2000 in 100 GeV steps
+    #]  # go from 300-3000 in 100 GeV steps
     ## mass_points.extend(["3500", "4000"])
-    #if year == 2016:
-    #    # mass_points.remove("2500")  # FIXME 2016
-    #    mass_points = [ "1400", "1500", "1600", "1700"]
-    #elif year == 2017:
-    #    mass_points.remove("3000")  # FIXME 2017
+    mass_points = [
+        str(i) for i in range(1100, 1800, 100)
+    ]
 
 if doEEJJ:
     if doRPV:
@@ -871,7 +870,7 @@ if doEEJJ:
     background_names = [
         "ZJet_amcatnlo_ptBinned_IncStitch" if do2016 else "ZJet_jetAndPtBinned",
         # "TTBarFromDATA",
-        "TTbar_powheg"] + (["QCD(data)"] if doQCD else []) + [
+        "TTbar_powheg"] + (["QCDFakes_DATA"] if doQCD else []) + [
         # "WJet_amcatnlo_ptBinned",
         "DIBOSON_nlo",
         "TRIBOSON",
