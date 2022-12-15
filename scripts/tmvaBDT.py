@@ -60,6 +60,7 @@ variableList = [
     "mass"
 ]
 # EGM Loose ID
+#FIXME: trigSF1 and 2 shouldn't both be applied
 eventWeightExpression = "Weight*PrefireWeight*puWeight*Ele1_RecoSF*Ele2_RecoSF*Ele1_TrigSF*Ele2_TrigSF*Ele1_EGMLooseIDSF*Ele2_EGMLooseIDSF"
 # HEEP
 #eventWeightExpression = "Weight*PrefireWeight*puWeight*Ele1_RecoSF*Ele2_RecoSF*Ele1_TrigSF*Ele2_TrigSF*Ele1_HEEPSF*Ele2_HEEPSF"
@@ -78,148 +79,147 @@ mycuts = TCut("M_e1e2 > 200 && sT_eejj > 400")
 mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
     
 ####################################################################################################
-# datasets -- preselection skims
-# inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_egLoose_4feb2022/"
-# inputListQCDBase = "$LQANA/config/nanoV7_2016_pskQCDEEJJ_egLoose_24mar2022_comb/"
-# inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_masym/"
-# inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_masym/"
-# inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs/"
-# inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs/"
-# inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs_varList/{}/"
-# inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_mejs_varList/{}/"
-# inputListBkgBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_allLQ/{}/"
-# inputListQCDBase = "/tmp/scooper/rdfDatasetInputLists_mee200st400_allLQ/{}/"
-inputListBkgBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
-inputListQCDBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
+# datasets
+#inputListBkgBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
+#inputListQCDBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
+inputListBkgBase = os.getenv("LQANA")+"/config/bdt/inputList_bdtTraining_eejj_finalSels_egLoose_6dec2022_mee200st400_allLQ/{}/"
+inputListQCDBase = inputListBkgBase 
 # HEEP
 # inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_heep_2sep2021/"
 # inputListQCDBase = "$LQANA/config/nanoV7_2016_pskQCDEEJJ_heep_6apr2022_comb/"
 # preselection-skimmed background datasets
+#FIXME: comment out datasets with zero events; should handle this a bit better
+#       this came from the fact that the makeBDTTrainingTrees script doesn't write out files for trees with zero entries
 backgroundDatasetsDict = {
         # "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
         "ZJet_amcatnlo_ptBinned" : [
-            inputListBkgBase+"DYJetsToLL_Zpt-0To50_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_Pt-50To100_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_Pt-100To250_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_Pt-250To400_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_Pt-400To650_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_Pt-650ToInf_amcatnloFXFX_pythia8.txt",
+            #FIXME: add inclusive stitched here; need to apply LHE cut in PSK step
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
             ],
         "TTbar_powheg" : [
-            inputListBkgBase+"TTTo2L2Nu_pythia8.txt",
-            inputListBkgBase+"TTToHadronic_pythia8.txt",
-            inputListBkgBase+"TTToSemiLeptonic_pythia8.txt",
+            inputListBkgBase+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"TTToHadronic_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_APV.txt",
             ],
         "QCDFakes_DATA" : [
-            inputListQCDBase+"SinglePhoton_Run2016H-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016G-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016F-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016E-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016D-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016C-02Apr2020-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016B-02Apr2020_ver2-v1.txt",
+            #inputListQCDBase+"SinglePhoton_Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
             ],
         "DIBOSON_nlo" : [
-            #FIXME: commented out datasets with zero events; should handle this a bit better
-            #       this came from the fact that the makeBDTTrainingTrees script doesn't write out files for trees with zero entries
-            #inputListBkgBase+"WWTo4Q.txt",
-            inputListBkgBase+"WWToLNuQQ.txt",
-            inputListBkgBase+"WWTo2L2Nu.txt",
-            inputListBkgBase+"ZZTo2L2Q_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"ZZTo4L_pythia8.txt",
-            #inputListBkgBase+"ZZTo2Q2Nu_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"ZZTo2L2Nu_pythia8.txt",
-            inputListBkgBase+"WZTo1L3Nu_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WZTo3LNu_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WZTo1L1Nu2Q_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WZTo2L2Q_amcatnloFXFX_pythia8.txt",
+            #inputListBkgBase+"WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8_APV.txt",
+            #inputListBkgBase+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_APV.txt",
+            inputListBkgBase+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            #inputListBkgBase+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
             ],
         "TRIBOSON" : [
-            inputListBkgBase+"WWW_4F_pythia8.txt",
-            inputListBkgBase+"WWZ_pythia8.txt",
-            inputListBkgBase+"WZZ_pythia8.txt",
-            inputListBkgBase+"ZZZ_pythia8.txt",
+            inputListBkgBase+"WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
+            inputListBkgBase+"WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
+            inputListBkgBase+"WZZ_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
+            inputListBkgBase+"ZZZ_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
             ],
         "TTW" : [
-            inputListBkgBase+"TTWJetsToLNu_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"TTWJetsToQQ_amcatnloFXFX_pythia8.txt",
+            inputListBkgBase+"TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_APV.txt",
+            inputListBkgBase+"TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_APV.txt",
             ],
         "TTZ" : [
-            inputListBkgBase+"ttZJets_madgraphMLM.txt"
+            inputListBkgBase+"ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8_APV.txt"
             ],
         "SingleTop" : [
-            inputListBkgBase+"ST_tW_top_5f_inclusiveDecays_ext1_pythia8.txt",
-            inputListBkgBase+"ST_tW_antitop_5f_inclusiveDecays_ext1_pythia8.txt",
-            inputListBkgBase+"ST_t-channel_top_4f_inclusiveDecays.txt",
-            inputListBkgBase+"ST_t-channel_antitop_4f_inclusiveDecays.txt",
-            inputListBkgBase+"ST_s-channel_4f_InclusiveDecays_pythia8.txt",
+            inputListBkgBase+"ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
+            inputListBkgBase+"ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
             ],
-        #"WJet_amcatnlo_jetBinned" : [
-        #    inputListBkgBase+"WToLNu_0J_amcatnloFXFX_pythia8.txt",
-        #    inputListBkgBase+"WToLNu_1J_backup_amcatnloFXFX_pythia8.txt",
-        #    inputListBkgBase+"WToLNu_2J_amcatnloFXFX_pythia8.txt",
-        #    ],
-        "WJet_amcatnlo_ptBinned" : [
-            #inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_Pt-400To600_amcatnloFXFX_pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8.txt",
+        "WJet_amcatnlo_jetBinned" : [
+            #inputListBkgBase+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
             ],
+        # "WJet_amcatnlo_ptBinned" : [
+        #     inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
+        #     inputListBkgBase+"WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8.txt",
+        #     inputListBkgBase+"WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8.txt",
+        #     inputListBkgBase+"WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8.txt",
+        #     inputListBkgBase+"WJetsToLNu_Pt-400To600_amcatnloFXFX_pythia8.txt",
+        #     inputListBkgBase+"WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8.txt",
+        #     ],
         "PhotonJets_Madgraph" : [
             #inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
-            #inputListBkgBase+"GJets_HT-100To200_madgraphMLM.txt",
-            inputListBkgBase+"GJets_HT-200To400_madgraphMLM.txt",
-            inputListBkgBase+"GJets_HT-400To600_madgraphMLM.txt",
-            inputListBkgBase+"GJets_HT-600ToInf_madgraphMLM.txt",
+            #inputListBkgBase+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
             ],
 }
+# these are the same as what comes out of combinePlots.py (i.e., in the log file)
+# TODO: need a better way to handle these, since we have one per MC dataset per era
+# these are the numbers for 2016preVFP
 backgroundDatasetsWeightsTimesOneThousand = {
         # "WJet_amcatnlo_jetBinned" : [0.339337935899, 0.172310335826, 0.0213606587798],
-        "DYJetsToLL_Zpt-0To50_amcatnloFXFX_pythia8" : 0.33620511942,
-        "DYJetsToLL_Pt-50To100_amcatnloFXFX_pythia8" : 0.114625534835,
-        "DYJetsToLL_Pt-100To250_amcatnloFXFX_pythia8" : 0.188510053163,
-        "DYJetsToLL_Pt-250To400_amcatnloFXFX_pythia8" : 0.795115450687,
-        "DYJetsToLL_Pt-400To650_amcatnloFXFX_pythia8" : 11.2325005129,
-        "DYJetsToLL_Pt-650ToInf_amcatnloFXFX_pythia8" : 11.1756034925,
-        "TTTo2L2Nu_pythia8" : 0.585547131056,
-        "TTToHadronic_pythia8" : 0.572359028863,
-        "TTToSemiLeptonic_pythia8" : 0.36631937923,
-        "WWTo4Q" : 856.651276021,
-        "WWToLNuQQ" : 207.201072147,
-        "WWTo2L2Nu" : 198.802581291,
-        "ZZTo2L2Q_amcatnloFXFX_pythia8" : 1.47221360112,
-        "ZZTo4L_pythia8" : 0.475809997084,
-        "ZZTo2Q2Nu_amcatnloFXFX_pythia8" : 0.728060423014,
-        "ZZTo2L2Nu_pythia8" : 0.382723130896,
-        "WZTo1L3Nu_amcatnloFXFX_pythia8" : 11.6251013241,
-        "WZTo3LNu_amcatnloFXFX_pythia8" : 1.93599141046,
-        "WZTo1L1Nu2Q_amcatnloFXFX_pythia8" : 0.910176137249,
-        "WZTo2L2Q_amcatnloFXFX_pythia8" : 0.859835380036,
-        "ST_tW_top_5f_inclusiveDecays_ext1_pythia8" : 184.936486294,
-        "ST_tW_antitop_5f_inclusiveDecays_ext1_pythia8" : 185.462933288,
-        "ST_t-channel_top_4f_inclusiveDecays" : 71.7704250605,
-        "ST_t-channel_antitop_4f_inclusiveDecays" : 73.4648859745,
-        "ST_s-channel_4f_InclusiveDecays_pythia8" : 12.2784973443,
-        "WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8" : 0.121230487882,
-        "WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8" : 0.197285449115,
-        "WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8" : 0.145778733507,
-        "WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8" : 1.4234006515,
-        "WJetsToLNu_Pt-400To600_amcatnloFXFX_pythia8" : 9.54412611451,
-        "WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8" : 9.17993794712,
-        "GJets_HT-40To100_madgraphMLM" : 79724.6223759,
-        "GJets_HT-100To200_madgraphMLM" : 32792.3855087,
-        "GJets_HT-200To400_madgraphMLM" : 4027.44663672,
-        "GJets_HT-400To600_madgraphMLM" : 1945.01356701,
-        "GJets_HT-600ToInf_madgraphMLM" : 669.263854243,
-        "WWW_4F_pythia8" : 149.598485516,
-        "WWZ_pythia8" : 143.827579157,
-        "WZZ_pythia8" : 145.307050001,
-        "ZZZ_pythia8" : 143.285693969,
-        "TTWJetsToLNu_amcatnloFXFX_pythia8" : 3.71148010247,
-        "TTWJetsToQQ_amcatnloFXFX_pythia8" : 23.1528859117,
-        "ttZJets_madgraphMLM" : 0.933902239753,
+        "DYJetsToLL_LHEFilterPtZ-0To50" : 0.021726730863031958,
+        "DYJetsToLL_LHEFilterPtZ-50To100" : 0.025064604525446715,
+        "DYJetsToLL_LHEFilterPtZ-100To250" : 0.07211723680772729,
+        "DYJetsToLL_LHEFilterPtZ-250To400" : 0.3631713593571083,
+        "DYJetsToLL_LHEFilterPtZ-400To650" : 2.7640426378581,
+        "DYJetsToLL_LHEFilterPtZ-650ToInf" : 2.6009925367576185,
+        "TTTo2L2Nu" : 0.5422378354048237,
+        "TTToHadronic" : 0.2057141832229361,
+        "TTToSemiLeptonic" : 0.15263263511758648,
+        "WWTo4Q" : 0.6031769551957746,
+        "WWTo1L1Nu2Q" : 0.5765899794274886,
+        "WWTo2L2Nu" : 7.098486588699867,
+        "ZZTo2Q2L" : 0.8148904888893352,
+        "ZZTo4L" : 0.3924880722370425,
+        "ZZTo2Q2Nu" : 4.741912907584,
+        "ZZTo2L2Nu" : 1.156611399883397,
+        "WZTo1L3Nu" : 9.556878431787064,
+        "WZTo3LNu" : 1.2480885221564577,
+        "WZTo1L1Nu2Q" : 3.1988189341324067,
+        "WZTo2Q2L" : 0.8332744398078211,
+        "ST_tW_top_5f_NoFullyHadronicDecays" : 6.54023482395406,
+        "ST_tW_antitop_5f_NoFullyHadronicDecays" : 6.770595340491985,
+        "ST_t-channel_top_5f_InclusiveDecays" : 0.3888019701337022,
+        "ST_t-channel_antitop_5f_InclusiveDecays" : 0.8914813248256295,
+        "ST_s-channel_4f_leptonDecays" : 3.531858580867974,
+        "WJetsToLNu_0J" : 0.11534942487801471,
+        "WJetsToLNu_1J" : 0.022149605942692937,
+        "WJetsToLNu_2J" : 0.030243327737861578,
+        #"WJetsToLNu_Wpt-0To50" : ,
+        #"WJetsToLNu_Wpt-50To100" : ,
+        #"WJetsToLNu_Pt-100To250" : ,
+        #"WJetsToLNu_Pt-250To400" : ,
+        #"WJetsToLNu_Pt-400To600" : ,
+        #"WJetsToLNu_Pt-600ToInf" : ,
+        #"GJets_HT-40To100_madgraphMLM" : ,
+        "GJets_DR-0p4_HT-100To200" : 19363.224190483783,
+        "GJets_DR-0p4_HT-200To400" : 1500.595696952784,
+        "GJets_DR-0p4_HT-400To600" : 595.9989369170503,
+        "GJets_DR-0p4_HT-600ToInf" : 204.73599765017784,
+        "WWW_4F" : 3.7565470916392854,
+        "WWZ" : 3.8430110810408156,
+        "WZZ" : 3.609874928733453,
+        "ZZZ" : 3.6753630353517175,
+        "TTWJetsToLNu" : 4.417684294295639,
+        "TTWJetsToQQ" : 46.303705837605165,
+        "ttZJets" : 0.6715438141903278,
         "SinglePhoton_Run2016H-02Apr2020-v1" : 1000.0,
         "SinglePhoton_Run2016G-02Apr2020-v1" : 1000.0,
         "SinglePhoton_Run2016F-02Apr2020-v1" : 1000.0,
@@ -227,9 +227,14 @@ backgroundDatasetsWeightsTimesOneThousand = {
         "SinglePhoton_Run2016D-02Apr2020-v1" : 1000.0,
         "SinglePhoton_Run2016C-02Apr2020-v1" : 1000.0,
         "SinglePhoton_Run2016B-02Apr2020_ver2-v1" : 1000.0,
+        "SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
+        "SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
+        "SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
+        "SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
+        "SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
 }
 inputListSignalBase = inputListBkgBase
-signalNameTemplate = "LQToDEle_M-{}_pair_pythia8"
+signalNameTemplate = "LQToDEle_M-{}_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_APV"
 allSignalDatasetsDict = {}
 massList = list(range(300, 3100, 100))
 massList.extend([3500, 4000])
@@ -237,24 +242,24 @@ for mass in massList:
     signalName = signalNameTemplate.format(mass)
     allSignalDatasetsDict[signalName] = [inputListSignalBase+signalName+".txt"]
 allSignalDatasetsWeightsTimesOneThousand = {
-        "LQToDEle_M-2000_pair_pythia8" : 0.0074746828,
-        "LQToDEle_M-1900_pair_pythia8" : 0.0131129752,
-        "LQToDEle_M-1800_pair_pythia8" : 0.0247234163522,
-        "LQToDEle_M-1700_pair_pythia8" : 0.0423445802,
-        "LQToDEle_M-1600_pair_pythia8" : 0.07639671,
-        "LQToDEle_M-1500_pair_pythia8" : 0.140885576,
-        "LQToDEle_M-1400_pair_pythia8" : 0.26362245,
-        "LQToDEle_M-1300_pair_pythia8" : 0.501492394,
-        "LQToDEle_M-1200_pair_pythia8" : 0.96553964,
-        "LQToDEle_M-1100_pair_pythia8" : 1.93394864,
-        "LQToDEle_M-1000_pair_pythia8" : 3.9561301,
-        "LQToDEle_M-900_pair_pythia8" : 8.536346,
-        "LQToDEle_M-800_pair_pythia8" : 19.4189010101,
-        "LQToDEle_M-700_pair_pythia8" : 46.7285420202,
-        "LQToDEle_M-600_pair_pythia8" : 125.387504098,
-        "LQToDEle_M-500_pair_pythia8" : 359.38734,
-        "LQToDEle_M-400_pair_pythia8" : 1300.53742,
-        "LQToDEle_M-300_pair_pythia8" : 6027.09068,
+        "LQToDEle_M-2000_pair" : 100.32078465133672,
+        "LQToDEle_M-1900_pair" : 107.72178754828693,
+        "LQToDEle_M-1800_pair" : 116.72402114444189,
+        "LQToDEle_M-1700_pair" : 124.00613950112923,
+        "LQToDEle_M-1600_pair" : 129.7489507060356,
+        "LQToDEle_M-1500_pair" : 135.92343625640598,
+        "LQToDEle_M-1400_pair" : 140.87231556094815,
+        "LQToDEle_M-1300_pair" : 144.73563520740947,
+        "LQToDEle_M-1200_pair" : 146.30880607495675,
+        "LQToDEle_M-1100_pair" : 148.6728586083759,
+        "LQToDEle_M-1000_pair" : 151.53234516258746,
+        "LQToDEle_M-900_pair" : 150.03888045676996,
+        "LQToDEle_M-800_pair" : 149.74910520889452,
+        "LQToDEle_M-700_pair" : 149.21704401503297,
+        "LQToDEle_M-600_pair" : 149.42342186166195,
+        "LQToDEle_M-500_pair" : 146.66723622777104,
+        "LQToDEle_M-400_pair" : 148.62651103075146,
+        "LQToDEle_M-300_pair" : 146.31523345814628,
 }
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate LQ masses requested..."
@@ -269,7 +274,18 @@ def log_result(result):
     sys.stdout.flush()
 
 
+def FindWeight(fullDatasetName, weightsDict):
+    for key in weightsDict.keys():
+        if key in fullDatasetName:
+            return weightsDict[key]
+        elif key in fullDatasetName.replace("_APV", ""):
+            return weightsDict[key]
+    raise RuntimeError("Could not find matching key in weightsDict for dataset={}; also tried {}. keys in dict {}".format(fullDatasetName, fullDatasetName.replace("_APV", ""), weightsDict.keys()))
+
+
 def LoadChainFromTxtFile(txtFile):
+    if not os.path.isfile(txtFile):
+        raise RuntimeError("File {} does not exist!".format(txtFile))
     fc = TFileCollection("dum","",txtFile)
     if fc.GetNFiles() <= 0:
         raise RuntimeError("Got <= 0 files loaded into the TFileCollection for {}!".format(txtFile))
@@ -302,7 +318,8 @@ def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, 
                 if ch is None:
                     continue
                 nSampleTotEvents+=ch.GetEntries()
-                weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+                #weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+                weight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), weightsTimes1kDict)/1000.0
                 if loader is not None:
                     if signal:
                         loader.AddSignalTree    ( ch, weight )
@@ -320,7 +337,8 @@ def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, 
             if ch is None:
                 continue
             nSampleTotEvents = ch.GetEntries()
-            weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+            #weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+            weight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), weightsTimes1kDict)/1000.0
             if loader is not None:
                 if signal:
                     loader.AddSignalTree    ( ch, weight )
@@ -331,6 +349,7 @@ def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, 
             print("Loaded tree for sample {} with {} entries.".format(key, nSampleTotEvents))
             nTotEvents+=nSampleTotEvents
     print("Total: loaded tree with {} entries.".format(nTotEvents))
+    sys.stdout.flush()
     if loader is None:
         return totalTChain
 
@@ -431,8 +450,9 @@ def TrainParametrizedBDT(lqMassList):
        signalDatasetsDict = {}
        signalDatasetsWeightsTimesOneThousand = {}
        signalDatasetsDict[signalDatasetName] = allSignalDatasetsDict[signalDatasetName]
-       signalDatasetsWeightsTimesOneThousand[signalDatasetName] = allSignalDatasetsWeightsTimesOneThousand[signalDatasetName]
-       LoadDatasets(signalDatasetsDict, signalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMass)
+       #signalDatasetsWeightsTimesOneThousand[signalDatasetName] = FindWeight(signalDatasetName, allSignalDatasetsWeightsTimesOneThousand)
+       #LoadDatasets(signalDatasetsDict, signalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMass)
+       LoadDatasets(signalDatasetsDict, allSignalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMass)
    
    #  Set individual event weights (the variables must exist in the original TTree)
    # if(analysisYear < 2018 && hasBranch("PrefireWeight") && !isData()) --> prefire weight
@@ -495,6 +515,14 @@ def GetSignalTotalEvents(lqMassToUse):
     return unscaledTotalEvts
 
 
+def GetSignalSumWeights(lqMassToUse):
+    hist = GetSignalTotalEventsHist(lqMassToUse, allSignalDatasetsDict)
+    # for TProfiles
+    # unscaledTotalEvts = prof.GetBinContent(1)*prof.GetBinEntries(1)
+    sumWeights = hist.GetBinContent(3)
+    return sumWeights
+
+
 def EvaluateFigureOfMerit(nS, nB, efficiency, bkgEnts, figureOfMerit):
     # see: https://twiki.cern.ch/twiki/bin/view/CMS/FigureOfMerit
     # and https://arxiv.org/pdf/physics/0702156.pdf [1]
@@ -538,7 +566,8 @@ def OptimizeBDTCut(args):
         signalDatasetsWeightsTimesOneThousand = {}
         signalDatasetName = signalNameTemplate.format(lqMassToUse)
         signalDatasetsDict[signalDatasetName] = allSignalDatasetsDict[signalDatasetName]
-        signalDatasetsWeightsTimesOneThousand[signalDatasetName] = allSignalDatasetsWeightsTimesOneThousand[signalDatasetName]
+        #signalDatasetsWeightsTimesOneThousand[signalDatasetName] = allSignalDatasetsWeightsTimesOneThousand[signalDatasetName]
+        signalDatasetsWeightsTimesOneThousand[signalDatasetName] = FindWeight(signalDatasetName, allSignalDatasetsWeightsTimesOneThousand)
         print(signalDatasetsDict)
         print(signalDatasetsWeightsTimesOneThousand)
         TMVA.Tools.Instance()
@@ -590,7 +619,8 @@ def OptimizeBDTCut(args):
                 histName = "BDTVal_{}_{}".format(sample, idx)
                 hbkg = TH1D(histName, histName, 10000, -1, 1)
                 histBkg = df.Histo1D(ROOT.RDF.TH1DModel(hbkg), "BDT", "eventWeight")
-                bkgWeight = backgroundDatasetsWeightsTimesOneThousand[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+                #bkgWeight = backgroundDatasetsWeightsTimesOneThousand[os.path.basename(txtFile).replace(".txt", "")]/1000.0
+                bkgWeight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), backgroundDatasetsWeightsTimesOneThousand)/1000.0
                 histBkg.Scale(bkgWeight)
                 bkgTotal.Add(histBkg.GetPtr())
                 #h = df.Histo1D(hbkg, "BDT", "eventWeight")
@@ -655,11 +685,12 @@ def OptimizeBDTCut(args):
         print("totalBackground=", bkgTotal.Integral())
 
         # now optimize
-        totalSignalEventsUnscaled = GetSignalTotalEvents(lqMassToUse)
+        #totalSignalEventsUnscaled = GetSignalTotalEvents(lqMassToUse)
+        sumWeights = GetSignalSumWeights(lqMassToUse)
         fomValueToCutInfoDict = {}
         for iBin in range(1, hbkg.GetNbinsX()+1):
             nS = histSig.Integral(iBin, hsig.GetNbinsX())
-            efficiency = nS/(signalWeight*totalSignalEventsUnscaled)  #FIXME?
+            efficiency = nS/(signalWeight*sumWeights)
             nB = bkgTotal.Integral(iBin, hbkg.GetNbinsX())
             cutVal = histSig.GetBinLowEdge(iBin)
             # if nB < 3:
@@ -714,14 +745,14 @@ def GetMassFloat(mass):
 ####################################################################################################
 if __name__ == "__main__":
     gROOT.SetBatch()
-    train = True
+    train = False
     optimize = True
     parallelize = True
-    parametrized = False
+    parametrized = True
     # lqMassesToUse = [1400, 1500, 1600, 1700]
-    # lqMassesToUse = list(range(1000, 2100, 100))
+    lqMassesToUse = list(range(1000, 2100, 100))
     # lqMassesToUse = list(range(300, 2100, 100))
-    lqMassesToUse = [300, 600, 900, 1200]
+    #lqMassesToUse = [300, 600, 900, 1200]
     #FIXME this should take the output of the training part
     # weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/train_14-17/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
     # weightFile = "/tmp/scooper/baselineNoMasym/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
@@ -740,7 +771,8 @@ if __name__ == "__main__":
     # weightFile = "/tmp/scooper/redoAgain_dedicatedBDTs/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_pythia8_BDTG.weights.xml"
     # weightFile = "/tmp/scooper/redoAgain_parametrizedBDT1400to1700/dataset/weights/TMVAClassification_BDTG.weights.xml"
     # weightFile = "/tmp/scooper/parametrizedBDT300to2000/dataset/weights/TMVAClassification_BDTG.weights.xml"
-    weightFile = os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/bdt/egmLooseIDWithQCD/redoAgain_dedicatedBDTs/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_pythia8_BDTG.weights.xml"
+    #weightFile = os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/bdt/egmLooseIDWithQCD/redoAgain_dedicatedBDTs/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_pythia8_BDTG.weights.xml"
+    weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/eejj/eejj_1dec2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/bdt/dataset/weights/TMVAClassification_BDTG.weights.xml"
     
     if train:
         if parametrized:
@@ -772,8 +804,7 @@ if __name__ == "__main__":
                 pool.join()
                 # check results?
                 if len(result_list) < jobCount:
-                    print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
-                    exit(-2)
+                    raise RuntimeError("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
             else:
                 for mass in lqMassesToUse:
                     TrainBDT([mass])
@@ -805,8 +836,7 @@ if __name__ == "__main__":
             pool.join()
             # check results?
             if len(result_list) < jobCount:
-                print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
-                exit(-2)
+                raise RuntimeError("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
         else:
             for mass in lqMassesToUse:
                 OptimizeBDTCut([weightFile.format(mass), mass])
