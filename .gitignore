@@ -16,3 +16,8 @@ src/analysisClass.C
 __pycache__
 *.pyc
 *.swp
+.cache
+CMakeCache.txt
+CMakeFiles/
+build/
+*.bak
