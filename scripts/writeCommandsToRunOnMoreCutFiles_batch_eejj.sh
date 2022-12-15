@@ -45,7 +45,8 @@ fi
 # ANANAME=eejj_optBDT_LQ1700_Mee200sT400_egLoose_6apr2022
 #ANANAME=eejj_nextTry_3aug2022
 #ANANAME=eejj_looseWithHeepEta_9aug2022
-ANANAME=eejj_2nov2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_meeBkgSystHist
+#ANANAME=eejj_2nov2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_meeBkgSystHist
+ANANAME=eejj_7dec2022_bdtParamFinalSels_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK
 #------------
 # inputlist2016=config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt
 # inputlist2016=config/nanoV7_2016_pskEEJJ_4jan2021_comb/inputListAllCurrent.txt
@@ -59,8 +60,10 @@ ANANAME=eejj_2nov2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_mee
 #inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_22sep2021/inputListAllCurrent.txt
 #inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_4feb2022/inputListAllCurrent.txt
 #
-inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_19oct2022/inputListAllCurrent.txt
-inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_19oct2022/inputListAllCurrent.txt
+inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_1dec2022/inputListAllCurrent.txt
+inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_1dec2022/inputListAllCurrent.txt
+#inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_19oct2022/inputListAllCurrent.txt
+#inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_19oct2022/inputListAllCurrent.txt
 #inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_6oct2022/inputListAllCurrent.txt
 #inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_6oct2022/inputListAllCurrent.txt
 #inputlist2016pre=config/inputListsTest_RSK_UL16preVFP_SEleL_30sep2022/inputListAllCurrent.txt
@@ -90,7 +93,12 @@ CODENAME=analysisClass_lq_eejj
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
 # cut files
-cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_preselOnly.txt"
+cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1300.txt
+/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1200.txt
+/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1100.txt
+"
+#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_preselOnly.txt"
+#
 #cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_looserPresel.txt"
 #cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj_loosePresel.txt"
 #cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel.txt"
@@ -136,7 +144,7 @@ elif [ "$YEAR" = "2017" ]; then
   INPUTLIST=$inputlist2017
   excludeCombining="-e LQToBEle*"
 elif [ "$YEAR" = "2018" ]; then
-  echo "Doing 2087!"
+  echo "Doing 2018!"
   ILUM=$ilumi2018
   INPUTLIST=$inputlist2018
 else
@@ -160,7 +168,7 @@ SUBDIR=ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
 #EOSDIR=/eos/user/s/scooper/LQ/NanoV7/${YEAR}/$DIRSTR/$ANANAME
 EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
 COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_${YEAR}_${DIRSTR}_batch_$(hostname -s).txt
-SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj_${YEAR}.txt
+SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj_${YEAR}.yaml
 #------------
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
@@ -181,15 +189,15 @@ cat >> $COMMANDFILE <<EOF
 ####################################################
 #### launch, check and combine cmds for $suffix ####
 # 1 job per dataset
-python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor -c $file -q $queue -d $EOSDIR -j 1 -n rootTupleTree/tree
+python scripts/launchAnalysis_batch_ForSkimToEOS.py -i $INPUTLIST -o $OUTDIRPATH/$SUBDIR/condor_$suffix -c $file -q $queue -d $EOSDIR/$suffix -j 1 -n rootTupleTree/tree
 
-./scripts/checkJobs.sh $OUTDIRPATH/$SUBDIR/condor $OUTDIRPATH/$SUBDIR/condor
+./scripts/checkJobs.sh $OUTDIRPATH/$SUBDIR/condor_$suffix $OUTDIRPATH/$SUBDIR/condor_$suffix
 
 mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
 && time  ./scripts/combinePlots.py \
     -i $INPUTLIST \
     -c $CODENAME \
-    -d $OUTDIRPATH/$SUBDIR/condor \
+    -d $OUTDIRPATH/$SUBDIR/condor_$suffix \
     -l  $(echo "$ILUM*$FACTOR" | bc) \
     -x $XSECTION  \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
@@ -204,7 +212,7 @@ mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
 && time  ./scripts/combinePlots.py \
     -i $INPUTLIST \
     -c $CODENAME \
-    -d $OUTDIRPATH/$SUBDIR/condor \
+    -d $OUTDIRPATH/$SUBDIR/condor_$suffix \
     -l $(echo "$ILUM*$FACTOR" | bc) \
     -x $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR}/xsection_13TeV_2022_Mee_BkgControlRegion_gteTwoBtaggedJets_TTbar_Mee_BkgControlRegion_DYJets.txt \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
