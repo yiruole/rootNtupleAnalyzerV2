@@ -5,12 +5,14 @@
 
 from array import array
 from collections import OrderedDict
-import numpy as np
 import sys
 import os
 import math
 import multiprocessing
 import traceback
+import copy
+
+from combineCommon import ParseXSectionFile, lookupXSection
 
 import ROOT
 from ROOT import TMVA, TFile, TString, TCut, TChain, TFileCollection, gROOT, gDirectory, gInterpreter, TEntryList, TH1D, TProfile, RDataFrame
@@ -82,7 +84,8 @@ mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
 # datasets
 #inputListBkgBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
 #inputListQCDBase = os.getenv("LQANA")+"/config/rdfDatasetInputLists_mee200st400_allLQ/{}/"
-inputListBkgBase = os.getenv("LQANA")+"/config/bdt/inputList_bdtTraining_eejj_finalSels_egLoose_6dec2022_mee200st400_allLQ/{}/"
+#inputListBkgBase = os.getenv("LQANA")+"/config/bdt/inputList_bdtTraining_eejj_finalSels_egLoose_6dec2022_mee200st400_allLQ/{}/"
+inputListBkgBase = os.getenv("LQANA")+"/config/bdt/inputList_UL16postVFP_bdtTraining_eejj_finalSels_egLoose_19dec2022_mee200st400_allLQ/{}/"
 inputListQCDBase = inputListBkgBase 
 # HEEP
 # inputListBkgBase = "$LQANA/config/nanoV7_2016_analysisPreselSkims_heep_2sep2021/"
@@ -94,64 +97,56 @@ backgroundDatasetsDict = {
         # "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
         "ZJet_amcatnlo_ptBinned" : [
             #FIXME: add inclusive stitched here; need to apply LHE cut in PSK step
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
             ],
         "TTbar_powheg" : [
-            inputListBkgBase+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"TTToHadronic_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            ],
-        "QCDFakes_DATA" : [
-            #inputListQCDBase+"SinglePhoton_Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListBkgBase+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"TTToHadronic_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.txt",
             ],
         "DIBOSON_nlo" : [
-            #inputListBkgBase+"WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8_APV.txt",
-            #inputListBkgBase+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8_APV.txt",
-            inputListBkgBase+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            #inputListBkgBase+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            #inputListBkgBase+"WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8.txt",
+            #inputListBkgBase+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8.txt",
+            inputListBkgBase+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            #inputListBkgBase+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
             ],
         "TRIBOSON" : [
-            inputListBkgBase+"WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
-            inputListBkgBase+"WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
-            inputListBkgBase+"WZZ_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
-            inputListBkgBase+"ZZZ_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
+            inputListBkgBase+"WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+            inputListBkgBase+"WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+            inputListBkgBase+"WZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+            inputListBkgBase+"ZZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
             ],
         "TTW" : [
-            inputListBkgBase+"TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_APV.txt",
-            inputListBkgBase+"TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_APV.txt",
+            inputListBkgBase+"TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
+            inputListBkgBase+"TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
             ],
         "TTZ" : [
-            inputListBkgBase+"ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8_APV.txt"
+            inputListBkgBase+"ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8.txt"
             ],
         "SingleTop" : [
-            inputListBkgBase+"ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_APV.txt",
-            inputListBkgBase+"ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8_APV.txt",
+            inputListBkgBase+"ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+            inputListBkgBase+"ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8.txt",
             ],
         "WJet_amcatnlo_jetBinned" : [
-            #inputListBkgBase+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
-            inputListBkgBase+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8_APV.txt",
+            #inputListBkgBase+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+            inputListBkgBase+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
             ],
         # "WJet_amcatnlo_ptBinned" : [
         #     inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
@@ -163,104 +158,30 @@ backgroundDatasetsDict = {
         #     ],
         "PhotonJets_Madgraph" : [
             #inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
-            #inputListBkgBase+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8_APV.txt",
+            #inputListBkgBase+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+            inputListBkgBase+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
             ],
 }
-# these are the same as what comes out of combinePlots.py (i.e., in the log file)
-# TODO: need a better way to handle these, since we have one per MC dataset per era
-# these are the numbers for 2016preVFP
-backgroundDatasetsWeightsTimesOneThousand = {
-        # "WJet_amcatnlo_jetBinned" : [0.339337935899, 0.172310335826, 0.0213606587798],
-        "DYJetsToLL_LHEFilterPtZ-0To50" : 0.021726730863031958,
-        "DYJetsToLL_LHEFilterPtZ-50To100" : 0.025064604525446715,
-        "DYJetsToLL_LHEFilterPtZ-100To250" : 0.07211723680772729,
-        "DYJetsToLL_LHEFilterPtZ-250To400" : 0.3631713593571083,
-        "DYJetsToLL_LHEFilterPtZ-400To650" : 2.7640426378581,
-        "DYJetsToLL_LHEFilterPtZ-650ToInf" : 2.6009925367576185,
-        "TTTo2L2Nu" : 0.5422378354048237,
-        "TTToHadronic" : 0.2057141832229361,
-        "TTToSemiLeptonic" : 0.15263263511758648,
-        "WWTo4Q" : 0.6031769551957746,
-        "WWTo1L1Nu2Q" : 0.5765899794274886,
-        "WWTo2L2Nu" : 7.098486588699867,
-        "ZZTo2Q2L" : 0.8148904888893352,
-        "ZZTo4L" : 0.3924880722370425,
-        "ZZTo2Q2Nu" : 4.741912907584,
-        "ZZTo2L2Nu" : 1.156611399883397,
-        "WZTo1L3Nu" : 9.556878431787064,
-        "WZTo3LNu" : 1.2480885221564577,
-        "WZTo1L1Nu2Q" : 3.1988189341324067,
-        "WZTo2Q2L" : 0.8332744398078211,
-        "ST_tW_top_5f_NoFullyHadronicDecays" : 6.54023482395406,
-        "ST_tW_antitop_5f_NoFullyHadronicDecays" : 6.770595340491985,
-        "ST_t-channel_top_5f_InclusiveDecays" : 0.3888019701337022,
-        "ST_t-channel_antitop_5f_InclusiveDecays" : 0.8914813248256295,
-        "ST_s-channel_4f_leptonDecays" : 3.531858580867974,
-        "WJetsToLNu_0J" : 0.11534942487801471,
-        "WJetsToLNu_1J" : 0.022149605942692937,
-        "WJetsToLNu_2J" : 0.030243327737861578,
-        #"WJetsToLNu_Wpt-0To50" : ,
-        #"WJetsToLNu_Wpt-50To100" : ,
-        #"WJetsToLNu_Pt-100To250" : ,
-        #"WJetsToLNu_Pt-250To400" : ,
-        #"WJetsToLNu_Pt-400To600" : ,
-        #"WJetsToLNu_Pt-600ToInf" : ,
-        #"GJets_HT-40To100_madgraphMLM" : ,
-        "GJets_DR-0p4_HT-100To200" : 19363.224190483783,
-        "GJets_DR-0p4_HT-200To400" : 1500.595696952784,
-        "GJets_DR-0p4_HT-400To600" : 595.9989369170503,
-        "GJets_DR-0p4_HT-600ToInf" : 204.73599765017784,
-        "WWW_4F" : 3.7565470916392854,
-        "WWZ" : 3.8430110810408156,
-        "WZZ" : 3.609874928733453,
-        "ZZZ" : 3.6753630353517175,
-        "TTWJetsToLNu" : 4.417684294295639,
-        "TTWJetsToQQ" : 46.303705837605165,
-        "ttZJets" : 0.6715438141903278,
-        "SinglePhoton_Run2016H-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016G-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016F-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016E-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016D-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016C-02Apr2020-v1" : 1000.0,
-        "SinglePhoton_Run2016B-02Apr2020_ver2-v1" : 1000.0,
-        "SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
-        "SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
-        "SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
-        "SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
-        "SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2" : 1000.0,
+qcdFakes2016pre = {
+        "QCDFakes_DATA" : [
+            #inputListQCDBase+"SinglePhoton_Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            ]
 }
-inputListSignalBase = inputListBkgBase
-signalNameTemplate = "LQToDEle_M-{}_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_APV"
-allSignalDatasetsDict = {}
-massList = list(range(300, 3100, 100))
-massList.extend([3500, 4000])
-for mass in massList:
-    signalName = signalNameTemplate.format(mass)
-    allSignalDatasetsDict[signalName] = [inputListSignalBase+signalName+".txt"]
-allSignalDatasetsWeightsTimesOneThousand = {
-        "LQToDEle_M-2000_pair" : 100.32078465133672,
-        "LQToDEle_M-1900_pair" : 107.72178754828693,
-        "LQToDEle_M-1800_pair" : 116.72402114444189,
-        "LQToDEle_M-1700_pair" : 124.00613950112923,
-        "LQToDEle_M-1600_pair" : 129.7489507060356,
-        "LQToDEle_M-1500_pair" : 135.92343625640598,
-        "LQToDEle_M-1400_pair" : 140.87231556094815,
-        "LQToDEle_M-1300_pair" : 144.73563520740947,
-        "LQToDEle_M-1200_pair" : 146.30880607495675,
-        "LQToDEle_M-1100_pair" : 148.6728586083759,
-        "LQToDEle_M-1000_pair" : 151.53234516258746,
-        "LQToDEle_M-900_pair" : 150.03888045676996,
-        "LQToDEle_M-800_pair" : 149.74910520889452,
-        "LQToDEle_M-700_pair" : 149.21704401503297,
-        "LQToDEle_M-600_pair" : 149.42342186166195,
-        "LQToDEle_M-500_pair" : 146.66723622777104,
-        "LQToDEle_M-400_pair" : 148.62651103075146,
-        "LQToDEle_M-300_pair" : 146.31523345814628,
+qcdFakes2016post = {
+        "QCDFakes_DATA" : [
+            inputListQCDBase+"SinglePhoton_Run2016H-UL2016_MiniAODv2_NanoAODv9-v1.txt",
+            inputListQCDBase+"SinglePhoton_Run2016G-UL2016_MiniAODv2_NanoAODv9-v2.txt",
+            inputListQCDBase+"SinglePhoton_Run2016F-UL2016_MiniAODv2_NanoAODv9-v1.txt",
+            ]
 }
+
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate LQ masses requested..."
 
@@ -274,16 +195,17 @@ def log_result(result):
     sys.stdout.flush()
 
 
-def FindWeight(fullDatasetName, weightsDict):
-    for key in weightsDict.keys():
-        if key in fullDatasetName:
-            return weightsDict[key]
-        elif key in fullDatasetName.replace("_APV", ""):
-            return weightsDict[key]
-    raise RuntimeError("Could not find matching key in weightsDict for dataset={}; also tried {}. keys in dict {}".format(fullDatasetName, fullDatasetName.replace("_APV", ""), weightsDict.keys()))
+def CalcWeight(fullDatasetName, intLumi, sumWeights):
+    fullDatasetName = fullDatasetName.replace("_APV", "")
+    xsec = float(lookupXSection(fullDatasetName))
+    if xsec > 0:
+        return intLumi*xsec/sumWeights
+    else:
+        return 1.0  # in the case of data
 
 
-def LoadChainFromTxtFile(txtFile):
+def LoadChainFromTxtFile(txtFile, console=None):
+    txtFile = os.path.expandvars(txtFile)
     if not os.path.isfile(txtFile):
         raise RuntimeError("File {} does not exist!".format(txtFile))
     fc = TFileCollection("dum","",txtFile)
@@ -295,14 +217,20 @@ def LoadChainFromTxtFile(txtFile):
     # for branchName in neededBranches:
     #     ch.SetBranchStatus(branchName, 1)
     if ch.GetEntries() <= 0:
-        print("WARNING: Got <= 0 entries for dataset={}; returning None!".format(txtFile))
+        logString = "WARNING: Got <= 0 entries for dataset={}; returning None!".format(txtFile)
+        if console is not None:
+            console.print(logString)
+        print(logString)
         return None
     else:
-        print("INFO: Got {} entries for dataset={}".format(ch.GetEntries(), txtFile))
+        logString = "INFO: Got {} entries for dataset={}".format(ch.GetEntries(), txtFile)
+        if console is not None:
+            console.print(logString)
+        print(logString)
     return ch
 
 
-def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, loader=None, lqMass=None, nLQPoints=1):
+def LoadDatasets(datasetDict, neededBranches, signal=False, loader=None, lqMass=None, nLQPoints=1):
     nTotEvents = 0
     if loader is None:
         totalTChain = TChain("rootTupleTree/tree")
@@ -312,14 +240,15 @@ def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, 
             # print(value)
             nSampleTotEvents = 0
             for count, txtFile in enumerate(value):
-                # print("Add file={} to collection".format(txtFile))
                 txtFile = txtFile.format(lqMass)
                 ch = LoadChainFromTxtFile(txtFile)
                 if ch is None:
                     continue
                 nSampleTotEvents+=ch.GetEntries()
-                #weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
-                weight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), weightsTimes1kDict)/1000.0
+                datasetName = os.path.basename(txtFile).replace(".txt", "")
+                sumWeights = GetBackgroundSumWeights(datasetName, txtFile)
+                weight = CalcWeight(datasetName, intLumi, sumWeights)
+                print("Add file={} with weight*1000={} to collection".format(txtFile, weight*1000))
                 if loader is not None:
                     if signal:
                         loader.AddSignalTree    ( ch, weight )
@@ -337,8 +266,10 @@ def LoadDatasets(datasetDict, weightsTimes1kDict, neededBranches, signal=False, 
             if ch is None:
                 continue
             nSampleTotEvents = ch.GetEntries()
-            #weight = weightsTimes1kDict[os.path.basename(txtFile).replace(".txt", "")]/1000.0
-            weight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), weightsTimes1kDict)/1000.0
+            datasetName = os.path.basename(txtFile).replace(".txt", "")
+            sumWeights = GetBackgroundSumWeights(datasetName, txtFile)
+            weight = CalcWeight(datasetName, intLumi, sumWeights)
+            print("Add file={} with weight*1000={} to collection".format(txtFile, weight*1000))
             if loader is not None:
                 if signal:
                     loader.AddSignalTree    ( ch, weight )
@@ -359,16 +290,9 @@ def TrainBDT(args):
     # just one use the single LQ signal specified by mass just above
     try:
         signalDatasetsDict = {}
-        signalDatasetsWeightsTimesOneThousand = {}
         signalDatasetName = signalNameTemplate.format(lqMassToUse)
-        #for key in allSignalDatasetsDict:
-        #    if signalNameTemplate.format(lqMassToUse) == key:
-        #        signalDatasetsDict[key] = allSignalDatasetsDict[key]
-        #        signalDatasetsWeightsTimesOneThousand[key] = allSignalDatasetsWeightsTimesOneThousand[key]
         signalDatasetsDict[signalDatasetName] = allSignalDatasetsDict[signalDatasetName]
-        signalDatasetsWeightsTimesOneThousand[signalDatasetName] = allSignalDatasetsWeightsTimesOneThousand[signalDatasetName]
         print(signalDatasetsDict)
-        print(signalDatasetsWeightsTimesOneThousand)
         
         outputFile = TFile.Open("TMVA_ClassificationOutput_"+signalDatasetName+".root", "RECREATE")
         
@@ -376,8 +300,8 @@ def TrainBDT(args):
         factory = TMVA.Factory("TMVAClassification_"+signalDatasetName, outputFile, "!V:ROC:!Silent:Color:DrawProgressBar:AnalysisType=Classification")
         
         loader = TMVA.DataLoader("dataset")
-        LoadDatasets(backgroundDatasetsDict, backgroundDatasetsWeightsTimesOneThousand, neededBranches, signal=False, loader=loader, lqMass=lqMassToUse)
-        LoadDatasets(signalDatasetsDict, signalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMassToUse)
+        LoadDatasets(backgroundDatasetsDict, neededBranches, signal=False, loader=loader, lqMass=lqMassToUse)
+        LoadDatasets(signalDatasetsDict, neededBranches, signal=True, loader=loader, lqMass=lqMassToUse)
         
         #  Set individual event weights (the variables must exist in the original TTree)
         # if(analysisYear < 2018 && hasBranch("PrefireWeight") && !isData()) --> prefire weight
@@ -445,14 +369,11 @@ def TrainParametrizedBDT(lqMassList):
    
    loader = TMVA.DataLoader("dataset")
    for lqMass in lqMassList:
-       LoadDatasets(backgroundDatasetsDict, backgroundDatasetsWeightsTimesOneThousand, neededBranches, signal=False, loader=loader, lqMass=lqMass, nLQPoints=len(lqMassList))
+       LoadDatasets(backgroundDatasetsDict, neededBranches, signal=False, loader=loader, lqMass=lqMass, nLQPoints=len(lqMassList))
        signalDatasetName = signalNameTemplate.format(lqMass)
        signalDatasetsDict = {}
-       signalDatasetsWeightsTimesOneThousand = {}
        signalDatasetsDict[signalDatasetName] = allSignalDatasetsDict[signalDatasetName]
-       #signalDatasetsWeightsTimesOneThousand[signalDatasetName] = FindWeight(signalDatasetName, allSignalDatasetsWeightsTimesOneThousand)
-       #LoadDatasets(signalDatasetsDict, signalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMass)
-       LoadDatasets(signalDatasetsDict, allSignalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=loader, lqMass=lqMass)
+       LoadDatasets(signalDatasetsDict, neededBranches, signal=True, loader=loader, lqMass=lqMass)
    
    #  Set individual event weights (the variables must exist in the original TTree)
    # if(analysisYear < 2018 && hasBranch("PrefireWeight") && !isData()) --> prefire weight
@@ -477,7 +398,7 @@ def TrainParametrizedBDT(lqMassList):
    outputFile.Close()
 
 
-def GetSignalTotalEventsHist(lqMassToUse, signalDict):
+def GetTotalEventsHist(lqMassToUse, signalDict, signalNameTemplate):
     signalDatasetName = signalNameTemplate.format(lqMassToUse)
     txtFiles = signalDict[signalDatasetName]
     # profName = "EventsPassingCuts_unscaled"
@@ -489,7 +410,6 @@ def GetSignalTotalEventsHist(lqMassToUse, signalDict):
         with open(os.path.expandvars(txtFile), "r") as theTxtFile:
             for line in theTxtFile:
                 line = line.strip()
-                # print("GetSignalTotalEventsHist() Opening file='{}'".format(line))
                 tfile = TFile.Open(os.path.expandvars(line))
                 tfiles.append(tfile)
                 unscaledEvtsHist = tfile.Get(histName)
@@ -497,9 +417,8 @@ def GetSignalTotalEventsHist(lqMassToUse, signalDict):
                     unscaledEvtsHist = tfile.Get("EventCounter")
                     if unscaledEvtsHist.ClassName() != "TH1D":
                         raise RuntimeError("Expected class TH1D for object names {} but class is '{}' instead.".format(histName, unscaledEvtsHist.ClassName()))
-                unscaledEvtsHist.SetDirectory(0)
                 if hist is None:
-                    hist = unscaledEvtsHist
+                    hist = copy.deepcopy(unscaledEvtsHist)
                 else:
                     hist.Add(unscaledEvtsHist)
     for tfile in tfiles:
@@ -508,7 +427,7 @@ def GetSignalTotalEventsHist(lqMassToUse, signalDict):
 
 
 def GetSignalTotalEvents(lqMassToUse):
-    hist = GetSignalTotalEventsHist(lqMassToUse, allSignalDatasetsDict)
+    hist = GetTotalEventsHist(lqMassToUse, allSignalDatasetsDict, signalNameTemplate)
     # for TProfiles
     # unscaledTotalEvts = prof.GetBinContent(1)*prof.GetBinEntries(1)
     unscaledTotalEvts = hist.GetBinContent(1)
@@ -516,9 +435,15 @@ def GetSignalTotalEvents(lqMassToUse):
 
 
 def GetSignalSumWeights(lqMassToUse):
-    hist = GetSignalTotalEventsHist(lqMassToUse, allSignalDatasetsDict)
+    hist = GetTotalEventsHist(lqMassToUse, allSignalDatasetsDict, signalNameTemplate)
     # for TProfiles
     # unscaledTotalEvts = prof.GetBinContent(1)*prof.GetBinEntries(1)
+    sumWeights = hist.GetBinContent(3)
+    return sumWeights
+
+
+def GetBackgroundSumWeights(sampleName, txtFile):
+    hist = GetTotalEventsHist(0, {sampleName: [txtFile]}, sampleName)
     sumWeights = hist.GetBinContent(3)
     return sumWeights
 
@@ -560,16 +485,12 @@ def EvaluateFigureOfMerit(nS, nB, efficiency, bkgEnts, figureOfMerit):
 
 
 def OptimizeBDTCut(args):
-    bdtWeightFileName, lqMassToUse = args
+    bdtWeightFileName, lqMassToUse, sharedOptValsDict = args
     try:
         signalDatasetsDict = {}
-        signalDatasetsWeightsTimesOneThousand = {}
         signalDatasetName = signalNameTemplate.format(lqMassToUse)
         signalDatasetsDict[signalDatasetName] = allSignalDatasetsDict[signalDatasetName]
-        #signalDatasetsWeightsTimesOneThousand[signalDatasetName] = allSignalDatasetsWeightsTimesOneThousand[signalDatasetName]
-        signalDatasetsWeightsTimesOneThousand[signalDatasetName] = FindWeight(signalDatasetName, allSignalDatasetsWeightsTimesOneThousand)
         print(signalDatasetsDict)
-        print(signalDatasetsWeightsTimesOneThousand)
         TMVA.Tools.Instance()
         reader = TMVA.Reader("!Color:!Silent")
         varValueDict = {}
@@ -604,7 +525,9 @@ def OptimizeBDTCut(args):
             bkgSampleIntegralOverCut = 0
             bkgSampleIntegral = 0
             for idx, txtFile in enumerate(backgroundDatasetsDict[sample]):
-                tchainBkg = LoadChainFromTxtFile(txtFile.format(lqMassToUse))
+                txtFile = txtFile.format(lqMassToUse)
+                #tchainBkg = LoadChainFromTxtFile(txtFile.format(lqMassToUse))
+                tchainBkg = LoadChainFromTxtFile(txtFile)
                 if tchainBkg is None:
                     continue
                 df = RDataFrame(tchainBkg)
@@ -620,7 +543,10 @@ def OptimizeBDTCut(args):
                 hbkg = TH1D(histName, histName, 10000, -1, 1)
                 histBkg = df.Histo1D(ROOT.RDF.TH1DModel(hbkg), "BDT", "eventWeight")
                 #bkgWeight = backgroundDatasetsWeightsTimesOneThousand[os.path.basename(txtFile).replace(".txt", "")]/1000.0
-                bkgWeight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), backgroundDatasetsWeightsTimesOneThousand)/1000.0
+                #bkgWeight = FindWeight(os.path.basename(txtFile).replace(".txt", ""), backgroundDatasetsWeightsTimesOneThousand)/1000.0
+                datasetName = os.path.basename(txtFile).replace(".txt", "")
+                sumWeights = GetBackgroundSumWeights(datasetName, txtFile)
+                bkgWeight = CalcWeight(datasetName, intLumi, sumWeights)
                 histBkg.Scale(bkgWeight)
                 bkgTotal.Add(histBkg.GetPtr())
                 #h = df.Histo1D(hbkg, "BDT", "eventWeight")
@@ -634,14 +560,15 @@ def OptimizeBDTCut(args):
                 print("subsample={}, entries with BDT > {} = {}, integral unweighted = {}, integral weighted = {}".format(txtFile, cutValForIntegral, bkgEntriesOverCut, bkgIntegralOverCut/bkgWeight, bkgIntegralOverCut))
                 sys.stdout.flush()
                 # print some entries
-                cols = ROOT.vector('string')()
-                cols.push_back("run")
-                cols.push_back("event")
-                cols.push_back("ls")
-                cols.push_back("eventWeight")
-                cols.push_back("BDT")
-                d2 = df.Display(cols)
-                d2.Print()
+                #cols = ROOT.vector('string')()
+                #cols.push_back("run")
+                #cols.push_back("event")
+                #cols.push_back("ls")
+                #cols.push_back("eventWeight")
+                #cols.push_back("BDT")
+                #d2 = df.Display(cols)
+                #d2.Print()
+                #
                 # if "photon" in txtFile.lower() and bkgIntegralOverCut > 0:
                 #     cols = ROOT.vector('string')()
                 #     cols.push_back("run")
@@ -664,7 +591,7 @@ def OptimizeBDTCut(args):
         sys.stdout.flush()
 
         # signal
-        tchainSig = LoadDatasets(signalDatasetsDict, signalDatasetsWeightsTimesOneThousand, neededBranches, signal=True, loader=None, lqMass=lqMassToUse)
+        tchainSig = LoadDatasets(signalDatasetsDict, neededBranches, signal=True, loader=None, lqMass=lqMassToUse)
         dfSig = RDataFrame(tchainSig)
         dfSig = dfSig.Filter(mycuts.GetTitle())  # will work for expressions valid in C++
         # dfSig = dfSig.Define('BDTv', ROOT.computeBDT, ROOT.BDT.GetVariableNames())
@@ -672,7 +599,10 @@ def OptimizeBDTCut(args):
         dfSig = dfSig.Define('BDT', 'BDTv[0]')
         dfSig = dfSig.Define('eventWeight', eventWeightExpression)
         histSig = dfSig.Histo1D(ROOT.RDF.TH1DModel(hsig), "BDT", "eventWeight")
-        signalWeight = signalDatasetsWeightsTimesOneThousand[signalDatasetName]/1000.0
+        #datasetName = os.path.basename(txtFile).replace(".txt", "")
+        sumWeights = GetSignalSumWeights(lqMassToUse)
+        signalWeight = CalcWeight(signalDatasetName, intLumi, sumWeights)
+        #signalWeight = signalDatasetsWeightsTimesOneThousand[signalDatasetName]/1000.0
         histSig.Scale(signalWeight)
 
         # print some entries
@@ -686,7 +616,7 @@ def OptimizeBDTCut(args):
 
         # now optimize
         #totalSignalEventsUnscaled = GetSignalTotalEvents(lqMassToUse)
-        sumWeights = GetSignalSumWeights(lqMassToUse)
+        #sumWeights = GetSignalSumWeights(lqMassToUse)
         fomValueToCutInfoDict = {}
         for iBin in range(1, hbkg.GetNbinsX()+1):
             nS = histSig.Integral(iBin, hsig.GetNbinsX())
@@ -718,8 +648,7 @@ def OptimizeBDTCut(args):
         #     idx+=1
         # now the max FOM value should be the first entry
         maxVal = next(iter(sortedDict.items()))
-        #print("max FOM: {} with cutVal={}, nS={}, eff={}, nB={}".format(maxVal[0], *maxVal[1]))
-        print("For lqMass={}, max FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(lqMassToUse, maxVal[0], *maxVal[1]))
+        #print("For lqMass={}, max FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(lqMassToUse, maxVal[0], *maxVal[1]))
         # testVals=list(fomValueToCutInfoDict.items())
         # testVal=testVals[9949]
         # print("test FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(testVal[0], *testVal[1]))
@@ -727,6 +656,9 @@ def OptimizeBDTCut(args):
         # print("test FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(testVal[0], *testVal[1]))
         # testVal=testVals[9950]
         # print("test FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(testVal[0], *testVal[1]))
+        valList = [maxVal[0]]
+        valList.extend(maxVal[1])
+        sharedOptValsDict[lqMassToUse] = valList
     except Exception as e:
         print("ERROR: exception in OptimizeBDTCut for lqMass={}".format(lqMassToUse))
         traceback.print_exc()
@@ -740,11 +672,23 @@ def GetMassFloat(mass):
     return float(mass)
 
 
+def PrintBDTCuts(optValsDict):
+    for mass, valList in optValsDict.items():
+        print("For lqMass={}, max FOM: ibin={} with FOM={}, cutVal={}, nS={}, eff={}, nB={}".format(mass, *valList))
+    sortedDict = OrderedDict(sorted(optValsDict.items(), key=lambda t: float(t[1][2])))
+    for mass, valList in sortedDict.items():
+        print("#"+114*"-")
+        print("# LQ M {} optimization".format(mass))
+        print("#"+114*"-")
+        print("BDTOutput_LQ{}                         {}                +inf 		-		-	2	10000 -1 1".format(mass, round(valList[2], 4)))
+
+
 ####################################################################################################
 # Run
 ####################################################################################################
 if __name__ == "__main__":
     gROOT.SetBatch()
+    year = "2016postVFP"
     train = False
     optimize = True
     parallelize = True
@@ -752,7 +696,7 @@ if __name__ == "__main__":
     # lqMassesToUse = [1400, 1500, 1600, 1700]
     lqMassesToUse = list(range(1000, 2100, 100))
     # lqMassesToUse = list(range(300, 2100, 100))
-    #lqMassesToUse = [300, 600, 900, 1200]
+    signalNameTemplate = "LQToDEle_M-{}_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8"
     #FIXME this should take the output of the training part
     # weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/nanoV7/eejj/mar24_2022_egLoose_BDT_qcd/train_14-17/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
     # weightFile = "/tmp/scooper/baselineNoMasym/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_BDTG.weights.xml"
@@ -772,8 +716,39 @@ if __name__ == "__main__":
     # weightFile = "/tmp/scooper/redoAgain_parametrizedBDT1400to1700/dataset/weights/TMVAClassification_BDTG.weights.xml"
     # weightFile = "/tmp/scooper/parametrizedBDT300to2000/dataset/weights/TMVAClassification_BDTG.weights.xml"
     #weightFile = os.getenv("LQANA")+"/versionsOfOptimization/nanoV7/2016/bdt/egmLooseIDWithQCD/redoAgain_dedicatedBDTs/dataset/weights/TMVAClassification_LQToDEle_M-{}_pair_pythia8_BDTG.weights.xml"
-    weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/eejj/eejj_1dec2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016preVFP/bdt/dataset/weights/TMVAClassification_BDTG.weights.xml"
+    #
+    #weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/eejj/eejj_1dec2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016postVFP/bdt/dataset/weights/TMVAClassification_BDTG.weights.xml"
+    weightFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/eejj/eejj_1dec2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016postVFP/bdt/dataset/weights/TMVAClassification_BDTG.weights.xml"
     
+    xsectionFile = os.getenv("LQANA")+"/versionsOfAnalysis/2016/eejj/eejj_1dec2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_2016postVFP/xsection_13TeV_2022_Mee_BkgControlRegion_gteTwoBtaggedJets_TTbar_Mee_BkgControlRegion_DYJets.txt"
+    ParseXSectionFile(xsectionFile)
+
+    if year == "2016preVFP":
+        intLumi = 19501.601622
+        for dataset in backgroundDatasetsDict.keys():
+            if "QCDFakes_DATA" in dataset:
+                continue
+            backgroundDatasetsDict[dataset] = [txtFile.replace(".txt", "_APV.txt") for txtFile in backgroundDatasetsDict[dataset]]
+        backgroundDatasetsDict.update(qcdFakes2016pre)
+        signalNameTemplate+="_APV"
+    elif year == "2016postVFP":
+        intLumi = 16812.151722
+        backgroundDatasetsDict.update(qcdFakes2016post)
+    elif year == "2017":
+        intLumi = 41540  #FIXME
+    elif year == "2018":
+        intLumi = 59399  #FIXME
+    else:
+        raise RuntimeError("Did not understand 'year' parameter whose value is {}; must be one of 2016preVFP, 2016postVFP, 2017, 2018".format(year))
+
+    inputListSignalBase = inputListBkgBase
+    allSignalDatasetsDict = {}
+    massList = list(range(300, 3100, 100))
+    massList.extend([3500, 4000])
+    for mass in massList:
+        signalName = signalNameTemplate.format(mass)
+        allSignalDatasetsDict[signalName] = [inputListSignalBase+signalName+".txt"]
+
     if train:
         if parametrized:
             TrainParametrizedBDT(lqMassesToUse)
@@ -811,13 +786,15 @@ if __name__ == "__main__":
     
     if optimize:
         if parallelize:
+            manager = multiprocessing.Manager()
+            dictOptValues = manager.dict()
             # ncores = multiprocessing.cpu_count()
             ncores = 4  # only use 4 parallel jobs to be nice
             pool = multiprocessing.Pool(ncores)
             jobCount = 0
             for mass in lqMassesToUse:
                 try:
-                    pool.apply_async(OptimizeBDTCut, [[weightFile.format(mass), mass]], callback=log_result)
+                    pool.apply_async(OptimizeBDTCut, [[weightFile.format(mass), mass, dictOptValues]], callback=log_result)
                     jobCount += 1
                 except KeyboardInterrupt:
                     print("\n\nCtrl-C detected: Bailing.")
@@ -839,4 +816,6 @@ if __name__ == "__main__":
                 raise RuntimeError("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
         else:
             for mass in lqMassesToUse:
-                OptimizeBDTCut([weightFile.format(mass), mass])
+                dictOptValues = {}
+                OptimizeBDTCut([weightFile.format(mass), mass, dictOptValues])
+        PrintBDTCuts(dictOptValues)
