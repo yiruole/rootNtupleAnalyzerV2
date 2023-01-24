@@ -275,7 +275,7 @@ void baseClass::init()
     hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
     hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
     for (auto& cutName : orderedCutNames_) {
-      auto c = & (cutName_cut_.find(cutName)->second);
+      auto c = cutName_cut_.find(cutName)->second;
       //cut * c = & (cc->second);
       if(c->saveVariableInReducedSkim) {
         if (reduced_skim_tree_->FindBranch(c->variableName.c_str()) != nullptr) {
@@ -459,28 +459,26 @@ void baseClass::readCutFile()
       int level_int = atoi( v[5].c_str() );
       if(level_int == -1)
       {
-        map<string, preCut>::iterator cc = preCutName_cut_.find(v[0]);
+        const auto&  cc = preCutName_cut_.find(v[0]);
         if( cc != preCutName_cut_.end() )
         {
           STDOUT("ERROR: variableName = "<< v[0] << " exists already in preCutName_cut_. Returning.");
           exit(-1);
         }
         preCutInfo_ << "### Preliminary cut values: " << s <<endl;
-        preCut thisPreCut;
-        thisPreCut.variableName =     v[0];
-        if ( is_number ( v[1] ) ) thisPreCut.value1  = decodeCutValue( v[1] );
-        else                      thisPreCut.string1 = v[1];
-        if ( is_number ( v[2] ) ) thisPreCut.value2  = decodeCutValue( v[2] );
-        else                      thisPreCut.string2 = v[2];
-        if ( is_number ( v[3] ) ) thisPreCut.value1  = decodeCutValue( v[3] );
-        else                      thisPreCut.string3 = v[3];
-        if ( is_number ( v[4] ) ) thisPreCut.value2  = decodeCutValue( v[4] );
-        else                      thisPreCut.string4 = v[4];
-        preCutName_cut_[thisPreCut.variableName]=thisPreCut;
+        unique_ptr<preCut> thisPreCut = make_unique<preCut>();
+        thisPreCut->variableName =     v[0];
+        if ( is_number ( v[1] ) ) thisPreCut->value1  = decodeCutValue( v[1] );
+        else                      thisPreCut->string1 = v[1];
+        if ( is_number ( v[2] ) ) thisPreCut->value2  = decodeCutValue( v[2] );
+        else                      thisPreCut->string2 = v[2];
+        if ( is_number ( v[3] ) ) thisPreCut->value1  = decodeCutValue( v[3] );
+        else                      thisPreCut->string3 = v[3];
+        if ( is_number ( v[4] ) ) thisPreCut->value2  = decodeCutValue( v[4] );
+        else                      thisPreCut->string4 = v[4];
+        preCutName_cut_[thisPreCut->variableName] = move(thisPreCut);
         continue;
       }
-      //cut thisCut;
-      //thisCut.variableName =     v[0];
       std::string variableName = v[0];
       string m1=v[1];
       string M1=v[2];
@@ -499,89 +497,135 @@ void baseClass::readCutFile()
       }
       if( m2=="-") m2="+inf";
       if( M2=="-") M2="-inf";
-      cut thisCut;
-      thisCut.variableName = variableName;
-      thisCut.minValue1  = decodeCutValue( m1 );
-      thisCut.maxValue1  = decodeCutValue( M1 );
-      thisCut.minValue2  = decodeCutValue( m2 );
-      thisCut.maxValue2  = decodeCutValue( M2 );
-      thisCut.level_int  = level_int;
-      thisCut.level_str  =       v[5];
-      thisCut.histoNBins = atoi( v[6].c_str() );
-      thisCut.histoMin   = atof( v[7].c_str() );
-      thisCut.histoMax   = atof( v[8].c_str() );
-      thisCut.saveVariableArrayInReducedSkim = ( v.size()>9 && v[9].find("SAVEARRAY") != string::npos ) ? true : false;
-      if(!thisCut.saveVariableArrayInReducedSkim)
-        thisCut.saveVariableInReducedSkim = ( v.size()==10 && v[9].find("SAVE") != string::npos ) ? true : false;
-      if(thisCut.saveVariableArrayInReducedSkim || thisCut.saveVariableInReducedSkim) {
-        thisCut.branchType = 'F';
-        // see if branch type was explicitly specified
-        if(v[9].find("/") != string::npos) {
-          std::string type = v[9].substr(v[9].find("/")+1, 1);
-          thisCut.branchType = type[0];
+      shared_ptr<cut> thisCut = make_shared<cut>();
+      if(v.size() > 9) { // check for optional flags
+        string flag(v[9]);
+        string flagOrig(flag);
+        transform(flag.begin(), flag.end(), flag.begin(),
+            [](unsigned char c){ return tolower(c); });
+        thisCut->saveVariableArrayInReducedSkim = (flag.find("savearray") != string::npos );
+        if(!thisCut->saveVariableArrayInReducedSkim)
+          thisCut->saveVariableInReducedSkim = (flag.find("save") != string::npos );
+        if(thisCut->saveVariableArrayInReducedSkim || thisCut->saveVariableInReducedSkim) {
+          thisCut->branchType = 'F';
+          // see if branch type was explicitly specified
+          if(flag.find("/") != string::npos) {
+            std::string type = flag.substr(flag.find("/")+1, 1);
+            thisCut->branchType = type[0];
+          }
+          if(thisCut->branchType == 'F') {
+            thisCut->value = float(0.0);
+          }
+          else if(thisCut->branchType == 'I')
+            thisCut->value = int(0);
+          else if(thisCut->branchType == 'l')
+            thisCut->value = static_cast<unsigned long long int>(0);
+          else if(thisCut->branchType == 'i')
+            thisCut->value = static_cast<unsigned int>(0);
+          else if(thisCut->branchType == 'b')
+            thisCut->value = static_cast<unsigned char>(0);
+          else if(thisCut->branchType == 'O')
+            thisCut->value = static_cast<bool>(false);
+          else {
+            STDOUT("ERROR: BranchType '" << thisCut->branchType << "' for saved variable named '" << variableName << "' is not one of F,I,l,i,b,O. Must add support for additional branch types.");
+            exit(-2);
+          }
+          //std::string varTypeName = std::visit( [](auto&&x)->decltype(auto){ return typeid(x).name(); }, thisCut->value );
+          //STDOUT("INFO: saving variable " << variableName << " using branchType=" << thisCut->branchType << "; its value _now_ has type " << varTypeName);
         }
-        if(thisCut.branchType == 'F') {
-          thisCut.value = float(0.0);
+        // TMVA cuts
+        // format: TMVACut:ModelName,preCutWeightFileName[,staticVar=value,staticVar2=value,...]
+        else if(flag.find("tmvacut:") != string::npos ) {
+          string tmvaCutParams = flagOrig.substr(flag.find("tmvacut:")+8);
+          vector<string> splitByCommas = ::split(tmvaCutParams, ',');
+          if(splitByCommas.size() < 2) {
+            STDOUT("ERROR: TMVACut specifier must look like 'TMVACut:modelName,preCutNameForWeightFile[,stativVar=value,...]'. What was found looks like '" << flag << "' instead.");
+            exit(-2);
+          }
+          string modelName = splitByCommas[0];
+          string weightFile = getPreCutString1(splitByCommas[1]);
+          thisCut.reset(new TMVACut(modelName, weightFile));
+          map<string, float> staticParametersMap;
+          if(splitByCommas.size() > 2) {
+            for(int index = 2; index < splitByCommas.size(); ++index) {
+              string param = splitByCommas[2];
+              vector<string> splitByEquals = ::split(param, '=');
+              if(splitByEquals.size() != 2) {
+                STDOUT("ERROR: Didn't understand TMVACut parameter '" << param << "'. TMVACut specifier must look like 'TMVACut:modelName,preCutNameForWeightFile[,stativVar=value,...]'. What was found looks like '" << flag << "' instead.");
+                exit(-2);
+              }
+              staticParametersMap[splitByEquals[0]] = stof(splitByEquals[1]);
+            }
+          }
+          vector<shared_ptr<cut>> tmvaCuts;
+          tmvaCuts.reserve(thisCut->getInputVariableNames().size());
+          for(const auto& varName : thisCut->getInputVariableNames()) {
+            auto&& cc = cutName_cut_.find(varName);
+            if( cc == cutName_cut_.end() ) {
+              shared_ptr staticCutPtr  = make_shared<cut>();
+              staticCutPtr->variableName = varName;
+              staticCutPtr->value = staticParametersMap.find(varName)->second;
+              staticCutPtr->passed = true;
+              staticCutPtr->filled = true;
+              tmvaCuts.push_back(staticCutPtr);
+            }
+            else
+              tmvaCuts.push_back(cc->second);
+          }
+          thisCut->setupReader(tmvaCuts);
         }
-        else if(thisCut.branchType == 'I')
-          thisCut.value = int(0);
-        else if(thisCut.branchType == 'l')
-          thisCut.value = static_cast<unsigned long long int>(0);
-        else if(thisCut.branchType == 'i')
-          thisCut.value = static_cast<unsigned int>(0);
-        else if(thisCut.branchType == 'b')
-          thisCut.value = static_cast<unsigned char>(0);
-        else if(thisCut.branchType == 'O')
-          thisCut.value = static_cast<bool>(false);
-        else {
-          STDOUT("ERROR: BranchType '" << thisCut.branchType << "' for saved variable named '" << variableName << "' is not one of F,I,l,i,b,O. Must add support for additional branch types.");
-          exit(-2);
-        }
-        //std::string varTypeName = std::visit( [](auto&&x)->decltype(auto){ return typeid(x).name(); }, thisCut.value );
-        //STDOUT("INFO: saving variable " << variableName << " using branchType=" << thisCut.branchType << "; its value _now_ has type " << varTypeName);
       }
+      thisCut->variableName = variableName;
+      thisCut->minValue1  = decodeCutValue( m1 );
+      thisCut->maxValue1  = decodeCutValue( M1 );
+      thisCut->minValue2  = decodeCutValue( m2 );
+      thisCut->maxValue2  = decodeCutValue( M2 );
+      thisCut->level_int  = level_int;
+      thisCut->level_str  =       v[5];
+      thisCut->histoNBins = atoi( v[6].c_str() );
+      thisCut->histoMin   = atof( v[7].c_str() );
+      thisCut->histoMax   = atof( v[8].c_str() );
 
       // Not filled from file
-      thisCut.id=++id;
+      thisCut->id=++id;
       string s1;
       if(skimWasMade_)
       {
-        s1 = "cutHisto_skim___________________" + thisCut.variableName;
+        s1 = "cutHisto_skim___________________" + thisCut->variableName;
       }
       else
       {
-        s1 = "cutHisto_noCuts_________________" + thisCut.variableName;
+        s1 = "cutHisto_noCuts_________________" + thisCut->variableName;
       }
-      string s2 = "cutHisto_allPreviousCuts________" + thisCut.variableName;
-      string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut.variableName;
-      string s4 = "cutHisto_allOtherCuts___________" + thisCut.variableName;
-      string s5 = "cutHisto_allCuts________________" + thisCut.variableName;
-      string s6 = "cutHisto_allOtherSameLevelCuts__" + thisCut.variableName;
-      thisCut.histo1 = TH1D (s1.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo2 = TH1D (s2.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo3 = TH1D (s3.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo4 = TH1D (s4.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo5 = TH1D (s5.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo6 = TH1D (s6.c_str(),"", thisCut.histoNBins, thisCut.histoMin, thisCut.histoMax);
-      thisCut.histo1.Sumw2();
-      thisCut.histo2.Sumw2();
-      thisCut.histo3.Sumw2();
-      thisCut.histo4.Sumw2();
-      thisCut.histo5.Sumw2();
-      thisCut.histo6.Sumw2();
+      string s2 = "cutHisto_allPreviousCuts________" + thisCut->variableName;
+      string s3 = "cutHisto_allOthrSmAndLwrLvlCuts_" + thisCut->variableName;
+      string s4 = "cutHisto_allOtherCuts___________" + thisCut->variableName;
+      string s5 = "cutHisto_allCuts________________" + thisCut->variableName;
+      string s6 = "cutHisto_allOtherSameLevelCuts__" + thisCut->variableName;
+      thisCut->histo1 = TH1D (s1.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo2 = TH1D (s2.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo3 = TH1D (s3.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo4 = TH1D (s4.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo5 = TH1D (s5.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo6 = TH1D (s6.c_str(),"", thisCut->histoNBins, thisCut->histoMin, thisCut->histoMax);
+      thisCut->histo1.Sumw2();
+      thisCut->histo2.Sumw2();
+      thisCut->histo3.Sumw2();
+      thisCut->histo4.Sumw2();
+      thisCut->histo5.Sumw2();
+      thisCut->histo6.Sumw2();
       // Filled event by event
-      thisCut.filled = false;
-      thisCut.weight = 1;
-      thisCut.passed = false;
-      thisCut.nEvtPassedBeforeWeight=0;
-      thisCut.nEvtPassed=0;
-      thisCut.nEvtPassedErr2=0;
-      thisCut.nEvtPassedBeforeWeight_alreadyFilled = false;
+      thisCut->filled = false;
+      thisCut->weight = 1;
+      thisCut->passed = false;
+      thisCut->nEvtPassedBeforeWeight=0;
+      thisCut->nEvtPassed=0;
+      thisCut->nEvtPassedErr2=0;
+      thisCut->nEvtPassedBeforeWeight_alreadyFilled = false;
 
-      orderedCutNames_.push_back(thisCut.variableName);
-      cutName_cut_[thisCut.variableName]=thisCut;
-      systCutName_cut_[thisCut.variableName]=thisCut;
-
+      orderedCutNames_.push_back(thisCut->variableName);
+      systCutName_cut_[thisCut->variableName] = make_shared<SimpleCut>(*thisCut);
+      cutName_cut_[thisCut->variableName] = move(thisCut);
     }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
   }
@@ -720,9 +764,6 @@ void baseClass::readCutFile()
         syst.regex = v[2].substr(firstQuote, lastQuote-firstQuote);
         syst.length = 1;
       }
-      else if (v[2].find("bdt=")==0) {
-
-      }
       // tformula-compatible string
       else {
         syst.formula.reset(new TTreeFormula(syst.name.c_str(), v[2].c_str(), readerTools_->GetTree().get()));
@@ -791,7 +832,7 @@ void baseClass::readCutFile()
     }
     for (int i=0;i<orderedCutNames_.size();++i) {
       auto&& cc = cutName_cut_.find(orderedCutNames_[i]);
-      if(cc->second.level_int < 1)
+      if(cc->second->level_int < 1)
         continue;
       orderedSystCutNames_.push_back(cc->first);
     }
@@ -829,7 +870,9 @@ void baseClass::resetCuts(const string& s)
 {
   for (auto& cc : cutName_cut_)
     {
-      auto&& c = & (cc.second);
+      auto& c = cc.second;
+      if(c->isStatic)
+        continue;
       c->filled = false;
       //c->value = decltype(c->value)();
       c->resetValue();
@@ -838,12 +881,12 @@ void baseClass::resetCuts(const string& s)
       c->evaluatedPreviousCuts = false;
       c->passedPreviousCuts = false;
       if(haveSystematics()) {
-        systCutName_cut_[cc.first].filled = false;
-        systCutName_cut_[cc.first].value = decltype(systCutName_cut_[cc.first].value)();
-        systCutName_cut_[cc.first].weight = 1;
-        systCutName_cut_[cc.first].passed = false;
-        systCutName_cut_[cc.first].evaluatedPreviousCuts = false;
-        systCutName_cut_[cc.first].passedPreviousCuts = false;
+        systCutName_cut_[cc.first]->filled = false;
+        systCutName_cut_[cc.first]->value = decltype(systCutName_cut_[cc.first]->value)();
+        systCutName_cut_[cc.first]->weight = 1;
+        systCutName_cut_[cc.first]->passed = false;
+        systCutName_cut_[cc.first]->evaluatedPreviousCuts = false;
+        systCutName_cut_[cc.first]->passedPreviousCuts = false;
         for(auto& syst : systematics_) {
           for(auto& mapItem : syst.cutNamesToSystValues) {
             syst.cutNamesToSystValues[mapItem.first] = 0;
@@ -903,16 +946,16 @@ template <typename T> void baseClass::fillArrayVariableWithValue(const string& s
   else
   {
     auto& c = cc->second;
-    c.filled = true;
-    c.value = T();
-    c.weight = 1.;
+    c->filled = true;
+    c->value = T();
+    c->weight = 1.;
     if(reader.GetSize() > cut::MAX_ARRAY_SIZE)
     {
       STDOUT("WARNING: truncated array size from" << reader.GetSize() << " to MAX_ARRAY_SIZE=" << cut::MAX_ARRAY_SIZE << " in this event.");
-      c.arraySize = cut::MAX_ARRAY_SIZE;
+      c->arraySize = cut::MAX_ARRAY_SIZE;
     }
     else
-      c.arraySize = reader.GetSize();
+      c->arraySize = reader.GetSize();
     // set the branch title for arrays; this includes useful information from NanoAOD
     TBranch* arrayBranch = reduced_skim_tree_->FindBranch(s.c_str());
     if(std::string(arrayBranch->GetTitle()).empty()) {
@@ -957,28 +1000,28 @@ template<typename T> void baseClass::evaluateCuts(map<string, T>& cutNameToCut, 
   {
     auto&& cc = cutNameToCut.find(*it);
     auto& c = cc->second;
-    std::string cName = c.variableName;
-    c.evaluatedPreviousCuts = false; // if redoing individual cuts, have to redo previous cut checking as well
-    //float val = c.template valueIsType<float>() ? c.template getValue<float>() ;
-    //using V = std::variant_alternative_t<c.value.index(), decltype(c.value)>;
-    //auto val2 = c.template getValue<typec.var_type(c.value)>();
-    bool passed = c.evaluateCut();
+    std::string cName = c->variableName;
+    c->evaluatedPreviousCuts = false; // if redoing individual cuts, have to redo previous cut checking as well
+    //float val = c->template valueIsType<float>() ? c->template getValue<float>() ;
+    //using V = std::variant_alternative_t<c->value.index(), decltype(c->value)>;
+    //auto val2 = c->template getValue<typec->var_type(c->value)>();
+    bool passed = c->evaluateCut();
 
     if( !passed )
     {
-      c.passed = false;
-      combNameToPassFail[c.level_str.c_str()] = false;
+      c->passed = false;
+      combNameToPassFail[c->level_str.c_str()] = false;
       combNameToPassFail["all"] = false;
-      if(verbose) std::cout << "FAILED cut: " << c.variableName << "; value is: " << c.getStringValue() << std::endl;
+      if(verbose) std::cout << "FAILED cut: " << c->variableName << "; value is: " << c->getStringValue() << std::endl;
     }
     else
     {
-      c.passed = true;
-      map<string,bool>::iterator cp = combNameToPassFail.find( c.level_str.c_str() );
-      combNameToPassFail[c.level_str.c_str()] = (cp==combNameToPassFail.end()?true:cp->second);
+      c->passed = true;
+      map<string,bool>::iterator cp = combNameToPassFail.find( c->level_str.c_str() );
+      combNameToPassFail[c->level_str.c_str()] = (cp==combNameToPassFail.end()?true:cp->second);
       map<string,bool>::iterator ap = combNameToPassFail.find( "all" );
       combNameToPassFail["all"] = (ap==combNameToPassFail.end()?true:ap->second);
-      if(verbose) std::cout << "PASSED cut: " << c.variableName << "; value is: " << c.getStringValue() << std::endl;
+      if(verbose) std::cout << "PASSED cut: " << c->variableName << "; value is: " << c->getStringValue() << std::endl;
     }
   }
 }
@@ -1035,7 +1078,6 @@ void baseClass::runOptimizer()
     }
     if (ignorecut) continue;
     if (passedCut(*it) == false) {
-      //std::cout << "SIC DEBUG: examining cut: " << *it << "; passed? " << passedCut(*it) << "; don't run optimizer" << std::endl;
       return;
     }
   }
@@ -1078,7 +1120,7 @@ void baseClass::runOptimizer()
     {
       //if(i==0)
       //  std::cout << "\tSIC DEBUG FIll opt hist bin " << i+1 << " with " << cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight <<std::endl;
-      h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)].weight); // take the event weight from the last cut in the cut file
+      h_optimizer_->Fill(i,cutName_cut_[orderedCutNames_.at(orderedCutNames_.size()-1)]->weight); // take the event weight from the last cut in the cut file
       h_optimizer_entries_->Fill(i);
     }
 
@@ -1097,12 +1139,12 @@ void baseClass::runSystematics()
   currentSystematicsHist_->Reset();
   // copy cut decisions/filled
   for(auto& cutName : orderedCutNames_) {
-    systCutName_cut_[cutName].passed = cutName_cut_[cutName].passed;
-    systCutName_cut_[cutName].filled = cutName_cut_[cutName].filled;
-    systCutName_cut_[cutName].weight = cutName_cut_[cutName].weight;
-    systCutName_cut_[cutName].value = cutName_cut_[cutName].value;
-    systCutName_cut_[cutName].passedPreviousCuts = cutName_cut_[cutName].passedPreviousCuts;
-    systCutName_cut_[cutName].evaluatedPreviousCuts = cutName_cut_[cutName].evaluatedPreviousCuts;
+    systCutName_cut_[cutName]->passed = cutName_cut_[cutName]->passed;
+    systCutName_cut_[cutName]->filled = cutName_cut_[cutName]->filled;
+    systCutName_cut_[cutName]->weight = cutName_cut_[cutName]->weight;
+    systCutName_cut_[cutName]->value = cutName_cut_[cutName]->value;
+    systCutName_cut_[cutName]->passedPreviousCuts = cutName_cut_[cutName]->passedPreviousCuts;
+    systCutName_cut_[cutName]->evaluatedPreviousCuts = cutName_cut_[cutName]->evaluatedPreviousCuts;
   }
   float ybinCoord = 0.5;
   for(auto& syst : systematics_) {
@@ -1122,21 +1164,21 @@ void baseClass::runSystematics()
         for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
           auto cutName = cutNameBranch.first;
           auto& systCut = systCutName_cut_[cutName];
-          systCut.filled = false;
+          systCut->filled = false;
           if(syst.cutNamesToBranchNames[cutName].size()) {
             //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
             //  " with the value of the branch: " << syst.cutNamesToBranchNames[cutNameCut.first];
             //cout << " which is: " << readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutNameCut.first]) << endl;
-            systCut.value = readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutName]);
-            systCut.filled = true;
+            systCut->value = readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutName]);
+            systCut->filled = true;
           }
           else {
             systVal = syst.cutNamesToSystValues[cutName];
             //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
             //  " with the syst value: " << systVal << "; filled? " << syst.cutNamesToSystFilled[cutNameCut.first] << endl;
             if(syst.cutNamesToSystFilled[cutName]) {
-              systCut.value = systVal;
-              systCut.filled = true;
+              systCut->value = systVal;
+              systCut->filled = true;
             }
             else {
               STDOUT("ERROR: syst value for cut named: " << cutName << " was not filled for systematic " << syst.name <<
@@ -1167,13 +1209,13 @@ void baseClass::runSystematics()
           //    ", origWeight=" << systCutName_cut_[cutName].weight << "; systVal=" << systVal << "; new weight= " << systCutName_cut_[cutName].weight*systVal << endl;
           //}
           if(shiftValue) {
-            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName].weight);
+            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName]->weight);
             currentSystematicsHist_->Fill(xbinCoord, ybinCoord, 1);
             //STDOUT("INFO: runSystematics(): 1. fill hist for syst="<<syst.name<<", systCutName=" << cutName <<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
             //    << ", nom. weight="<<systCutName_cut_[cutName].weight);
           }
           else {
-            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName].weight*systVal);
+            systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName]->weight*systVal);
             currentSystematicsHist_->Fill(xbinCoord, ybinCoord, systVal);
             //STDOUT("INFO: runSystematics(): 2. fill hist for syst="<<syst.name<<", systCutName=" << cutName <<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
             //    << ", syst. weight="<<systCutName_cut_[cutName].weight*systVal);
@@ -1186,12 +1228,12 @@ void baseClass::runSystematics()
         // if value was shifted, reset all the cuts to nominal before moving to next syst
         for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
           auto cutName = cutNameBranch.first;
-          systCutName_cut_[cutName].passed = cutName_cut_[cutName].passed;
-          systCutName_cut_[cutName].filled = cutName_cut_[cutName].filled;
-          systCutName_cut_[cutName].weight = cutName_cut_[cutName].weight;
-          systCutName_cut_[cutName].value = cutName_cut_[cutName].value;
-          systCutName_cut_[cutName].passedPreviousCuts = cutName_cut_[cutName].passedPreviousCuts;
-          systCutName_cut_[cutName].evaluatedPreviousCuts = cutName_cut_[cutName].evaluatedPreviousCuts;
+          systCutName_cut_[cutName]->passed = cutName_cut_[cutName]->passed;
+          systCutName_cut_[cutName]->filled = cutName_cut_[cutName]->filled;
+          systCutName_cut_[cutName]->weight = cutName_cut_[cutName]->weight;
+          systCutName_cut_[cutName]->value = cutName_cut_[cutName]->value;
+          systCutName_cut_[cutName]->passedPreviousCuts = cutName_cut_[cutName]->passedPreviousCuts;
+          systCutName_cut_[cutName]->evaluatedPreviousCuts = cutName_cut_[cutName]->evaluatedPreviousCuts;
         }
       }
     }
@@ -1201,7 +1243,7 @@ void baseClass::runSystematics()
 float baseClass::getPreCutValue1(const string& s)
 {
   float ret;
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
@@ -1210,69 +1252,63 @@ float baseClass::getPreCutValue1(const string& s)
       std::cout << pair.first << std::endl;
     exit(-5);
   }
-  preCut * c = & (cc->second);
-  if(c->value1 == -999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
-  return (c->value1);
+  if(cc->second->value1 == -999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
+  return (cc->second->value1);
 }
 
 float baseClass::getPreCutValue2(const string& s)
 {
   float ret;
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
     exit(-5);
   }
-  preCut * c = & (cc->second);
-  if(c->value2 == -999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
-  return (c->value2);
+  if(cc->second->value2 == -999) STDOUT("ERROR: value2 of preliminary cut "<<s<<" was not provided.");
+  return (cc->second->value2);
 }
 
 float baseClass::getPreCutValue3(const string& s)
 {
   float ret;
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
     exit(-5);
   }
-  preCut * c = & (cc->second);
-  if(c->value3 == -999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
-  return (c->value3);
+  if(cc->second->value3 == -999) STDOUT("ERROR: value3 of preliminary cut "<<s<<" was not provided.");
+  return (cc->second->value3);
 }
 
 float baseClass::getPreCutValue4(const string& s)
 {
   float ret;
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
     exit(-5);
   }
-  preCut * c = & (cc->second);
-  if(c->value4 == -999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
-  return (c->value4);
+  if(cc->second->value4 == -999) STDOUT("ERROR: value4 of preliminary cut "<<s<<" was not provided.");
+  return (cc->second->value4);
 }
 
 bool baseClass::hasPreCut(const string& s) {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
-  return cc != preCutName_cut_.end();
+  return preCutName_cut_.find(s) != preCutName_cut_.end();
 }
 
 string baseClass::getPreCutString1(const string& s)
 {
   string ret;
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in preCutName_cut_. Bailing.");
     exit(-5);
   }
-  preCut * c = & (cc->second);
-  return (c->string1);
+  return (cc->second->string1);
 }
 
 float baseClass::getCutMinValue1(const string& s)
@@ -1283,8 +1319,7 @@ float baseClass::getCutMinValue1(const string& s)
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
   }
-  auto const& c = cc->second;
-  return c.minValue1;
+  return cc->second->minValue1;
 }
 
 float baseClass::getCutMaxValue1(const string& s)
@@ -1295,8 +1330,7 @@ float baseClass::getCutMaxValue1(const string& s)
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
   }
-  auto const& c = cc->second;
-  return c.maxValue1;
+  return cc->second->maxValue1;
 }
 
 float baseClass::getCutMinValue2(const string& s)
@@ -1307,8 +1341,7 @@ float baseClass::getCutMinValue2(const string& s)
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
   }
-  auto const& c = cc->second;
-  return c.minValue2;
+  return cc->second->minValue2;
 }
 
 float baseClass::getCutMaxValue2(const string& s)
@@ -1319,8 +1352,7 @@ float baseClass::getCutMaxValue2(const string& s)
   {
     STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning");
   }
-  auto const& c = cc->second;
-  return c.maxValue2;
+  return cc->second->maxValue2;
 }
 
 
@@ -1331,9 +1363,7 @@ const TH1D& baseClass::getHisto_noCuts_or_skim(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-
-  auto const& c = cc->second;
-  return (c.histo1);
+  return (cc->second->histo1);
 }
 
 const TH1D& baseClass::getHisto_allPreviousCuts(const string& s)
@@ -1343,8 +1373,7 @@ const TH1D& baseClass::getHisto_allPreviousCuts(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histo2);
+  return (cc->second->histo2);
 }
 
 const TH1D& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
@@ -1354,8 +1383,7 @@ const TH1D& baseClass::getHisto_allOthrSmAndLwrLvlCuts(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histo3);
+  return (cc->second->histo3);
 }
 
 const TH1D& baseClass::getHisto_allOtherCuts(const string& s)
@@ -1365,8 +1393,7 @@ const TH1D& baseClass::getHisto_allOtherCuts(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histo4);
+  return (cc->second->histo4);
 }
 
 const TH1D& baseClass::getHisto_allCuts(const string& s)
@@ -1376,8 +1403,7 @@ const TH1D& baseClass::getHisto_allCuts(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histo5);
+  return (cc->second->histo5);
 }
 
 int baseClass::getHistoNBins(const string& s)
@@ -1387,8 +1413,7 @@ int baseClass::getHistoNBins(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histoNBins);
+  return (cc->second->histoNBins);
 }
 
 float baseClass::getHistoMin(const string& s)
@@ -1398,8 +1423,7 @@ float baseClass::getHistoMin(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histoMin);
+  return (cc->second->histoMin);
 }
 
 float baseClass::getHistoMax(const string& s)
@@ -1409,8 +1433,7 @@ float baseClass::getHistoMax(const string& s)
     {
       STDOUT("ERROR: did not find variableName = "<<s<<" in cutName_cut_. Returning false.");
     }
-  auto const& c = cc->second;
-  return (c.histoMax);
+  return (cc->second->histoMax);
 }
 
 
@@ -1424,21 +1447,21 @@ bool baseClass::fillCutHistos()
     auto& c = cc->second;
     // only fill histos for float vars at the moment
     //XXX SIC FIXME
-    if( c.filled && std::holds_alternative<float>(c.value)) {
-      auto valPtr = std::get_if<float>(&c.value);
+    if( c->filled && std::holds_alternative<float>(c->value)) {
+      auto valPtr = std::get_if<float>(&c->value);
       auto val = *valPtr;
       if ( produceSkim_ || produceReducedSkim_ ) 
-        c.histo1.Fill( val, c.weight );
+        c->histo1.Fill( val, c->weight );
       if ( fillAllPreviousCuts_ ) 
-        if( passedAllPreviousCuts(c.variableName) )                c.histo2.Fill( val, c.weight );
+        if( passedAllPreviousCuts(c->variableName) )                c->histo2.Fill( val, c->weight );
       if( fillAllSameLevelAndLowerLevelCuts_) 
-        if( passedAllOtherSameAndLowerLevelCuts(c.variableName) )  c.histo3.Fill( val, c.weight );
+        if( passedAllOtherSameAndLowerLevelCuts(c->variableName) )  c->histo3.Fill( val, c->weight );
       if( fillAllOtherCuts_ ) 
-        if( passedAllOtherCuts(c.variableName) )                   c.histo4.Fill( val, c.weight );
+        if( passedAllOtherCuts(c->variableName) )                   c->histo4.Fill( val, c->weight );
       if( fillAllCuts_ ) 
-        if( passedCut("all") )                                      c.histo5.Fill( val, c.weight );
+        if( passedCut("all") )                                      c->histo5.Fill( val, c->weight );
       if(fillAllSameLevelCuts_)
-        if( passedAllOtherCutsAtSameLevel(c.variableName) )        c.histo6.Fill( val, c.weight );
+        if( passedAllOtherCutsAtSameLevel(c->variableName) )        c->histo6.Fill( val, c->weight );
     }
   }
   return ret;
@@ -1451,7 +1474,7 @@ bool baseClass::writeCutHistos()
   for (vector<string>::iterator it = orderedCutNames_.begin();
        it != orderedCutNames_.end(); it++)
     {
-      auto&& c = & (cutName_cut_.find(*it)->second);
+      auto&& c = cutName_cut_.find(*it)->second;
       if ( produceSkim_ || produceReducedSkim_ ) c->histo1.Write();
       if ( fillAllPreviousCuts_                ) c->histo2.Write();
       if ( fillAllOtherCuts_                   ) c->histo4.Write();
@@ -1476,13 +1499,13 @@ bool baseClass::updateCutEffic()
     {
       if( passedCut(cName) )
       {
-        if ( c.nEvtPassedBeforeWeight_alreadyFilled == false)
+        if ( c->nEvtPassedBeforeWeight_alreadyFilled == false)
         {
-          c.nEvtPassedBeforeWeight += 1;
-          c.nEvtPassedBeforeWeight_alreadyFilled = true;
+          c->nEvtPassedBeforeWeight += 1;
+          c->nEvtPassedBeforeWeight_alreadyFilled = true;
         }
-        c.nEvtPassed+=c.weight;
-        c.nEvtPassedErr2 += (c.weight)*(c.weight);
+        c->nEvtPassed+=c->weight;
+        c->nEvtPassedErr2 += (c->weight)*(c->weight);
       }
     }
   }
@@ -1708,7 +1731,7 @@ bool baseClass::writeCutEfficFile()
   for (vector<string>::iterator it = orderedCutNames_.begin();
       it != orderedCutNames_.end(); it++)
   {
-    auto&& c = & (cutName_cut_.find(*it)->second);
+    auto&& c = cutName_cut_.find(*it)->second;
     ++bincounter;
     checkOverflow(eventCuts_.get(),c->nEvtPassed);
     eventCuts_->SetBinContent(bincounter, c->nEvtPassed);
@@ -2448,13 +2471,13 @@ bool baseClass::writeUserHistos()
 
 float baseClass::getSkimPreCutValue(const string& s)
 {
-  map<string, preCut>::iterator cc = preCutName_cut_.find(s);
+  const auto& cc = preCutName_cut_.find(s);
   if( cc == preCutName_cut_.end() )
   {
     STDOUT("getSkimPreCutValue: (" << s << "): INFO -- did not find the precut string in the map!");
     return 0;
   }
-  preCut * c = & (cc->second);
+  const auto& c = cc->second;
   if(c->value1 == -999) STDOUT("ERROR: value1 of preliminary cut "<<s<<" was not provided.");
   STDOUT("getSkimPreCutValue: (" << s << "): INFO -- found the precut string in the map with value: " << c->value1);
   return (c->value1);
@@ -2751,7 +2774,7 @@ shared_ptr<TH1> baseClass::findSavedHist(string histName)
 shared_ptr<TProfile> baseClass::makeNewEventsPassingSkimCutsProfile(const shared_ptr<TProfile> prevProfFromFile) {
   vector<string> skimCutNames;
   for(auto& cutName : orderedCutNames_) {
-    if(isSkimCut(cutName_cut_.find(cutName)->second))
+    if(isSkimCut(*cutName_cut_.find(cutName)->second))
       skimCutNames.push_back(cutName);
   }
   int nBinsInherited = 1;
