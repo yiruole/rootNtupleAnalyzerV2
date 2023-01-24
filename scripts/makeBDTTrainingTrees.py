@@ -114,8 +114,8 @@ def ProcessDataset(args):
             df = df.Define("MejMax", "Numba::CalcMejMax(M_e1j1, M_e2j2, M_e1j2, M_e2j1)")
             df = df.Define("MejMin", "Numba::CalcMejMin(M_e1j1, M_e2j2, M_e1j2, M_e2j1)")
             df = df.Define("Meejj", "CalcMeejj(Ele1_Pt, Ele1_Eta, Ele1_Phi, Ele2_Pt, Ele2_Eta, Ele2_Phi,Jet1_Pt, Jet1_Eta, Jet1_Phi, Jet2_Pt, Jet2_Eta, Jet2_Phi)")
-            df = df.Define("massInt", str(mass))
-            df = df.Define("mass", "Numba::GetMassFloat(massInt)")
+            df = df.Define("LQCandidateMassInt", str(mass))
+            df = df.Define("LQCandidateMass", "Numba::GetMassFloat(LQCandidateMassInt)")
             expectedEvents = df.Count()
             datasetName = os.path.basename(txtFile).replace(".txt", "")
             tfilepath = outputTFileDir+"/{}/{}.root".format(mass, datasetName)
@@ -140,7 +140,9 @@ def ProcessDataset(args):
             expectedEvents = expectedEvents.GetValue()
             if expectedEvents > 0:
                 tree = tfile.Get("rootTupleTree/tree")
-                if tree.ClassName() == "TTree":
+                if tree == None:
+                    print("WARN: didn't get a tree from the file; redoing training tree for txtFile={}, mass={}".format(txtFile, mass))
+                elif tree.ClassName() == "TTree":
                   if tree.GetEntries() == expectedEvents:
                       redo = False
                   else:
@@ -158,99 +160,102 @@ def ProcessDataset(args):
     return True
 
 
-# datasets
-inputListBkgBase = "$LQANA/config/inputListsPSKEEJJ_UL16postVFP_1dec2022/"
-inputListQCDBase = "$LQANA/config/inputListsPSKQCD_egmloose_UL16postVFP_5dec2022/"
-inputListSignalBase = inputListBkgBase
-# preselection-skimmed background datasets
-backgroundDatasetsDict = {
-        # "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
-        "ZJet_amcatnlo_ptBinned" : [
-            #FIXME: add inclusive stitched here; need to apply LHE cut in PSK step
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            ],
-        "TTbar_powheg" : [
-            inputListBkgBase+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"TTToHadronic_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.txt",
-            ],
-        "DIBOSON_nlo" : [
-            inputListBkgBase+"WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8.txt",
-            inputListBkgBase+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8.txt",
-            inputListBkgBase+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            #inputListBkgBase+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            ],
-        "TRIBOSON" : [
-            inputListBkgBase+"WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
-            inputListBkgBase+"WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
-            inputListBkgBase+"WZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
-            inputListBkgBase+"ZZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
-            ],
-        "TTW" : [
-            inputListBkgBase+"TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
-            inputListBkgBase+"TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
-            ],
-        "TTZ" : [
-            inputListBkgBase+"ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8.txt"
-            ],
-        "SingleTop" : [
-            inputListBkgBase+"ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
-            inputListBkgBase+"ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8.txt",
-            ],
-        "WJet_amcatnlo_jetBinned" : [
-            inputListBkgBase+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            inputListBkgBase+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
-            ],
-        # "WJet_amcatnlo_ptBinned" : [
-        #     inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
-        #     inputListBkgBase+"WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8.txt",
-        #     inputListBkgBase+"WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8.txt",
-        #     inputListBkgBase+"WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8.txt",
-        #     inputListBkgBase+"WJetsToLNu_Pt-400To600_amcatnloFXFX_pythia8.txt",
-        #     inputListBkgBase+"WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8.txt",
-        #     ],
-        "PhotonJets_Madgraph" : [
-            #inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
-            inputListBkgBase+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
-            ],
-}
-qcdFakes2016pre = {
-        "QCDFakes_DATA" : [
-            inputListQCDBase+"SinglePhoton_Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            ]
-}
-qcdFakes2016post = {
-        "QCDFakes_DATA" : [
-            inputListQCDBase+"SinglePhoton_Run2016H-UL2016_MiniAODv2_NanoAODv9-v1.txt",
-            inputListQCDBase+"SinglePhoton_Run2016G-UL2016_MiniAODv2_NanoAODv9-v2.txt",
-            inputListQCDBase+"SinglePhoton_Run2016F-UL2016_MiniAODv2_NanoAODv9-v1.txt",
-            ]
-}
+def GetBackgroundDatasetsDict(inputListBkgBase):
+    backgroundDatasetsDict = {
+            # "ZJet_amcatnlo_ptBinned" if do2016 else "ZJet_jetAndPtBinned",
+            "ZJet_amcatnlo_ptBinned" : [
+                #FIXME: add inclusive stitched here; need to apply LHE cut in PSK step
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                ],
+            "TTbar_powheg" : [
+                inputListBkgBase+"TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"TTToHadronic_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.txt",
+                ],
+            "DIBOSON_nlo" : [
+                inputListBkgBase+"WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"ZZTo4L_TuneCP5_13TeV_powheg_pythia8.txt",
+                inputListBkgBase+"ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8.txt",
+                inputListBkgBase+"WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                #inputListBkgBase+"WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                ],
+            "TRIBOSON" : [
+                inputListBkgBase+"WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+                inputListBkgBase+"WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+                inputListBkgBase+"WZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+                inputListBkgBase+"ZZZ_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+                ],
+            "TTW" : [
+                inputListBkgBase+"TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
+                inputListBkgBase+"TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8.txt",
+                ],
+            "TTZ" : [
+                inputListBkgBase+"ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8.txt"
+                ],
+            "SingleTop" : [
+                inputListBkgBase+"ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8.txt",
+                inputListBkgBase+"ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8.txt",
+                ],
+            "WJet_amcatnlo_jetBinned" : [
+                inputListBkgBase+"WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                inputListBkgBase+"WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8.txt",
+                ],
+            # "WJet_amcatnlo_ptBinned" : [
+            #     inputListBkgBase+"WJetsToLNu_Wpt-0To50_ext1_amcatnloFXFX_pythia8.txt",
+            #     inputListBkgBase+"WJetsToLNu_Wpt-50To100_ext1_amcatnloFXFX_pythia8.txt",
+            #     inputListBkgBase+"WJetsToLNu_Pt-100To250_amcatnloFXFX_pythia8.txt",
+            #     inputListBkgBase+"WJetsToLNu_Pt-250To400_amcatnloFXFX_pythia8.txt",
+            #     inputListBkgBase+"WJetsToLNu_Pt-400To600_amcatnloFXFX_pythia8.txt",
+            #     inputListBkgBase+"WJetsToLNu_Pt-600ToInf_amcatnloFXFX_pythia8.txt",
+            #     ],
+            "PhotonJets_Madgraph" : [
+                #inputListBkgBase+"GJets_HT-40To100_madgraphMLM.txt",
+                inputListBkgBase+"GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+                inputListBkgBase+"GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+                inputListBkgBase+"GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+                inputListBkgBase+"GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8.txt",
+                ],
+    }
+    return backgroundDatasetsDict
+
+def GetQCDDatasetList(year):
+    if year == "2016preVFP":
+        qcdFakes = {
+                "QCDFakes_DATA" : [
+                    inputListQCDBase+"SinglePhoton_Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    ]
+        }
+    elif year == "2016postVFP":
+        qcdFakes = {
+                "QCDFakes_DATA" : [
+                    inputListQCDBase+"SinglePhoton_Run2016H-UL2016_MiniAODv2_NanoAODv9-v1.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016G-UL2016_MiniAODv2_NanoAODv9-v2.txt",
+                    inputListQCDBase+"SinglePhoton_Run2016F-UL2016_MiniAODv2_NanoAODv9-v1.txt",
+                    ]
+        }
+    return qcdFakes
+
 
 # mycuts = TCut("M_e1e2 > 200 && sT_eejj > 400")
 mycutb = TCut("M_e1e2 > 200 && sT_eejj > 400")
@@ -302,14 +307,18 @@ branchesToSave = [
         "MejMin",
         "MejMax",
         "Meejj",
-        "mass"
+        "LQCandidateMass"
 ]
 ####################################################################################################
 # Run
 ####################################################################################################
 parallelize = True
-outputTFileDir = "root://eosuser.cern.ch//eos/user/s/scooper/LQ/ultralegacy/2016postVFP/analysis/bdtTraining_eejj_finalSels_egLoose_19dec2022_mee200st400_allLQ"
 year = "2016postVFP"
+date = "19jan2023"
+inputListBkgBase = "$LQANA/config/inputListsPSKEEJJ_UL{}_16jan2023/".format(year[2:])
+inputListQCDBase = "$LQANA/config/inputListsPSKQCD_egmloose_UL{}_5dec2022/".format(year[2:])
+inputListSignalBase = inputListBkgBase
+outputTFileDir = "root://eosuser.cern.ch//eos/user/s/scooper/LQ/ultralegacy/{}/analysis/bdtTraining_eejj_finalSels_egLoose_{}_mee200st400_allLQ".format(year, date)
 signalNameTemplate = "LQToDEle_M-{}_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8"
 
 if __name__ == "__main__":
@@ -322,15 +331,17 @@ if __name__ == "__main__":
     sys.stdout.flush()
     console = Console()
     allSignalDatasetsDict = {}
+    backgroundDatasetsDict = GetBackgroundDatasetsDict(inputListBkgBase)
     if year == "2016preVFP":
         for dataset in backgroundDatasetsDict.keys():
-            if "QCDFakes_DATA" in dataset:
-                continue
+            #if "QCDFakes_DATA" in dataset:
+            #    continue
             backgroundDatasetsDict[dataset] = [txtFile.replace(".txt", "_APV.txt") for txtFile in backgroundDatasetsDict[dataset]]
-        backgroundDatasetsDict.update(qcdFakes2016pre)
+        #backgroundDatasetsDict.update(qcdFakes2016pre)
         signalNameTemplate+="_APV"
-    elif year == "2016postVFP":
-        backgroundDatasetsDict.update(qcdFakes2016post)
+    #elif year == "2016postVFP":
+    #    backgroundDatasetsDict.update(qcdFakes2016post)
+    backgroundDatasetsDict.update(GetQCDDatasetList(year))
     massList = list(range(300, 3100, 100))
     massList.extend([3500, 4000])
     for mass in massList:
