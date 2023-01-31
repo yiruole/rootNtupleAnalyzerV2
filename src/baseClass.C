@@ -509,8 +509,8 @@ void baseClass::readCutFile()
         if(thisCut->saveVariableArrayInReducedSkim || thisCut->saveVariableInReducedSkim) {
           thisCut->branchType = 'F';
           // see if branch type was explicitly specified
-          if(flag.find("/") != string::npos) {
-            std::string type = flag.substr(flag.find("/")+1, 1);
+          if(flagOrig.find("/") != string::npos) {
+            std::string type = flagOrig.substr(flagOrig.find("/")+1, 1);
             thisCut->branchType = type[0];
           }
           if(thisCut->branchType == 'F') {
