@@ -19,6 +19,8 @@ Collection::Collection (std::shared_ptr<TTreeReaderTools> tools, unsigned short 
 Collection::Collection ( Collection & c ): 
   m_readerTools ( c.m_readerTools ),
   m_raw_indices ( c.m_raw_indices ),
-  m_trigObj_index ( -1 )
+  m_trigObj_index ( -1 ),
+  m_systematicVariationNames(c.m_systematicVariationNames),
+  m_systematicVariations(c.m_systematicVariations)
 {}
 
