@@ -23,7 +23,7 @@ class Object {
   float Pt()  const { return m_pt;  }
   float Eta() const { return m_eta; }
   float Phi() const { return m_phi; }
-  float PtOrignal() const { return m_originalPt; }
+  float PtOriginal() const { return m_originalPt; }
 
   void SetPt(float pt) { m_pt = pt; }
   void SetEta(float eta) { m_eta = eta; }

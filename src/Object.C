@@ -16,6 +16,7 @@ Object::Object(const Object & o):
   m_raw_index(o.m_raw_index),
   m_trigObj_index ( o.m_trigObj_index ),
   m_pt(o.Pt()),
+  m_originalPt(o.PtOriginal()),
   m_eta(o.Eta()),
   m_phi(o.Phi())
 {}
