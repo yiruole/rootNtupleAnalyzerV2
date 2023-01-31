@@ -88,6 +88,10 @@ double PFJet::EnergyResScaleFactorFromCorrection(const correction::Correction* c
   return correction->evaluate({Eta(), variation});
 }
 
+float PFJet::GetSystematicVariation(const std::string& systematicName) {
+  return m_collection->GetSystematicValue(m_raw_index, systematicName);
+}
+
 std::ostream& operator<<(std::ostream& stream, PFJet& object) {
   stream            << object.Name() << " : "
 	 << "Pt = "       << object.Pt ()  << ", "

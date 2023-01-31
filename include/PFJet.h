@@ -46,6 +46,9 @@ class PFJet : public Object {
 
   float FixedGridRhoAll();
 
+  // systematics
+  float GetSystematicVariation(const std::string& systematicName);
+
  private:
   bool PassUserID_PFJetLoose (bool verbose);
   bool PassUserID_PFJetMedium(bool verbose);
