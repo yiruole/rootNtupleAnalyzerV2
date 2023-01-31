@@ -87,6 +87,13 @@ find_package(correctionlib REQUIRED)
 find_package(Threads)
 find_package(ZLIB)
 
+include(FetchContent)
+FetchContent_Declare(CMSJMECalculators
+  GIT_REPOSITORY https://gitlab.cern.ch/cp3-cms/CMSJMECalculators.git
+  GIT_TAG        0.2.0
+  )
+FetchContent_MakeAvailable(CMSJMECalculators)
+
 #add_library(mylib
 #  src/mylib.cpp
 #  )
@@ -131,6 +138,7 @@ add_executable(main
   src/QCDFakeRate.C
   src/eventListHelper.C
   src/jsonParser.C
+  src/JMEUncertainties.C
 )
 
 target_link_libraries(main
@@ -143,4 +151,5 @@ target_link_libraries(main
   ROOT::Physics
   ROOT::TMVA
   correctionlib
+  CMSJMECalculators
 )
