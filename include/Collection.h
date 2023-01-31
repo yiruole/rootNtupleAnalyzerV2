@@ -9,6 +9,7 @@
 #include <typeinfo>
 #include <TRandom3.h>
 #include <TLorentzVector.h>
+#include <ROOT/RVec.hxx>
 
 #include "IDTypes.h"
 #include "analysisClass.h"
@@ -110,16 +111,50 @@ class Collection {
 
   template <class Object1, class Object2> 
     int HasHowMany ( const CollectionPtr other_collection ){
-    std::vector<unsigned short> other_collection_raw_indices = other_collection -> GetRawIndices();
+    std::vector<unsigned short>* other_collection_raw_indices = other_collection -> GetRawIndices();
     std::vector<unsigned short> common_raw_indices;
     // std::sort ( m_raw_indices.begin(), m_raw_indices.end() );
     // std::sort ( other_collection_raw_indices.begin(), other_collection_raw_indices.end() );
-    std::set_intersection ( other_collection_raw_indices.begin(), other_collection_raw_indices.end(),
+    std::set_intersection ( other_collection_raw_indices->begin(), other_collection_raw_indices->end(),
 			    m_raw_indices.begin()               , m_raw_indices.end(),
 			    std::back_inserter ( common_raw_indices ) );
     return common_raw_indices.size();
   }
 
+  float GetSystematicValue(const unsigned short rawIdx, const std::string& systName) {
+    unsigned short variationIdx = FindSystematicVariationIndex(systName);
+    return m_systematicVariations[variationIdx][rawIdx];
+  }
+
+  unsigned short FindSystematicVariationIndex(const std::string& systName) {
+    auto variationIdxItr = std::find(m_systematicVariationNames.begin(), m_systematicVariationNames.end(), systName);
+    if(variationIdxItr == m_systematicVariationNames.end()) {
+      STDOUT("ERROR: specified systName = " << systName << " does not exist in the stored systematic variations:");
+      for(auto syst : m_systematicVariationNames)
+        std::cout << syst << ", ";
+      std::cout << endl;
+      exit(-8);
+    }
+    return std::distance(m_systematicVariationNames.begin(), variationIdxItr);
+  }
+
+  void SetSystematics(std::vector<std::string>&& systNames, std::vector<ROOT::VecOps::RVec<float> >&& systematics) {
+    m_systematicVariationNames = std::move(systNames);
+    m_systematicVariations = std::move(systematics);
+  }
+  void SetSystematics(std::vector<std::string>& systNames, std::vector<ROOT::VecOps::RVec<float> >& systematics) {
+    m_systematicVariationNames = systNames;
+    m_systematicVariations = systematics;
+  }
+
+  std::vector<std::string> GetSystematicsNames() {
+    return m_systematicVariationNames;
+  }
+
+
+  std::vector<ROOT::VecOps::RVec<float> > GetSystematics() {
+    return m_systematicVariations;
+  }
   //------------------------------------------------------------------------------------------
   // For skimming
   //------------------------------------------------------------------------------------------
@@ -129,6 +164,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByID( ID id, bool verbose = false ) { 
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     new_collection -> Clear();
     unsigned short size = GetSize();
@@ -145,6 +181,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByMinPt ( double min_pt ) { 
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -160,6 +197,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByMinPtHeep ( double min_pt ) { 
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -175,6 +213,7 @@ class Collection {
   template<class Object1>
     CollectionPtr SkimByEtaRange ( double min_eta, double max_eta ) { 
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short size = GetSize();
     for (unsigned short i = 0; i < size ; ++i){
@@ -201,6 +240,7 @@ class Collection {
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -223,6 +263,7 @@ class Collection {
     CollectionPtr SkimByVetoDRMatch ( Object2 & other_object, double min_dr ){
     unsigned short this_collection_size = GetSize();
     CollectionPtr new_collection ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       Object1 this_collection_constituent  = GetConstituent<Object1>(i);
@@ -248,6 +289,7 @@ class Collection {
     unsigned short this_collection_size = GetSize();
     unsigned short other_collection_size = other_collection -> GetSize();
     CollectionPtr new_collection  ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
       double tmp_min_dr = 999.0;
@@ -289,6 +331,7 @@ class Collection {
   template <class Object1> 
     CollectionPtr RemoveDuplicates () { 
     CollectionPtr new_collection  ( new Collection(m_readerTools, 0));
+    new_collection -> SetSystematics(GetSystematicsNames(), GetSystematics());
     new_collection -> SetTriggerObjectIndex ( m_trigObj_index );
     unsigned short this_collection_size = GetSize();
     for (unsigned short i = 0; i < this_collection_size ; ++i) {
@@ -475,6 +518,8 @@ class Collection {
   short m_trigObj_index;
   std::vector<unsigned short> m_raw_indices; 
   std::shared_ptr<TTreeReaderTools> m_readerTools;
+  std::vector<ROOT::VecOps::RVec<float> > m_systematicVariations;
+  std::vector<std::string> m_systematicVariationNames;
   
 };
 
