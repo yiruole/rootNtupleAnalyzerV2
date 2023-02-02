@@ -1,6 +1,7 @@
 #include "Collection.h"
 #include "JMESystematicsCalculators.h"
 #include <variant>
+#include <filesystem>
 
 using namespace ROOT::VecOps;
 
@@ -10,33 +11,79 @@ class JMEUncertainties {
     typedef std::variant<RVec<float>, RVec<int>, float, std::uint32_t> JetMETArgType;
     typedef JetVariationsCalculator::result_t JetVariationsResult;
 
-    JMEUncertainties(analysisClass & d) :
+    JMEUncertainties(analysisClass & d, const std::string& jecTextFilePath, const std::string& jerTextFilePath,
+        const std::string& jecTag, const std::string& jerTag, bool splitJER=false, bool doGenMatch=true,
+        float genMatchMaxDR=0.2, float genMatchMaxDPt = 3.0) :
       m_data (&d) {
-        //FIXME TODO how to specify text file paths? probably have to be in cutfiles
         // redo JEC, push_back corrector parameters for different levels
         std::vector<JetCorrectorParameters> jecParams;
-        std::string jecTextFilePath = "/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/jecUL/Summer19UL16APV_V7_MC/";
-        std::string jerTextFilePath = "/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/jerUL/Summer20UL16APV_JRV3_MC/";
-        std::string textFilePath_UncertaintySources = jecTextFilePath + "Summer19UL16APV_V7_MC_UncertaintySources_AK4PFchs.txt";
-        std::string textFilePath_PtResolution = jerTextFilePath + "Summer20UL16APV_JRV3_MC_PtResolution_AK4PFchs.txt";
-        std::string textFilePath_SF =  jerTextFilePath + "Summer20UL16APV_JRV3_MC_SF_AK4PFchs.txt";
-        jecParams.push_back(JetCorrectorParameters(jecTextFilePath+"Summer19UL16APV_V7_MC_L1FastJet_AK4PFchs.txt"));
-        jecParams.push_back(JetCorrectorParameters(jecTextFilePath+"Summer19UL16APV_V7_MC_L2Relative_AK4PFchs.txt"));
-        jecParams.push_back(JetCorrectorParameters(jecTextFilePath+"Summer19UL16APV_V7_MC_L3Absolute_AK4PFchs.txt"));
-        jecParams.push_back(JetCorrectorParameters(jecTextFilePath+"Summer19UL16APV_V7_MC_L2L3Residual_AK4PFchs.txt"));
+        std::string ourJecTextFilePath = jecTextFilePath+jecTag+"/"+jecTag;
+        std::string ourJerTextFilePath = jerTextFilePath+jerTag+"/"+jerTag;
+        std::string textFilePath_UncertaintySources = ourJecTextFilePath + "_UncertaintySources_AK4PFchs.txt";
+        CheckFileExists(textFilePath_UncertaintySources);
+        std::string textFilePath_PtResolution = ourJerTextFilePath + "_PtResolution_AK4PFchs.txt";
+        CheckFileExists(textFilePath_PtResolution);
+        std::string textFilePath_SF =  ourJerTextFilePath + "_SF_AK4PFchs.txt";
+        CheckFileExists(textFilePath_SF);
+        std::string textFilePath_L1Corr = ourJecTextFilePath+"_L1FastJet_AK4PFchs.txt";
+        CheckFileExists(textFilePath_L1Corr);
+        std::string textFilePath_L2Corr = ourJecTextFilePath+"_L2Relative_AK4PFchs.txt";
+        CheckFileExists(textFilePath_L2Corr);
+        std::string textFilePath_L3Corr = ourJecTextFilePath+"_L3Absolute_AK4PFchs.txt";
+        CheckFileExists(textFilePath_L3Corr);
+        std::string textFilePath_L2L3Corr = ourJecTextFilePath+"_L2L3Residual_AK4PFchs.txt";
+        CheckFileExists(textFilePath_L2L3Corr);
+        jecParams.push_back(JetCorrectorParameters(textFilePath_L1Corr));
+        jecParams.push_back(JetCorrectorParameters(textFilePath_L2Corr));
+        jecParams.push_back(JetCorrectorParameters(textFilePath_L3Corr));
+        jecParams.push_back(JetCorrectorParameters(textFilePath_L2L3Corr));
         m_calc.setJEC(jecParams);
-        // calculate JES uncertainties (repeat for all sources)
-        //JetCorrectorParameters jcp_unc(textFilePath_UncertaintySources);
-        JetCorrectorParameters jcp_unc(textFilePath_UncertaintySources, "Total");
-        //TODO: add sources
-        m_calc.addJESUncertainty("Total", jcp_unc);
+        // calculate JES uncertainties
+        AddJESUncertainty(textFilePath_UncertaintySources, "AbsoluteStat");
+        AddJESUncertainty(textFilePath_UncertaintySources, "AbsoluteScale");
+        AddJESUncertainty(textFilePath_UncertaintySources, "AbsoluteMPFBias");
+        AddJESUncertainty(textFilePath_UncertaintySources, "Fragmentation");
+        AddJESUncertainty(textFilePath_UncertaintySources, "SinglePionECAL");
+        AddJESUncertainty(textFilePath_UncertaintySources, "SinglePionHCAL");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorQCD");
+        AddJESUncertainty(textFilePath_UncertaintySources, "TimePtEta");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeJEREC1");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeJEREC2");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeJERHF");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativePtBB");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativePtEC1");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativePtEC2");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativePtHF");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeBal");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeSample");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeFSR");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeStatFSR");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeStatEC");
+        AddJESUncertainty(textFilePath_UncertaintySources, "RelativeStatHF");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpDataMC");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpPtRef");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpPtBB");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpPtEC1");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpPtEC2");
+        AddJESUncertainty(textFilePath_UncertaintySources, "PileUpPtHF");
+        // extras
+        AddJESUncertainty(textFilePath_UncertaintySources, "Total");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorZJet");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorPhotonJet");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorPureGluon");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorPureQuark");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorPureCharm");
+        AddJESUncertainty(textFilePath_UncertaintySources, "FlavorPureBottom");
         // Smear jets, with JER uncertainty
-        bool splitJER = false;
         m_calc.setSmearing(textFilePath_PtResolution, textFilePath_SF,
             splitJER,       // decorrelate for different regions
-            true, 0.2, 3.);  // use hybrid recipe, matching parameters
-        //TODO: make options configurable from outside
+            doGenMatch, genMatchMaxDR, genMatchMaxDPt);  // use hybrid recipe, matching parameters
       }
+
+    void AddJESUncertainty(std::string& uncertaintySourcesTxtFile, std::string uncertaintySource) {
+      JetCorrectorParameters jcp_unc(uncertaintySourcesTxtFile, uncertaintySource);
+      m_calc.addJESUncertainty(uncertaintySource, jcp_unc);
+    }
 
     void ComputeJetVariations(CollectionPtr jetCollection, bool isMC=true, bool forMET=false, bool isMETFixEE2017=false,
         bool addHEM2018Issue=false, bool verbose=false) {
@@ -46,7 +93,7 @@ class JMEUncertainties {
       std::vector<std::string> systematicsNames;
       for(unsigned short i = 0; i < result.size(); ++i) {
         systematics.push_back(result.pt(i));
-        systematicsNames.push_back("pt_"+variations[i]);
+        systematicsNames.push_back("Pt_"+variations[i]);
       }
       for(unsigned short i = 0; i < result.size(); ++i) {
         systematics.push_back(result.mass(i));
@@ -76,6 +123,8 @@ class JMEUncertainties {
           std::get<RVec<float> >(jetArgs[10]), std::get<RVec<float> >(jetArgs[11]), std::get<RVec<float> >(jetArgs[12]), std::get<RVec<float> >(jetArgs[13])
           );
     }
+
+  private:
     // reimplemented in C++ from https://gitlab.cern.ch/cp3-cms/CMSJMECalculators/-/blob/main/python/CMSJMECalculators/utils.py#L23
     std::vector<JetMETArgType> GetJetMETArgs(bool isMC=true, bool forMET=false, bool isMETFixEE2017=false, bool addHEM2018Issue=false) {
       std::vector<JetMETArgType> args;
@@ -145,7 +194,13 @@ class JMEUncertainties {
       return args;
     }
 
-  private:
+    void CheckFileExists(std::string& filePath) {
+      if(!std::filesystem::exists(filePath)) {
+        STDOUT("ERROR: JES/JER file " << filePath << " does not exist! Can't compute uncertainties. Exiting.");
+        exit(-8);
+      }
+    }
+
 		JetVariationsCalculator m_calc;
     analysisClass* m_data;
 };
