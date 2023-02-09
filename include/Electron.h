@@ -13,10 +13,9 @@ class Electron : public Object {
 
   // Kinematic variables
   
-  float PtHeep               ();
   float PtUncorr             ();
+  float Energy               ();
   float SCEta                (); 
-  float SCSeedEta            (); 
   float SCPhi                (); 
   float SCEt                 (); 
   float SCEnergy             (); 
@@ -153,36 +152,20 @@ class Electron : public Object {
   float IsEE                 ();
   bool   EcalSeed            ();
   float DeltaEta             ();
-  float DeltaEtaSeed         ();
-  float DeltaPhi             ();
   float HoE                  ();
-  //float SigmaIEtaIEta        ();
   float Full5x5SigmaIEtaIEta ();
-  float SigmaEtaEta          ();
-  //float E1x5OverE5x5         ();
-  //float E2x5OverE5x5         ();
-  float Full5x5E1x5OverE5x5     ();
-  float Full5x5E2x5OverE5x5     ();
   float LeadVtxDistXY        ();
   float LeadVtxDistZ         ();
-  float VtxDistXY            ();
-  float VtxDistZ             ();
-  float Dist                 ();
-  float DCotTheta            ();
-  float ValidFrac            ();
-  float CaloEnergy           ();
-  float EcalEnergy           ();
-  float ESuperClusterOverP   ();
-  float FBrem                ();
-  float NBrems               ();
   bool  HasMatchedConvPhot   ();
-  float BeamSpotDXY          ();
-  float BeamSpotDXYErr       ();
-  float GsfCtfScPixCharge    ();
-  float GsfScPixCharge       ();
-  float GsfCtfCharge         ();
-  float Classif              ();
-  float  RhoForHEEP           ();
+  float RhoForHEEP           ();
+  int SeedGain             ();
+
+  float DEScaleUp            ();
+  float DEScaleDown          ();
+  float DESigmaUp            ();
+  float DESigmaDown          ();
+  float PtDESigmaUp          ();
+  float PtDESigmaDown        ();
 
 
   // EGamma bits
@@ -198,7 +181,6 @@ class Electron : public Object {
   
   // Conversion variables		      	
   
-  int    MissingHitsEG        ();
   int    MissingHits          ();
   
   // Isolation variables		       	
@@ -209,9 +191,6 @@ class Electron : public Object {
   
   float PFRelIso03Charged    ();
   float PFRelIso03All        ();
-  float PFPhotonIso03        ();
-  float PFNeutralHadronIso03 ();
-  float PFPUIso03            ();
 
   //float PFChargedHadronIso04 ();
   //float PFPhotonIso04        ();

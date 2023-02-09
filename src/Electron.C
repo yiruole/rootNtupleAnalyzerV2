@@ -20,10 +20,9 @@ Electron::Electron (Collection & c, unsigned short i, short j):
 
 // Kinematic variables
 
-float   Electron::PtHeep             (){ return CaloEnergy()/cosh(SCEta()); }
 float   Electron::PtUncorr           (){ return ECorr() != 0 ? Pt()/ECorr() : Pt(); }
+float   Electron::Energy             (){ return Pt() * cosh(Eta()); }
 float   Electron::SCEta              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index)+m_collection->ReadArrayBranch<Float_t>("Electron_eta",m_raw_index); } 
-float   Electron::SCSeedEta          (){ return -1.0; } 
 float   Electron::SCPhi              (){ return m_collection->ReadArrayBranch<Float_t>("Electron_scPhi",m_raw_index); } 
 float   Electron::SCEt               (){ return (m_collection->ReadArrayBranch<Float_t>("Electron_scEtOverPt",m_raw_index)+1)*Pt(); } 
 float   Electron::IsEB               (){ return fabs(Eta()) < 1.5; } 
@@ -51,8 +50,8 @@ bool Electron::PassHEEPIDCut(HEEPIDCut cut) {
   return 0x1 & (GetHEEPBitmap() >> static_cast<int>(cut));
 }
 bool Electron::PassHEEPGsfEleHadronicOverEMLinearCut2018   () {
-  float energy = Pt() * cosh(SCEta());  // using corrected quantities here, probably OK
-  return bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/energy + 0.05 );
+  // using corrected quantities here, probably OK
+  return bool ( HoE()            < (-0.4+0.4*fabs(SCEta()))*RhoForHEEP()/SCEnergy() + 0.05 );
 }
 bool Electron::PassHEEPGsfEleEmHadD1IsoRhoCut2018          () {
   float caloIsolation = EcalIsoDR03() + HcalIsoD1DR03();
@@ -82,55 +81,24 @@ bool Electron::PassEGammaIDLooseCut(EGammaIDCut cut) {
 }
 
 
-//bool   Electron::EcalSeed             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronHasEcalDrivenSeed        -> at ( m_raw_index ); }
-//bool   Electron::EcalDriven           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronIsEcalDriven             -> at ( m_raw_index ); }
-bool   Electron::EcalSeed             (){ return false; }
-//float Electron::DeltaEtaSeed         (){ return m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronDeltaEtaTrkSeedSC        -> at ( m_raw_index ); }
-float Electron::DeltaEtaSeed          (){
-  //std::cout << "Electron::DeltaEtaTrkSeedSC=" << m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronDeltaEtaTrkSeedSC            -> at ( m_raw_index )
-  //  //<< "\tElectron::dEtaSCTrkAtVtx-SCEta+SCSeedEta=" << 
-  //  //m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronDeltaEtaTrkSC            -> at ( m_raw_index ) -
-  //  //m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronSCEta -> at( m_raw_index) +
-  //  //m_collection->ReadArrayBranch<Float_t>("Electron_") ElectronSCSeedEta -> at(m_raw_index)
-  //  << std::endl;
-  return -1.0;
-}
-// -999 --> indicates that it's not available in NanoAOD
-float Electron::DeltaPhi             (){ return -999; }
+bool  Electron::EcalSeed             (){ return false; }
+float Electron::DeltaEta             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index); }
 float Electron::HoE                  (){ return m_collection->ReadArrayBranch<Float_t>("Electron_hoe",m_raw_index); }
-//FIXME remove
-float Electron::SigmaEtaEta          (){ return -999; } 
-
 float Electron::Full5x5SigmaIEtaIEta (){ return m_collection->ReadArrayBranch<Float_t>("Electron_sieie",m_raw_index); }
-float Electron::Full5x5E1x5OverE5x5  (){ return -999; }
-float Electron::Full5x5E2x5OverE5x5  (){ return -999; }
 float Electron::LeadVtxDistXY        (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dxy",m_raw_index); }
 float Electron::LeadVtxDistZ         (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dz",m_raw_index); }
-//
-float Electron::VtxDistXY            (){ return -999; }
-float Electron::VtxDistZ             (){ return -999; }
-//
-float Electron::Dist                 (){ return -999; }
-float Electron::DCotTheta            (){ return -999; }
-float Electron::ValidFrac            (){ return -999; }
-float Electron::CaloEnergy           (){ return -999; }
-float Electron::EcalEnergy           (){ return -999; }
-float Electron::ESuperClusterOverP   (){ return -999; }
-float Electron::NBrems               (){ return -999; }
 bool Electron::HasMatchedConvPhot    (){ return !(m_collection->ReadArrayBranch<Bool_t>("Electron_convVeto",m_raw_index)); }
-float Electron::FBrem                (){ return -999; }
-float Electron::BeamSpotDXY          (){ return -999; }
-float Electron::BeamSpotDXYErr       (){ return -999; }
-float Electron::GsfCtfScPixCharge    (){ return -999; }
-float Electron::GsfScPixCharge       (){ return -999; }
-float Electron::GsfCtfCharge         (){ return -999; }
-float Electron::Classif              (){ return -999; }
 float Electron::RhoForHEEP           (){ return m_collection->ReadValueBranch<Float_t>("fixedGridRhoFastjetAll"); }
-float Electron::DeltaEta             (){ return m_collection->ReadArrayBranch<Float_t>("Electron_deltaEtaSC",m_raw_index); }
-					                                      					      
+int Electron::SeedGain               (){ return m_collection->ReadArrayBranch<UChar_t>("Electron_seedGain",m_raw_index); }
+
+float Electron::DEScaleUp            (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dEscaleUp",m_raw_index); }
+float Electron::DEScaleDown          (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dEscaleDown",m_raw_index); }
+float Electron::DESigmaUp            (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dEsigmaUp",m_raw_index); }
+float Electron::DESigmaDown          (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dEsigmaDown",m_raw_index); }
+float Electron::PtDESigmaUp          (){ return (Energy()-DESigmaUp())/cosh(Eta()); }
+float Electron::PtDESigmaDown        (){ return (Energy()-DESigmaDown())/cosh(Eta()); }
+
 // Conversion variables		      	   		      		  	  				      
-//FIXME: difference between these is...?
-int    Electron::MissingHitsEG        (){ return m_collection->ReadArrayBranch<UChar_t>("Electron_lostHits",m_raw_index); }
 int    Electron::MissingHits          (){ return m_collection->ReadArrayBranch<UChar_t>("Electron_lostHits",m_raw_index); }
 					                                      					      
 // Isolation variables		       	   		       			  				      
@@ -140,9 +108,6 @@ float Electron::HcalIsoD1DR03        (){ return m_collection->ReadArrayBranch<Fl
 float Electron::TrkIsoDR03           (){ return m_collection->ReadArrayBranch<Float_t>("Electron_dr03TkSumPt"             , m_raw_index); }
 float Electron::PFRelIso03Charged    (){ return m_collection->ReadArrayBranch<Float_t>("Electron_pfRelIso03_chg"          , m_raw_index); }
 float Electron::PFRelIso03All        (){ return m_collection->ReadArrayBranch<Float_t>("Electron_pfRelIso03_all"          , m_raw_index); }
-float Electron::PFPhotonIso03        (){ return -999; }
-float Electron::PFNeutralHadronIso03 (){ return -999; }
-float Electron::PFPUIso03            (){ return -999; }
 
 // GEN matching
 int Electron::NumGenParticles() { return 1; } //FIXME: this is either 1 matched particle or nothing matched
@@ -187,7 +152,6 @@ double Electron::EnergyRes (){
   return 0.05;
 }
 // Energy resolution scale factors
-//FIXME
 double Electron::EnergyResScaleFactor (){ 
   // SIC: changed May 12, 2015 to 10% as per LQ1 2012 CWR comment; see EGM-13-001 and email thread
   if      ( IsEBFiducial() ) return 1.1;
