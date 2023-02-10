@@ -202,7 +202,10 @@ class JMEUncertainties {
       args.push_back(GetRVecFromBranchName("Jet_mass"));
       args.push_back(GetRVecFromBranchName("Jet_rawFactor"));
       args.push_back(GetRVecFromBranchName("Jet_area"));
-      args.push_back(GetRVecFromBranchName<int>("Jet_partonFlavour"));
+      if(isMC)
+        args.push_back(GetRVecFromBranchName<int>("Jet_partonFlavour"));
+      else
+        args.push_back(RVecI());
       if(forMET) {
         args.push_back(GetRVecFromBranchName("Jet_muonSubtrFactor"));
         args.push_back(GetRVecFromBranchName("Jet_neEmEF"));
