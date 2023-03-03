@@ -37,7 +37,7 @@ static const std::string SYSTHISTSUFFIX = "WithSystematics";
 class SimpleCut {
   public:
     virtual ~SimpleCut() = default;
-    typedef std::variant<float, int, unsigned long long int, unsigned int, unsigned char> ValueType;
+    typedef std::variant<float, int, unsigned long long int, unsigned int, bool> ValueType;
 
     std::string variableName = "";
     int level_int = -1;
@@ -99,9 +99,8 @@ class SimpleCut {
                   || minValue2 < val && val <= maxValue2 ) )
             return true;
             }
-            else if constexpr (std::is_same_v<unsigned char, T>) {
-              if(filled && (minValue1 < val && val <= maxValue1
-                    || minValue2 < val && val <= maxValue2 ) )
+            else if constexpr (std::is_same_v<bool, T>) {
+              if(val)
                 return true;
             }
             else {
@@ -120,16 +119,12 @@ class SimpleCut {
         if(branchType == 'x') {
           if constexpr (std::is_same_v<T, double>)
             value = static_cast<float>(newValue);
-          else if constexpr (std::is_same_v<T, bool>)
-            value = static_cast<unsigned char>(newValue);
           else
             value = newValue;
           branchType = 'y';
         }
         if constexpr (std::is_same_v<T, double>)
           value = static_cast<float>(newValue);
-        else if constexpr (std::is_same_v<T, bool>)
-          value = static_cast<unsigned char>(newValue);
         else if (!valueIsType<T>()) {
           std::string varTypeName = getValueTypeName();
           STDOUT("ERROR: Trying to set value of variable " << variableName << " which is of type " << varTypeName << " to a value of different type " << typeid(T).name() << "; can't do this.");
@@ -154,8 +149,8 @@ class SimpleCut {
         value = static_cast<unsigned long long int>(0);
       else if(valueIsType<unsigned int>())
         value = static_cast<unsigned int>(0);
-      else if(valueIsType<unsigned char>()) {
-        value = static_cast<unsigned char>(0);
+      else if(valueIsType<bool>()) {
+        value = static_cast<bool>(0);
       }
       else {
         STDOUT("ERROR: value type '" << getValueTypeName() << "' for saved variable named '" << variableName << "' is not one supported. Must add support for additional branch types.");
@@ -163,6 +158,7 @@ class SimpleCut {
       }
     }
 
+    virtual void resetLink(std::string varName, void* link) {}
 };
 
 class cut : public SimpleCut {
@@ -197,12 +193,7 @@ class TMVACut : public cut {
   public:
     std::string modelName;
     std::string weightFileName;
-    std::vector<std::shared_ptr<cut> > inputVariables;
-
     std::string readerOptions = "!Color:!Silent";
-    std::unique_ptr<TMVA::Reader> reader;
-    //std::unique_ptr<TMVA::Experimental::RReader> reader;
-    TMVA::Experimental::Internal::XMLConfig xmlConfig;
 
     bool evaluateCut() override {
       std::string cutsNotFilled;
@@ -224,14 +215,29 @@ class TMVACut : public cut {
     }
 
     void setupReader(std::vector<std::shared_ptr<cut> >& inputVariableList) override {
+      reader = std::make_shared<TMVA::Reader>(readerOptions);
       inputVariables = inputVariableList;
       for(auto& cut : inputVariables)
         reader->AddVariable(cut->variableName, cut->getValueAddress<float>());
       reader->BookMVA(modelName, weightFileName);
+      fillVarInfoMap();
     }
 
     std::vector<std::string> getInputVariableNames() override {
       return xmlConfig.variables;
+    }
+
+    void resetLink(std::string varName, void* link) override {
+      const auto& itr = std::find(varNames.begin(), varNames.end(), varName);
+      if(itr==varNames.end())
+        return;
+      unsigned int idx = std::distance(varNames.begin(), itr);
+      reader->DataInfo().GetVariableInfos()[idx].SetExternalLink(link);
+    }
+
+    void fillVarInfoMap() {
+      for(auto&& varInfo : reader->DataInfo().GetVariableInfos())
+        varNames.push_back(varInfo.GetLabel().Data());
     }
 
     TMVACut() = delete;
@@ -240,11 +246,18 @@ class TMVACut : public cut {
         TMVA::Tools::Instance();
         //reader.reset(new TMVA::Experimental::RReader(weightFileName));
         //reader = std::make_unique<TMVA::Experimental::RReader>(weightFileName);
-        reader = std::make_unique<TMVA::Reader>(readerOptions);
+        reader = std::make_shared<TMVA::Reader>(readerOptions);
         xmlConfig = TMVA::Experimental::Internal::ParseXMLConfig(weightFileName);
         branchType = 'F';
         value = float(0.0);
       }
+
+  private:
+    std::vector<std::shared_ptr<cut> > inputVariables;
+    std::shared_ptr<TMVA::Reader> reader;
+    //std::unique_ptr<TMVA::Experimental::RReader> reader;
+    TMVA::Experimental::Internal::XMLConfig xmlConfig;
+    std::vector<std::string> varNames;
 };
 
 struct preCut {
@@ -400,7 +413,9 @@ class baseClass {
       STDOUT("ERROR: did not find variableName = "<<s<<" neither in cutNameToCut nor combCutNameToPassed. Returning false.");
       return (ret=false);
     }
-    template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string>& orderedCutNames) {
+    template <typename T> bool passedAllPreviousCuts(const std::string& s, std::map<std::string, T>& cutNameToCut, std::vector<std::string>& orderedCutNames, bool verbose=false) {
+      if(verbose)
+        STDOUT("passedAllPreviousCuts" << s);
       auto&& cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() ) {
         STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning false.");
@@ -418,6 +433,8 @@ class baseClass {
             if( ! (c->filled && c->passed) ) {
               cc->second->evaluatedPreviousCuts = true;
               cc->second->passedPreviousCuts = false;
+              if(verbose)
+                STDOUT("Failed cut: " << cc->second->variableName);
               break;
             }
           }
@@ -775,7 +792,7 @@ class baseClass {
     // systematics
     std::vector<Systematic> systematics_;
     TList systFormulas_;
-    std::map<std::string, std::shared_ptr<SimpleCut>> systCutName_cut_;
+    std::map<std::string, std::shared_ptr<cut>> systCutName_cut_;
     std::unique_ptr<TH2D> currentSystematicsHist_;
 };
 
