@@ -498,6 +498,8 @@ void baseClass::readCutFile()
       if( m2=="-") m2="+inf";
       if( M2=="-") M2="-inf";
       shared_ptr<cut> thisCut = make_shared<cut>();
+      bool isTMVACut = false;
+      map<string, float> staticParametersMap;
       if(v.size() > 9) { // check for optional flags
         string flag(v[9]);
         string flagOrig(flag);
@@ -545,7 +547,7 @@ void baseClass::readCutFile()
           string modelName = splitByCommas[0];
           string weightFile = getPreCutString1(splitByCommas[1]);
           thisCut.reset(new TMVACut(modelName, weightFile));
-          map<string, float> staticParametersMap;
+          isTMVACut = true;
           if(splitByCommas.size() > 2) {
             for(int index = 2; index < splitByCommas.size(); ++index) {
               string param = splitByCommas[2];
@@ -624,7 +626,29 @@ void baseClass::readCutFile()
       thisCut->nEvtPassedBeforeWeight_alreadyFilled = false;
 
       orderedCutNames_.push_back(thisCut->variableName);
-      systCutName_cut_[thisCut->variableName] = make_shared<SimpleCut>(*thisCut);
+      if(isTMVACut) {
+        systCutName_cut_[thisCut->variableName] = make_shared<TMVACut>(*dynamic_cast<TMVACut*>(thisCut.get()));
+        vector<shared_ptr<cut>> tmvaCuts;
+        tmvaCuts.reserve(thisCut->getInputVariableNames().size());
+        for(const auto& varName : thisCut->getInputVariableNames()) {
+          auto&& cc = systCutName_cut_.find(varName);
+          if( cc == systCutName_cut_.end() ) {
+            shared_ptr staticCutPtr  = make_shared<cut>();
+            staticCutPtr->variableName = varName;
+            staticCutPtr->value = staticParametersMap.find(varName)->second;
+            staticCutPtr->passed = true;
+            staticCutPtr->filled = true;
+            tmvaCuts.push_back(staticCutPtr);
+          }
+          else {
+            tmvaCuts.push_back(cc->second);
+          }
+        }
+        systCutName_cut_[thisCut->variableName]->setupReader(tmvaCuts);
+      }
+      else
+        systCutName_cut_[thisCut->variableName] = make_shared<cut>(*thisCut);
+      string varName = thisCut->variableName;
       cutName_cut_[thisCut->variableName] = move(thisCut);
     }
     STDOUT( "baseClass::readCutFile: Finished reading cutFile: " << *cutFile_ );
@@ -840,29 +864,36 @@ void baseClass::readCutFile()
     STDOUT("Making systematics 2D hist with " << nCutsForSysts << " x bins");
     histsToSave_.push_back(std::shared_ptr<TH2D>(new TH2D("systematics", "systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
     currentSystematicsHist_.reset(new TH2D("currentSystematics", "current systematics", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts));
-    auto theHist = dynamic_pointer_cast<TH2D>(histsToSave_.back());
-    theHist->Sumw2();
-    theHist->SetDirectory(0);
+    auto systHist = dynamic_pointer_cast<TH2D>(histsToSave_.back());
+    histsToSave_.push_back(std::shared_ptr<TH2D>(new TH2D("systematicsUnweighted", "systematics (no weight)", nCutsForSysts, 0, nCutsForSysts, nSysts, 0, nSysts)));
+    auto systHistUnweighted = dynamic_pointer_cast<TH2D>(histsToSave_.back());
+    systHist->Sumw2();
+    systHist->SetDirectory(0);
+    systHistUnweighted->Sumw2();
+    systHistUnweighted->SetDirectory(0);
     int idx = 1;
     for (auto& cutName : orderedSystCutNames_) {
-      theHist->GetXaxis()->SetBinLabel(idx, cutName.c_str());
+      systHist->GetXaxis()->SetBinLabel(idx, cutName.c_str());
+      systHistUnweighted->GetXaxis()->SetBinLabel(idx, cutName.c_str());
       ++idx;
     }
     idx = 1;
     for(auto& syst : systematics_) {
       if(syst.length==1) {
-        theHist->GetYaxis()->SetBinLabel(idx, syst.name.c_str());
+        systHist->GetYaxis()->SetBinLabel(idx, syst.name.c_str());
+        systHistUnweighted->GetYaxis()->SetBinLabel(idx, syst.name.c_str());
         ++idx;
       }
       else {
         for(int arrIdx = 0; arrIdx < syst.length; ++arrIdx) {
           string systName = syst.name + "_" + to_string(arrIdx);
-          theHist->GetYaxis()->SetBinLabel(idx, systName.c_str());
+          systHist->GetYaxis()->SetBinLabel(idx, systName.c_str());
+          systHistUnweighted->GetYaxis()->SetBinLabel(idx, systName.c_str());
           ++idx;
         }
       }
     }
-    theHist->GetYaxis()->Copy(*currentSystematicsHist_->GetYaxis());
+    systHist->GetYaxis()->Copy(*currentSystematicsHist_->GetYaxis());
   }
 }
 
@@ -1002,9 +1033,6 @@ template<typename T> void baseClass::evaluateCuts(map<string, T>& cutNameToCut, 
     auto& c = cc->second;
     std::string cName = c->variableName;
     c->evaluatedPreviousCuts = false; // if redoing individual cuts, have to redo previous cut checking as well
-    //float val = c->template valueIsType<float>() ? c->template getValue<float>() ;
-    //using V = std::variant_alternative_t<c->value.index(), decltype(c->value)>;
-    //auto val2 = c->template getValue<typec->var_type(c->value)>();
     bool passed = c->evaluateCut();
 
     if( !passed )
@@ -1136,6 +1164,11 @@ void baseClass::runSystematics()
     cout << "ERROR: could not find systematics histogram. This shouldn't happen. Exiting" << endl;
     exit(-6);
   }
+  shared_ptr<TH2D> systHistUnweighted = dynamic_pointer_cast<TH2D>(findSavedHist("systematicsUnweighted"));
+  if(systHistUnweighted == nullptr) {
+    cout << "ERROR: could not find systematics unweighted histogram. This shouldn't happen. Exiting" << endl;
+    exit(-6);
+  }
   currentSystematicsHist_->Reset();
   // copy cut decisions/filled
   for(auto& cutName : orderedCutNames_) {
@@ -1166,15 +1199,16 @@ void baseClass::runSystematics()
           auto& systCut = systCutName_cut_[cutName];
           systCut->filled = false;
           if(syst.cutNamesToBranchNames[cutName].size()) {
-            //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
-            //  " with the value of the branch: " << syst.cutNamesToBranchNames[cutNameCut.first];
-            //cout << " which is: " << readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutNameCut.first]) << endl;
+            //cout << "[DEBUG] syst " << syst.name << " affects cut named: " << cutName << "; replace orig val of: " << systCut->getValue<float>() << 
+            //  " with the value of the branch: " << syst.cutNamesToBranchNames[cutName];
+            //cout << " which is: " << readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutName]) << endl;
+            //STDOUT("\tDEBUG: [pre-value overwrite] systCut " << cutName << " has value = " << systCut->getValue<float>() << " and address: " << systCut->getValueAddress<float>());
             systCut->value = readerTools_->ReadValueBranch<Float_t>(syst.cutNamesToBranchNames[cutName]);
             systCut->filled = true;
           }
           else {
             systVal = syst.cutNamesToSystValues[cutName];
-            //cout << "\t[sethlog] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
+            //cout << "\t[DEBUG] syst affects cut named: " << cutNameCut.first << "; replace orig val of: " << cutNameCut.second.value << 
             //  " with the syst value: " << systVal << "; filled? " << syst.cutNamesToSystFilled[cutNameCut.first] << endl;
             if(syst.cutNamesToSystFilled[cutName]) {
               systCut->value = systVal;
@@ -1202,23 +1236,38 @@ void baseClass::runSystematics()
       }
       float xbinCoord = 0.5;
       for(auto& cutName : orderedSystCutNames_) {
+        //if(syst.name == "nominal" || syst.name=="JERUp") {
+        //  STDOUT("[DEBUG] passedCut() for cut: " << cutName << "? " << passedCut(cutName, systCutName_cut_, combCutNameToPassFail) << ", value=" << systCutName_cut_[cutName]->getValue<float>() << ", for syst: " << syst.name);
+        //  STDOUT("[DEBUG] calling passedSelection() for selection: " << cutName << " for syst: " << syst.name);
+        //}
         //TODO: perhaps remove the list of cut names; always have to use the full list!
         if(passedSelection(cutName, systCutName_cut_, combCutNameToPassFail, orderedCutNames_)) {
-          //if(cutName == "min_M_ej_LQ1200") {
-          //  cout << "[sethlog]: passed selection " << cutName << "; fill syst hist xbin: " << xbinCoord << ", ybin: " << ybinCoord <<
-          //    ", origWeight=" << systCutName_cut_[cutName].weight << "; systVal=" << systVal << "; new weight= " << systCutName_cut_[cutName].weight*systVal << endl;
+          //if(syst.name == "nominal" || syst.name=="JERUp") {
+          //  cout << "[DEBUG]: passed selection " << cutName << " with value="<< systCutName_cut_[cutName]->getValue<float>() << "; fill syst hist; syst="<<syst.name<<",  xbin: " << xbinCoord << ", ybin: " << ybinCoord <<
+          //    ", origWeight=" << systCutName_cut_[cutName]->weight << "; systVal=" << systVal << "; new weight= " << systCutName_cut_[cutName]->weight*systVal <<
+          //    " passedPreviousCuts? " << systCutName_cut_[cutName]->passedPreviousCuts << " evaluatedPreviousCuts? " << systCutName_cut_[cutName]->evaluatedPreviousCuts << endl;
+          //  cout << "\t[DEBUG]: NOMINAL selection " << cutName << " with value="<< cutName_cut_[cutName]->getValue<float>()
+          //    << " passedSelection? " << passedSelection(cutName, cutName_cut_, combCutNameToPassFail, orderedCutNames_) <<
+          //    " passedPreviousCuts? " << cutName_cut_[cutName]->passedPreviousCuts << " evaluatedPreviousCuts? " << cutName_cut_[cutName]->evaluatedPreviousCuts << endl;
           //}
           if(shiftValue) {
             systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName]->weight);
+            systHistUnweighted->Fill(xbinCoord, ybinCoord);
             currentSystematicsHist_->Fill(xbinCoord, ybinCoord, 1);
-            //STDOUT("INFO: runSystematics(): 1. fill hist for syst="<<syst.name<<", systCutName=" << cutName <<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
-            //    << ", nom. weight="<<systCutName_cut_[cutName].weight);
+            //int bin = currentSystematicsHist_->FindFixBin(xbinCoord, ybinCoord);
+            //if(syst.name=="JERUp")
+            //  STDOUT("INFO: runSystematics(): 1. fill hist for syst="<<syst.name<<", systCutName=" << cutName //<<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
+            //      << ", nom. weight="<<systCutName_cut_[cutName]->weight << "; binContent=" << systHist->GetBinContent(bin));
           }
           else {
             systHist->Fill(xbinCoord, ybinCoord, systCutName_cut_[cutName]->weight*systVal);
+            systHistUnweighted->Fill(xbinCoord, ybinCoord, systVal);
             currentSystematicsHist_->Fill(xbinCoord, ybinCoord, systVal);
-            //STDOUT("INFO: runSystematics(): 2. fill hist for syst="<<syst.name<<", systCutName=" << cutName <<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
-            //    << ", syst. weight="<<systCutName_cut_[cutName].weight*systVal);
+            //int bin = currentSystematicsHist_->FindFixBin(xbinCoord, ybinCoord);
+            //if(syst.name == "nominal")
+            //  STDOUT("DEBUG: runSystematics() passed selection " << cutName << ": 2. fill hist for syst="<<syst.name<<", systCutName=" << cutName //<<", binX=" << currentSystematicsHist_->GetXaxis()->FindFixBin(xbinCoord) << ", binY=" << currentSystematicsHist_->GetYaxis()->FindFixBin(ybinCoord)
+            //      << ", syst. weight=weight*systVal="<<systCutName_cut_[cutName]->weight << "*"
+            //      << systVal << "=" << systCutName_cut_[cutName]->weight*systVal << "; binContent=" << systHist->GetBinContent(bin));
           }
         }
         xbinCoord+=1;
@@ -1226,8 +1275,7 @@ void baseClass::runSystematics()
       ybinCoord+=1;
       if(shiftValue) {
         // if value was shifted, reset all the cuts to nominal before moving to next syst
-        for(auto& cutNameBranch : syst.cutNamesToBranchNames) {
-          auto cutName = cutNameBranch.first;
+        for(auto& cutName : orderedCutNames_) {
           systCutName_cut_[cutName]->passed = cutName_cut_[cutName]->passed;
           systCutName_cut_[cutName]->filled = cutName_cut_[cutName]->filled;
           systCutName_cut_[cutName]->weight = cutName_cut_[cutName]->weight;
