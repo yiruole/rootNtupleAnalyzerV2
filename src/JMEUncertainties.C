@@ -1,4 +1,5 @@
 #include "Collection.h"
+#include "PFJet.h"
 #include "JMESystematicsCalculators.h"
 #include <variant>
 #include <filesystem>
@@ -14,11 +15,13 @@ class JMEUncertainties {
     using METVariationsResult = Type1METVariationsCalculator::result_t;
 
     template <typename T>
-      JMEUncertainties(T&& t, analysisClass & d, const std::vector<std::string>& jesUncertainties, const std::string& jecTextFilePath, const std::string& jerTextFilePath,
-          const std::string& jecTag, const std::string& jerTag, bool splitJER=false, bool doGenMatch=true,
+      JMEUncertainties(T&& t, analysisClass* d,
+          const std::vector<std::string>& jesUncertainties, const std::string& jecTextFilePath, const std::string& jerTextFilePath,
+          const std::string& jecTag, const std::string& jerTag, bool splitJER=false,
+          bool doGenMatch=true,
           float genMatchMaxDR=0.2, float genMatchMaxDPt = 3.0) :
         m_calc(std::forward<T>(t)),
-        m_data (&d),
+        m_data(d),
         m_splitJER (splitJER),
         m_doGenMatch (doGenMatch),
         m_genMatchMaxDR (genMatchMaxDR),
@@ -82,26 +85,49 @@ class JMEUncertainties {
       setSmearing();
     }
 
-    void ComputeJetVariations(CollectionPtr jetCollection, bool isMC=true, bool forMET=false, bool isMETFixEE2017=false,
-        bool addHEM2018Issue=false, bool verbose=false) {
-      JetVariationsResult result = produceJetVariations(isMC, false, false, addHEM2018Issue);
+    void ComputeJetVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection = nullptr,
+        bool isMC=false, bool verbose=false) {
+      JetVariationsResult result = produceJetVariations(jetCollection, genJetCollection, isMC);
       std::vector<std::string> variations = available();
       std::vector<RVecF> systematics;
+      std::vector<RVecF> massSystematics;
       std::vector<std::string> systematicsNames;
+      std::vector<unsigned short> rawIndices = jetCollection->GetRawIndices();
+      sort(rawIndices.begin(), rawIndices.end());
+      for(unsigned short varIdx = 0; varIdx < result.size(); ++varIdx) {
+        RVecF calculatedPtVariations = result.pt(varIdx);
+        RVecF calculatedMassVariations = result.mass(varIdx);
+        RVecF ptVariationByJet;
+        RVecF massVariationByJet;
+        unsigned short vecIdx = 0;
+        if(!rawIndices.size())
+          break;
+        unsigned short lastRawIdxIdx = 0;
+        for(unsigned short idx = 0; idx <= rawIndices[rawIndices.size()-1]; ++idx) {
+          bool foundElement = idx == rawIndices[lastRawIdxIdx];
+          float pt = foundElement ? calculatedPtVariations[lastRawIdxIdx] : 0.0;
+          ptVariationByJet.emplace_back(pt);
+          float mass = foundElement ? calculatedMassVariations[lastRawIdxIdx] : 0.0;
+          massVariationByJet.emplace_back(mass);
+          if(foundElement)
+            lastRawIdxIdx++;
+        }
+        systematics.push_back(ptVariationByJet);
+        massSystematics.push_back(massVariationByJet);
+      }
+      systematics.insert(systematics.end(), massSystematics.begin(), massSystematics.end());
       for(unsigned short i = 0; i < result.size(); ++i) {
-        systematics.push_back(result.pt(i));
         systematicsNames.push_back("Pt_"+variations[i]);
       }
       for(unsigned short i = 0; i < result.size(); ++i) {
-        systematics.push_back(result.mass(i));
         systematicsNames.push_back("mass_"+variations[i]);
       }
       jetCollection->SetSystematics(std::move(systematicsNames), std::move(systematics));
     }
     
-    METSystematicsResult ComputeType1METVariations(bool isMC=true, bool forMET=true, bool isMETFixEE2017=false,
-        bool addHEM2018Issue=false, bool verbose=false) {
-      METVariationsResult result = produceType1METVariations(isMC, forMET, isMETFixEE2017, addHEM2018Issue);
+    METSystematicsResult ComputeType1METVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection = nullptr,
+        bool isMC=false, bool verbose=false) {
+      METVariationsResult result = produceType1METVariations(jetCollection, genJetCollection, isMC);
       std::vector<std::string> variations = available();
       METSystematicsResult returnVal;
       for(unsigned short i = 0; i < result.size(); ++i)
@@ -111,9 +137,9 @@ class JMEUncertainties {
       return returnVal;
     }
 
-    METSystematicsResult ComputeFixEE2017Type1METVariations(bool isMC=true, bool forMET=true, bool isMETFixEE2017=true,
-        bool addHEM2018Issue=false, bool verbose=false) {
-      METVariationsResult result = produceFixEE2017Type1METVariations(isMC, forMET, isMETFixEE2017, addHEM2018Issue);
+    METSystematicsResult ComputeFixEE2017Type1METVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection,
+        bool isMC=true, bool verbose=false) {
+      METVariationsResult result = produceFixEE2017Type1METVariations(jetCollection, genJetCollection, isMC);
       std::vector<std::string> variations = available();
       METSystematicsResult returnVal;
       for(unsigned short i = 0; i < result.size(); ++i)
@@ -148,8 +174,19 @@ class JMEUncertainties {
       return RVec<T>(static_cast<T*>(m_data->readerTools_->ReadArrayBranch<T>(branchName).GetAddress()),
           m_data->readerTools_->ReadArrayBranch<T>(branchName).GetSize());
     }
-    JetVariationsResult produceJetVariations(bool isMC=true, bool forMET=false, bool isMETFixEE2017=false, bool addHEM2018Issue=false) {
-      std::vector<JetMETArgType> jetArgs = GetJetMETArgs(isMC, forMET, isMETFixEE2017, addHEM2018Issue);
+    template <typename T = float> RVec<T> GetRVecFromJetCollection(CollectionPtr jetCollection, const std::string& varName) {
+      RVec<T> result;
+      std::vector<unsigned short> indices = jetCollection->GetRawIndices();
+      for(const auto& idx : indices) {
+        result.emplace_back(jetCollection->ReadArrayBranch<T>(varName, idx));
+      }
+      return result;
+    }
+    JetVariationsResult produceJetVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection, bool isMC=false) {
+      bool forMET=false;
+      bool isMETFixEE2017=false;
+      bool addHEM2018Issue=false;
+      std::vector<JetMETArgType> jetArgs = GetJetMETArgs(jetCollection, isMC, forMET, isMETFixEE2017, addHEM2018Issue, genJetCollection);
       return std::get<JetVariationsCalculator>(m_calc).produce(std::get<RVecF >(jetArgs[0]), std::get<RVecF >(jetArgs[1]), std::get<RVecF >(jetArgs[2]),
           std::get<RVecF >(jetArgs[3]),std::get<RVecF >(jetArgs[4]),std::get<RVecF >(jetArgs[5]),
           std::get<RVecI >(jetArgs[6]), std::get<RVecI >(jetArgs[7]),
@@ -159,8 +196,11 @@ class JMEUncertainties {
           );
     }
 
-    METVariationsResult produceType1METVariations(bool isMC=true, bool forMET=true, bool isMETFixEE2017=false, bool addHEM2018Issue=false) {
-      std::vector<JetMETArgType> metArgs = GetJetMETArgs(isMC, forMET, isMETFixEE2017, addHEM2018Issue);
+    METVariationsResult produceType1METVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection, bool isMC=false) {
+      bool forMET=true;
+      bool isMETFixEE2017=false;
+      bool addHEM2018Issue=false;
+      std::vector<JetMETArgType> metArgs = GetJetMETArgs(jetCollection, isMC, forMET, isMETFixEE2017, addHEM2018Issue, genJetCollection);
       return std::get<Type1METVariationsCalculator>(m_calc).produce(std::get<RVecF >(metArgs[0]), std::get<RVecF >(metArgs[1]), std::get<RVecF >(metArgs[2]),
           std::get<RVecF >(metArgs[3]),std::get<RVecF >(metArgs[4]),std::get<RVecF >(metArgs[5]),
           std::get<RVecI >(metArgs[6]),
@@ -175,8 +215,11 @@ class JMEUncertainties {
           );
     }
 
-    METVariationsResult produceFixEE2017Type1METVariations(bool isMC=true, bool forMET=true, bool isMETFixEE2017=true, bool addHEM2018Issue=false) {
-      std::vector<JetMETArgType> metArgs = GetJetMETArgs(isMC, forMET, isMETFixEE2017, addHEM2018Issue);
+    METVariationsResult produceFixEE2017Type1METVariations(CollectionPtr jetCollection, CollectionPtr genJetCollection, bool isMC=false) {
+      bool forMET=true;
+      bool isMETFixEE2017=true;
+      bool addHEM2018Issue=false;
+      std::vector<JetMETArgType> metArgs = GetJetMETArgs(jetCollection, isMC, forMET, isMETFixEE2017, addHEM2018Issue, genJetCollection);
       return std::get<FixEE2017Type1METVariationsCalculator>(m_calc).produce(std::get<RVecF >(metArgs[0]), std::get<RVecF >(metArgs[1]), std::get<RVecF >(metArgs[2]),
           std::get<RVecF >(metArgs[3]),std::get<RVecF >(metArgs[4]),std::get<RVecF >(metArgs[5]),
           std::get<RVecI >(metArgs[6]),
@@ -191,29 +234,32 @@ class JMEUncertainties {
           );
     }
 
+  private:
     // reimplemented in C++ from https://gitlab.cern.ch/cp3-cms/CMSJMECalculators/-/blob/main/python/CMSJMECalculators/utils.py#L23
-    std::vector<JetMETArgType> GetJetMETArgs(bool isMC=true, bool forMET=false, bool isMETFixEE2017=false, bool addHEM2018Issue=false) {
+    std::vector<JetMETArgType> GetJetMETArgs(CollectionPtr jetCollection,
+        bool isMC=true, bool forMET=false, bool isMETFixEE2017=false, bool addHEM2018Issue=false,
+        CollectionPtr genJetCollection = nullptr) {
       std::vector<JetMETArgType> args;
-      UInt_t nJet = GetValueFromBranchName<UInt_t>("nJet");
-      args.push_back(GetRVecFromBranchName("Jet_pt"));
-      RVecF jetEta = GetRVecFromBranchName("Jet_eta");
+      UInt_t nJet = jetCollection->GetSize();
+      args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_pt"));
+      RVecF jetEta = GetRVecFromJetCollection(jetCollection, "Jet_eta");
       args.push_back(jetEta);
-      args.push_back(GetRVecFromBranchName("Jet_phi"));
-      args.push_back(GetRVecFromBranchName("Jet_mass"));
-      args.push_back(GetRVecFromBranchName("Jet_rawFactor"));
-      args.push_back(GetRVecFromBranchName("Jet_area"));
+      args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_phi"));
+      args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_mass"));
+      args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_rawFactor"));
+      args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_area"));
       if(isMC)
-        args.push_back(GetRVecFromBranchName<int>("Jet_partonFlavour"));
+        args.push_back(GetRVecFromJetCollection<int>(jetCollection, "Jet_partonFlavour"));
       else
         args.push_back(RVecI());
       if(forMET) {
-        args.push_back(GetRVecFromBranchName("Jet_muonSubtrFactor"));
-        args.push_back(GetRVecFromBranchName("Jet_neEmEF"));
-        args.push_back(GetRVecFromBranchName("Jet_chEmEF"));
+        args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_muonSubtrFactor"));
+        args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_neEmEF"));
+        args.push_back(GetRVecFromJetCollection(jetCollection, "Jet_chEmEF"));
       }
       if( !(forMET && isMETFixEE2017) ) {
         if(addHEM2018Issue)
-          args.push_back(GetRVecFromBranchName<int>("Jet_jetId"));
+          args.push_back(GetRVecFromJetCollection<int>(jetCollection, "Jet_jetId"));
         else
           args.push_back(RVecI());
       }
@@ -223,10 +269,10 @@ class JMEUncertainties {
         UInt_t luminosityBlock = GetValueFromBranchName<UInt_t>("luminosityBlock");
         ULong64_t event = GetValueFromBranchName<ULong64_t>("event");
         args.push_back(static_cast<std::uint32_t>((run<<20) + (luminosityBlock<<10) + event + 1 + (nJet != 0 ? int(jetEta[0]/.01) : 0)));
-        args.push_back(GetRVecFromBranchName("GenJet_pt"));
-        args.push_back(GetRVecFromBranchName("GenJet_eta"));
-        args.push_back(GetRVecFromBranchName("GenJet_phi"));
-        args.push_back(GetRVecFromBranchName("GenJet_mass"));
+        args.push_back(GetRVecFromJetCollection(genJetCollection, "GenJet_pt"));
+        args.push_back(GetRVecFromJetCollection(genJetCollection, "GenJet_eta"));
+        args.push_back(GetRVecFromJetCollection(genJetCollection, "GenJet_phi"));
+        args.push_back(GetRVecFromJetCollection(genJetCollection, "GenJet_mass"));
       }
       else {
         args.push_back(std::uint32_t(0));
