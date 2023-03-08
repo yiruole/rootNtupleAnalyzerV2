@@ -2222,15 +2222,21 @@ void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Do
       exit(-4);
     }
     else {
-      //STDOUT("INFO: trying to fill histogram "<<nameAndTitle<<" with systematics and selection=" << selection);
       // systematics
-      float selectionBinCoord = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
+      const auto selectionItr = std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection);
+      if(selectionItr==orderedSystCutNames_.end()) {
+        STDOUT("ERROR: failed to find selection=" << selection << " in orderedSystCutNames=");
+        for(auto& cutName : orderedSystCutNames_)
+          cout << cutName << ", ";
+        cout << endl;
+        STDOUT("Cannot fill hist. Exiting.");
+        exit(-9);
+      }
+      float selectionBinCoord = 0.5+int(selectionItr-orderedSystCutNames_.begin());
       unsigned int selectionBin = currentSystematicsHist_->GetXaxis()->FindFixBin(selectionBinCoord);
       for(unsigned int yBin = 1; yBin <= currentSystematicsHist_->GetNbinsY(); ++yBin) {
         float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBin);
         float yBinCoord = currentSystematicsHist_->GetYaxis()->GetBinCenter(yBin);
-        //if(nh_h->second->GetXaxis()->FindFixBin(value)==347 && yBin==1)
-        //  STDOUT("INFO: for syst="<<currentSystematicsHist_->GetYaxis()->GetBinLabel(yBin)<<", binX=" << selectionBin << ", binY=" << yBin << ", systWeight="<<systWeight<<", weight="<<weight<<", bin in var dist="<<nh_h->second->GetXaxis()->FindFixBin(value));
         if(systWeight != 0)
           nh_h->second->Fill(value, yBinCoord, systWeight*weight);
       }
