@@ -2145,78 +2145,10 @@ void baseClass::saveEventsPassingCuts(const std::string& fileName)
   }
 }
 
-// FIXME TODO: use templates for these functions
-void baseClass::CreateAndFillUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight, bool systematics, std::string selection)
-{
-  if(systematics && haveSystematics() && selection!="") {
-    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
-    if( nh_h == user1DHistsWithSysts_.end() ) {
-      std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY()));
-      h->Sumw2();
-      h->SetDirectory(0);
-      currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
-      user1DHistsWithSysts_[std::string(nameAndTitle)] = std::move(h);
-      // systematics
-      float selectionBin = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
-      float yBinCoord = 0.5;
-      for(auto& syst : systematics_) {
-        float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBinCoord);
-        if(systWeight != 0)
-          nh_h->second->Fill(value, yBinCoord, systWeight*weight);
-        yBinCoord++;
-      }
-    }
-    else {
-      // systematics
-      float selectionBin = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
-      float yBinCoord = 0.5;
-      for(auto& syst : systematics_) {
-        float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBinCoord);
-        if(systWeight != 0)
-          nh_h->second->Fill(value, yBinCoord, systWeight*weight);
-        yBinCoord++;
-      }
-    }
-  }
-  else {
-    // no systematics
-    map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
-    if( nh_h == userTH1Ds_.end() ) {
-      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
-      h->Sumw2();
-      h->SetDirectory(0);
-      userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
-      h->Fill(value);
-    }
-    else {
-      nh_h->second->Fill(value, weight);
-    }
-  }
-}
-void baseClass::CreateUserTH1D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics)
-{
-  if(systematics && haveSystematics()) {
-    CreateUserTH2DForSysts(nameAndTitle, nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY());
-  }
-  else {
-    map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(nameAndTitle);
-    if( nh_h == userTH1Ds_.end() )
-    {
-      std::unique_ptr<TH1D> h(new TH1D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup));
-      h->Sumw2();
-      h->SetDirectory(0);
-      userTH1Ds_[std::string(nameAndTitle)] = std::move(h);
-    }
-    else
-    {
-      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
-    }
-  }
-}
-void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Double_t weight, std::string selection)
+void baseClass::FillUserHist(const std::string& nameAndTitle, Double_t value, Double_t weight, std::string selection)
 {
   if(selection!="" && haveSystematics()) {
-    map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+    map<std::string , std::unique_ptr<TH2> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
     if( nh_h == user1DHistsWithSysts_.end() ) {
       STDOUT("ERROR: trying to fill histogram wth systs "<<nameAndTitle<<" that was not defined.");
       exit(-4);
@@ -2243,9 +2175,9 @@ void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Do
     }
   }
   else {
-    map<std::string , std::unique_ptr<TH1D> >::iterator nh_h = userTH1Ds_.find(std::string(nameAndTitle));
-    if( nh_h == userTH1Ds_.end() ) {
-      map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+    map<std::string , std::unique_ptr<TH1> >::iterator nh_h = userTH1s_.find(std::string(nameAndTitle));
+    if( nh_h == userTH1s_.end() ) {
+      map<std::string , std::unique_ptr<TH2> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
       if( nh_h != user1DHistsWithSysts_.end() ) {
         STDOUT("ERROR: trying to fill histogram which has systs "<<nameAndTitle<<" without passing the cut corresponding to the selection to FillUserTH1D().");
         exit(-4);
@@ -2260,20 +2192,20 @@ void baseClass::FillUserTH1D(const std::string& nameAndTitle, Double_t value, Do
     }
   }
 }
-void baseClass::FillUserTH1D(const std::string& nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight, std::string selection)
+void baseClass::FillUserHist(const std::string& nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight, std::string selection)
 {
-  FillUserTH1D(nameAndTitle, *reader, weight);
+  FillUserHist(nameAndTitle, *reader, weight);
 }
 
 void baseClass::CreateAndFillUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() )
+  map<std::string , std::unique_ptr<TH2> >::iterator nh_h = userTH2s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH2s_.end() )
     {
       std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
       h->SetDirectory(0);
-      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
+      userTH2s_[std::string(nameAndTitle)] = std::move(h);
       h->Fill(value_x, value_y, weight);
     }
   else
@@ -2284,31 +2216,13 @@ void baseClass::CreateAndFillUserTH2D(const std::string& nameAndTitle, Int_t nbi
 
 void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() )
+  map<std::string , std::unique_ptr<TH2> >::iterator nh_h = userTH2s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH2s_.end() )
     {
       std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
       h->Sumw2();
       h->SetDirectory(0);
-      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
-    }
-  else
-    {
-      STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
-    }
-}
-
-void baseClass::CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
-{
-  std::string histTitle = nameAndTitle+SYSTHISTSUFFIX;
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = user1DHistsWithSysts_.find(nameAndTitle);
-  if( nh_h == user1DHistsWithSysts_.end() )
-    {
-      std::unique_ptr<TH2D> h(new TH2D(histTitle.c_str(), histTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup));
-      h->Sumw2();
-      h->SetDirectory(0);
-      currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
-      user1DHistsWithSysts_[nameAndTitle] = std::move(h);
+      userTH2s_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -2318,13 +2232,13 @@ void baseClass::CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nb
 
 void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y )
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() )
+  map<std::string , std::unique_ptr<TH2> >::iterator nh_h = userTH2s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH2s_.end() )
     {
       std::unique_ptr<TH2D> h(new TH2D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, x, nbinsy, y ));
       h->Sumw2();
       h->SetDirectory(0);
-      userTH2Ds_[std::string(nameAndTitle)] = std::move(h);
+      userTH2s_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -2334,8 +2248,8 @@ void baseClass::CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Do
 
 void baseClass::FillUserTH2D(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() )
+  map<std::string , std::unique_ptr<TH2> >::iterator nh_h = userTH2s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH2s_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
       exit(-4);
@@ -2353,15 +2267,15 @@ void baseClass::FillUserTH2D(const std::string& nameAndTitle, TTreeReaderValue<d
 
 void baseClass::FillUserTH2DLower(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight)
 {
-  map<std::string , std::unique_ptr<TH2D> >::iterator nh_h = userTH2Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH2Ds_.end() )
+  map<std::string , std::unique_ptr<TH2> >::iterator nh_h = userTH2s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH2s_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
       exit(-4);
     }
   else
   {
-    TH2D * hist = nh_h->second.get();
+    TH2 * hist = nh_h->second.get();
     TAxis * x_axis   = hist -> GetXaxis();
     TAxis * y_axis   = hist -> GetYaxis();
     int     n_bins_x = hist -> GetNbinsX();
@@ -2392,14 +2306,14 @@ void baseClass::FillUserTH2DLower(const std::string& nameAndTitle, Double_t valu
 
 void baseClass::CreateAndFillUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup,  Double_t value_x,  Double_t value_y, Double_t z, Double_t weight)
 {
-  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH3Ds_.end() )
+  map<std::string , std::unique_ptr<TH3> >::iterator nh_h = userTH3s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH3s_.end() )
     {
       std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
       h->SetDirectory(0);
       h->Fill(value_x, value_y, weight);
-      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
+      userTH3s_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -2409,13 +2323,13 @@ void baseClass::CreateAndFillUserTH3D(const std::string& nameAndTitle, Int_t nbi
 
 void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup)
 {
-  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH3Ds_.end() )
+  map<std::string , std::unique_ptr<TH3> >::iterator nh_h = userTH3s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH3s_.end() )
     {
       std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup));
       h->Sumw2();
       h->SetDirectory(0);
-      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
+      userTH3s_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -2424,13 +2338,13 @@ void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Do
 }
 void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z)
 {
-  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH3Ds_.end() )
+  map<std::string , std::unique_ptr<TH3> >::iterator nh_h = userTH3s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH3s_.end() )
     {
       std::unique_ptr<TH3D> h(new TH3D(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, x, nbinsy, y, nbinsz, z ));
       h->Sumw2();
       h->SetDirectory(0);
-      userTH3Ds_[std::string(nameAndTitle)] = std::move(h);
+      userTH3s_[std::string(nameAndTitle)] = std::move(h);
     }
   else
     {
@@ -2440,8 +2354,8 @@ void baseClass::CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Do
 
 void baseClass::FillUserTH3D(const std::string& nameAndTitle, Double_t value_x,  Double_t value_y, Double_t value_z, Double_t weight)
 {
-  map<std::string , std::unique_ptr<TH3D> >::iterator nh_h = userTH3Ds_.find(std::string(nameAndTitle));
-  if( nh_h == userTH3Ds_.end() )
+  map<std::string , std::unique_ptr<TH3> >::iterator nh_h = userTH3s_.find(std::string(nameAndTitle));
+  if( nh_h == userTH3s_.end() )
     {
       STDOUT("ERROR: trying to fill histogram "<<nameAndTitle<<" that was not defined.");
       exit(-4);
@@ -2492,24 +2406,24 @@ bool baseClass::writeUserHistos()
   bool ret = true;
   output_root_->cd();
 
-  for (map<std::string, std::unique_ptr<TH1D> >::iterator uh_h = userTH1Ds_.begin(); uh_h != userTH1Ds_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH1> >::iterator uh_h = userTH1s_.begin(); uh_h != userTH1s_.end(); uh_h++)
     {
       output_root_->cd();
       uh_h->second->Write();
     }
-  for (map<std::string, std::unique_ptr<TH2D> >::iterator uh_h = userTH2Ds_.begin(); uh_h != userTH2Ds_.end(); uh_h++)
-    {
-      //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
-      output_root_->cd();
-      uh_h->second->Write();
-    }
-  for (map<std::string, std::unique_ptr<TH2D> >::iterator uh_h = user1DHistsWithSysts_.begin(); uh_h != user1DHistsWithSysts_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH2> >::iterator uh_h = userTH2s_.begin(); uh_h != userTH2s_.end(); uh_h++)
     {
       //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
       output_root_->cd();
       uh_h->second->Write();
     }
-  for (map<std::string, std::unique_ptr<TH3D> >::iterator uh_h = userTH3Ds_.begin(); uh_h != userTH3Ds_.end(); uh_h++)
+  for (map<std::string, std::unique_ptr<TH2> >::iterator uh_h = user1DHistsWithSysts_.begin(); uh_h != user1DHistsWithSysts_.end(); uh_h++)
+    {
+      //      STDOUT("uh_h = "<< uh_h->first<<" "<< uh_h->second );
+      output_root_->cd();
+      uh_h->second->Write();
+    }
+  for (map<std::string, std::unique_ptr<TH3> >::iterator uh_h = userTH3s_.begin(); uh_h != userTH3s_.end(); uh_h++)
     {
       output_root_->cd();
       uh_h->second->Write();

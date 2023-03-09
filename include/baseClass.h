@@ -648,18 +648,112 @@ class baseClass {
     unsigned int getNumSystematics() { return systematics_.size(); }
     void runSystematics();
 
-    void CreateAndFillUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1, bool systematics=true, std::string selection="");
-    void CreateUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics=false);
+    template <typename T = TH1F> void CreateAndFillUserHist(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1.0, bool systematics=true, std::string selection="")
+    {
+      if(systematics && haveSystematics() && selection!="") {
+        std::map<std::string , std::unique_ptr<TH2> >::iterator nh_h = user1DHistsWithSysts_.find(std::string(nameAndTitle));
+        if( nh_h == user1DHistsWithSysts_.end() ) {
+          std::unique_ptr<TH2> h(new TH2F(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY()));
+          h->Sumw2();
+          h->SetDirectory(0);
+          currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
+          user1DHistsWithSysts_[std::string(nameAndTitle)] = std::move(h);
+          // systematics
+          float selectionBin = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
+          float yBinCoord = 0.5;
+          for(auto& syst : systematics_) {
+            float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBinCoord);
+            if(systWeight != 0)
+              nh_h->second->Fill(value, yBinCoord, systWeight*weight);
+            yBinCoord++;
+          }
+        }
+        else {
+          // systematics
+          float selectionBin = 0.5+int(std::find(orderedSystCutNames_.begin(), orderedSystCutNames_.end(), selection)-orderedSystCutNames_.begin());
+          float yBinCoord = 0.5;
+          for(auto& syst : systematics_) {
+            float systWeight = currentSystematicsHist_->GetBinContent(selectionBin, yBinCoord);
+            if(systWeight != 0)
+              nh_h->second->Fill(value, yBinCoord, systWeight*weight);
+            yBinCoord++;
+          }
+        }
+      }
+      else {
+        // no systematics
+        std::map<std::string , std::unique_ptr<TH1> >::iterator nh_h = userTH1s_.find(std::string(nameAndTitle));
+        if( nh_h == userTH1s_.end() ) {
+          std::unique_ptr<TH1> h = std::make_unique<T>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
+          h->Sumw2();
+          h->SetDirectory(0);
+          userTH1s_[std::string(nameAndTitle)] = std::move(h);
+          h->Fill(value);
+        }
+        else {
+          nh_h->second->Fill(value, weight);
+        }
+      }
+    }
+    template <typename T = TH1F> void CreateUserHist(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics=false)
+    {
+      if(systematics && haveSystematics()) {
+        CreateUserHistForSysts(nameAndTitle, nbinsx, xlow, xup, currentSystematicsHist_->GetNbinsY(), 0, currentSystematicsHist_->GetNbinsY());
+      }
+      else {
+        std::map<std::string , std::unique_ptr<TH1> >::iterator nh_h = userTH1s_.find(nameAndTitle);
+        if( nh_h == userTH1s_.end() )
+        {
+          std::unique_ptr<TH1> h = std::make_unique<T>(nameAndTitle.c_str(), nameAndTitle.c_str(), nbinsx, xlow, xup);
+          h->Sumw2();
+          h->SetDirectory(0);
+          userTH1s_[std::string(nameAndTitle)] = std::move(h);
+        }
+        else
+        {
+          STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+        }
+      }
+    }
+    template <typename T = TH2F> void CreateUserHistForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
+    {
+      std::string histTitle = nameAndTitle+SYSTHISTSUFFIX;
+      std::map<std::string , std::unique_ptr<TH2> >::iterator nh_h = user1DHistsWithSysts_.find(nameAndTitle);
+      if( nh_h == user1DHistsWithSysts_.end() )
+      {
+        std::unique_ptr<TH2> h = std::make_unique<T>(histTitle.c_str(), histTitle.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
+        h->Sumw2();
+        h->SetDirectory(0);
+        currentSystematicsHist_->GetYaxis()->Copy(*h->GetYaxis());
+        user1DHistsWithSysts_[nameAndTitle] = std::move(h);
+      }
+      else
+      {
+        STDOUT("ERROR: trying to define already existing histogram "<<nameAndTitle);
+      }
+    }
+    template <typename T = TH1F> void CreateUserHistWithSysts(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics=false)
+    { CreateUserHist<T>(nameAndTitle, nbinsx, xlow, xup, true); }
+    void FillUserHist(const std::string&  nameAndTitle, Double_t value, Double_t weight=1, std::string selection="");
+    void FillUserHist(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1, std::string selection="");
+
+    void CreateAndFillUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Double_t value, Double_t weight=1, bool systematics=true, std::string selection="")
+    { CreateAndFillUserHist<TH1D>(nameAndTitle, nbinsx, xlow, xup, value, weight, systematics, selection); }
+    void CreateUserTH1D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, bool systematics=false)
+    { CreateUserHist<TH1D>(nameAndTitle, nbinsx, xlow, xup, systematics); }
     void CreateUserTH1DWithSysts(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup) { CreateUserTH1D(nameAndTitle, nbinsx, xlow, xup, true); }
-    void FillUserTH1D(const std::string&  nameAndTitle, Double_t value, Double_t weight=1, std::string selection="");
-    void FillUserTH1D(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1, std::string selection="");
+    void FillUserTH1D(const std::string&  nameAndTitle, Double_t value, Double_t weight=1, std::string selection="")
+    { FillUserHist(nameAndTitle, value, weight, selection); }
+    void FillUserTH1D(const std::string&  nameAndTitle, TTreeReaderValue<double>& reader, Double_t weight=1, std::string selection="")
+    { FillUserHist(nameAndTitle, reader, weight, selection); }
     void CreateAndFillUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Double_t value_x,  Double_t value_y, Double_t weight=1);
     void CreateUserTH2D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
     void CreateUserTH2D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y );
     void FillUserTH2D(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
     void FillUserTH2D(const std::string&  nameAndTitle, TTreeReaderValue<double>& xReader, TTreeReaderValue<double>& yReader, Double_t weight=1);
     void FillUserTH2DLower(const std::string&   nameAndTitle, Double_t value_x,  Double_t value_y, Double_t weight=1);
-    void CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup);
+    void CreateUserTH2DForSysts(const std::string& nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup)
+    { CreateUserHistForSysts<TH2D>(nameAndTitle, nbinsx, xlow, xup, nbinsy, ylow, yup); }
     void CreateAndFillUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup,  Int_t binsz, Double_t zlow, Double_t zup, Double_t value_x,  Double_t value_y, Double_t z, Double_t weight=1);
     void CreateUserTH3D(const std::string&  nameAndTitle, Int_t nbinsx, Double_t xlow, Double_t xup, Int_t nbinsy, Double_t ylow, Double_t yup, Int_t nbinsz, Double_t zlow, Double_t zup);
     void CreateUserTH3D(const std::string& nameAndTitle, Int_t nbinsx, Double_t * x, Int_t nbinsy, Double_t * y, Int_t nbinsz, Double_t * z );
@@ -700,11 +794,11 @@ class baseClass {
     std::map<std::string, std::shared_ptr<cut>> cutName_cut_;
     std::vector<std::string> orderedCutNames_;
     std::vector<std::string> orderedSystCutNames_;
-    std::map<std::string , std::unique_ptr<TH1D> > userTH1Ds_;
-    std::map<std::string , std::unique_ptr<TH2D> > userTH2Ds_;
-    std::map<std::string , std::unique_ptr<TH3D> > userTH3Ds_;
+    std::map<std::string , std::unique_ptr<TH1> > userTH1s_;
+    std::map<std::string , std::unique_ptr<TH2> > userTH2s_;
+    std::map<std::string , std::unique_ptr<TH3> > userTH3s_;
     std::map<std::string , std::unique_ptr<TProfile> > userTProfiles_;
-    std::map<std::string , std::unique_ptr<TH2D> > user1DHistsWithSysts_;
+    std::map<std::string , std::unique_ptr<TH2> > user1DHistsWithSysts_;
     void init();
     void readInputList();
     void readCutFile();
