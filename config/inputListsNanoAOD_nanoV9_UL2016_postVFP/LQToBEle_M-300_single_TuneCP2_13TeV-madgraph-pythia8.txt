@@ -1,6 +1,6 @@
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/75DD29E2-BDC9-2C48-8D5B-FA0405918726.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/E3B28570-6F8A-6144-BD6F-ED88F3E22F75.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/09EECC29-030D-C240-A971-CFB6D3C3133C.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/01356D36-D65D-DC4D-B090-7FA52A33AFCD.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/357A30BD-AC5C-6F45-9FEE-8BCE114BC263.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/C8E4F111-754D-3345-9918-2B3727589EF3.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/75DD29E2-BDC9-2C48-8D5B-FA0405918726.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/E3B28570-6F8A-6144-BD6F-ED88F3E22F75.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/09EECC29-030D-C240-A971-CFB6D3C3133C.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/01356D36-D65D-DC4D-B090-7FA52A33AFCD.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/357A30BD-AC5C-6F45-9FEE-8BCE114BC263.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToBEle_M-300_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/C8E4F111-754D-3345-9918-2B3727589EF3.root

@@ -1,1 +1,1 @@
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODv9/LQToDEle_M-4000_single_bMassZero_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/50000/0637656C-1DCE-4E4F-BB08-A855333EE306.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/LQToDEle_M-4000_single_bMassZero_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/50000/0637656C-1DCE-4E4F-BB08-A855333EE306.root

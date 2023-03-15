@@ -1,3 +1,3 @@
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2560000/9C5A3970-C4FE-EC41-9205-3E8BF43043DA.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/67854389-CBFA-BC42-94E4-A3B208066DEF.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/164CA160-DA35-BA47-84B4-430030BDDB79.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/2560000/9C5A3970-C4FE-EC41-9205-3E8BF43043DA.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/67854389-CBFA-BC42-94E4-A3B208066DEF.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-1800_single_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/164CA160-DA35-BA47-84B4-430030BDDB79.root

@@ -1,1 +1,1 @@
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/LQToDEle_M-700_single_bMassZero_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/50000/480674F0-A31E-5C4F-9D50-99029DDC19DA.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToDEle_M-700_single_bMassZero_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/50000/480674F0-A31E-5C4F-9D50-99029DDC19DA.root

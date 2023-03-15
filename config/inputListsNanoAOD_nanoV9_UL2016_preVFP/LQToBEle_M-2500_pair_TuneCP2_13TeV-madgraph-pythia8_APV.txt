@@ -1,2 +1,2 @@
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODAPVv9/LQToBEle_M-2500_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/30000/4280D9E4-6D32-3742-BBF4-711C4831D0EB.root
-root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL16NanoAODAPVv9/LQToBEle_M-2500_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2550000/97494F6C-A16F-CE4B-A71C-79C6973E8B58.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODAPVv9/LQToBEle_M-2500_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/30000/4280D9E4-6D32-3742-BBF4-711C4831D0EB.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODAPVv9/LQToBEle_M-2500_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2550000/97494F6C-A16F-CE4B-A71C-79C6973E8B58.root
