@@ -80,6 +80,7 @@ add_compile_options(-std=c++17)
 #add_compile_options(-g)
 #add_compile_options(-pg)
 #add_compile_options(${USER_CXXFLAGS})
+#set_source_files_properties(JMEUncertainties.C PROPERTIES COMPILE_FLAGS -g)
 
 find_package(Boost REQUIRED iostreams regex)
 find_package(ROOT REQUIRED Hist Tree TreePlayer Physics TMVA)
