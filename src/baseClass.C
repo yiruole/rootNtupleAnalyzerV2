@@ -354,10 +354,7 @@ void baseClass::readInputList()
     STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
   }
   else
-  {
-    STDOUT("baseClass::readInputList: ERROR opening inputList:" << *inputList_ );
-    exit (-1);
-  }
+    throw runtime_error("baseClass::readInputList: ERROR opening inputList: " + *inputList_ );
   is.close();
   treeEntries_ = tree_->GetEntries();
 
