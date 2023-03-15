@@ -1,5 +1,4 @@
 #include "HistoReader.h"
-
 #include <iostream>
 
 using namespace std;
@@ -15,10 +14,16 @@ HistoReader::HistoReader(std::string filename, std::string barrelHistName, std::
     bool absEta, bool etIsXAxis) : isAbsEta(absEta), isEtXAxis(etIsXAxis)
 {
   unique_ptr<TFile> myTFile(TFile::Open(filename.c_str()));
-  histoBarrel = unique_ptr<TH2F>(myTFile->Get<TH2F>(barrelHistName.c_str()));
+  TH2F* barrelHist = myTFile->Get<TH2F>(barrelHistName.c_str());
+  if(!barrelHist)
+    throw runtime_error("Could not find hist " + barrelHistName + " in file: " + filename);
+  histoBarrel = unique_ptr<TH2F>(barrelHist);
   histoBarrel->SetDirectory(0);
 
-  histoEndcap = unique_ptr<TH2F>(myTFile->Get<TH2F>(endcapHistName.c_str()));
+  TH2F* endcapHist = myTFile->Get<TH2F>(endcapHistName.c_str());
+  if(!endcapHist)
+    throw runtime_error("Could not find hist " + endcapHistName + " in file: " + filename);
+  histoEndcap = unique_ptr<TH2F>(endcapHist);
   histoEndcap->SetDirectory(0);
 }
 
