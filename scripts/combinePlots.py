@@ -11,6 +11,7 @@ import multiprocessing
 import traceback
 import subprocess
 import time
+from graphlib import TopologicalSorter
 
 import combineCommon
 
@@ -62,143 +63,161 @@ def log_result(result):
 
 
 def MakeCombinedSample(args):
-    try:
-        sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, tfileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables = args
-        outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
-        histoDictThisSample = {}
-        tablesThisSample = []
-        sampleTable = {}
-        piecesAdded = []
+    while True:
+        try:
+            taskQueue, finalizedTasksQueue, visitedNodes, dictSamples, dictDatasetsFileNames, tfileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables = args
+            sample = taskQueue.get()
+            sampleInfo = dictSamples[sample]
+            pieceList = sampleInfo["pieces"]
+            corrLHESysts = sampleInfo["correlateLHESystematics"]
+            outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
+            outputDatFile = tfileNameTemplate.format(sample).replace("plots.root", "tables.dat")
+            histoDictThisSample = {}
+            tablesThisSample = []
+            sampleTable = {}
+            piecesAdded = []
 
-        combineCommon.ParseXSectionFile(options.xsection)
-        piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
+            combineCommon.ParseXSectionFile(options.xsection)
+            #piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
+            piecesToAdd = combineCommon.PartialExpand(pieceList)
 
-        hasMC = False
-        # ---Loop over datasets in the inputlist
-        # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-        for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
-            if len(piecesAdded) == len(piecesToAdd):
-                break  # we're done!
-            toBeUpdated = False
-            matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
-                dataset_fromInputList.replace("_tree", "")
-            )
-            if matchingPiece in piecesToAdd:
-                toBeUpdated = True
-                # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
-            # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
-            elif matchingPiece.endswith("_reduced_skim"):
-                matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
-                if matchingPieceNoRSK in piecesToAdd:
+            hasMC = False
+            # ---Loop over datasets in the inputlist
+            # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
+            for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
+                if len(piecesAdded) == len(piecesToAdd):
+                    break  # we're done!
+                toBeUpdated = False
+                matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
+                    dataset_fromInputList.replace("_tree", "")
+                )
+                if matchingPiece in piecesToAdd:
                     toBeUpdated = True
-                    matchingPiece = matchingPieceNoRSK
-                    # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
-            # elif matchingPiece.endswith("_ext1"):
-            #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
-            #     if matchingPieceNoExt1 in pieceList:
-            #         toBeUpdated = True
-            #         matchingPiece = matchingPieceNoExt1
-            #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
-            if not toBeUpdated:
-                continue
+                    # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
+                # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
+                elif matchingPiece.endswith("_reduced_skim"):
+                    matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
+                    if matchingPieceNoRSK in piecesToAdd:
+                        toBeUpdated = True
+                        matchingPiece = matchingPieceNoRSK
+                        # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
+                # elif matchingPiece.endswith("_ext1"):
+                #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
+                #     if matchingPieceNoExt1 in pieceList:
+                #         toBeUpdated = True
+                #         matchingPiece = matchingPieceNoExt1
+                #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
+                if not toBeUpdated:
+                    continue
 
-            # prepare to combine
-            print("\tfound matching dataset:", matchingPiece + " ... ", end=' ')
-            sys.stdout.flush()
+                # prepare to combine
+                print("\tfound matching dataset:", matchingPiece + " ... ", end=' ', flush=True)
 
-            inputDatFile = rootFilename.replace(".root", ".dat")
-            sampleHistos = []
-            print("with file: {}".format(rootFilename))
-            sys.stdout.flush()
-            combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos)
+                inputDatFile = rootFilename.replace(".root", ".dat").replace("plots", "tables")
+                sampleHistos = []
+                print("with file: {}".format(rootFilename), flush=True)
+                print("\tlooking up xsection...", end=' ', flush=True)
+                try:
+                    xsection_val = combineCommon.lookupXSection(matchingPiece)
+                    xsectionFound = True
+                except RuntimeError:
+                    xsectionFound = False
 
-            print("\tlooking up xsection...", end=' ')
-            sys.stdout.flush()
-            xsection_val = combineCommon.lookupXSection(
-                matchingPiece
-            )
-            print("found", xsection_val, "pb")
-            sys.stdout.flush()
-            isData = False
-            if float(xsection_val) < 0:
-                isData = True
-            else:
-                hasMC = True
+                # print("INFO: TFilenameTemplate = {}".format(tfileNameTemplate.format(sample)))
+                combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos, xsectionFound)
+                # print "inputDatFile="+inputDatFile
 
-            # print "inputDatFile="+inputDatFile
+                # ---Read .dat table for current dataset
+                data = combineCommon.ParseDatFile(inputDatFile)
+                Ntot = float(data[0]["Npass"])
+                sampleNameForHist = ""
 
-            # ---Read .dat table for current dataset
-            data = combineCommon.ParseDatFile(inputDatFile)
 
-            # ---Calculate weight
-            sumWeights = 0
-            lhePdfWeightSumw = 0
-            for hist in sampleHistos:
-                if "SumOfWeights" in hist.GetName():
-                    sumWeights = hist.GetBinContent(1)
-                elif "LHEPdfSumw" in hist.GetName():
-                    lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
-            Ntot = float(data[0]["Npass"])
-            doPDFReweight = False
-            # FIXME
-            # if "2016" in inputRootFile:
-            #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
-            #         doPDFReweight = doPDFReweight2016LQSignals
-            weight, plotWeight, xsection_X_intLumi = CalculateWeight(
-                Ntot, xsection_val, options.intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw, doPDFReweight
-            )
-            # print "xsection: " + xsection_val,
-            print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ')
-            sys.stdout.flush()
-            print(str(sumWeights))
-            sys.stdout.flush()
+                if xsectionFound:
+                    print("found", xsection_val, "pb", flush=True)
+                    # ---Calculate weight
+                    sumWeights = 0
+                    lhePdfWeightSumw = 0
+                    for hist in sampleHistos:
+                        if "SumOfWeights" in hist.GetName():
+                            sumWeights = hist.GetBinContent(1)
+                        elif "LHEPdfSumw" in hist.GetName():
+                            lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
+                    doPDFReweight = False
+                    # FIXME
+                    # if "2016" in inputRootFile:
+                    #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
+                    #         doPDFReweight = doPDFReweight2016LQSignals
+                    weight, plotWeight, xsection_X_intLumi = CalculateWeight(
+                        Ntot, xsection_val, options.intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw, doPDFReweight
+                    )
+                    # print "xsection: " + xsection_val,
+                    print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ', flush=True)
+                    print(str(sumWeights), flush=True)
+                elif rootFilename == tfileNameTemplate.format(matchingPiece):
+                    print("histos taken from file already scaled", flush=True)
+                    xsection_val = 1.0
+                    weight = 1000.0
+                    plotWeight = 1.0
+                    xsection_X_intLumi = Ntot
+                    sampleNameForHist = matchingPiece
+                else:
+                    raise RuntimeError("xsection not found")
 
-            # ---Update table
-            data = combineCommon.FillTableErrors(data, rootFilename)
-            data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
-            sampleTable = combineCommon.UpdateTable(data, sampleTable)
-            tablesThisSample.append(data)
+                isData = False
+                if float(xsection_val) < 0 or "SingleElectron_20" in rootFilename or "SinglePhoton_20" in rootFilename or "EGamma_20" in rootFilename:
+                    isData = True
+                else:
+                    hasMC = True
 
+                # ---Update table
+                data = combineCommon.FillTableErrors(data, rootFilename, sampleNameForHist)
+                data = combineCommon.CreateWeightedTable(data, weight, xsection_X_intLumi)
+                sampleTable = combineCommon.UpdateTable(data, sampleTable)
+                tablesThisSample.append(data)
+
+                if not options.tablesOnly:
+                    #print("INFO: updating histo dict for sample={}, corrLHESysts={}".format(sample, corrLHESysts), flush=True)
+                    histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
+                    #print("INFO: tmap looks like", {value.GetName() for value in histoDictThisSample.values() if "tmap" in value.GetName()})
+                piecesAdded.append(matchingPiece)
+
+            # validation of combining pieces
+            # if set(piecesAdded) != set(pieceList):
+            if set(piecesAdded) != set(piecesToAdd):
+                errMsg = "ERROR: for sample {}, the following pieces requested in sampleListForMerging were not added: ".format(sample)
+                errMsg += str(list(set(piecesAdded).symmetric_difference(set(piecesToAdd))))
+                errMsg += "\twhile the pieces indicated as part of the sample were:"
+                errMsg += str(sorted(piecesToAdd))
+                errMsg += "\tand the pieces added were:"
+                errMsg += str(sorted(piecesAdded))
+                errMsg += "\tRefusing to proceed."
+                raise RuntimeError("sample validation failed: {}".format(errMsg))
+
+            # ---Create final tables
+            combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
+            with open(outputDatFile, "w") as theFile:
+                combineCommon.WriteTable(combinedTableThisSample, sample, theFile)
+            # for writing tables later
+            dictFinalTables[sample] = combinedTableThisSample
+
+            # write histos
             if not options.tablesOnly:
-                histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
-            piecesAdded.append(matchingPiece)
-
-        # validation of combining pieces
-        # if set(piecesAdded) != set(pieceList):
-        if set(piecesAdded) != set(piecesToAdd):
-            # print
-            # print 'set(piecesAdded)=',set(piecesAdded),'set(pieceList)=',set(pieceList)
-            # print 'are they equal?',
-            print()
-            # print 'ERROR: for sample',sample,'the pieces added were:'
-            # print sorted(piecesAdded)
-            print("ERROR: for sample", sample + ", the following pieces requested in sampleListForMerging were not added:")
-            # print list(set(piecesAdded).symmetric_difference(set(pieceList)))
-            print(list(set(piecesAdded).symmetric_difference(set(piecesToAdd))))
-            print("\twhile the pieces indicated as part of the sample were:")
-            # print sorted(pieceList)
-            print(sorted(piecesToAdd))
-            print("\tand the pieces added were:")
-            print(sorted(piecesAdded))
-            print("\tRefusing to proceed.")
-            raise RuntimeError("sample validation failed")
-
-        # ---Create final tables
-        combinedTableThisSample = combineCommon.CalculateEfficiency(sampleTable)
-        # for writing tables later
-        dictFinalTables[sample] = combinedTableThisSample
-
-        # write histos
-        if not options.tablesOnly:
-            combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, hasMC, True)
-            if sample in samplesToSave:
-                dictFinalHisto[sample] = histoDictThisSample
-        outputTfile.Close()
-    except Exception as e:
-        print("ERROR: exception in MakeCombinedSample for sample={}".format(sample))
-        traceback.print_exc()
-        raise e
-    return True
+                combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, hasMC, True)
+                if sample in samplesToSave:
+                    dictFinalHisto[sample] = histoDictThisSample
+            outputTfile.Close()
+            dictDatasetsFileNames[sample] = tfileNameTemplate.format(sample)
+            if sampleInfo["save"]:
+                sampleFiles.append(dictDatasetsFileNames[sample])
+            visitedNodes[sample] = True
+            finalizedTasksQueue.put(sample)
+            taskQueue.task_done()
+        except Exception as e:
+            print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
+            traceback.print_exc()
+            raise e
+        #return True
 
 
 ####################################################################################################
@@ -349,7 +368,7 @@ if doPDFReweight2016LQSignals:
     print("Doing PDF reweighting for 2016 LQ B/D signal samples")
 
 ncores = 8
-pool = multiprocessing.Pool(ncores)
+#pool = multiprocessing.Pool(ncores)
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate samples found in samplesToCombineFile..."
 jobCount = 0
@@ -375,6 +394,9 @@ dictFinalTables = manager.dict()
 dictFinalHisto = manager.dict()
 # --- Samples to save in final histo dict
 samplesToSave = manager.list()
+dictDatasetsFileNames = manager.dict()
+sampleFiles = manager.list()
+
 if not options.tablesOnly:
     if options.ttbarBkg:
         ttbarDataRawSampleName = "TTBarUnscaledRawFromDATA"
@@ -399,6 +421,7 @@ for lin in open(options.inputList):
     )
 
 foundAllFiles, dictDatasetsFileNames = combineCommon.FindInputFiles(options.inputList, options.analysisCode, options.inputDir)
+dictDatasetsFileNames = manager.dict(dictDatasetsFileNames)
 if not foundAllFiles:
     raise RuntimeError("Some files not found.")
 else:
@@ -408,40 +431,81 @@ else:
 if not os.path.isdir(options.outputDir):
     os.makedirs(options.outputDir)
 
-outputTableFile = open(
-    options.outputDir + "/" + options.analysisCode + "_tables.dat", "w"
-)
+outputTableFile = open(options.outputDir + "/" + options.analysisCode + "_tables.dat", "w")
 tfilePrefix = options.outputDir + "/" + options.analysisCode
 sampleTFileNameTemplate = tfilePrefix+"_{}_plots.root"
 
-# loop over samples defined in sampleListForMerging
-for sample, sampleInfo in dictSamples.items():
-    pieceList = sampleInfo["pieces"]
-    corrLHESysts = sampleInfo["correlateLHESystematics"]
-    #print("-->Look at sample named:", sample, "with piecelist=", pieceList)
-    #sys.stdout.flush()
-    #MakeCombinedSample([sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate])
-    # combine
-    try:
-        pool.apply_async(MakeCombinedSample, [[sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables]], callback=log_result)
-        jobCount += 1
-        sampleCount += 1
-    except KeyboardInterrupt:
-        print("\n\nCtrl-C detected: Bailing.")
-        pool.terminate()
-        sys.exit(1)
-    except Exception as e:
-        print("ERROR: caught exception in job for sample: {}; exiting".format(sample))
-        traceback.print_exc()
-        pool.terminate()
-        exit(-2)
+dag = combineCommon.CreateGraphDict(dictSamples)
+visitedNodes = {key: False for key in dag.keys()}
+visitedNodes = manager.dict(visitedNodes)
+processes = []
+taskQueue = multiprocessing.JoinableQueue()
+finalizedTasksQueue = multiprocessing.JoinableQueue()
+for _ in range(ncores):
+    process = multiprocessing.Process(target=MakeCombinedSample,
+                                      args=[[taskQueue,
+                                            finalizedTasksQueue,
+                                            visitedNodes,
+                                            dictSamples,
+                                            dictDatasetsFileNames,
+                                            sampleTFileNameTemplate,
+                                            samplesToSave,
+                                            dictFinalHisto,
+                                            dictFinalTables
+                                            ]],
+                                      daemon=True)
+    processes.append(process)
+    process.start()
 
-# now close the pool and wait for jobs to finish
-pool.close()
-sys.stdout.write(logString.format(jobCount, sampleCount))
-sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-sys.stdout.flush()
-pool.join()
+ts = TopologicalSorter(dag)
+ts.prepare()
+while ts.is_active():
+    # print("Queued samples: ")
+    for sample in ts.get_ready():
+        taskQueue.put(sample)
+        #print(sample)
+    sample = finalizedTasksQueue.get()
+    # print("Finalized samples: ")
+    # print(sample)
+    ts.done(sample)
+    finalizedTasksQueue.task_done()
+
+taskQueue.join()
+finalizedTasksQueue.join()
+for node in visitedNodes:
+    assert visitedNodes[node] == True
+
+## loop over samples defined in sampleListForMerging
+#for sample, sampleInfo in dictSamples.items():
+#    pieceList = sampleInfo["pieces"]
+#    corrLHESysts = sampleInfo["correlateLHESystematics"]
+#    writeSample = sampleInfo["save"]
+#    #print("-->Look at sample named:", sample, "with piecelist=", pieceList)
+#    #sys.stdout.flush()
+#    #MakeCombinedSample([sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate])
+#    # combine
+#    try:
+#        pool.apply_async(MakeCombinedSample, [[sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables]], callback=log_result)
+#        sampleFiles.append(sampleTFileNameTemplate.format(sample))
+#        jobCount += 1
+#        sampleCount += 1
+#    except KeyboardInterrupt:
+#        print("\n\nCtrl-C detected: Bailing.")
+#        pool.terminate()
+#        sys.exit(1)
+#    except Exception as e:
+#        print("ERROR: caught exception in job for sample: {}; exiting".format(sample))
+#        traceback.print_exc()
+#        pool.terminate()
+#        exit(-2)
+#
+## now close the pool and wait for jobs to finish
+#pool.close()
+#sys.stdout.write(logString.format(jobCount, sampleCount))
+#sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+#sys.stdout.flush()
+#pool.join()
+
 # check results?
 if len(result_list) < jobCount:
     print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
@@ -456,7 +520,7 @@ if not options.tablesOnly:
     outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
-    sampleFiles = [sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()]
+    #sampleFiles = [sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()]
     args.extend(sampleFiles)
     #print("DEBUG: command={}".format(" ".join(args)))
     timeStarted = time.time()

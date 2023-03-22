@@ -147,8 +147,18 @@ def GetSamplesToCombineDict(sampleListForMerging):
         dictSamples[sample] = {}
         dictSamples[sample]["pieces"] = pieces
         dictSamples[sample]["correlateLHESystematics"] = values["correlateLHESystematics"] if "correlateLHESystematics" in values.keys() else True
+        dictSamples[sample]["save"] = values["save"] if "save" in values.keys() else False
     # print "dictSamples["+key+"]=", dictSamples[key]
     return dictSamples
+
+
+def CreateGraphDict(sampleDict):
+    graphDict = {}
+    for sample, keys in reversed(sampleDict.items()):
+        #print("sample={}, pieces={}".format(sample, keys["pieces"]))
+        pieces = keys["pieces"]
+        graphDict[sample] = [piece for piece in pieces if "/" not in piece]
+    return graphDict
 
 
 def ExpandPiece(piece, dictSamples):
@@ -172,6 +182,23 @@ def ExpandSampleDict(dictSamples):
     for sampleName, sampleList in list(dictSamples.items()):
         outputDict[sampleName] = ExpandPieces(sampleList, dictSamples)
     return outputDict
+
+
+def PartialExpand(pieceList):
+    piecesToAdd = []
+    for piece in pieceList:
+        if "/" in piece:
+            piecesToAdd.extend([SanitizeDatasetNameFromFullDataset(piece)])
+        else:
+            piecesToAdd.extend([piece])
+    return piecesToAdd
+
+
+def NeedsExpansion(pieceList):
+    for piece in pieceList:
+        if "/" not in piece:
+            return True
+    return False
 
 
 def ParseXSectionFile(xsectionFile):
@@ -210,7 +237,10 @@ def lookupXSection(datasetNameFromInputList):
         raise RuntimeError("xsectionDict is empty. Cannot lookupXSection for "+datasetNameFromInputList)
     # for key in sorted(xsectionDict.keys()):
     #     print('sample=',key,'xsection=',xsectionDict[key])
-    return xsectionDict[datasetNameFromInputList]
+    if datasetNameFromInputList in xsectionDict.keys():
+        return xsectionDict[datasetNameFromInputList]
+    else:
+        raise RuntimeError("xsectionDict has no entry for key: {}".format(datasetNameFromInputList))
 
 
 def ParseDatFile(datFilename):
@@ -219,8 +249,7 @@ def ParseDatFile(datFilename):
     column = []
     lineCounter = int(0)
 
-    # print '(opening:',inputDataFile,
-    # sys.stdout.flush()
+    # print("Opening:" , datFilename, flush=True)
     with open(datFilename) as datFile:
         # start with line that begins with '#id'
         foundFirstLine = False
@@ -327,7 +356,7 @@ def FillTableErrors(table, rootFileName, sampleName=""):
     if not tfile:
         raise RuntimeError("ERROR: could not open file '{}'.".format(rootFileName))
     if sampleName:
-        histName = "profile1D__{}__EventsPassingCutsAllHist".format(sampleName)
+        histName = "histo1D__{}__EventsPassingCutsAllHist".format(sampleName)
     else:
         histName = "EventsPassingCutsAllHist"
     eventsPassingHist = tfile.Get(histName)
@@ -866,7 +895,7 @@ def WriteTable(table, name, file, printToScreen=False):
             ###
 
 
-def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
+def GetSampleHistosFromTFile(tfileName, sampleHistos, keepHistName=True):
     # used in combinePlots.py
     tfile = r.TFile(tfileName)
     for key in tfile.GetListOfKeys():
@@ -877,19 +906,12 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
         if not htemp or htemp is None:
             raise RuntimeError("failed to get histo named:", histoName, "from file:", tfile.GetName())
         r.SetOwnership(htemp, True)
-        if sampleName in histoName:
-            # do this later -- XXX SIC REMOVE
-            #if "amcatnlo" in tfileName.lower() and "systematics" in histoName.lower() and "diffs" not in histoName.lower():
-            #    # in this case, we check if there are 102 LHEPdfWeights in the y bins, and if so, we remove index 100 and 101 (alpha_S weights)
-            #    yBinLabels = htemp.GetYaxis().GetLabels()
-            #    lhePdfWeightLabels = [label for label in yBinLabels if "lhepdfweight" in label.GetString().Data()]
-            #    if len(lhePdfWeightLabels) == 102:
-            #        print("INFO: removing {} bins from the LHEPdfWeights (indices 100 and 101) histo {} with ybins {} in file {}".format(
-            #                len(lhePdfWeightLabels)-100, htemp.GetName(), htemp.GetNbinsY(), tfileName))
-            #        htemp = RemoveHistoBins(htemp, "y", lhePdfWeightLabels[-2:])
-            if htemp.InheritsFrom("TH1"):
-                htemp.SetDirectory(0)
-            sampleHistos.append(htemp)
+        if htemp.InheritsFrom("TH1"):
+            htemp.SetDirectory(0)
+        if not keepHistName:
+            prefixEndPos = htemp.GetName().rfind("__")+2
+            htemp.SetName(htemp.GetName()[prefixEndPos:])
+        sampleHistos.append(htemp)
     tfile.Close()
     if len(sampleHistos) < 1:
         raise RuntimeError(
@@ -972,9 +994,10 @@ def GetSampleHistosFromTFile(tfileName, sampleHistos, sampleName=""):
 
 def ExtractBranchTitles(systHist, tmap):
     systDict = {}
+    specialSysts = ["LHEPdfWeightMC_UpComb", "LHEPdfWeightMC_DownComb", "LHEPdfWeightHessian_NominalComb", "LHEPdf_UpComb", "LHEPdf_DownComb", "LHEScale_UpComb", "LHEScale_DownComb"]
     for yBin in range(1, systHist.GetNbinsY()+1):
         systName = systHist.GetYaxis().GetBinLabel(yBin)
-        if "LHEPdfWeightMC_UpComb" in systName or "LHEPdfWeightMC_DownComb" in systName or "LHEPdfWeightHessian_NominalComb" in systName:
+        if any(substring in systName for substring in specialSysts):
             continue  # skip the special bins we may add ourselves
         branchTitleList = []
         mapObject = tmap.FindObject(systName)
@@ -982,7 +1005,8 @@ def ExtractBranchTitles(systHist, tmap):
             # assume it's an array syst, so try to match stripping off the _N part
             mapObject = tmap.FindObject(systName[:systName.rfind("_")])
         if not mapObject:
-            raise RuntimeError("For syst {}, using systHist {} and map {}, could not find matching map object for syst name nor for array type systName={}.".format(systName, systHist.GetName(), tmap.GetName(), systName[:systName.rfind("_")]))
+            raise RuntimeError("For syst {}, using systHist {} and map {}, could not find matching map object for syst name nor for array type systName={}.".format(
+                systName, systHist.GetName(), tmap.GetName(), systName[:systName.rfind("_")]))
         #print("INFO: for syst {}, found matching mapObject key: {}, value: {}".format(systName, mapObject.Key(), mapObject.Value()))
         branchTitleListItr = r.TIter(mapObject.Value())
         branchTitle = branchTitleListItr.Next()
@@ -1201,8 +1225,6 @@ def CalculatePDFVariationHessian(hist, sampleName, pdfKeys=[], nominalBin=1, sys
     for xBin in range(0, hist.GetNbinsX()+2):
         nominal = hist.GetBinContent(xBin, nominalBin)
         pdfYields = [hist.GetBinContent(xBin, yBin) for yBin in validYbins]
-        #if xBin==101:
-        #    print("DEBUG -- CalculatePDFVariationHessian: for xbin=101, for sampleName={}, nominal={}, pdfYields look like {}".format(sampleName, nominal, pdfYields))
         pdfVars = [pow(nominal-pdfYield, 2) for pdfYield in pdfYields]
         pdfDeltaX = math.sqrt(sum(pdfVars))
         deltaUp[xBin] = pdfDeltaX
@@ -1233,19 +1255,19 @@ def UpdateHistoDict(sampleHistoDict, pieceHistoList, piece, sample="", plotWeigh
         pieceHisto.SetName(GetShortHistoName(pieceHistoName))
         if idx in sampleHistoDict:
             sampleHisto = sampleHistoDict[idx]
-            # sampleHistoName = sampleHisto.GetName()
-            # sampleHisto.SetName(GetShortHistoName(sampleHistoName))
             if pieceHisto.GetName() not in sampleHisto.GetName():
                 raise RuntimeError(
-                        "ERROR: non-matching histos between sample hist with name '{}' and piece hist with name '{}'. Quitting here".format(
-                            sampleHisto.GetName(), pieceHisto.GetName()))
+                        "ERROR: non-matching histos between sample {} hist with name '{}' and piece {} hist with name '{}'. Quitting here".format(
+                            sample, sampleHisto.GetName(), piece, pieceHisto.GetName()))
         if "eventspassingcuts" in pieceHisto.GetName().lower() and "unscaled" not in pieceHisto.GetName().lower():
-            # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
-            # print "INFO: create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi.".format(pieceHisto.GetName())
-            unscaledEvtsPassingCuts = copy.deepcopy(pieceHisto)
-            unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
-            sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0, correlateLHESystematics, isData, systNameToBranchTitleDict)
-            idx += 1
+            if pieceHisto.GetName()+"_unscaled" not in [histo.GetName() for histo in pieceHistoList]:
+                # create new EventsPassingCuts hist that doesn't have scaling/reweighting by int. lumi.
+                unscaledEvtsPassingCuts = copy.deepcopy(pieceHisto)
+                unscaledEvtsPassingCuts.SetNameTitle(pieceHisto.GetName()+"_unscaled", pieceHisto.GetTitle()+"_unscaled")
+                # print("INFO: UpdateHistoDict(): sample={}, piece={}, create new EventsPassingCuts hist from {} that doesn't have scaling/reweighting by int. lumi. idx is now {}".format(sample, piece, pieceHisto.GetName(), idx), flush=True)
+                sampleHistoDict = updateSample(sampleHistoDict, unscaledEvtsPassingCuts, idx, piece, sample, 1.0, correlateLHESystematics, isData, systNameToBranchTitleDict)
+                idx += 1
+        #print("INFO: updateSample for sample={}, correlateLHESystematics={}".format(sample, correlateLHESystematics), flush=True)
         sampleHistoDict = updateSample(sampleHistoDict, pieceHisto, idx, piece, sample, plotWeight, correlateLHESystematics, isData, systNameToBranchTitleDict)
         # if idx < 2:
         #     print "\tINFO: UpdateHistoDict for sample {}: added pieceHisto {} with entries {} to sampleHistoDict[idx], which has name {} and entries {}".format(
@@ -1383,84 +1405,97 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
             # CheckSystematicsTMapConsistency(dictFinalHistoAtSample[h], htemp)
             # no-op
             return dictFinalHistoAtSample
-        if "systematics" in histoName.lower() and not IsHistEmpty(htemp) and not isData:
+        if "systematics" in histoName.lower() and not isData:
             labelsToAdd = ["LHEPdfWeightMC_UpComb", "LHEPdfWeightMC_DownComb", "LHEPdfWeightHessian_NominalComb"]
-            hessianNominalYields = np.zeros(htemp.GetNbinsX()+2)
-            pdfSystDeltasUp = np.zeros(htemp.GetNbinsX()+2)
-            pdfSystDeltasDown = np.zeros(htemp.GetNbinsX()+2)
-            if not correlateLHESystematics:
-                # case for combining between samples
-                # 1. we have to calculate the PDF syst if it's an MC PDF
-                #  - make two special bins to hold this
-                #  - zero all the PDF weight bins
-                #  - at the end, call from WriteHistos(), we combine any hessian vars with the MC vars into one bin (and any hessian into one bin)
-                pdfVariationType, pdfName = GetPDFVariationType(GetBranchTitle("LHEPdfWeight", sample, systNameToBranchTitleDict)[0])
-                #print("\tINFO: sample has pdfVariationType={}".format(pdfVariationType))
-                if "mc" in pdfVariationType:
-                    pdfSystDeltasUp, pdfSystDeltasDown, yBins = CalculatePDFSystematic(htemp, sample, systNameToBranchTitleDict)
-                    pdfWeightLabels = [label.GetString().Data() for label in htemp.GetYaxis().GetLabels() if "LHEPdfWeight" in label.GetString().Data()]
-                    for xBin in range(0, htemp.GetNbinsX()+2):
-                        for label in pdfWeightLabels:
-                            yBin = htemp.GetYaxis().FindFixBin(label)
-                            htemp.SetBinContent(xBin, yBin, 0)
-                            htemp.SetBinError(xBin, yBin, 0)
-                elif "hessian" in pdfVariationType:
-                    hessianNominalYields = [htemp.GetBinContent(xBin, 1) for xBin in range(0, htemp.GetNbinsX()+2)]
+            if not any(substring in list(htemp.GetYaxis().GetLabels()) for substring in labelsToAdd):
                 htemp = AddHistoBins(htemp, "y", labelsToAdd)
                 if firstHistForSample:
                     dictFinalHistoAtSample[h] = AddHistoBins(dictFinalHistoAtSample[h], "y", labelsToAdd)
-                for xBin in range(0, htemp.GetNbinsX()+2):
-                    htemp.SetBinContent(xBin, htemp.GetNbinsY()-2, pdfSystDeltasUp[xBin])
-                    htemp.SetBinContent(xBin, htemp.GetNbinsY()-1, pdfSystDeltasDown[xBin])
-                    htemp.SetBinContent(xBin, htemp.GetNbinsY(), hessianNominalYields[xBin])
-                    htemp.SetBinError(xBin, htemp.GetNbinsY()-2, pdfSystDeltasUp[xBin])
-                    htemp.SetBinError(xBin, htemp.GetNbinsY()-1, pdfSystDeltasDown[xBin])
-                    htemp.SetBinError(xBin, htemp.GetNbinsY(), hessianNominalYields[xBin])
-                # 2. we have to calculate the scale syst
-                #   - replace the scale weights with one bin holding the max deviation
-                scaleSystDeltas, yBins = CalculateShapeSystematic(htemp, sample, systNameToBranchTitleDict)
-                #shapeSysts = [htemp.GetYaxis().GetBinLabel(yBin) for yBin in range(0, htemp.GetNbinsY()+1) if "LHEScaleWeight_" in htemp.GetYaxis().GetBinLabel(yBin)][1:]  # remove all but first and use that one for the comb.
-                #print("INFO - shape systs have bins with labels {} in piece".format(shapeSysts))
-                #htemp = RemoveHistoBins(htemp, "y", shapeSysts)
-                htemp.GetYaxis().SetBinLabel(yBins[0], "LHEScaleWeight_maxComb")
-                #print("INFO - removed histo bins with labels {} from piece".format([label for label in shapeSysts]))
-                #print("INFO - now have the following shape/scale bins: {}".format([label.GetString().Data() for label in htemp.GetYaxis().GetLabels() if "scale" in label.GetString().Data().lower()]))
-                if firstHistForSample:
-                    #dictFinalHistoAtSample[h] = RemoveHistoBins(dictFinalHistoAtSample[h], "y", shapeSysts)
-                    dictFinalHistoAtSample[h].GetYaxis().SetBinLabel(yBins[0], "LHEScaleWeight_maxComb")
-                    #print("INFO - removed histo bins with labels {} from combined hist".format([label for label in shapeSysts]))
-                    #print("INFO - now have the following shape/scale bins: {}".format([label.GetString().Data() for label in dictFinalHistoAtSample[h].GetYaxis().GetLabels() if "scale" in label.GetString().Data().lower()]))
-                for xBin in range(0, htemp.GetNbinsX()+2):
-                    nominal = htemp.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
-                    htemp.SetBinContent(xBin, yBins[0], scaleSystDeltas[xBin]+nominal)
-                    htemp.SetBinError(xBin, yBins[0], scaleSystDeltas[xBin])
-            else:
-                #print("INFO - GetBranchTitle for hist={} which has {} entries. is hist empty? {} histEntries==0 ? {}".format(htemp.GetName(), htemp.GetEntries(), IsHistEmpty(htemp), htemp.GetEntries()==0))
-                branchTitle, pdfKeys = GetBranchTitle("LHEPdfWeight", sample, systNameToBranchTitleDict)
-                if len(pdfKeys) > 0:
-                    pdfVariationType, pdfName = GetPDFVariationType(branchTitle)
+            if not IsHistEmpty(htemp):
+                hessianNominalYields = np.zeros(htemp.GetNbinsX()+2)
+                pdfSystDeltasUp = np.zeros(htemp.GetNbinsX()+2)
+                pdfSystDeltasDown = np.zeros(htemp.GetNbinsX()+2)
+                if not correlateLHESystematics: # and not any(substring in list(htemp.GetYaxis().GetLabels()) for substring in labelsToAdd):
+                    # case for combining between samples
+                    # 1. we have to calculate the PDF syst if it's an MC PDF
+                    #  - make two special bins to hold this
+                    #  - zero all the PDF weight bins
+                    #  - at the end, call from WriteHistos(), we combine any hessian vars with the MC vars into one bin (and any hessian into one bin)
+                    # print("\tINFO: updateSample() - not correlating lhe systs for hist {} in piece {} for sample {}".format(histoName, piece, sample), flush=True)
+                    pdfVariationType, pdfName = GetPDFVariationType(GetBranchTitle("LHEPdfWeight", sample, systNameToBranchTitleDict)[0])
+                    # print("\tINFO: updateSample() - not correlating lhe systs for hist {}; sample {} has pdfVariationType={}".format(histoName, sample, pdfVariationType), flush=True)
                     if "mc" in pdfVariationType:
                         pdfSystDeltasUp, pdfSystDeltasDown, yBins = CalculatePDFSystematic(htemp, sample, systNameToBranchTitleDict)
-                    htemp = AddHistoBins(htemp, "y", labelsToAdd)
-                    if firstHistForSample:
-                        dictFinalHistoAtSample[h] = AddHistoBins(dictFinalHistoAtSample[h], "y", labelsToAdd)
+                        pdfWeightLabels = [label.GetString().Data() for label in htemp.GetYaxis().GetLabels() if "LHEPdfWeight" in label.GetString().Data()]
+                        for xBin in range(0, htemp.GetNbinsX()+2):
+                            for label in pdfWeightLabels:
+                                yBin = htemp.GetYaxis().FindFixBin(label)
+                                htemp.SetBinContent(xBin, yBin, 0)
+                                htemp.SetBinError(xBin, yBin, 0)
+                    elif "hessian" in pdfVariationType:
+                        hessianNominalYields = [htemp.GetBinContent(xBin, 1) for xBin in range(0, htemp.GetNbinsX()+2)]
+                    #htemp = AddHistoBins(htemp, "y", labelsToAdd)
+                    #if firstHistForSample:
+                    #    dictFinalHistoAtSample[h] = AddHistoBins(dictFinalHistoAtSample[h], "y", labelsToAdd)
+                    pdfWeightMCDownCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightMC_DownComb")
+                    pdfWeightMCUpCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightMC_UpComb")
+                    pdfWeightHessianCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightHessian_NominalComb")
                     for xBin in range(0, htemp.GetNbinsX()+2):
-                        htemp.SetBinContent(xBin, htemp.GetNbinsY()-2, pdfSystDeltasUp[xBin])
-                        htemp.SetBinContent(xBin, htemp.GetNbinsY()-1, pdfSystDeltasDown[xBin])
-                        htemp.SetBinContent(xBin, htemp.GetNbinsY(), hessianNominalYields[xBin])
-                        htemp.SetBinError(xBin, htemp.GetNbinsY()-2, pdfSystDeltasUp[xBin])
-                        htemp.SetBinError(xBin, htemp.GetNbinsY()-1, pdfSystDeltasDown[xBin])
-                        htemp.SetBinError(xBin, htemp.GetNbinsY(), hessianNominalYields[xBin])
+                        htemp.SetBinContent(xBin, pdfWeightMCUpCombBin, pdfSystDeltasUp[xBin])
+                        htemp.SetBinContent(xBin, pdfWeightMCDownCombBin, pdfSystDeltasDown[xBin])
+                        htemp.SetBinContent(xBin, pdfWeightHessianCombBin, hessianNominalYields[xBin])
+                        htemp.SetBinError(xBin, pdfWeightMCUpCombBin, pdfSystDeltasUp[xBin])
+                        htemp.SetBinError(xBin, pdfWeightMCDownCombBin, pdfSystDeltasDown[xBin])
+                        htemp.SetBinError(xBin, pdfWeightHessianCombBin, hessianNominalYields[xBin])
+                    # 2. we have to calculate the scale syst
+                    #   - replace the scale weights with one bin holding the max deviation
+                    scaleSystDeltas, yBins = CalculateShapeSystematic(htemp, sample, systNameToBranchTitleDict)
+                    #shapeSysts = [htemp.GetYaxis().GetBinLabel(yBin) for yBin in range(0, htemp.GetNbinsY()+1) if "LHEScaleWeight_" in htemp.GetYaxis().GetBinLabel(yBin)][1:]  # remove all but first and use that one for the comb.
+                    #print("INFO - shape systs have bins with labels {} in piece".format(shapeSysts))
+                    #htemp = RemoveHistoBins(htemp, "y", shapeSysts)
+                    if not "LHEScaleWeight_maxComb" in list(htemp.GetYaxis().GetLabels()):
+                        htemp.GetYaxis().SetBinLabel(yBins[0], "LHEScaleWeight_maxComb")
+                    #print("INFO - removed histo bins with labels {} from piece".format([label for label in shapeSysts]))
+                    #print("INFO - now have the following shape/scale bins: {}".format([label.GetString().Data() for label in htemp.GetYaxis().GetLabels() if "scale" in label.GetString().Data().lower()]))
+                    if firstHistForSample and not "LHEScaleWeight_maxComb" in list(htemp.GetYaxis().GetLabels()):
+                        #dictFinalHistoAtSample[h] = RemoveHistoBins(dictFinalHistoAtSample[h], "y", shapeSysts)
+                        dictFinalHistoAtSample[h].GetYaxis().SetBinLabel(yBins[0], "LHEScaleWeight_maxComb")
+                        #print("INFO - removed histo bins with labels {} from combined hist".format([label for label in shapeSysts]))
+                        #print("INFO - now have the following shape/scale bins: {}".format([label.GetString().Data() for label in dictFinalHistoAtSample[h].GetYaxis().GetLabels() if "scale" in label.GetString().Data().lower()]))
+                    lheScaleMaxCombBin = htemp.GetYaxis().FindFixBin("LHEScaleWeight_maxComb")
+                    for xBin in range(0, htemp.GetNbinsX()+2):
+                        nominal = htemp.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
+                        htemp.SetBinContent(xBin, lheScaleMaxCombBin, scaleSystDeltas[xBin]+nominal)
+                        htemp.SetBinError(xBin, lheScaleMaxCombBin, scaleSystDeltas[xBin])
+                elif not any(substring in list(htemp.GetYaxis().GetLabels()) for substring in labelsToAdd):
+                    #print("INFO - GetBranchTitle for hist={} which has {} entries. is hist empty? {} histEntries==0 ? {}".format(htemp.GetName(), htemp.GetEntries(), IsHistEmpty(htemp), htemp.GetEntries()==0))
+                    branchTitle, pdfKeys = GetBranchTitle("LHEPdfWeight", sample, systNameToBranchTitleDict)
+                    if len(pdfKeys) > 0:
+                        pdfVariationType, pdfName = GetPDFVariationType(branchTitle)
+                        if "mc" in pdfVariationType:
+                            pdfSystDeltasUp, pdfSystDeltasDown, yBins = CalculatePDFSystematic(htemp, sample, systNameToBranchTitleDict)
+                        #htemp = AddHistoBins(htemp, "y", labelsToAdd)
+                        #if firstHistForSample:
+                        #    dictFinalHistoAtSample[h] = AddHistoBins(dictFinalHistoAtSample[h], "y", labelsToAdd)
+                        pdfWeightMCDownCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightMC_DownComb")
+                        pdfWeightMCUpCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightMC_UpComb")
+                        pdfWeightHessianCombBin = htemp.GetYaxis().FindFixBin("LHEPdfWeightHessian_NominalComb")
+                        for xBin in range(0, htemp.GetNbinsX()+2):
+                            htemp.SetBinContent(xBin, pdfWeightMCUpCombBin, pdfSystDeltasUp[xBin])
+                            htemp.SetBinContent(xBin, pdfWeightMCDownCombBin, pdfSystDeltasDown[xBin])
+                            htemp.SetBinContent(xBin, pdfWeightHessianCombBin, hessianNominalYields[xBin])
+                            htemp.SetBinError(xBin, pdfWeightMCUpCombBin, pdfSystDeltasUp[xBin])
+                            htemp.SetBinError(xBin, pdfWeightMCDownCombBin, pdfSystDeltasDown[xBin])
+                            htemp.SetBinError(xBin, pdfWeightHessianCombBin, hessianNominalYields[xBin])
             # check systematics hist bins
             systematicsListFromDictHist = list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())
             systematicsListFromTempHist = list(htemp.GetYaxis().GetLabels())
             systsNotInTempHist = [label for label in systematicsListFromDictHist if label not in systematicsListFromTempHist]
             if len(systsNotInTempHist) > 0:
                 print("\tINFO: some systematics absent from piece {}; removing them from {} for combined sample {}. Missing systematics: {}".format(
-                        htemp.GetName(), piece, sample, systsNotInTempHist))
+                        piece, htemp.GetName(), sample, systsNotInTempHist), flush=True)
                 # print "SethLog: systematicsListFromTempHist={} and piece={}".format(systematicsListFromTempHist, piece)
                 # print "SethLog: systematicsListFromDictHist={} and sample={}".format(systematicsListFromDictHist, sample)
-                sys.stdout.flush()
                 # remove systs that are missing from htemp
                 dictFinalHistoAtSample[h] = RemoveHistoBins(dictFinalHistoAtSample[h], "y", systsNotInTempHist)
                 # now update the systematics list, since we removed some
@@ -1476,16 +1511,20 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
                 # remove systs that are missing from htemp
                 htemp = RemoveHistoBins(htemp, "y", systsNotInDictHist)
             if htemp.GetNbinsX() != dictFinalHistoAtSample[h].GetNbinsX() or htemp.GetNbinsY() != dictFinalHistoAtSample[h].GetNbinsY():
-                raise RuntimeError("htemp {} to be added has {} x bins and {} y bins, which is inconsistent with the existing hist, which has {} x bins and {} y bins".format(
-                    htemp.GetName(), htemp.GetNbinsX(), htemp.GetNbinsY(),
-                    dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY()))
+                print("ERROR: piece {} has bin labels: {}".format(piece, list(htemp.GetYaxis().GetLabels())), flush=True)
+                print("ERROR: sample {} has bin labels: {}".format(sample, list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())), flush=True)
+                raise RuntimeError("htemp {} from piece {} to be added has {} x bins and {} y bins, which is inconsistent with the existing hist from sample {}, which has {} x bins and {} y bins; different y bins={}".format(
+                    htemp.GetName(), piece, htemp.GetNbinsX(), htemp.GetNbinsY(),
+                    sample, dictFinalHistoAtSample[h].GetNbinsX(), dictFinalHistoAtSample[h].GetNbinsY(), str(list(set(htemp.GetYaxis().GetLabels()).symmetric_difference(set(dictFinalHistoAtSample[h].GetYaxis().GetLabels()))))))
             if list(htemp.GetYaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetYaxis().GetLabels()):
-                raise RuntimeError("htemp {} to be added has y-axis bin labels {} which are inconsistent with existing hist: {}".format(
-                    htemp.GetName(), list(htemp.GetYaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())))
+                print("ERROR: piece {} has bin labels: {}".format(piece, list(htemp.GetYaxis().GetLabels())), flush=True)
+                print("ERROR: sample {} has bin labels: {}".format(sample, list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())), flush=True)
+                raise RuntimeError("htemp {} from piece {} to be added has y-axis bin labels {} which are inconsistent with existing hist from sample {}: {}".format(
+                    htemp.GetName(), piece,list(htemp.GetYaxis().GetLabels()), sample, list(dictFinalHistoAtSample[h].GetYaxis().GetLabels())))
             if dictFinalHistoAtSample[h].GetXaxis().GetLabels():
                 if list(htemp.GetXaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetXaxis().GetLabels()):
-                    raise RuntimeError("htemp {} to be added has x-axis bin labels {} which are inconsistent with existing hist: {}".format(
-                        htemp.GetName(), list(htemp.GetXaxis().GetLabels()), list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
+                    raise RuntimeError("htemp {} from piece {} to be added has x-axis bin labels {} which are inconsistent with existing hist from sample {}: {}".format(
+                        htemp.GetName(), piece, list(htemp.GetXaxis().GetLabels()), sample, list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
                 
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
@@ -1520,8 +1559,7 @@ def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, hasMC=True, 
     outputTfile.cd()
     nHistos = len(sampleHistoDict)
     if verbose:
-        print("Writing", nHistos, "histos...", end=' ')
-    sys.stdout.flush()
+        print("[{}] Writing {} histos...".format(sample, nHistos), end=' ', flush=True)
     for histo in sampleHistoDict.values():  # for each hist contained in the sample's dict
         histName = histo.GetName()
         nbytes = 0
@@ -1557,6 +1595,7 @@ def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, hasMC=True, 
                     mcPDFSystDeltasUp, mcPDFSystDeltasDown, yBins = CalculatePDFVariationMC(histo, sample, pdfKeyLabels)
                 else:
                     hessianPDFSystDeltasUp, pdfSystDeltasDown, yBins = CalculatePDFVariationHessian(histo, sample, pdfKeyLabels)
+                    # print("INFO: for sample = {}, hist = {}, calculated hessian pdf variations; hessianPDFSystDeltasUp[1]={} vs nominal[1]={}".format(sample, histo.GetName(), hessianPDFSystDeltasUp[1], histo.GetBinContent(1,1)))
                 # we should have the addition of the scale weight bins to use
                 #if not IsHistEmpty(histo):
                 if len([x for x in [label.GetString().Data() for label in histo.GetYaxis().GetLabels()] if re.match(r"LHEScaleWeight_\d+", x)]) > 0:
@@ -1583,40 +1622,52 @@ def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, hasMC=True, 
                     #if len(hessianPDFSystDeltasUp) > 100:
                     #    print("DEBUG -- calculatePDFVariationHessian for sample={}, pdfKeyLabels={}; hessianPDFSystDeltasUp[xBin=138]={}".format(sample, pdfKeyLabels, hessianPDFSystDeltasUp[138]))
                 scaleSystDeltas = [histo.GetBinError(xBin, histo.GetYaxis().FindFixBin("LHEScaleWeight_maxComb")) for xBin in range(0, histo.GetNbinsX()+2)]
-            histo = RemoveHistoBins(histo, "y", pdfWeightLabels) 
+            #FIXME: remove these later? or just keep?
+            #histo = RemoveHistoBins(histo, "y", pdfWeightLabels) 
             labelsToAdd = ["LHEPdf_UpComb", "LHEPdf_DownComb"]
-            histo = AddHistoBins(histo, "y", labelsToAdd)
-            for xBin in range(0, histo.GetNbinsX()+2):
-                nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
-                pdfSystDeltaUp = math.sqrt(pow(hessianPDFSystDeltasUp[xBin], 2)+pow(mcPDFSystDeltasUp[xBin], 2))
-                pdfSystDeltaDown = math.sqrt(pow(hessianPDFSystDeltasUp[xBin], 2)+pow(mcPDFSystDeltasDown[xBin], 2))
-                pdfSystTotUp = pdfSystDeltaUp+nominal  # convention of filling with x' = deltaX + x
-                pdfSystTotDown = pdfSystDeltaDown+nominal
-                #if xBin==138:
-                #    print("DEBUG -- pdfSystDeltaTotUp for sample={} and xBin=138: mcPDFSystDeltasUp[138]={}, hessianPDFSystDeltasUp[138]={}; sumInQuad={}, pdfSystTotUp={}, nom={}".format(sample, mcPDFSystDeltasUp[138], hessianPDFSystDeltasUp[138], pdfSystDeltaUp, pdfSystTotUp, nominal))
-                histo.SetBinContent(xBin, histo.GetNbinsY()-1, pdfSystTotUp)
-                histo.SetBinContent(xBin, histo.GetNbinsY(), pdfSystTotDown)
-                histo.SetBinError(xBin, histo.GetNbinsY()-1, pdfSystDeltaUp)
-                histo.SetBinError(xBin, histo.GetNbinsY(), pdfSystDeltaDown)  # for plotting, we rely on the sumQuad addition of bin errors
+            if not any(substring in list(histo.GetYaxis().GetLabels()) for substring in labelsToAdd):
+                histo = AddHistoBins(histo, "y", labelsToAdd)
+            if not IsHistEmpty(histo):
+                pdfUpCombBin = histo.GetYaxis().FindFixBin("LHEPdf_UpComb")
+                pdfDownCombBin = histo.GetYaxis().FindFixBin("LHEPdf_DownComb")
+                for xBin in range(0, histo.GetNbinsX()+2):
+                    nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
+                    pdfSystDeltaUp = math.sqrt(pow(hessianPDFSystDeltasUp[xBin], 2)+pow(mcPDFSystDeltasUp[xBin], 2))
+                    pdfSystDeltaDown = math.sqrt(pow(hessianPDFSystDeltasUp[xBin], 2)+pow(mcPDFSystDeltasDown[xBin], 2))
+                    pdfSystTotUp = pdfSystDeltaUp+nominal  # convention of filling with x' = deltaX + x
+                    pdfSystTotDown = pdfSystDeltaDown+nominal
+                    #if xBin==138:
+                    #    print("DEBUG -- pdfSystDeltaTotUp for sample={} and xBin=138: mcPDFSystDeltasUp[138]={}, hessianPDFSystDeltasUp[138]={}; sumInQuad={}, pdfSystTotUp={}, nom={}".format(sample, mcPDFSystDeltasUp[138], hessianPDFSystDeltasUp[138], pdfSystDeltaUp, pdfSystTotUp, nominal))
+                    histo.SetBinContent(xBin, pdfUpCombBin, pdfSystTotUp)
+                    histo.SetBinContent(xBin, pdfDownCombBin, pdfSystTotDown)
+                    histo.SetBinError(xBin, pdfUpCombBin, pdfSystDeltaUp)
+                    histo.SetBinError(xBin, pdfDownCombBin, pdfSystDeltaDown)  # for plotting, we rely on the sumQuad addition of bin errors
             # now we handle the scale weights in a similar way
             scaleWeightLabels = [label.GetString().Data() for label in histo.GetYaxis().GetLabels() if "LHEScaleWeight_" in label.GetString().Data() and not "comb" in label.GetString().Data().lower()]
-            histo = RemoveHistoBins(histo, "y", scaleWeightLabels) 
+            #FIXME: remove these later? or just keep?
+            #histo = RemoveHistoBins(histo, "y", scaleWeightLabels) 
             #if "LHEScaleWeight_maxComb" not in [label.GetString().Data() for label in histo.GetYaxis().GetLabels()]:
             #    histo = AddHistoBins(histo, "y", ["LHEScaleWeight_maxComb"])
-            histo = AddHistoBins(histo, "y", ["LHEScale_UpComb", "LHEScale_DownComb"])
-            for xBin in range(0, histo.GetNbinsX()+2):
-                nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
-                histo.SetBinContent(xBin, histo.GetNbinsY()-1, scaleSystDeltas[xBin]+nominal)
-                histo.SetBinError(xBin, histo.GetNbinsY()-1, scaleSystDeltas[xBin])  # for plotting, we rely on the sumQuad addition of bin errors
-                histo.SetBinContent(xBin, histo.GetNbinsY(), scaleSystDeltas[xBin]+nominal)
-                histo.SetBinError(xBin, histo.GetNbinsY(), scaleSystDeltas[xBin])
+            labelsToAdd = ["LHEScale_UpComb", "LHEScale_DownComb"]
+            if not any(substring in list(histo.GetYaxis().GetLabels()) for substring in labelsToAdd):
+                histo = AddHistoBins(histo, "y", labelsToAdd)
+            if not IsHistEmpty(histo):
+                scaleUpCombBin = histo.GetYaxis().FindFixBin("LHEScale_UpComb")
+                scaleDownCombBin = histo.GetYaxis().FindFixBin("LHEScale_DownComb")
+                for xBin in range(0, histo.GetNbinsX()+2):
+                    nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
+                    histo.SetBinContent(xBin, scaleUpCombBin, scaleSystDeltas[xBin]+nominal)
+                    histo.SetBinError(xBin, scaleUpCombBin, scaleSystDeltas[xBin])  # for plotting, we rely on the sumQuad addition of bin errors
+                    histo.SetBinContent(xBin, scaleDownCombBin, scaleSystDeltas[xBin]+nominal)
+                    histo.SetBinError(xBin, scaleDownCombBin, scaleSystDeltas[xBin])
             # redo the bin errors for the other systematics, so that we can use their bin errors in case of any uncorrelated systs
-            otherSystBins = [histo.GetYaxis().FindFixBin(label.GetString().Data()) for label in histo.GetYaxis().GetLabels() if "LHEScale" not in label.GetString().Data() and "LHEPdf" not in label.GetString().Data() and "nominal" not in label.GetString().Data().lower()]
-            for xBin in range(0, histo.GetNbinsX()+2):
-                nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
-                for yBin in otherSystBins:
-                    val = histo.GetBinContent(xBin, yBin)
-                    histo.SetBinError(xBin, yBin, val-nominal)
+            if not IsHistEmpty(histo):
+                otherSystBins = [histo.GetYaxis().FindFixBin(label.GetString().Data()) for label in histo.GetYaxis().GetLabels() if "LHEScale" not in label.GetString().Data() and "LHEPdf" not in label.GetString().Data() and "nominal" not in label.GetString().Data().lower()]
+                for xBin in range(0, histo.GetNbinsX()+2):
+                    nominal = histo.GetBinContent(xBin, 1)  # y-bin 1 always being nominal
+                    for yBin in otherSystBins:
+                        val = histo.GetBinContent(xBin, yBin)
+                        histo.SetBinError(xBin, yBin, val-nominal)
             # write the hist
             nbytes = histo.Write()
             # make systDiffs hist if needed
@@ -1630,7 +1681,7 @@ def WriteHistos(outputTfile, sampleHistoDict, sample, corrLHESysts, hasMC=True, 
             raise RuntimeError("Error writing into the output file '{}': wrote {} bytes to file when writing object '{}'.".format(
                 outputTfile.GetName(), nbytes, histName))
     if verbose:
-        print("Done.")
+        print("[{}] Done writing.".format(sample), flush=True)
     sys.stdout.flush()
 
 
@@ -1882,6 +1933,8 @@ def AddHistoBins(hist, axis, labelsToAdd):
             for ibin in range(1, numNewBins+1):
                 newHist.GetYaxis().SetBinLabel(ibin, newBinLabels[ibin-1])
             hist.GetXaxis().Copy(newHist.GetXaxis())
+            if IsHistEmpty(hist):
+                return newHist
             # now handle bin content
             for xbin in range(0, newHist.GetNbinsX()+2):
                 for ybin in range(0, hist.GetNbinsY()+1):
@@ -1993,3 +2046,40 @@ def SetTColorPalette(colorList):
     tcolors = [r.TColor.GetColor(i) for i in colorList]
     print("tcolors=", tcolors)
     r.gStyle.SetPalette(len(tcolors), np.array(tcolors, dtype=np.int32))
+
+
+def DeleteTmpFiles(allTmpFilesByMass):
+    for mass, tmpFileList in allTmpFilesByMass.items():
+        for tmpFile in tmpFileList:
+            os.unlink(tmpFile)
+
+
+#FIXME: would be much better to use some kind of mkstemp named
+def WriteTmpCard(txtFilePath, mass, cardIndex, cardContent, dirPath="/tmp"):
+    tmpCardFileNameBasePath = "{}/tmpDatacard_m{}_card{}_{}"
+    tmpCardFileName = tmpCardFileNameBasePath.format(dirPath, mass, cardIndex, os.path.basename(txtFilePath))
+    print("INFO: writing tmp datacard to {}".format(tmpCardFileName))
+    with open(tmpCardFileName, "w") as tmpCardFile:
+        for lineToWrite in cardContent:
+            tmpCardFile.write(lineToWrite+"\n")
+    return tmpCardFileName
+
+
+def SeparateDatacards(txtFilePath, cardIndex, dirPath):
+    massList = []
+    tmpFileByMass = {}
+    cardContent = []
+    for line in open(os.path.expandvars(txtFilePath)):
+        if ".txt" in line:
+            if len(cardContent) > 0:
+                tmpFile = WriteTmpCard(txtFilePath, mass, cardIndex, cardContent, dirPath)
+                tmpFileByMass[mass] = tmpFile
+            cardContent = []
+            mass = line.split("M")[-1].split(".txt")[0]
+            massList.append(mass)
+        else:
+            cardContent.append(line)
+    if len(cardContent) > 0:
+        tmpFile = WriteTmpCard(txtFilePath, mass, cardIndex, cardContent, dirPath)
+        tmpFileByMass[mass] = tmpFile
+    return massList, tmpFileByMass
