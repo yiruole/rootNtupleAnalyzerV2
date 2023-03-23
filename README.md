@@ -26,8 +26,9 @@ NOTE: There are many analysis classes already available in the macros repo.
    4. Compile:
 Clean up any old builds if needed with `cmake --build build --target clean`.  
 Then:  
-`cmake -B build -S .`  
-`cmake --build build -j4`
+`cmake -B build -S . && cmake --build build -j12`  
+or for reduced skims:
+`cmake -DREDUCED_SKIM=True -B build -S . && cmake --build build -j12`
 
    5. If you are writing a new analysis class, add your analysis code to the method `Loop()` of analysisClass_myCode.C
 
@@ -189,7 +190,7 @@ the skim creation will be turned off and calling the fillSkimTree() method will 
 See https://hypernews.cern.ch/HyperNews/CMS/get/exotica-lq/266.html
 
 ### PU reweighting
-~This is done in the NanoAOD postprocessing step.~~
+~This is done via correctionlib JSON in the reduced skim step.~~
 
 ### Reduced skims
 Producing a new ntuple with a subset of cutFile variables and a subset of events (Paolo, Francesco, Edmund).
@@ -259,8 +260,7 @@ The `createList.py` script can be found in the submitJobsWithCrabV2 repository h
 7) Link and then compile the analysis class you need:
 `unlink src/analysisClass.C`
 `ln -s $LQMACRO/src2012/analysisClass_lq1_skim.C src/analysisClass.C`
-`cmake -B build -S .`
-`cmake --build build -j4`
+`cmake -DREDUCED_SKIM=True -B build -S . && cmake --build build -j12`
 8) Test the code:
 `./main config/FullNtupleDatasets_Summer12MC_DY2JetsToLL_ScaleSysts_MGi/DY2JetsToLL_M-50_scaledown_8TeV-madgraph__Summer12-START53_V7C-v1__AODSIM.txt $LQMACRO/config2012/ReducedSkims/cutTable_lq1_skim_SingleEle_loose.txt rootTupleTree/tree test test`
 
