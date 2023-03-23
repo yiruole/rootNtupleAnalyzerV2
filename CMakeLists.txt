@@ -88,12 +88,15 @@ find_package(correctionlib REQUIRED)
 find_package(Threads)
 find_package(ZLIB)
 
-include(FetchContent)
-FetchContent_Declare(CMSJMECalculators
-  GIT_REPOSITORY https://gitlab.cern.ch/cp3-cms/CMSJMECalculators.git
-  GIT_TAG        0.2.0
-  )
-FetchContent_MakeAvailable(CMSJMECalculators)
+if(REDUCED_SKIM)
+  include(FetchContent)
+  FetchContent_Declare(CMSJMECalculators
+    GIT_REPOSITORY https://gitlab.cern.ch/cp3-cms/CMSJMECalculators.git
+    GIT_TAG        0.2.0
+    )
+  FetchContent_MakeAvailable(CMSJMECalculators)
+else()
+endif()
 
 #add_library(mylib
 #  src/mylib.cpp
@@ -114,34 +117,50 @@ FetchContent_MakeAvailable(CMSJMECalculators)
 #)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(main
-  src/TTreeReaderTools.C
-  src/main.C
-  src/analysisClass.C
-  src/baseClass.C
-  src/Collection.C
-  src/CorrectionHandler.C
-  src/Electron.C
-  src/ElectronIDs.C
-  src/GenJet.C
-  src/GenJetIDs.C
-  src/GenParticle.C
-  src/GenParticleIDs.C
-  src/HLTriggerObject.C
-  src/HLTriggerObjectCollectionHelper.C
-  src/LooseElectron.C
-  src/HistoReader.C
-  src/Muon.C
-  src/MuonIDs.C
-  src/Object.C
-  src/PFJet.C
-  src/PFJetIDs.C
-  src/QCDFakeRate.C
-  src/eventListHelper.C
-  src/jsonParser.C
-  src/JMEUncertainties.C
-)
+if(REDUCED_SKIM)
+  add_executable(main
+    src/TTreeReaderTools.C
+    src/main.C
+    src/analysisClass.C
+    src/baseClass.C
+    src/Collection.C
+    src/CorrectionHandler.C
+    src/Electron.C
+    src/ElectronIDs.C
+    src/GenJet.C
+    src/GenJetIDs.C
+    src/GenParticle.C
+    src/GenParticleIDs.C
+    src/HLTriggerObject.C
+    src/HLTriggerObjectCollectionHelper.C
+    src/LooseElectron.C
+    src/HistoReader.C
+    src/Muon.C
+    src/MuonIDs.C
+    src/Object.C
+    src/PFJet.C
+    src/PFJetIDs.C
+    src/QCDFakeRate.C
+    src/eventListHelper.C
+    src/jsonParser.C
+    src/JMEUncertainties.C
+    )
+else()
+  add_executable(main
+    src/TTreeReaderTools.C
+    src/main.C
+    src/analysisClass.C
+    src/baseClass.C
+    src/Collection.C
+    src/Electron.C
+    src/ElectronIDs.C
+    src/LooseElectron.C
+    src/Object.C
+    src/jsonParser.C
+    )
+endif()
 
+if(REDUCED_SKIM)
 target_link_libraries(main
   PUBLIC
   Boost::iostreams
@@ -154,3 +173,15 @@ target_link_libraries(main
   correctionlib
   CMSJMECalculators
 )
+else()
+  target_link_libraries(main
+    PUBLIC
+    Boost::iostreams
+    Boost::regex
+    ROOT::Hist
+    ROOT::Tree
+    ROOT::TreePlayer
+    ROOT::Physics
+    ROOT::TMVA
+    )
+endif()
