@@ -564,7 +564,8 @@ class baseClass {
       auto&& cc = cutNameToCut.find(s);
       if( cc == cutNameToCut.end() )
       {
-        STDOUT("ERROR: did not find variableName = "<<s<<" in cutNameToCut. Returning");
+        STDOUT("ERROR: did not find variableName = "+s+" in cutNameToCut.");
+        throw std::runtime_error("ERROR: did not find variableName = "+s+" in cutNameToCut.");
       }
       auto const& c = cc->second;
       return c->filled;
