@@ -12,6 +12,7 @@ import traceback
 import subprocess
 import time
 from graphlib import TopologicalSorter
+from collections import OrderedDict
 
 import combineCommon
 
@@ -22,12 +23,10 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputLi
         plotWeight = 1.0
         xsection_X_intLumi = Ntot
         sumWeights = -1
-        print("\t[data]", end=' ')
-        sys.stdout.flush()
+        print("\t[data]", end=' ', flush=True)
     else:
         xsection_X_intLumi = float(xsection_val) * float(intLumi)
-        print("\t[MC]", end=' ')
-        sys.stdout.flush()
+        print("\t[MC]", end=' ', flush=True)
 
         # removed 2018 March 2
         # XXX: This is incorrect anyway.
@@ -37,7 +36,7 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputLi
         #  xsection_X_intLumi/=avgTopPtWeight
 
         if pdfReweight:
-            print("\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights))
+            print("\tapplying LHEPdfWeight={} to dataset={}".format(lhePdfWeightSumw, dataset_fromInputList)+"[instead of original sumWeights={}]".format(sumWeights), flush=True)
             sumWeights = lhePdfWeightSumw
 
         # now calculate the actual weight
@@ -47,19 +46,19 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputLi
         # else:
         #     print "\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList
         #     weight = xsection_X_intLumi / sumWeights
-        print("\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList)
+        print("\tapplying sumWeights=", sumWeights, "to", dataset_fromInputList, flush=True)
         weight = xsection_X_intLumi / sumWeights
         plotWeight = weight / 1000.0
     return weight, plotWeight, xsection_X_intLumi
 
 
-def log_result(result):
-    # This is called whenever foo_pool(i) returns a result.
-    # result_list is modified only by the main process, not the pool workers.
-    result_list.append(result)
-    sys.stdout.write("\r"+logString.format(jobCount, sampleCount))
-    sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-    sys.stdout.flush()
+# def log_result(result):
+#     # This is called whenever foo_pool(i) returns a result.
+#     # result_list is modified only by the main process, not the pool workers.
+#     result_list.append(result)
+#     sys.stdout.write("\r"+logString.format(jobCount, sampleCount))
+#     sys.stdout.write("\t"+str(len(result_list))+" jobs done")
+#     sys.stdout.flush()
 
 
 def MakeCombinedSample(args):
@@ -72,59 +71,65 @@ def MakeCombinedSample(args):
             corrLHESysts = sampleInfo["correlateLHESystematics"]
             outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
             outputDatFile = tfileNameTemplate.format(sample).replace("plots.root", "tables.dat")
-            histoDictThisSample = {}
+            histoDictThisSample = OrderedDict()
             tablesThisSample = []
             sampleTable = {}
             piecesAdded = []
 
             combineCommon.ParseXSectionFile(options.xsection)
-            #piecesToAdd = combineCommon.ExpandPieces(pieceList, dictSamples)
             piecesToAdd = combineCommon.PartialExpand(pieceList)
+            # print("For sample {}, piecesToAdd looks like {}, dictDatasetsFileNames={}".format(sample, piecesToAdd, dictDatasetsFileNames))
+            datasetsFileNamesCleaned = {combineCommon.SanitizeDatasetNameFromInputList(k): v for k, v in dictDatasetsFileNames.items()}
 
             hasMC = False
             # ---Loop over datasets in the inputlist
-            # TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-            for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
-                if len(piecesAdded) == len(piecesToAdd):
-                    break  # we're done!
-                toBeUpdated = False
-                matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
-                    dataset_fromInputList.replace("_tree", "")
-                )
-                if matchingPiece in piecesToAdd:
-                    toBeUpdated = True
-                    # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
-                # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
-                elif matchingPiece.endswith("_reduced_skim"):
-                    matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
-                    if matchingPieceNoRSK in piecesToAdd:
-                        toBeUpdated = True
-                        matchingPiece = matchingPieceNoRSK
-                        # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
-                # elif matchingPiece.endswith("_ext1"):
-                #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
-                #     if matchingPieceNoExt1 in pieceList:
-                #         toBeUpdated = True
-                #         matchingPiece = matchingPieceNoExt1
-                #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
-                if not toBeUpdated:
-                    continue
+            for currentPiece in piecesToAdd:
+            ## TODO: rewrite to be more efficient (loop over piecesToAdd instead)
+            #for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
+            #    if len(piecesAdded) == len(piecesToAdd):
+            #        break  # we're done!
+            #    toBeUpdated = False
+            #    matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
+            #        dataset_fromInputList.replace("_tree", "")
+            #    )
+            #    if matchingPiece in piecesToAdd:
+            #        toBeUpdated = True
+            #        # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
+            #    # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
+            #    elif matchingPiece.endswith("_reduced_skim"):
+            #        matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
+            #        if matchingPieceNoRSK in piecesToAdd:
+            #            toBeUpdated = True
+            #            matchingPiece = matchingPieceNoRSK
+            #            # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
+            #    # elif matchingPiece.endswith("_ext1"):
+            #    #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
+            #    #     if matchingPieceNoExt1 in pieceList:
+            #    #         toBeUpdated = True
+            #    #         matchingPiece = matchingPieceNoExt1
+            #    #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
+            #    if not toBeUpdated:
+            #        continue
+                if currentPiece in datasetsFileNamesCleaned.keys():
+                    matchingPiece = currentPiece
+                    rootFilename = datasetsFileNamesCleaned[currentPiece]
+                else:
+                    raise RuntimeError("ERROR: for sample {}, could not find currentPiece={} in datasetsFileNamesCleaned={}".format(sample, currentPiece, datasetsFileNamesCleaned))
 
                 # prepare to combine
                 print("\tfound matching dataset:", matchingPiece + " ... ", end=' ', flush=True)
-
                 inputDatFile = rootFilename.replace(".root", ".dat").replace("plots", "tables")
-                sampleHistos = []
                 print("with file: {}".format(rootFilename), flush=True)
                 print("\tlooking up xsection...", end=' ', flush=True)
                 try:
                     xsection_val = combineCommon.lookupXSection(matchingPiece)
                     xsectionFound = True
+                    print("found", xsection_val, "pb", flush=True)
                 except RuntimeError:
                     xsectionFound = False
 
                 # print("INFO: TFilenameTemplate = {}".format(tfileNameTemplate.format(sample)))
-                combineCommon.GetSampleHistosFromTFile(rootFilename, sampleHistos, xsectionFound)
+                sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFilename, xsectionFound)
                 # print "inputDatFile="+inputDatFile
 
                 # ---Read .dat table for current dataset
@@ -132,9 +137,7 @@ def MakeCombinedSample(args):
                 Ntot = float(data[0]["Npass"])
                 sampleNameForHist = ""
 
-
                 if xsectionFound:
-                    print("found", xsection_val, "pb", flush=True)
                     # ---Calculate weight
                     sumWeights = 0
                     lhePdfWeightSumw = 0
@@ -149,7 +152,7 @@ def MakeCombinedSample(args):
                     #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
                     #         doPDFReweight = doPDFReweight2016LQSignals
                     weight, plotWeight, xsection_X_intLumi = CalculateWeight(
-                        Ntot, xsection_val, options.intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw, doPDFReweight
+                        Ntot, xsection_val, options.intLumi, sumWeights, matchingPiece, lhePdfWeightSumw, doPDFReweight
                     )
                     # print "xsection: " + xsection_val,
                     print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ', flush=True)
@@ -207,15 +210,16 @@ def MakeCombinedSample(args):
                 if sample in samplesToSave:
                     dictFinalHisto[sample] = histoDictThisSample
             outputTfile.Close()
-            dictDatasetsFileNames[sample] = tfileNameTemplate.format(sample)
-            if sampleInfo["save"]:
-                sampleFiles.append(dictDatasetsFileNames[sample])
+            #dictDatasetsFileNames[sample] = tfileNameTemplate.format(sample)
+            #print("[{}] now dictDatasetsFileNames={}".format(sample, dictDatasetsFileNames), flush=True)
+            #if sampleInfo["save"]:
+            #    sampleFiles.append(dictDatasetsFileNames[sample])
             visitedNodes[sample] = True
             finalizedTasksQueue.put(sample)
             taskQueue.task_done()
         except Exception as e:
-            print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
-            traceback.print_exc()
+            #print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
+            #traceback.print_exc()
             raise e
         #return True
 
@@ -394,7 +398,7 @@ dictFinalTables = manager.dict()
 dictFinalHisto = manager.dict()
 # --- Samples to save in final histo dict
 samplesToSave = manager.list()
-dictDatasetsFileNames = manager.dict()
+#dictDatasetsFileNames = manager.dict()
 sampleFiles = manager.list()
 
 if not options.tablesOnly:
@@ -420,8 +424,8 @@ for lin in open(options.inputList):
         )
     )
 
-foundAllFiles, dictDatasetsFileNames = combineCommon.FindInputFiles(options.inputList, options.analysisCode, options.inputDir)
-dictDatasetsFileNames = manager.dict(dictDatasetsFileNames)
+foundAllFiles, dictDatasetsFileNamesOrig = combineCommon.FindInputFiles(options.inputList, options.analysisCode, options.inputDir)
+dictDatasetsFileNames = manager.dict(dictDatasetsFileNamesOrig)
 if not foundAllFiles:
     raise RuntimeError("Some files not found.")
 else:
@@ -467,6 +471,9 @@ while ts.is_active():
     sample = finalizedTasksQueue.get()
     # print("Finalized samples: ")
     # print(sample)
+    dictDatasetsFileNames[sample] = sampleTFileNameTemplate.format(sample)
+    if dictSamples[sample]["save"]:
+        sampleFiles.append(dictDatasetsFileNames[sample])
     ts.done(sample)
     finalizedTasksQueue.task_done()
 
@@ -474,37 +481,6 @@ taskQueue.join()
 finalizedTasksQueue.join()
 for node in visitedNodes:
     assert visitedNodes[node] == True
-
-## loop over samples defined in sampleListForMerging
-#for sample, sampleInfo in dictSamples.items():
-#    pieceList = sampleInfo["pieces"]
-#    corrLHESysts = sampleInfo["correlateLHESystematics"]
-#    writeSample = sampleInfo["save"]
-#    #print("-->Look at sample named:", sample, "with piecelist=", pieceList)
-#    #sys.stdout.flush()
-#    #MakeCombinedSample([sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate])
-#    # combine
-#    try:
-#        pool.apply_async(MakeCombinedSample, [[sample, pieceList, dictSamples, dictDatasetsFileNames, corrLHESysts, sampleTFileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables]], callback=log_result)
-#        sampleFiles.append(sampleTFileNameTemplate.format(sample))
-#        jobCount += 1
-#        sampleCount += 1
-#    except KeyboardInterrupt:
-#        print("\n\nCtrl-C detected: Bailing.")
-#        pool.terminate()
-#        sys.exit(1)
-#    except Exception as e:
-#        print("ERROR: caught exception in job for sample: {}; exiting".format(sample))
-#        traceback.print_exc()
-#        pool.terminate()
-#        exit(-2)
-#
-## now close the pool and wait for jobs to finish
-#pool.close()
-#sys.stdout.write(logString.format(jobCount, sampleCount))
-#sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-#sys.stdout.flush()
-#pool.join()
 
 # check results?
 if len(result_list) < jobCount:
