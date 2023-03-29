@@ -70,23 +70,29 @@ class Object {
     }
 
   template<class AnotherObject>
-    bool MatchByDRAndDPt ( CollectionPtr c, AnotherObject & best_match, float max_dr, float max_dpt ) { 
+    bool MatchByDRAndDPt ( CollectionPtr c, AnotherObject & best_match, float max_dr, float max_dpt_rel, bool verbose=false) { 
       unsigned short size = c -> GetSize();
       double min_dR = 9999.;
       bool match = false;
       for (unsigned short i = 0; i < size ; ++i){
         AnotherObject constituent = c -> GetConstituent<AnotherObject> ( i );
         float dr = DeltaR ( & constituent );
+        if(verbose)
+          std::cout << "Object::MatchByDRAndDPt() - check match with dR = " << dr << "; object=" << constituent << std::endl;
 
         if (dr < max_dr) {
           if (dr < min_dR) {
             double dPt = fabs(DeltaPt( & constituent ));
-            if (dPt > max_dpt)
+            if(verbose)
+              std::cout << "Object::MatchByDRAndDPt() - check match with dPt = " << dPt << "; object=" << constituent << std::endl;
+            if(fabs(dPt) / constituent.Pt() > max_dpt_rel)
               continue;
 
             match = true;
             min_dR = dr;
             best_match = constituent;
+            if(verbose)
+              std::cout << "Object::MatchByDRAndDPt() - found match with dR = " << dr << " and dPt = " << dPt << "; object=" << best_match << std::endl;
           }
         }
       }
