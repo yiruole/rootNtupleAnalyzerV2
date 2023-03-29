@@ -52,15 +52,6 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputLi
     return weight, plotWeight, xsection_X_intLumi
 
 
-# def log_result(result):
-#     # This is called whenever foo_pool(i) returns a result.
-#     # result_list is modified only by the main process, not the pool workers.
-#     result_list.append(result)
-#     sys.stdout.write("\r"+logString.format(jobCount, sampleCount))
-#     sys.stdout.write("\t"+str(len(result_list))+" jobs done")
-#     sys.stdout.flush()
-
-
 def MakeCombinedSample(args):
     while True:
         try:
@@ -84,32 +75,6 @@ def MakeCombinedSample(args):
             hasMC = False
             # ---Loop over datasets in the inputlist
             for currentPiece in piecesToAdd:
-            ## TODO: rewrite to be more efficient (loop over piecesToAdd instead)
-            #for dataset_fromInputList, rootFilename in dictDatasetsFileNames.items():
-            #    if len(piecesAdded) == len(piecesToAdd):
-            #        break  # we're done!
-            #    toBeUpdated = False
-            #    matchingPiece = combineCommon.SanitizeDatasetNameFromInputList(
-            #        dataset_fromInputList.replace("_tree", "")
-            #    )
-            #    if matchingPiece in piecesToAdd:
-            #        toBeUpdated = True
-            #        # print 'INFO: matchingPiece in piecesToAdd: toBeUpdated=True'
-            #    # if no match, maybe the dataset in the input list ends with "_reduced_skim", so try to match without that
-            #    elif matchingPiece.endswith("_reduced_skim"):
-            #        matchingPieceNoRSK = matchingPiece[0: matchingPiece.find("_reduced_skim")]
-            #        if matchingPieceNoRSK in piecesToAdd:
-            #            toBeUpdated = True
-            #            matchingPiece = matchingPieceNoRSK
-            #            # print 'INFO: matchingPieceNoRSK in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoRSK
-            #    # elif matchingPiece.endswith("_ext1"):
-            #    #     matchingPieceNoExt1 = matchingPiece[0: matchingPiece.find("_ext1")]
-            #    #     if matchingPieceNoExt1 in pieceList:
-            #    #         toBeUpdated = True
-            #    #         matchingPiece = matchingPieceNoExt1
-            #    #         # print 'INFO: matchingPieceNoExt1 in pieceList: toBeUpdated=True, matchingPiece=', matchingPieceNoExt1
-            #    if not toBeUpdated:
-            #        continue
                 if currentPiece in datasetsFileNamesCleaned.keys():
                     matchingPiece = currentPiece
                     rootFilename = datasetsFileNamesCleaned[currentPiece]
@@ -147,7 +112,6 @@ def MakeCombinedSample(args):
                         elif "LHEPdfSumw" in hist.GetName():
                             lhePdfWeightSumw = hist.GetBinContent(1)  # sum[genWeight*pdfWeight_0]
                     doPDFReweight = False
-                    # FIXME
                     # if "2016" in inputRootFile:
                     #     if "LQToBEle" in inputRootFile or "LQToDEle" in inputRootFile:
                     #         doPDFReweight = doPDFReweight2016LQSignals
@@ -212,8 +176,6 @@ def MakeCombinedSample(args):
             outputTfile.Close()
             #dictDatasetsFileNames[sample] = tfileNameTemplate.format(sample)
             #print("[{}] now dictDatasetsFileNames={}".format(sample, dictDatasetsFileNames), flush=True)
-            #if sampleInfo["save"]:
-            #    sampleFiles.append(dictDatasetsFileNames[sample])
             visitedNodes[sample] = True
             finalizedTasksQueue.put(sample)
             taskQueue.task_done()
@@ -221,7 +183,6 @@ def MakeCombinedSample(args):
             #print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
             #traceback.print_exc()
             raise e
-        #return True
 
 
 ####################################################################################################
@@ -398,7 +359,6 @@ dictFinalTables = manager.dict()
 dictFinalHisto = manager.dict()
 # --- Samples to save in final histo dict
 samplesToSave = manager.list()
-#dictDatasetsFileNames = manager.dict()
 sampleFiles = manager.list()
 
 if not options.tablesOnly:
@@ -496,9 +456,7 @@ if not options.tablesOnly:
     outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
-    #sampleFiles = [sampleTFileNameTemplate.format(sample) for sample in dictSamples.keys()]
     args.extend(sampleFiles)
-    #print("DEBUG: command={}".format(" ".join(args)))
     timeStarted = time.time()
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
@@ -510,8 +468,11 @@ if not options.tablesOnly:
     outputTfile = TFile.Open(outputTFileName)
     outputTfile.cd()
     if not options.keepInputFiles:
-        for fileName in sampleFiles:
+        for sample in dictSamples.keys():
+            fileName = sampleTFileNameTemplate.format(sample)
             os.remove(fileName)
+            tableFile = fileName.replace(".root", ".dat").replace("plots", "tables")
+            os.remove(tableFile)
 
 # --- Write tables
 for sample in dictSamples.keys():
