@@ -846,10 +846,23 @@ void baseClass::readCutFile()
     Systematic nominalSyst("nominal");
     nominalSyst.formula.reset(new TTreeFormula("nominal","1", readerTools_->GetTree().get()));
     systematics_.emplace(systematics_.begin(), move(nominalSyst));
+    // special PDF oand scale weight bins
+    vector<string> pdfCombBins = {"LHEPdfWeightMC_UpComb", "LHEPdfWeightMC_DownComb", "LHEPdfWeightHessian_NominalComb", "LHEPdf_UpComb", "LHEPdf_DownComb"};
+    vector<string> scaleCombBins = {"LHEScaleWeight_maxComb", "LHEScale_UpComb", "LHEScale_DownComb"};
 
     int nSysts = 0;
     for(auto& syst : systematics_) {
-      nSysts+=syst.length;
+      unsigned int length = syst.length;
+      // always use 103 PDF weights and 9 scale weights
+      if(syst.name=="LHEPdfWeight") {
+        length = NUMPDFWEIGHTS;
+        length+=pdfCombBins.size();
+      }
+      else if(syst.name=="LHEScaleWeight") {
+        length = NUMSCALEWEIGHTS;
+        length+=scaleCombBins.size();
+      }
+      nSysts+=length;
     }
     for (int i=0;i<orderedCutNames_.size();++i) {
       auto&& cc = cutName_cut_.find(orderedCutNames_[i]);
@@ -882,11 +895,31 @@ void baseClass::readCutFile()
         ++idx;
       }
       else {
-        for(int arrIdx = 0; arrIdx < syst.length; ++arrIdx) {
+        unsigned int length = syst.length;
+        // always use 103 PDF weights and 9 scale weights
+        if(syst.name=="LHEPdfWeight")
+          length = NUMPDFWEIGHTS;
+        else if(syst.name=="LHEScaleWeight")
+          length = NUMSCALEWEIGHTS;
+        for(int arrIdx = 0; arrIdx < length; ++arrIdx) {
           string systName = syst.name + "_" + to_string(arrIdx);
           systHist->GetYaxis()->SetBinLabel(idx, systName.c_str());
           systHistUnweighted->GetYaxis()->SetBinLabel(idx, systName.c_str());
           ++idx;
+        }
+        if(syst.name=="LHEPdfWeight") {
+          for(const auto& binName : pdfCombBins) {
+            systHist->GetYaxis()->SetBinLabel(idx, binName.c_str());
+            systHistUnweighted->GetYaxis()->SetBinLabel(idx, binName.c_str());
+            ++idx;
+          }
+        }
+        else if(syst.name=="LHEScaleWeight") {
+          for(const auto& binName : scaleCombBins) {
+            systHist->GetYaxis()->SetBinLabel(idx, binName.c_str());
+            systHistUnweighted->GetYaxis()->SetBinLabel(idx, binName.c_str());
+            ++idx;
+          }
         }
       }
     }
@@ -1176,7 +1209,6 @@ void baseClass::runSystematics()
     systCutName_cut_[cutName]->passedPreviousCuts = cutName_cut_[cutName]->passedPreviousCuts;
     systCutName_cut_[cutName]->evaluatedPreviousCuts = cutName_cut_[cutName]->evaluatedPreviousCuts;
   }
-  float ybinCoord = 0.5;
   for(auto& syst : systematics_) {
     int currentLength = syst.formula ? syst.formula->GetNdata() : syst.length;
     if(syst.length!=currentLength) {
@@ -1232,6 +1264,8 @@ void baseClass::runSystematics()
         }
       }
       float xbinCoord = 0.5;
+      std::string systNameBinLookup = currentLength==1 ? syst.name : syst.name+"_"+to_string(i);
+      float ybinCoord = systHist->GetYaxis()->GetBinCenter(systHist->GetYaxis()->FindFixBin(systNameBinLookup.c_str()));
       for(auto& cutName : orderedSystCutNames_) {
         //if(syst.name == "nominal" || syst.name=="JERUp") {
         //  STDOUT("[DEBUG] passedCut() for cut: " << cutName << "? " << passedCut(cutName, systCutName_cut_, combCutNameToPassFail) << ", value=" << systCutName_cut_[cutName]->getValue<float>() << ", for syst: " << syst.name);
@@ -1269,7 +1303,6 @@ void baseClass::runSystematics()
         }
         xbinCoord+=1;
       }
-      ybinCoord+=1;
       if(shiftValue) {
         // if value was shifted, reset all the cuts to nominal before moving to next syst
         for(auto& cutName : orderedCutNames_) {

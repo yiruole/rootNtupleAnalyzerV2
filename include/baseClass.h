@@ -33,6 +33,8 @@
 }
 
 static const std::string SYSTHISTSUFFIX = "WithSystematics";
+static const unsigned int NUMPDFWEIGHTS = 103;
+static const unsigned int NUMSCALEWEIGHTS = 9;
 
 class SimpleCut {
   public:
