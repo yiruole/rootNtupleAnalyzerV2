@@ -75,22 +75,6 @@ def make_filenamelist_eos(inputDir):
 
 
 # FIXME now should return the full path
-def make_filenamelist_castor(inputDir):
-    filenamelist = []
-    proc = subprocess.Popen(
-        ["rfdir", inputDir], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )
-    output = proc.communicate()[0]
-    if proc.returncode != 0:
-        print(output)
-        sys.exit(1)
-    for line in output.splitlines():
-        filenamelist.append(line.strip().split()[8])
-
-    return filenamelist
-
-
-# FIXME now should return the full path
 def make_filenamelist_default(inputDir):
     if not os.path.isdir(inputDir):
         print(("%s is not a directory" % (inputDir)))
@@ -112,7 +96,6 @@ def process_input_dir(inputDir, match, filelist, useCERNEOS, eosHost):
 
     if re.search("^/castor/cern.ch/", inputDir):
         prefix = "rfio:"
-        # filenamelist = make_filenamelist_castor(inputDir)
         print("ERROR: unsupported access protocol")
         exit(-1)
     elif re.search("^/eos/", inputDir):
