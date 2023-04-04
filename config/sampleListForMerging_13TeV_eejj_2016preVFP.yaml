@@ -1,6 +1,7 @@
 ZJet_amcatnlo_Inc:
   pieces:
   - /DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
+  save: true
 ZJet_amcatnlo_pt0to50:
   pieces:
   - /DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -40,13 +41,16 @@ ZJet_amcatnlo_ptBinned:
     #  - ZJet_amcatnlo_pt250to400
     #  - ZJet_amcatnlo_pt400to650
     #  - ZJet_amcatnlo_pt650toInf
+  save: true
 ZJet_amcatnlo_ptBinned_IncStitch:
   pieces:
   - ZJet_amcatnlo_Inc
   - ZJet_amcatnlo_ptBinned
+  save: true
 WJet_amcatnlo_Inc:
   pieces:
   - /WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM
+  save: true
 WJet_amcatnlo_0Jets:
   pieces:
   - /WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -61,6 +65,7 @@ WJet_amcatnlo_jetBinned:
   - WJet_amcatnlo_0Jets
   - WJet_amcatnlo_1Jet
   - WJet_amcatnlo_2Jets
+  save: true
 TTToHadronic:
   pieces:
   - /TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -76,6 +81,7 @@ TTbar_powheg:
   - TTToSemiLeptonic
   - TTTo2L2Nu
   correlateLHESystematics: false
+  save: true
 ST_tW_top_5f_NoFullyHadronicDecays:
   pieces:
   - /ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -99,6 +105,7 @@ SingleTop:
   - ST_t-channel_antitop_5f_inclusiveDecays
   - ST_s-channel_4f_leptonDecays
   correlateLHESystematics: false
+  save: true
 GJets_HT-100To200:
   pieces:
   - /GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM
@@ -117,6 +124,7 @@ PhotonJets_Madgraph:
   - GJets_HT-200To400
   - GJets_HT-400To600
   - GJets_HT-600ToInf
+  save: true
 WWTo4Q:
   pieces:
   - /WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -132,6 +140,7 @@ WW_nlo:
   - WWTo1L1Nu2Q
   - WWTo2L2Nu_powheg
   correlateLHESystematics: false
+  save: true
 ZZTo2Nu2Q:
   pieces:
   - /ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -151,6 +160,7 @@ ZZ_nlo:
   - ZZTo4L_powheg
   - ZZTo2L2Nu_powheg
   correlateLHESystematics: false
+  save: true
 WZTo1L3Nu:
   pieces:
   - /WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -174,12 +184,14 @@ WZ_nlo:
   - WZTo2Q2L
   - WZTo3LNu_powheg
   correlateLHESystematics: false
+  save: true
 DIBOSON_nlo:
   pieces:
   - WW_nlo
   - ZZ_nlo
   - WZ_nlo
   correlateLHESystematics: false
+  save: true
 WWW:
   pieces:
   - /WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17_ext1-v1/NANOAODSIM
@@ -199,6 +211,7 @@ TRIBOSON:
   - WZZ
   - ZZZ
   correlateLHESystematics: false
+  save: true
 TTWJetsToLNu:
   pieces:
   - /TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
@@ -210,10 +223,11 @@ ttZJets:
   - /ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM
 TTX:
   pieces:
-  - TTWJetsToQQ
+  - TTWJetsToLNu
   - TTWJetsToQQ
   - ttZJets
   correlateLHESystematics: false
+  save: true
   #OTHERBKG_WJetAMCJetBinned_dibosonNLO:
   #  pieces:
   #  - WJet_amcatnlo_jetBinned
@@ -245,6 +259,7 @@ OTHERBKG_WJetAMCJetBinned_dibosonNLO_tribosonGJetsTTX:
   - PhotonJets_Madgraph
   - TTX
   correlateLHESystematics: false
+  save: true
   #ALLBKG_powhegTTBar_ZJetPtWJetAMCJetBinned_NLODiboson_tribosonGJetsTTX:
   #  pieces:
   #  - ZJet_amcatnlo_ptBinned
@@ -267,6 +282,7 @@ ALLBKG_powhegTTBar_ZJetPtIncStitchWJetAMCJetBinned_NLODiboson_tribosonGJetsTTX:
   - PhotonJets_Madgraph
   - TTX
   correlateLHESystematics: false
+  save: true
   #ALLBKG_powhegTTBar_ZJetIncWJetAMCJetBinned_NLODiboson_tribosonGJetsTTX:
   #  pieces:
   #  - ZJet_amcatnlo_Inc
@@ -280,7 +296,6 @@ ALLBKG_powhegTTBar_ZJetPtIncStitchWJetAMCJetBinned_NLODiboson_tribosonGJetsTTX:
   #  correlateLHESystematics: false
 SingleElectron_2016B_HIPM:
   pieces:
-  - /SingleElectron/Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
   - /SingleElectron/Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
 SingleElectron_2016C_HIPM:
   pieces:
@@ -301,9 +316,9 @@ SingleElectron_2016_HIPM:
   - SingleElectron_2016D_HIPM
   - SingleElectron_2016E_HIPM
   - SingleElectron_2016F_HIPM
+  save: true
 SinglePhoton_2016B_HIPM:
   pieces:
-  - /SinglePhoton/Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
   - /SinglePhoton/Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
 SinglePhoton_2016C_HIPM:
   pieces:
@@ -324,101 +339,133 @@ SinglePhoton_2016_HIPM:
   - SinglePhoton_2016D_HIPM
   - SinglePhoton_2016E_HIPM
   - SinglePhoton_2016F_HIPM
+  save: true
 DATA:
   pieces:
   - SingleElectron_2016_HIPM
   - SinglePhoton_2016_HIPM
+  save: true
 # LQ signals
 LQToDEle_M-300_pair:
   pieces:
   - /LQToDEle_M-300_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-400_pair:
   pieces:
   - /LQToDEle_M-400_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-500_pair:
   pieces:
   - /LQToDEle_M-500_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-600_pair:
   pieces:
   - /LQToDEle_M-600_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-700_pair:
   pieces:
   - /LQToDEle_M-700_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-800_pair:
   pieces:
   - /LQToDEle_M-800_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-900_pair:
   pieces:
   - /LQToDEle_M-900_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1000_pair:
   pieces:
   - /LQToDEle_M-1000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1100_pair:
   pieces:
   - /LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1200_pair:
   pieces:
   - /LQToDEle_M-1200_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1300_pair:
   pieces:
   - /LQToDEle_M-1300_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1400_pair:
   pieces:
   - /LQToDEle_M-1400_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1500_pair:
   pieces:
   - /LQToDEle_M-1500_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1600_pair:
   pieces:
   - /LQToDEle_M-1600_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1700_pair:
   pieces:
   - /LQToDEle_M-1700_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1800_pair:
   pieces:
   - /LQToDEle_M-1800_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-1900_pair:
   pieces:
   - /LQToDEle_M-1900_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2000_pair:
   pieces:
   - /LQToDEle_M-2000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2100_pair:
   pieces:
   - /LQToDEle_M-2100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2200_pair:
   pieces:
   - /LQToDEle_M-2200_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2300_pair:
   pieces:
   - /LQToDEle_M-2300_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2400_pair:
   pieces:
   - /LQToDEle_M-2400_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2500_pair:
   pieces:
   - /LQToDEle_M-2500_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2600_pair:
   pieces:
   - /LQToDEle_M-2600_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2700_pair:
   pieces:
   - /LQToDEle_M-2700_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2800_pair:
   pieces:
   - /LQToDEle_M-2800_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-2900_pair:
   pieces:
   - /LQToDEle_M-2900_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-3000_pair:
   pieces:
   - /LQToDEle_M-3000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-3500_pair:
   pieces:
   - /LQToDEle_M-3500_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 LQToDEle_M-4000_pair:
   pieces:
   - /LQToDEle_M-4000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+  save: true
 #
 #LQToBEle_M-300_pair:
 #  pieces:
