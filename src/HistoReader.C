@@ -14,6 +14,8 @@ HistoReader::HistoReader(std::string filename, std::string barrelHistName, std::
     bool absEta, bool etIsXAxis) : isAbsEta(absEta), isEtXAxis(etIsXAxis)
 {
   unique_ptr<TFile> myTFile(TFile::Open(filename.c_str()));
+  if(!myTFile)
+    throw runtime_error("Could not find file: " + filename);
   TH2F* barrelHist = myTFile->Get<TH2F>(barrelHistName.c_str());
   if(!barrelHist)
     throw runtime_error("Could not find hist " + barrelHistName + " in file: " + filename);
