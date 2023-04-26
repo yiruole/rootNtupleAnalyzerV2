@@ -155,6 +155,7 @@ else()
     src/Electron.C
     src/ElectronIDs.C
     src/LooseElectron.C
+    src/HistoReader.C
     src/Object.C
     src/jsonParser.C
     )
