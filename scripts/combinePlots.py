@@ -5,16 +5,46 @@ import sys
 import string
 from optparse import OptionParser
 import os
-from ROOT import TFile, gROOT
+from ROOT import TFile, gROOT, SetOwnership
 import re
 import multiprocessing
 import traceback
 import subprocess
+import copy
 import time
 from graphlib import TopologicalSorter
 from collections import OrderedDict
+import pprint
 
 import combineCommon
+
+
+def SavePrunedSystHistos(inputRootFileName, outputRootFileName):
+    classesToKeep = ["TH1", "TProfile"]
+    myFile = TFile.Open(inputRootFileName)
+    myOutputFile = TFile(outputRootFileName, "recreate")
+    for key in myFile.GetListOfKeys():
+        histoName = key.GetName()
+        htemp = key.ReadObj()
+        if not htemp or htemp is None:
+            raise RuntimeError("failed to get histo named:", histoName, "from file:", myFile.GetName())
+        if not any(htemp.InheritsFrom(className) for className in classesToKeep):
+            continue
+        SetOwnership(htemp, True)
+        myOutputFile.cd()
+        if "systematics" not in histoName.lower():
+            myOutputFile.cd()
+            htemp.Write()
+            continue
+        pdfWeightLabels = [label.GetString().Data() for label in htemp.GetYaxis().GetLabels() if "LHEPdfWeight" in label.GetString().Data()]
+        shapeSystLabels = [htemp.GetYaxis().GetBinLabel(yBin) for yBin in range(0, htemp.GetNbinsY()+1) if "LHEScaleWeight_" in htemp.GetYaxis().GetBinLabel(yBin)][1:]  # remove all but first and use that one for the comb.
+        binsToRemove = pdfWeightLabels+shapeSystLabels
+        myOutputFile.cd()
+        htemp = combineCommon.RemoveHistoBins(htemp, "y", binsToRemove)
+        myOutputFile.cd()
+        htemp.Write()
+    myOutputFile.Close()
+    myFile.Close()
 
 
 def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputList, lhePdfWeightSumw=0.0, pdfReweight=False):
@@ -82,19 +112,20 @@ def MakeCombinedSample(args):
                     raise RuntimeError("ERROR: for sample {}, could not find currentPiece={} in datasetsFileNamesCleaned={}".format(sample, currentPiece, datasetsFileNamesCleaned))
 
                 # prepare to combine
-                print("\tfound matching dataset:", matchingPiece + " ... ", end=' ', flush=True)
+                print("\t[{}] found matching dataset:".format(sample), matchingPiece + " ... ", end=' ', flush=True)
                 inputDatFile = rootFilename.replace(".root", ".dat").replace("plots", "tables")
                 print("with file: {}".format(rootFilename), flush=True)
-                print("\tlooking up xsection...", end=' ', flush=True)
+                print("\t[{}] looking up xsection...".format(sample), end=' ', flush=True)
                 try:
                     xsection_val = combineCommon.lookupXSection(matchingPiece)
                     xsectionFound = True
                     print("found", xsection_val, "pb", flush=True)
                 except RuntimeError:
+                    print("did not find xsection", flush=True)
                     xsectionFound = False
 
                 # print("INFO: TFilenameTemplate = {}".format(tfileNameTemplate.format(sample)))
-                sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFilename, xsectionFound)
+                sampleHistos = combineCommon.GetSampleHistosFromTFile(rootFilename, sample, xsectionFound)
                 # print "inputDatFile="+inputDatFile
 
                 # ---Read .dat table for current dataset
@@ -119,7 +150,7 @@ def MakeCombinedSample(args):
                         Ntot, xsection_val, options.intLumi, sumWeights, matchingPiece, lhePdfWeightSumw, doPDFReweight
                     )
                     # print "xsection: " + xsection_val,
-                    print("\tweight(x1000): " + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ', flush=True)
+                    print("\t[{}] weight(x1000): ".format(sample) + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ', flush=True)
                     print(str(sumWeights), flush=True)
                 elif rootFilename == tfileNameTemplate.format(matchingPiece):
                     print("histos taken from file already scaled", flush=True)
@@ -178,11 +209,12 @@ def MakeCombinedSample(args):
             #print("[{}] now dictDatasetsFileNames={}".format(sample, dictDatasetsFileNames), flush=True)
             visitedNodes[sample] = True
             finalizedTasksQueue.put(sample)
-            taskQueue.task_done()
         except Exception as e:
-            #print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
-            #traceback.print_exc()
-            raise e
+            print("ERROR: exception in MakeCombinedSample for sample={}".format(sample), flush=True)
+            traceback.print_exc()
+            finalizedTasksQueue.put(None)
+        finally:
+            taskQueue.task_done()
 
 
 ####################################################################################################
@@ -307,6 +339,15 @@ parser.add_option(
     metavar="KEEPINPUTFILES",
 )
 
+parser.add_option(
+    "-n",
+    "--nCores",
+    dest="nCores",
+    default=8,
+    help="number of cores/processes to use",
+    metavar="NCORES",
+)
+
 (options, args) = parser.parse_args()
 
 if len(sys.argv) < 14:
@@ -332,8 +373,7 @@ doPDFReweight2016LQSignals = False
 if doPDFReweight2016LQSignals:
     print("Doing PDF reweighting for 2016 LQ B/D signal samples")
 
-ncores = 8
-#pool = multiprocessing.Pool(ncores)
+ncores = int(options.nCores)
 result_list = []
 logString = "INFO: running {} parallel jobs for {} separate samples found in samplesToCombineFile..."
 jobCount = 0
@@ -421,16 +461,23 @@ for _ in range(ncores):
     processes.append(process)
     process.start()
 
+queuedSamplesDict = {}
 ts = TopologicalSorter(dag)
 ts.prepare()
 while ts.is_active():
-    # print("Queued samples: ")
     for sample in ts.get_ready():
         taskQueue.put(sample)
-        #print(sample)
+        # print("Queued sample ", sample, flush=True)
+        queuedSamplesDict[sample] = "Queued"
     sample = finalizedTasksQueue.get()
-    # print("Finalized samples: ")
-    # print(sample)
+    if sample == None:
+        print("ERROR occurred in processing of sample.", flush=True)
+        exit(-1)
+    # print("Finalized samples: ", sample, flush=True)
+    # del queuedSamplesDict[sample]
+    # print("Status of in-progress samples: ", flush=True)
+    # pprint.pprint(queuedSamplesDict)
+    # print("", flush=True)
     dictDatasetsFileNames[sample] = sampleTFileNameTemplate.format(sample)
     if dictSamples[sample]["save"]:
         sampleFiles.append(dictDatasetsFileNames[sample])
@@ -447,16 +494,16 @@ if len(result_list) < jobCount:
     print("ERROR: {} jobs had errors. Exiting.".format(jobCount-len(result_list)))
     exit(-2)
 print()
-print("INFO: Done with individual samples")
-sys.stdout.flush()
+print("INFO: Done with individual samples", flush=True)
 
 if not options.tablesOnly:
-    print("INFO: hadding individual samples using {} cores...".format(ncores), end=' ')
-    sys.stdout.flush()
-    outputTFileName = options.outputDir + "/" + options.analysisCode + "_plots.root"
+    ncores = 8  # always use more cores for hadd
+    print("INFO: hadding individual samples using {} cores...".format(ncores), end=' ', flush=True)
+    outputTFileNameHadd = options.outputDir + "/" + options.analysisCode + "_plots_hadd.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
-    args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileName]
+    args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileNameHadd]
     args.extend(sampleFiles)
+    # print("run cmd: ", " ".join(args))
     timeStarted = time.time()
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
@@ -464,15 +511,23 @@ if not options.tablesOnly:
     if proc.returncode != 0:
         raise RuntimeError("ERROR: hadd command '{}' finished with error: '{}'; output looks like '{}'".format(" ".join(args), stderr, stdout))
     else:
-        print("INFO: Finished hadd in "+str(round(timeDelta/60.0, 2))+" mins.")
-    outputTfile = TFile.Open(outputTFileName)
-    outputTfile.cd()
+        print("INFO: Finished hadd in "+str(round(timeDelta/60.0, 2))+" mins.", flush=True)
     if not options.keepInputFiles:
         for sample in dictSamples.keys():
             fileName = sampleTFileNameTemplate.format(sample)
             os.remove(fileName)
             tableFile = fileName.replace(".root", ".dat").replace("plots", "tables")
             os.remove(tableFile)
+    # now prune the hists and write in a new TFile
+    print("INFO: pruning output file...", end=' ', flush=True)
+    outputTFileName = outputTFileNameHadd.replace("_hadd", "")
+    timeStarted = time.time()
+    SavePrunedSystHistos(outputTFileNameHadd, outputTFileName)
+    timeDelta = time.time() - timeStarted
+    print("INFO: Finished file pruning in "+str(round(timeDelta/60.0, 2))+" mins.", flush=True)
+    os.remove(outputTFileNameHadd)
+    outputTfile = TFile.Open(outputTFileName)
+    outputTfile.cd()
 
 # --- Write tables
 for sample in dictSamples.keys():
@@ -589,9 +644,9 @@ if not options.tablesOnly:
             histoQCDClosure.Write()
 
     outputTfile.Close()
-    print("output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root")
+    print("output plots at: " + options.outputDir + "/" + options.analysisCode + "_plots.root", flush=True)
 
-print("output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat")
+print("output tables at: ", options.outputDir + "/" + options.analysisCode + "_tables.dat", flush=True)
 
 # ---TODO: CREATE LATEX TABLE (PYTEX?) ---#
 
