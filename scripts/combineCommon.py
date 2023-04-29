@@ -903,12 +903,14 @@ def WriteTable(table, name, file, printToScreen=False):
             ###
 
 
-def GetSampleHistosFromTFile(tfileName, keepHistName=True):
+def GetSampleHistosFromTFile(tfileName, sample, keepHistName=True):
     histNameToHistDict = {}
-    tfile = r.TFile(tfileName)
+    if tfileName.startswith("/eos/cms"):
+        tfileName = "root://eoscms/" + tfileName
+    elif tfileName.startswith("/eos/user"):
+        tfileName = "root://eosuser/" + tfileName
+    tfile = r.TFile.Open(tfileName)
     for key in tfile.GetListOfKeys():
-        # histoName = file.GetListOfKeys()[h].GetName()
-        # htemp = file.Get(histoName)
         histoName = key.GetName()
         htemp = key.ReadObj()
         if not htemp or htemp is None:
@@ -928,7 +930,6 @@ def GetSampleHistosFromTFile(tfileName, keepHistName=True):
             else:
                 prefixEndPos = hname.rfind("__")+2
             htemp.SetName(hname[prefixEndPos:])
-        # sampleHistos.append(htemp)
     sampleHistos = list(sortedDict.values())
     tfile.Close()
     if len(sampleHistos) < 1:
