@@ -5,6 +5,26 @@ import sys
 import string
 import re
 from optparse import OptionParser
+import subprocess
+import shlex
+
+
+def GetSiteListFromDAS(fileNameList, dataset):
+    # the best we can easily do is to just submit to all sites which host at least part of the dataset
+    # to do better, we'd have to submit to only those sites with 100% of the dataset hosted
+    #   not clear how to determine that with DAS queries
+    firstName = fileNameList[0]
+    query = "dataset file=/"+firstName.split("//")[-1].strip()
+    cmd = 'dasgoclient --query="{}"'.format(query)
+    proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+    output = proc.communicate()[0].decode().strip()
+    query = "site dataset="+output
+    cmd = 'dasgoclient --query="{}"'.format(query)
+    proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+    output = proc.communicate()[0].decode().strip()
+    siteList = list(output.replace("_Disk", "").split())
+    return siteList
+    
 
 
 def PrepareJobScript(outputname):
@@ -213,7 +233,8 @@ outputeosdir = options.eosDir
 outputeosdir = outputeosdir.rstrip('/') + '/' + dataset
 ################################################
 with open(inputlist, "r") as inputFile:
-    numfiles = len(inputFile.readlines())
+    allInputFiles = inputFile.readlines()
+numfiles = len(allInputFiles)
 ijobmax = int(options.ijobmax)
 if ijobmax < 0:
     ijobmax = numfiles
@@ -259,12 +280,22 @@ input.close()
 condorFileName = outputmain+'/condorSubmit.sub'
 WriteSubmitFile(condorFileName)
 
+if options.reducedSkim or options.nanoSkim:
+    siteList = GetSiteListFromDAS(allInputFiles, dataset)
+else:
+    siteList = []
+
 failedToSub = False
 print('submit jobs for', options.output.rstrip("/"))
 # FIXME don't cd and use absolute paths in the condor submission instead
 oldDir = os.getcwd()
 os.chdir(outputmain)
-exitCode = os.WEXITSTATUS(os.system('condor_submit '+condorFileName))
+condorCmd = 'condor_submit '+condorFileName
+if len(siteList):
+    condorSites = 'CONDOR_DEFAULT_DESIRED_SITES="'+",".join(siteList)
+    condorSites = condorSites.strip(",")+'"'
+    condorCmd = condorSites + " " + condorCmd
+exitCode = os.WEXITSTATUS(os.system(condorCmd))
 # print 'from condor_submit '+condorFileName+',got exit code='+str(exitCode)
 if exitCode != 0:
     print('\texited with '+str(exitCode)+'; try to resubmit')
