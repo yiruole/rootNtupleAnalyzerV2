@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import subprocess as sp
+import shlex
 
 # --------------------------------------------------------------------------------
 # Helper functions
@@ -433,6 +434,7 @@ total_jobs = 0
 
 failedCommands = list()
 
+cmdsToRun = []
 with open(options.inputlist, "r") as inputlist_file:
     for line in inputlist_file:
         if not len(line.strip()) > 0:
@@ -493,15 +495,22 @@ with open(options.inputlist, "r") as inputlist_file:
         elif options.nanoSkim:
             command += " -s "
     
-        print(command)
-    
-        # os.system  ( command )
-        exitCode = os.WEXITSTATUS(os.system(command))
-        if exitCode != 0:
-            print("Failed submitting jobs for this dataset; add to failedCommands list")
-            failedCommands.append(command)
-        if options.wait is not None:
-            time.sleep(float(options.wait))
+        cmdsToRun.append(command)
+
+# use 4 processes to submit in parallel
+for i in range(0, len(cmdsToRun), 4):
+    cmds = cmdsToRun[i:i+4]
+    for cmd in cmds:
+        print(cmd)
+    procs = [sp.Popen(shlex.split(i), stdout=sp.PIPE, stderr=sp.PIPE) for i in cmds]
+    for idx, p in enumerate(procs):
+        res = p.communicate()
+        for line in res[0].decode(encoding='utf-8').split('\n'):
+              print(line)
+        if p.returncode != 0:
+             print("stderr =", res[1])
+             print("Failed submitting jobs for this dataset; add to failedCommands list")
+             failedCommands.append(cmds[idx])
 
 # FIXME this is not the correct number
 print("submitted a _maximum_ of jobs =", total_jobs)
