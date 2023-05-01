@@ -14,6 +14,7 @@ def PrepareJobScript(outputname):
         outputfile.write('source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos7-gcc11-opt/setup.sh\n')
         # ROOT likes HOME set
         outputfile.write('[ -z "$HOME" ] && export HOME='+os.getenv('HOME')+'\n')
+        outputfile.write('export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH\n')
         inputList = inputfilename.split('/')[-1]
         # merge files if nano skim or reduced skim requested
         if options.reducedSkim or options.nanoSkim:
@@ -23,10 +24,15 @@ def PrepareJobScript(outputname):
             # overwrite original inputList to just have inputTree.root
             with open(inputfilename, "w") as newInputList:
                 newInputList.write("inputTree.root\n")
+            outputfile.write('retVal=$?\n')
+            outputfile.write('if [ $retVal -ne 0 ]; then\n')
+            outputfile.write('  echo "./haddnano.py return error code=$retVal; quitting here."\n')
+            outputfile.write('  exit $retVal\n')
+            outputfile.write('fi\n')
         outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write('retVal=$?\n')
         outputfile.write('if [ $retVal -ne 0 ]; then\n')
-        outputfile.write('  echo "./main return error code=$retVal; quitting here."\n')
+        outputfile.write('  echo ./'+execName+' return error code=$retVal; quitting here."\n')
         outputfile.write('  exit $retVal\n')
         outputfile.write('fi\n')
         # for lxbatch
@@ -83,6 +89,13 @@ def WriteSubmitFile(condorFileName):
             inputFilesToTransfer.append(options.jsonFileName)
         if options.reducedSkim:
             parentDir = os.path.dirname(outputmain)
+            inputFilesToTransfer.append(parentDir+'/haddnano.py')
+            inputFilesToTransfer.append(parentDir+'/libCMSJMECalculators.so')
+            inputFilesToTransfer.append(parentDir+'/libCMSJMECalculatorsDict.so')
+            inputFilesToTransfer.append(parentDir+'/egammaEffi.txt_EGM2D.root')
+            inputFilesToTransfer.append(parentDir+'/EGM_ScaleUnc.json.gz')
+            inputFilesToTransfer.append(parentDir+'/jec')
+            inputFilesToTransfer.append(parentDir+'/jer')
             inputFilesToTransfer.append(parentDir+'/haddnano.py')
             #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
         elif options.nanoSkim:
