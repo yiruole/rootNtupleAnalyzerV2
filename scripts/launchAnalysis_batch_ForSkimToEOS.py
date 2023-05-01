@@ -114,6 +114,59 @@ def get_n_files(inputlist):
     return len(files)
 
 
+def FindInputFileAndModifyCutFile(localCutFile, keyword):
+    found_file = False
+    localFile = ""
+    cutfile_lines = []
+    with open(localCutFile, "r") as cutfile:
+        for line in cutfile:
+            if line.strip() == "":
+                cutfile_lines.append(line)
+                continue
+            if line.split()[0] == "#":
+                cutfile_lines.append(line)
+                continue
+            if line.strip().split()[0] == keyword:
+                if found_file is True:
+                    print("Error: You are only allowed to have one {} file per cut file.".format(keyword))
+                    print("cut file = " + options.cutfile)
+                    sys.exit()
+                # if len(line.split()) != 2:
+                #     print("Error: this line in your cut file does not make sense:")
+                #     print(line)
+                #     print("cut file = " + options.cutfile)
+                #     sys.exit()
+                inputFile = line.split()[1]
+                # print("INFO: found input file {} for keyword {}".format(inputFile, keyword))
+                if os.path.isfile(inputFile):
+                    print("Moving the {} file to the local output directory...".format(keyword), end=' ')
+                    os.system("cp " + inputFile + " " + options.outputDir)
+                    print("... done ")
+                    found_file = True
+                    localFile = options.outputDir + "/" + inputFile.split("/")[-1]
+                    localFileBasePath = os.path.basename(localFile)
+                    cutfile_lines.append(line.replace(inputFile, localFileBasePath))
+                elif os.path.isdir(inputFile):
+                    print("Moving the {} dir to the local output directory...".format(keyword), end=' ')
+                    os.system("cp -R " + inputFile + " " + options.outputDir)
+                    print("... done ")
+                    found_file = True
+                    localFileBasePath = inputFile.strip("/").split("/")[-1]
+                    if localFileBasePath[-1] != "/":
+                        localFileBasePath += "/"
+                    print("INFO: replace inputFile={} in line {} with localFileBasePath={}".format(inputFile, line, localFileBasePath))
+                    cutfile_lines.append(line.replace(inputFile, localFileBasePath))
+                else:
+                    print("Error: No {} file or dir here: {}".format(keyword, inputFile))
+                    sys.exit()
+            else:
+                cutfile_lines.append(line)
+    if found_file:
+        with open(localCutFile, "w") as cutfile:
+            for line in cutfile_lines:
+                cutfile.write(line)
+    return found_file, localFile
+
 # --------------------------------------------------------------------------------
 # Parse options
 # --------------------------------------------------------------------------------
@@ -282,7 +335,6 @@ print("... done ")
 if options.reducedSkim or options.nanoSkim:
     haddnanoPath = os.path.expandvars("$LQANA/scripts/haddnano.py")
     print("Moving haddnano.py to the local output directory...", end=' ')
-
     if not os.path.isfile(haddnanoPath):
         print("Error: No haddnano.py here: " + haddnanoPath)
         sys.exit(-1)
@@ -290,6 +342,21 @@ if options.reducedSkim or options.nanoSkim:
         os.system("cp " + haddnanoPath + " " + options.outputDir + "/")
 
     print("... done ")
+    # Also, copy CMSJME libs
+    cmsjmelibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculators.so")
+    print("Moving CMSJME libs to the local output directory...", end=' ')
+    if not os.path.isfile(cmsjmelibPath):
+        print("Error: No libCMSJMECalculators.so here: " + cmsjmelibPath)
+        sys.exit(-1)
+    else:
+        os.system("cp " + cmsjmelibPath + " " + options.outputDir + "/")
+    cmsjmeDictlibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculatorsDict.so")
+    print("Moving CMSJME libs to the local output directory...", end=' ')
+    if not os.path.isfile(cmsjmeDictlibPath):
+        print("Error: No libCMSJMECalculatorsDict.so here: " + cmsjmeDictlibPath)
+        sys.exit(-1)
+    else:
+        os.system("cp " + cmsjmeDictlibPath + " " + options.outputDir + "/")
 
 # --------------------------------------------------------------------------------
 # Look for the exe file.  If it exists, move it to the output directory
@@ -331,83 +398,16 @@ else:
 print("... done ")
 
 # --------------------------------------------------------------------------------
-# Get JSON file from cut file and copy it to the output directory
+# Get JSON and other files from cut file and copy them to the output directory,
+# also modifying the path in the local cut file
 # --------------------------------------------------------------------------------
-found_json = False
-cutfile_lines = []
-with open(localCutFile, "r") as cutfile:
-    for line in cutfile:
-        if line.strip() == "":
-            cutfile_lines.append(line)
-            continue
-        if line.split()[0] == "#":
-            cutfile_lines.append(line)
-            continue
-        if line.strip()[:4] == "JSON":
-            if found_json is True:
-                print("Error: You are only allowed to have one JSON file per cut file.")
-                print("cut file = " + options.cutfile)
-                sys.exit()
-            if len(line.split()) != 2:
-                print("Error: this line in your cut file does not make sense:")
-                print(line)
-                print("cut file = " + options.cutfile)
-                sys.exit()
-            json_file = line.split()[1]
-            if not os.path.isfile(json_file):
-                print("Error: No JSON file here: " + json_file)
-                sys.exit()
-            else:
-                print("Moving the JSON file to the local output directory...", end=' ')
-                os.system("cp " + json_file + " " + options.outputDir)
-                found_json = True
-                jsonFile = options.outputDir + "/" + json_file.split("/")[-1]
-                print("... done ")
-                json = os.path.basename(jsonFile)
-                cutfile_lines.append(line.replace(json_file, json))
-        else:
-            cutfile_lines.append(line)
-if found_json:
-    with open(localCutFile, "w") as cutfile:
-        for line in cutfile_lines:
-            cutfile.write(line)
-
-# --------------------------------------------------------------------------------
-# Get branch selection file from cut file and copy it to the output directory
-# --------------------------------------------------------------------------------
-found_branchSelFile = False
-cutfile_lines = []
-with open(localCutFile, "r") as cutfile:
-    for line in cutfile:
-        if line.strip() == "":
-            cutfile_lines.append(line)
-            continue
-        if line.split()[0] == "#":
-            cutfile_lines.append(line)
-            continue
-        if line.strip().split()[0] == "BranchSelection":
-            if found_branchSelFile is True:
-                print("Error: You are only allowed to have one BranchSelection file per cut file.")
-                print("cut file = " + options.cutfile)
-                sys.exit()
-            branchSel_file = line.split()[1]
-            if not os.path.isfile(branchSel_file):
-                print("Error: No BranchSelection file here: " + branchSel_file)
-                sys.exit()
-            else:
-                print("Moving the branch selection file to the local output directory...", end=' ')
-                os.system("cp " + branchSel_file + " " + options.outputDir)
-                found_branchSelFile = True
-                branchSelFile = options.outputDir + "/" + branchSel_file.split("/")[-1]
-                print("... done ")
-                branchFile = os.path.basename(branchSelFile)
-                cutfile_lines.append(line.replace(branchSel_file, branchFile))
-        else:
-            cutfile_lines.append(line)
-if found_branchSelFile:
-    with open(localCutFile, "w") as cutfile:
-        for line in cutfile_lines:
-            cutfile.write(line)
+found_json, jsonFile = FindInputFileAndModifyCutFile(localCutFile, "JSON")
+found_branchSelFile, branchSelFile =  FindInputFileAndModifyCutFile(localCutFile, "BranchSelection")
+if options.reducedSkim:
+    FindInputFileAndModifyCutFile(localCutFile, "TriggerSFFileName")
+    FindInputFileAndModifyCutFile(localCutFile, "EGMScaleJSONFileName")
+    FindInputFileAndModifyCutFile(localCutFile, "JECTextFilePath")
+    FindInputFileAndModifyCutFile(localCutFile, "JERTextFilePath")
 
 # --------------------------------------------------------------------------------
 # Check if path is a link
