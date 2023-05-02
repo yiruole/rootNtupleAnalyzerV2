@@ -151,6 +151,7 @@ def GetSamplesToCombineDict(sampleListForMerging):
         dictSamples[sample]["pieces"] = pieces
         dictSamples[sample]["correlateLHESystematics"] = values["correlateLHESystematics"] if "correlateLHESystematics" in values.keys() else True
         dictSamples[sample]["save"] = values["save"] if "save" in values.keys() else False
+        dictSamples[sample]["isMC"] = values["isMC"] if "isMC" in values.keys() else True
     return dictSamples
 
 

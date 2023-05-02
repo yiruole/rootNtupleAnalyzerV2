@@ -297,38 +297,47 @@ ALLBKG_powhegTTBar_ZJetPtIncStitchWJetAMCJetBinned_NLODiboson_tribosonGJetsTTX:
 SingleElectron_2016F:
   pieces:
   - /SingleElectron/Run2016F-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD           
+  isMC: false
 SingleElectron_2016G:
   pieces:
   - /SingleElectron/Run2016G-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD
+  isMC: false
 SingleElectron_2016H:
   pieces:
   - /SingleElectron/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD
+  isMC: false
 SingleElectron_2016:
   pieces:
   - SingleElectron_2016F
   - SingleElectron_2016G
   - SingleElectron_2016H
   save: true
+  isMC: false
 SinglePhoton_2016F:
   pieces:
   - /SinglePhoton/Run2016F-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD
+  isMC: false
 SinglePhoton_2016G:
   pieces:
   - /SinglePhoton/Run2016G-UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+  isMC: false
 SinglePhoton_2016H:
   pieces:
   - /SinglePhoton/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD
+  isMC: false
 SinglePhoton_2016:
   pieces:
   - SinglePhoton_2016F
   - SinglePhoton_2016G
   - SinglePhoton_2016H
   save: true
+  isMC: false
 DATA:
   pieces:
   - SingleElectron_2016
   - SinglePhoton_2016
   save: true
+  isMC: false
 # LQ signals
 LQToDEle_M-300_pair:
   pieces:

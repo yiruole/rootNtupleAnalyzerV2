@@ -90,6 +90,7 @@ def MakeCombinedSample(args):
             sampleInfo = dictSamples[sample]
             pieceList = sampleInfo["pieces"]
             corrLHESysts = sampleInfo["correlateLHESystematics"]
+            isMC = sampleInfo["isMC"]
             outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
             outputDatFile = tfileNameTemplate.format(sample).replace("plots.root", "tables.dat")
             histoDictThisSample = OrderedDict()
@@ -102,7 +103,6 @@ def MakeCombinedSample(args):
             # print("For sample {}, piecesToAdd looks like {}, dictDatasetsFileNames={}".format(sample, piecesToAdd, dictDatasetsFileNames))
             datasetsFileNamesCleaned = {combineCommon.SanitizeDatasetNameFromInputList(k): v for k, v in dictDatasetsFileNames.items()}
 
-            hasMC = False
             # ---Loop over datasets in the inputlist
             for currentPiece in piecesToAdd:
                 if currentPiece in datasetsFileNamesCleaned.keys():
@@ -153,20 +153,14 @@ def MakeCombinedSample(args):
                     print("\t[{}] weight(x1000): ".format(sample) + str(weight) + " = " + str(xsection_X_intLumi), "/", end=' ', flush=True)
                     print(str(sumWeights), flush=True)
                 elif rootFilename == tfileNameTemplate.format(matchingPiece):
-                    print("histos taken from file already scaled", flush=True)
+                    print("\t[{}] histos taken from file already scaled".format(sample), flush=True)
                     xsection_val = 1.0
-                    weight = 1000.0
+                    weight = 1000.0 if isMC else 1.0
                     plotWeight = 1.0
                     xsection_X_intLumi = Ntot
                     sampleNameForHist = matchingPiece
                 else:
                     raise RuntimeError("xsection not found")
-
-                isData = False
-                if float(xsection_val) < 0 or "SingleElectron_20" in rootFilename or "SinglePhoton_20" in rootFilename or "EGamma_20" in rootFilename:
-                    isData = True
-                else:
-                    hasMC = True
 
                 # ---Update table
                 data = combineCommon.FillTableErrors(data, rootFilename, sampleNameForHist)
@@ -176,7 +170,7 @@ def MakeCombinedSample(args):
 
                 if not options.tablesOnly:
                     #print("INFO: updating histo dict for sample={}, corrLHESysts={}".format(sample, corrLHESysts), flush=True)
-                    histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, isData)
+                    histoDictThisSample = combineCommon.UpdateHistoDict(histoDictThisSample, sampleHistos, matchingPiece, sample, plotWeight, corrLHESysts, not isMC)
                     #print("INFO: tmap looks like", {value.GetName() for value in histoDictThisSample.values() if "tmap" in value.GetName()})
                 piecesAdded.append(matchingPiece)
 
@@ -201,7 +195,7 @@ def MakeCombinedSample(args):
 
             # write histos
             if not options.tablesOnly:
-                combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, hasMC, True)
+                combineCommon.WriteHistos(outputTfile, histoDictThisSample, sample, corrLHESysts, isMC, True)
                 if sample in samplesToSave:
                     dictFinalHisto[sample] = histoDictThisSample
             outputTfile.Close()
@@ -503,7 +497,7 @@ if not options.tablesOnly:
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileNameHadd]
     args.extend(sampleFiles)
-    # print("run cmd: ", " ".join(args))
+    # print("INFO: run cmd: ", " ".join(args))
     timeStarted = time.time()
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
