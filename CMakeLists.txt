@@ -158,6 +158,7 @@ else()
     src/HistoReader.C
     src/Object.C
     src/jsonParser.C
+    src/QCDFakeRate.C
     )
 endif()
 
