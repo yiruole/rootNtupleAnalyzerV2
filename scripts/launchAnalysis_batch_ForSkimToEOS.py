@@ -6,6 +6,7 @@ import sys
 import time
 import subprocess as sp
 import shlex
+import re
 
 # --------------------------------------------------------------------------------
 # Helper functions
@@ -153,6 +154,7 @@ def FindInputFileAndModifyCutFile(localCutFile, keyword):
                     print("... done ")
                     found_file = True
                     localFileBasePath = inputFile.strip("/").split("/")[-1]
+                    localFile = options.outputDir + "/" + localFileBasePath
                     if localFileBasePath[-1] != "/":
                         localFileBasePath += "/"
                     print("INFO: replace inputFile={} in line {} with localFileBasePath={}".format(inputFile, line, localFileBasePath))
@@ -330,40 +332,9 @@ if not os.path.isdir(options.outputDir):
 
 print("... done ")
 
-# ----------------------------------------------------------------------------------------
-# For reduced skims: Check for haddnano.py.  If it exists, move it to the output directory
-# ----------------------------------------------------------------------------------------
-if options.reducedSkim or options.nanoSkim:
-    haddnanoPath = os.path.expandvars("$LQANA/scripts/haddnano.py")
-    print("Moving haddnano.py to the local output directory...", end=' ')
-    if not os.path.isfile(haddnanoPath):
-        print("Error: No haddnano.py here: " + haddnanoPath)
-        sys.exit(-1)
-    else:
-        os.system("cp " + haddnanoPath + " " + options.outputDir + "/")
-
-    print("... done ")
-    # Also, copy CMSJME libs
-    cmsjmelibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculators.so")
-    print("Moving CMSJME libs to the local output directory...", end=' ')
-    if not os.path.isfile(cmsjmelibPath):
-        print("Error: No libCMSJMECalculators.so here: " + cmsjmelibPath)
-        sys.exit(-1)
-    else:
-        os.system("cp " + cmsjmelibPath + " " + options.outputDir + "/")
-    cmsjmeDictlibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculatorsDict.so")
-    print("Moving CMSJME libs to the local output directory...", end=' ')
-    if not os.path.isfile(cmsjmeDictlibPath):
-        print("Error: No libCMSJMECalculatorsDict.so here: " + cmsjmeDictlibPath)
-        sys.exit(-1)
-    else:
-        os.system("cp " + cmsjmeDictlibPath + " " + options.outputDir + "/")
-
 # --------------------------------------------------------------------------------
 # Look for the exe file.  If it exists, move it to the output directory
 # --------------------------------------------------------------------------------
-
-
 if os.path.isfile(options.executable):
     print("Moving the exe to the local output directory...", end=' ')
     os.system("cp " + options.executable + " " + options.outputDir + "/")
@@ -399,16 +370,47 @@ else:
 print("... done ")
 
 # --------------------------------------------------------------------------------
-# Get JSON and other files from cut file and copy them to the output directory,
+# Get JSON and other files specified in the cut file and copy them to the output directory,
 # also modifying the path in the local cut file
 # --------------------------------------------------------------------------------
-found_json, jsonFile = FindInputFileAndModifyCutFile(localCutFile, "JSON")
-found_branchSelFile, branchSelFile =  FindInputFileAndModifyCutFile(localCutFile, "BranchSelection")
-if options.reducedSkim:
-    FindInputFileAndModifyCutFile(localCutFile, "TriggerSFFileName")
-    FindInputFileAndModifyCutFile(localCutFile, "EGMScaleJSONFileName")
-    FindInputFileAndModifyCutFile(localCutFile, "JECTextFilePath")
-    FindInputFileAndModifyCutFile(localCutFile, "JERTextFilePath")
+inputFileNames = ["JSON", "BranchSelection", "TriggerSFFileName", "EGMScaleJSONFileName", "JECTextFilePath", "JERTextFilePath"]
+inputFilesToTransfer = []
+for inputFile in inputFileNames:
+    foundFile, filename = FindInputFileAndModifyCutFile(localCutFile, inputFile)
+    if foundFile:
+        inputFilesToTransfer.append(filename)
+
+# ----------------------------------------------------------------------------------------
+# For reduced skims: Check for haddnano.py.  If it exists, move it to the output directory
+# ----------------------------------------------------------------------------------------
+if options.reducedSkim or options.nanoSkim:
+    haddnanoPath = os.path.expandvars("$LQANA/scripts/haddnano.py")
+    print("Moving haddnano.py to the local output directory...", end=' ')
+    if not os.path.isfile(haddnanoPath):
+        print("Error: No haddnano.py here: " + haddnanoPath)
+        sys.exit(-1)
+    else:
+        os.system("cp " + haddnanoPath + " " + options.outputDir + "/")
+        inputFilesToTransfer.append(options.outputDir + "/haddnano.py")
+
+    print("... done ")
+    # Also, copy CMSJME libs
+    cmsjmelibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculators.so")
+    print("Moving CMSJME libs to the local output directory...", end=' ')
+    if not os.path.isfile(cmsjmelibPath):
+        print("Error: No libCMSJMECalculators.so here: " + cmsjmelibPath)
+        sys.exit(-1)
+    else:
+        os.system("cp " + cmsjmelibPath + " " + options.outputDir + "/")
+        inputFilesToTransfer.append(options.outputDir + "/libCMSJMECalculators.so")
+    cmsjmeDictlibPath = os.path.expandvars("$LQANA/build/_deps/cmsjmecalculators-build/libCMSJMECalculatorsDict.so")
+    print("Moving CMSJME libs to the local output directory...", end=' ')
+    if not os.path.isfile(cmsjmeDictlibPath):
+        print("Error: No libCMSJMECalculatorsDict.so here: " + cmsjmeDictlibPath)
+        sys.exit(-1)
+    else:
+        os.system("cp " + cmsjmeDictlibPath + " " + options.outputDir + "/")
+        inputFilesToTransfer.append(options.outputDir + "/libCMSJMECalculatorsDict.so")
 
 # --------------------------------------------------------------------------------
 # Check if path is a link
@@ -430,6 +432,7 @@ print("... done")
 
 print("Launching jobs!")
 
+submitted_jobs = 0
 total_jobs = 0
 
 failedCommands = list()
@@ -471,7 +474,6 @@ with open(options.inputlist, "r") as inputlist_file:
     
         command = "./scripts/submit_batch_ForSkimToEOS.py"
         command = command + " -i " + line.strip()
-        # command = command + " -c " + options.cutfile
         command = (
             command + " -c " + options.outputDir + "/" + options.cutfile.split("/")[-1]
         )
@@ -481,15 +483,12 @@ with open(options.inputlist, "r") as inputlist_file:
         if options.queue is not None:
           command = command + " -q " + options.queue
         command = command + " -d " + eosPath
-        # command = command + " -e " + os.path.realpath(options.executable)
         command = (
             command + " -e " + options.outputDir + "/" + options.executable.split("/")[-1]
         )
         command = command + " -m " + options.eosHost
-        if found_json:
-            command = command + " -j " + os.path.realpath(jsonFile)
-        if found_branchSelFile:
-            command += " -b " + os.path.realpath(branchSelFile)
+        if len(inputFilesToTransfer):
+            command += " -f " + ",".join(inputFilesToTransfer)
         if options.reducedSkim:
             command = command + " -r "
         elif options.nanoSkim:
@@ -497,23 +496,39 @@ with open(options.inputlist, "r") as inputlist_file:
     
         cmdsToRun.append(command)
 
-# use 4 processes to submit in parallel
-for i in range(0, len(cmdsToRun), 4):
-    cmds = cmdsToRun[i:i+4]
-    for cmd in cmds:
-        print(cmd)
-    procs = [sp.Popen(shlex.split(i), stdout=sp.PIPE, stderr=sp.PIPE) for i in cmds]
-    for idx, p in enumerate(procs):
-        res = p.communicate()
-        for line in res[0].decode(encoding='utf-8').split('\n'):
-              print(line)
-        if p.returncode != 0:
-             print("stderr =", res[1])
-             print("Failed submitting jobs for this dataset; add to failedCommands list")
-             failedCommands.append(cmds[idx])
+# use 6 processes to submit in parallel
+# procsToUse = 6
+# for i in range(0, len(cmdsToRun), procsToUse):
+#     cmds = cmdsToRun[i:i+procsToUse]
+#     for cmd in cmds:
+#         print(cmd)
+#     procs = [sp.Popen(shlex.split(i), stdout=sp.PIPE, stderr=sp.PIPE) for i in cmds]
+#     for idx, p in enumerate(procs):
+#         res = p.communicate()
+#         for line in res[0].decode(encoding='utf-8').split('\n'):
+#               print(line)
+#         if p.returncode != 0:
+#              print("stderr =", res[1])
+#              print("Failed submitting jobs for this dataset; add to failedCommands list")
+#              failedCommands.append(cmds[idx])
+# one at a time
+for cmd in cmdsToRun:
+    try:
+        proc = sp.run(shlex.split(cmd), check=True, universal_newlines=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    except sp.CalledProcessError as ex:
+        print("stdout = ", ex.stdout)
+        print("stderr = ", ex.stderr)
+        raise ex
+    output = proc.stdout
+    print(output)
+    jobsThisDataset = int(re.search("(\d+)\sjob\(s\)\ssubmitted", output).group(1))  # parse from condor_submit output
+    submitted_jobs += jobsThisDataset
+    if proc.returncode != 0:
+        print("stderr =", proc.stderr)
+        print("Failed submitting jobs for this dataset; add to failedCommands list")
+        failedCommands.append(cmd)
 
-# FIXME this is not the correct number
-print("submitted a _maximum_ of jobs =", total_jobs)
+print("submitted {} jobs in total".format(submitted_jobs))
 
 if len(failedCommands) > 0:
     print("list of failed commands:")

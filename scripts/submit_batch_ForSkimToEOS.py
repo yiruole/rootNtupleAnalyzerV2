@@ -52,7 +52,7 @@ def PrepareJobScript(outputname):
         outputfile.write('./'+execName+' '+inputList+" "+cutfile.split('/')[-1]+" "+options.treeName+" "+outputPrefix+"_"+str(ijob)+" "+outputPrefix+"_"+str(ijob)+"\n")
         outputfile.write('retVal=$?\n')
         outputfile.write('if [ $retVal -ne 0 ]; then\n')
-        outputfile.write('  echo ./'+execName+' return error code=$retVal; quitting here."\n')
+        outputfile.write('  echo "./'+execName+' return error code=$retVal; quitting here."\n')
         outputfile.write('  exit $retVal\n')
         outputfile.write('fi\n')
         # for lxbatch
@@ -105,27 +105,9 @@ def WriteSubmitFile(condorFileName):
         # condorFile.write('stream_error = True\n')
         # exePath = os.path.dirname(os.path.abspath(options.executable))
         inputFilesToTransfer = [cutfile,options.executable,outputmain+'/input/input_$(Process).list']
-        if len(options.jsonFileName):
-            inputFilesToTransfer.append(options.jsonFileName)
-        if options.reducedSkim:
-            parentDir = os.path.dirname(outputmain)
-            inputFilesToTransfer.append(parentDir+'/haddnano.py')
-            inputFilesToTransfer.append(parentDir+'/libCMSJMECalculators.so')
-            inputFilesToTransfer.append(parentDir+'/libCMSJMECalculatorsDict.so')
-            inputFilesToTransfer.append(parentDir+'/egammaEffi.txt_EGM2D.root')
-            inputFilesToTransfer.append(parentDir+'/EGM_ScaleUnc.json.gz')
-            inputFilesToTransfer.append(parentDir+'/jec')
-            inputFilesToTransfer.append(parentDir+'/jer')
-            inputFilesToTransfer.append(parentDir+'/haddnano.py')
-            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'
-        elif options.nanoSkim:
-            parentDir = os.path.dirname(outputmain)
-            inputFilesToTransfer.append(parentDir+'/haddnano.py')
-            inputFilesToTransfer.append(options.branchSelFileName)
-            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName+','+parentDir+'/haddnano.py'+','+options.branchSelFileName
-        #else:
-            #filesToTransfer = cutfile+','+options.executable+','+outputmain+'/input/input_$(Process).list,'+options.jsonFileName
         filesToTransfer = ",".join(inputFilesToTransfer)
+        filesToTransfer += ","
+        filesToTransfer += options.filesToTransfer
         condorFile.write('transfer_input_files = '+filesToTransfer+'\n')
         condorFile.write('queue $(N)\n')
 
@@ -186,6 +168,10 @@ parser.add_option("-r", "--reducedSkim", dest="reducedSkim",
 parser.add_option("-s", "--nanoSkim", dest="nanoSkim",
                   help="is this a nanoAOD skim?",
                   metavar="NANOSKIM", default=False, action="store_true")
+
+parser.add_option("-f", "--filesToTransfer", dest="filesToTransfer",
+                  help="comma-separated list of files for condor to transfer",
+                  metavar="FILESTOTRANSFER", default="")
 
 
 (options, args) = parser.parse_args()
@@ -280,10 +266,11 @@ input.close()
 condorFileName = outputmain+'/condorSubmit.sub'
 WriteSubmitFile(condorFileName)
 
-if options.reducedSkim or options.nanoSkim:
-    siteList = GetSiteListFromDAS(allInputFiles, dataset)
-else:
-    siteList = []
+#if options.reducedSkim or options.nanoSkim:
+#    siteList = GetSiteListFromDAS(allInputFiles, dataset)
+#else:
+#    siteList = []
+siteList = []
 
 failedToSub = False
 print('submit jobs for', options.output.rstrip("/"))
