@@ -102,7 +102,8 @@ class SimpleCut {
             return true;
             }
             else if constexpr (std::is_same_v<bool, T>) {
-              if(val)
+              if(filled && (minValue1 < val && val <= maxValue1
+                    || minValue2 < val && val <= maxValue2 ) )
                 return true;
             }
             else {
