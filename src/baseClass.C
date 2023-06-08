@@ -556,6 +556,7 @@ void baseClass::readCutFile()
               staticParametersMap[splitByEquals[0]] = stof(splitByEquals[1]);
             }
           }
+          // TMVA input variables (defined in XML) have to be specified in the cut file as cuts already
           vector<shared_ptr<cut>> tmvaCuts;
           tmvaCuts.reserve(thisCut->getInputVariableNames().size());
           for(const auto& varName : thisCut->getInputVariableNames()) {
