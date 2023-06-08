@@ -1,22 +1,30 @@
 #include "QCDFakeRate.h"
 #include "TFile.h"
 
-QCDFakeRate::QCDFakeRate(std::string filename, std::vector<std::string>& regionVec, int year) {
+QCDFakeRate::QCDFakeRate(std::string filename, std::string histPrefix, std::vector<std::string>& regionVec, bool lookupFromHist, bool absEta, bool etIsXAxis) {
   TFile* myFile = TFile::Open(filename.c_str());
-  std::string histNamePrefix = "y"+std::to_string(year);
-  histNamePrefix+="_";
   int index = 0;
   for(auto regionName : regionVec) {
-    std::string histName = histNamePrefix+regionName;
-    histName+="_combinedFit";
-    funcVec.push_back(std::unique_ptr<TF1>(static_cast<TF1*>(myFile->Get(histName.c_str()))));
-    regionToFuncIndexMap[regionName] = index;
+    std::string histName = histPrefix+regionName;
+    if(lookupFromHist)
+      m_histoReaderVec.push_back(std::make_unique<HistoReader>(filename, histName, histName, absEta, etIsXAxis));
+    else
+      m_funcVec.push_back(std::unique_ptr<TF1>(static_cast<TF1*>(myFile->Get(histName.c_str()))));
+    m_regionToIndexMap[regionName] = index;
     index++;
   }
 }
 
+float QCDFakeRate::GetFakeRate(double et, double scEta, double phi, unsigned int run) {
+  return GetFakeRate(et, GetFakeRateRegion(scEta, phi, run), scEta);
+}
+
+float QCDFakeRate::GetFakeRate(double et, std::string regionName, double scEta) {
+  return m_histoReaderVec[m_regionToIndexMap[regionName]]->LookupValue(scEta, et);
+}
+
 float QCDFakeRate::GetFakeRate(double et, std::string regionName) {
-  return funcVec[regionToFuncIndexMap[regionName]]->Eval(et);
+  return m_funcVec[m_regionToIndexMap[regionName]]->Eval(et);
 }
 
 bool QCDFakeRate::isHEMElectron(float eta, float phi) {
@@ -26,23 +34,13 @@ bool QCDFakeRate::isHEMElectron(float eta, float phi) {
   return false;
 }
 
-std::string QCDFakeRate::GetFakeRateRegion(bool isBarrel, bool isEndcap1, bool isEndcap2, float eta, float phi, int run) {
+std::string QCDFakeRate::GetFakeRateRegion(float eta, float phi, unsigned int run) {
   std::string region = "";
-  if(isBarrel)
-    region = "Bar_";
-  else if(isEndcap1)
-    region = "End1_";
-  else if(isEndcap2)
-    region = "End2_";
-  
-  if(run < 0)
-    return region+"2Jet";
-  else { // 2018
-    if(run < 319077)
-      return region+"pre319077_2Jet";
-    else if(isHEMElectron(eta, phi))
-      return region+"HEMonly_post319077_2Jet";
-    else
-      return region+"noHEM_post319077_2Jet";
-  }
+
+  if(run < 319077)
+    return region+"pre319077_2Jet";
+  else if(isHEMElectron(eta, phi))
+    return region+"HEMonly_post319077_2Jet";
+  else
+    return region+"noHEM_post319077_2Jet";
 }
