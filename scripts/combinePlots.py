@@ -10,6 +10,7 @@ import re
 import multiprocessing
 import traceback
 import subprocess
+import shlex
 import copy
 import time
 from graphlib import TopologicalSorter
@@ -22,7 +23,7 @@ import combineCommon
 def SavePrunedSystHistos(inputRootFileName, outputRootFileName):
     classesToKeep = ["TH1", "TProfile"]
     myFile = TFile.Open(inputRootFileName)
-    myOutputFile = TFile(outputRootFileName, "recreate")
+    myOutputFile = TFile.Open(outputRootFileName, "recreate", "", 207)
     for key in myFile.GetListOfKeys():
         histoName = key.GetName()
         htemp = key.ReadObj()
@@ -85,14 +86,14 @@ def CalculateWeight(Ntot, xsection_val, intLumi, sumWeights, dataset_fromInputLi
 def MakeCombinedSample(args):
     while True:
         try:
-            taskQueue, finalizedTasksQueue, visitedNodes, dictSamples, dictDatasetsFileNames, tfileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables = args
+            taskQueue, finalizedTasksQueue, visitedNodes, dictSamples, dictDatasetsFileNames, tfileNameTemplate, datFileNameTemplate, samplesToSave, dictFinalHisto, dictFinalTables = args
             sample = taskQueue.get()
             sampleInfo = dictSamples[sample]
             pieceList = sampleInfo["pieces"]
             corrLHESysts = sampleInfo["correlateLHESystematics"]
             isMC = sampleInfo["isMC"]
-            outputTfile = TFile(tfileNameTemplate.format(sample), "RECREATE", "", 207)
-            outputDatFile = tfileNameTemplate.format(sample).replace("plots.root", "tables.dat")
+            outputTfile = TFile.Open(tfileNameTemplate.format(sample), "RECREATE", "", 207)
+            outputDatFile = datFileNameTemplate.format(sample)
             histoDictThisSample = OrderedDict()
             tablesThisSample = []
             sampleTable = {}
@@ -113,7 +114,7 @@ def MakeCombinedSample(args):
 
                 # prepare to combine
                 print("\t[{}] found matching dataset:".format(sample), matchingPiece + " ... ", end=' ', flush=True)
-                inputDatFile = rootFilename.replace(".root", ".dat").replace("plots", "tables")
+                inputDatFile = rootFilename.replace(".root", ".dat").replace("plots", "tables").replace("root://eoscms/", "/eos/cms/").replace("root://eosuser/", "/eos/user/")
                 print("with file: {}".format(rootFilename), flush=True)
                 print("\t[{}] looking up xsection...".format(sample), end=' ', flush=True)
                 try:
@@ -155,7 +156,7 @@ def MakeCombinedSample(args):
                 elif rootFilename == tfileNameTemplate.format(matchingPiece):
                     print("\t[{}] histos taken from file already scaled".format(sample), flush=True)
                     xsection_val = 1.0
-                    weight = 1000.0 if isMC else 1.0
+                    weight = 1.0
                     plotWeight = 1.0
                     xsection_X_intLumi = Ntot
                     sampleNameForHist = matchingPiece
@@ -426,12 +427,31 @@ else:
     print("\bDone.  All root/dat files are present.")
     print()
 
-if not os.path.isdir(options.outputDir):
-    os.makedirs(options.outputDir)
+if options.outputDir.startswith("/eos/"):
+    if options.outputDir.startswith("/eos/cms"):
+        cmd = "EOS_MGM_URL=root://eoscms/ eos mkdir {}".format(options.outputDir)
+        tfileOutputPath = options.outputDir.replace("/eos/cms/", "root://eoscms//")
+    elif options.outputDir.startswith("/eos/user"):
+        cmd = "EOS_MGM_URL=root://eosuser/ eos mkdir {}".format(options.outputDir)
+        tfileOutputPath = options.outputDir.replace("/eos/cms/", "root://eosuser//")
+    else:
+        raise RuntimeError("Don't know how to handle output dir like '{}'".format(outputDir))
+    if not os.path.isdir(options.outputDir):
+        try:
+            proc = subprocess.run(shlex.split(cmd), check=True, universal_newlines=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        except subprocess.CalledProcessError as ex:
+            print("cmd '{}' failed.".format(cmd))
+            print("stdout = ", ex.stdout)
+            print("stderr = ", ex.stderr)
+else:
+    if not os.path.isdir(options.outputDir):
+        os.makedirs(options.outputDir)
+    tfileOutputPath = options.outputDir
 
 outputTableFile = open(options.outputDir + "/" + options.analysisCode + "_tables.dat", "w")
-tfilePrefix = options.outputDir + "/" + options.analysisCode
-sampleTFileNameTemplate = tfilePrefix+"_{}_plots.root"
+tfilePrefix = tfileOutputPath + "/" + options.analysisCode
+sampleTFileNameTemplate = tfilePrefix + "_{}_plots.root"
+sampleDatFileNameTemplate = options.outputDir + "/" + options.analysisCode + "_{}_tables.dat"
 
 dag = combineCommon.CreateGraphDict(dictSamples)
 visitedNodes = {key: False for key in dag.keys()}
@@ -447,6 +467,7 @@ for _ in range(ncores):
                                             dictSamples,
                                             dictDatasetsFileNames,
                                             sampleTFileNameTemplate,
+                                            sampleDatFileNameTemplate,
                                             samplesToSave,
                                             dictFinalHisto,
                                             dictFinalTables
@@ -493,7 +514,7 @@ print("INFO: Done with individual samples", flush=True)
 if not options.tablesOnly:
     ncores = 8  # always use more cores for hadd
     print("INFO: hadding individual samples using {} cores...".format(ncores), end=' ', flush=True)
-    outputTFileNameHadd = options.outputDir + "/" + options.analysisCode + "_plots_hadd.root"
+    outputTFileNameHadd = tfileOutputPath + "/" + options.analysisCode + "_plots_hadd.root"
     # hadd -fk207 -j4 outputFileComb.root [inputFiles]
     args = ["hadd", "-fk207", "-j "+str(ncores), outputTFileNameHadd]
     args.extend(sampleFiles)
@@ -508,7 +529,7 @@ if not options.tablesOnly:
         print("INFO: Finished hadd in "+str(round(timeDelta/60.0, 2))+" mins.", flush=True)
     if not options.keepInputFiles:
         for sample in dictSamples.keys():
-            fileName = sampleTFileNameTemplate.format(sample)
+            fileName = sampleTFileNameTemplate.format(sample).replace("root://eoscms/", "/eos/cms/").replace("root://eosuser/", "/eos/user/")
             os.remove(fileName)
             tableFile = fileName.replace(".root", ".dat").replace("plots", "tables")
             os.remove(tableFile)
@@ -519,7 +540,7 @@ if not options.tablesOnly:
     SavePrunedSystHistos(outputTFileNameHadd, outputTFileName)
     timeDelta = time.time() - timeStarted
     print("INFO: Finished file pruning in "+str(round(timeDelta/60.0, 2))+" mins.", flush=True)
-    os.remove(outputTFileNameHadd)
+    os.remove(outputTFileNameHadd.replace("root://eoscms/", "/eos/cms/").replace("root://eosuser/", "/eos/user/"))
     outputTfile = TFile.Open(outputTFileName)
     outputTfile.cd()
 
