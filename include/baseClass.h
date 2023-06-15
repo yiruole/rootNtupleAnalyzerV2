@@ -56,6 +56,7 @@ class SimpleCut {
     float maxValue2 = -999;
     char branchType = 'x';
     bool isStatic = false;
+    bool computeSysts = false;
 
     std::string getValueTypeName() const {
       return std::visit( [](auto&&x)->decltype(auto){ return typeid(x).name(); }, value);
@@ -353,7 +354,7 @@ class Optimize {
 
 class baseClass {
   public :
-    enum CUTLEVELS { SKIM_LEVEL=0 };
+    enum CUTLEVELS { SKIM_LEVEL=0, SYST_LEVEL=1 };
     std::map<std::string, bool> combCutName_passed_;
 
     bool passJSON(int run, int ls, bool isData);
@@ -816,10 +817,11 @@ class baseClass {
     float decodeCutValue(const std::string& s);
     bool skimWasMade_;
     int nPreviousSkimCuts_;
-    double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin);
+    double getInfoFromHist(const std::string& fileName, const std::string& histName, int bin, bool getError=false);
     template <typename T> std::shared_ptr<T> getSavedObjectFromFile(const std::string& fileName, const std::string& histName);
     double getGlobalInfoNstart(const std::string& fileName);
     double getSumGenWeights(const std::string& fileName);
+    double getSumGenWeightSqrs(const std::string& fileName);
     double getSumTopPtWeights(const std::string& fileName);
     double getTreeEntries(const std::string& fileName);
     double getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
@@ -831,6 +833,7 @@ class baseClass {
 
     Long64_t NBeforeSkim_;
     double sumGenWeights_;
+    double sumGenWeightSqrs_;
     double sumTopPtWeights_;
 
     template <typename T> void checkOverflow(const TH1*, const T);

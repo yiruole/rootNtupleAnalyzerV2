@@ -317,8 +317,10 @@ void baseClass::readInputList()
   NBeforeSkim_ = 0;
   int NBeforeSkim;
   sumGenWeights_ = 0;
+  sumGenWeightSqrs_ = 0;
   sumTopPtWeights_ = 0;
   double tmpSumGenWeights = 0;
+  double tmpSumGenWeightSqrs = 0;
   double tmpSumTopPtWeights = 0;
 
   STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
@@ -343,7 +345,9 @@ void baseClass::readInputList()
       STDOUT("Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
       tmpSumGenWeights = getSumGenWeights(name);
       sumGenWeights_ += tmpSumGenWeights;
-      STDOUT("gen weight sum (current,total): = "<<tmpSumGenWeights<<", "<<sumGenWeights_);
+      tmpSumGenWeightSqrs += getSumGenWeightSqrs(name);
+      sumGenWeightSqrs_ += tmpSumGenWeightSqrs;
+      STDOUT("gen weight sum (current,total): = "<<tmpSumGenWeights<<"+/-"<<sqrt(tmpSumGenWeightSqrs)<<", "<<sumGenWeights_<<"+/-"<<sqrt(sumGenWeightSqrs_));
       tmpSumTopPtWeights = getSumTopPtWeights(name);
       sumTopPtWeights_ += tmpSumTopPtWeights;
       //STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
@@ -574,6 +578,8 @@ void baseClass::readCutFile()
           }
           thisCut->setupReader(tmvaCuts);
         }
+        else if(flag.find("systs") != string::npos)
+          thisCut->computeSysts = true;
       }
       thisCut->variableName = variableName;
       thisCut->minValue1  = decodeCutValue( m1 );
@@ -581,6 +587,8 @@ void baseClass::readCutFile()
       thisCut->minValue2  = decodeCutValue( m2 );
       thisCut->maxValue2  = decodeCutValue( M2 );
       thisCut->level_int  = level_int;
+      if(level_int >= SYST_LEVEL)
+        thisCut->computeSysts = true;
       thisCut->level_str  =       v[5];
       thisCut->histoNBins = atoi( v[6].c_str() );
       thisCut->histoMin   = atof( v[7].c_str() );
@@ -867,8 +875,7 @@ void baseClass::readCutFile()
     }
     for (int i=0;i<orderedCutNames_.size();++i) {
       auto&& cc = cutName_cut_.find(orderedCutNames_[i]);
-      if(cc->second->level_int < 1)
-        continue;
+      if(cc->second->computeSysts)
       orderedSystCutNames_.push_back(cc->first);
     }
     int nCutsForSysts = orderedSystCutNames_.size();
@@ -1957,7 +1964,7 @@ float baseClass::decodeCutValue(const string& s)
   return ret;
 }
 
-double baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin)
+double baseClass::getInfoFromHist(const std::string& fileName, const std::string& histName, int bin, bool getError)
 {
   double NBeforeSkim = -999;
 
@@ -1994,9 +2001,9 @@ double baseClass::getInfoFromHist(const std::string& fileName, const std::string
       return NBeforeSkim;
     }
     else if(hCount1)
-      NBeforeSkim = hCount1->GetBinContent(bin);
+      NBeforeSkim =  getError ? hCount1->GetBinError(bin) : hCount1->GetBinContent(bin);
     else
-      NBeforeSkim = hCount2->GetBinContent(bin);
+      NBeforeSkim = getError ? hCount2->GetBinError(bin) : hCount2->GetBinContent(bin);
   }
   else
   {
@@ -2006,7 +2013,7 @@ double baseClass::getInfoFromHist(const std::string& fileName, const std::string
       STDOUT("ERROR: Did not find specified hist named: '" << histName << "'. Cannot extract info. Quitting");
       exit(-1);
     }
-    NBeforeSkim = hCount->GetBinContent(bin);
+    NBeforeSkim = getError ? hCount->GetBinError(bin) : hCount->GetBinContent(bin);
   }
 
   return NBeforeSkim;
@@ -2027,6 +2034,14 @@ double baseClass::getSumGenWeights(const std::string& fileName)
   if(!skimWasMade_)
     sumGenWeights = getSumWeightFromRunsTree(fileName, "genEventSumw");
   return sumGenWeights;
+}
+
+double baseClass::getSumGenWeightSqrs(const std::string& fileName)
+{
+  double sumGenWeightSqrs = pow(getInfoFromHist(fileName, "EventCounter", 3, true), 2); // need sum(w^2)
+  if(!skimWasMade_)
+    sumGenWeightSqrs = getSumWeightFromRunsTree(fileName, "genEventSumw2");
+  return sumGenWeightSqrs;
 }
 
 double baseClass::getSumTopPtWeights(const std::string& fileName)
