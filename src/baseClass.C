@@ -70,6 +70,7 @@ baseClass::~baseClass()
   output_root_->cd();
   checkOverflow(h_weightSums_,sumGenWeights_);
   h_weightSums_->SetBinContent(1,sumGenWeights_);
+  h_weightSums_->SetBinError(1,sqrt(sumGenWeightSqrs_));
   checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
   h_weightSums_->Write();
@@ -2534,6 +2535,7 @@ bool baseClass::writeSkimTree()
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumGenWeights_);
+  hCount_->SetBinError(3,sqrt(sumGenWeightSqrs_));
   hCount_->SetBinContent(4,sumTopPtWeights_);
   hCount_->Write();
   for(auto& hist : histsToSave_)
@@ -2572,6 +2574,7 @@ bool baseClass::writeReducedSkimTree()
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumGenWeights_);
+  hReducedCount_->SetBinError(3,sqrt(sumGenWeightSqrs_));
   hReducedCount_->SetBinContent(4,sumTopPtWeights_);
   hReducedCount_->Write();
   for(auto& hist : histsToSave_)
