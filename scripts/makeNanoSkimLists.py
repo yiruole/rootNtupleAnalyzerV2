@@ -96,7 +96,8 @@ if (
 outputDir = options.outputDir.rstrip("/") + "/"
 os.makedirs(outputDir, exist_ok=True)  # don't complain if dir exists already
 
-prefix="root://cmsxrootd.fnal.gov/"
+# prefix="root://cmsxrootd.fnal.gov/"
+prefix="root://cms-xrd-global.cern.ch/"
 outputFileName = outputDir + "inputListAllCurrent.txt"
 datasetList = ReadDatasetList(options.inputlist)
 
