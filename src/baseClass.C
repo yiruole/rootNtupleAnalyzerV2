@@ -323,22 +323,37 @@ void baseClass::readInputList()
   double tmpSumGenWeights = 0;
   double tmpSumGenWeightSqrs = 0;
   double tmpSumTopPtWeights = 0;
+  vector<string> rootFileNames;
 
-  STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
-
-  ifstream is(inputList_->c_str());
-  if(is.good())
-  {
-    STDOUT("baseClass::readInputList: Starting reading list: " << *inputList_ );
-    while( is.getline(pName, 500, '\n') )
+  std::string suffix = ".root";
+  if(inputList_->size() >= suffix.size() && 0 == inputList_->compare(inputList_->size()-suffix.size(), suffix.size(), suffix)) {
+    STDOUT("baseClass::readinputList(): handling root file =  "<< *inputList_ );
+    rootFileNames.push_back(*inputList_);
+  }
+  else {
+    STDOUT("baseClass::readinputList(): inputList_ =  "<< *inputList_ );
+    ifstream is(inputList_->c_str());
+    if(is.good())
     {
-      if (pName[0] == '#') continue;
-      //if (pName[0] == ' ') continue; // do we want to skip lines that start with a space?
-      if (pName[0] == '\n') continue;// simple protection against blank lines
-      // if it's just /store (e.g., via crab3) add the necessary prefix
-      std::string name(pName);
-      if(name.find("/store") != std::string::npos && name.find("/store")==0)
-        name.insert(0,"root://eoscms//eos/cms");
+      STDOUT("baseClass::readInputList: Starting reading list: " << *inputList_ );
+      while( is.getline(pName, 500, '\n') )
+      {
+        if (pName[0] == '#') continue;
+        //if (pName[0] == ' ') continue; // do we want to skip lines that start with a space?
+        if (pName[0] == '\n') continue;// simple protection against blank lines
+                                       // if it's just /store (e.g., via crab3) add the necessary prefix
+        std::string name(pName);
+        if(name.find("/store") != std::string::npos && name.find("/store")==0)
+          name.insert(0,"root://eoscms//eos/cms");
+        rootFileNames.push_back(name);
+      }
+    }
+    else
+      throw runtime_error("baseClass::readInputList: ERROR opening inputList: " + *inputList_ );
+    is.close();
+    STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
+  }
+  for(const auto& name : rootFileNames) {
       //STDOUT("Adding file: " << name);
       chain->Add(name.c_str());
       NBeforeSkim = getGlobalInfoNstart(name);
@@ -346,7 +361,7 @@ void baseClass::readInputList()
       STDOUT("Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = "<<NBeforeSkim<<", "<<NBeforeSkim_);
       tmpSumGenWeights = getSumGenWeights(name);
       sumGenWeights_ += tmpSumGenWeights;
-      tmpSumGenWeightSqrs += getSumGenWeightSqrs(name);
+      tmpSumGenWeightSqrs = getSumGenWeightSqrs(name);
       sumGenWeightSqrs_ += tmpSumGenWeightSqrs;
       STDOUT("gen weight sum (current,total): = "<<tmpSumGenWeights<<"+/-"<<sqrt(tmpSumGenWeightSqrs)<<", "<<sumGenWeights_<<"+/-"<<sqrt(sumGenWeightSqrs_));
       tmpSumTopPtWeights = getSumTopPtWeights(name);
@@ -354,15 +369,9 @@ void baseClass::readInputList()
       //STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
       saveLHEPdfSumw(name);
       saveEventsPassingCuts(name);
-    }
-    tree_ = chain;
-    STDOUT("baseClass::readInputList: Finished reading list: " << *inputList_ );
   }
-  else
-    throw runtime_error("baseClass::readInputList: ERROR opening inputList: " + *inputList_ );
-  is.close();
+  tree_ = chain;
   treeEntries_ = tree_->GetEntries();
-
 }
 
 bool is_number(const std::string& s) {
