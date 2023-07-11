@@ -115,6 +115,9 @@ def SanitizeDatasetNameFromInputList(dataset_fromInputList):
         ]
     # print '1) SanitizeDatasetNameFromInputList() result is:'+dataset_fromInputList
     dataset_fromInputList = dataset_fromInputList.replace("_APV", "")
+    # it was causing problems for me that the v9-v* was being left on here but removed in SanitizeDatasetNameFromFullDataset - Emma
+    if dataset_fromInputList.find("_NanoAODv")>0:
+        dataset_fromInputList = dataset_fromInputList[:dataset_fromInputList.find("_NanoAODv")+8]
     dataset_fromInputList = dataset_fromInputList.rstrip("_")
     return dataset_fromInputList
 

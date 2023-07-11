@@ -38,12 +38,21 @@
 /WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM               5.217  # from genxsecanalyzer
 /WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM           4.664  # from genxsecanalyzer
 ###################
-# WJets
+# WJets - HT-binned and sherpa samples added July 2023 for fake rate closure test.
 ###################
 /WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM                    61526.7
 /WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM                 53310 # from genxsecanalyzer
 /WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM                 8973  # from genxsecanalyzer
 /WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM                 3339  # from genxsecanalyzer
+/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM         1254  # from genxsecanalyzer
+/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM       1.157 # from genxsecanalyzer
+/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM         336.4 # from genxsecanalyzer
+/WJetsToLNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM        0.02624 # from genxsecanalyzer
+/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM         45.21 # from genxsecanalyzer
+/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM         10.98 # from genxsecanalyzer 
+/WJetsToLNu_HT-70To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM          1269  # from genxsecanalyzer 
+/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM        4.927 # from genxsecanalyzer 
+/WJetsToLNu_012JetsNLO_34JetsLO_EWNLOcorr_13TeV-sherpa/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM            61770 # from genxsecanalyzer
 ###################
 # Single Top
 ###################
@@ -150,13 +159,13 @@
 /SingleElectron/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD              -1
 /SinglePhoton/Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD      -1
 /SinglePhoton/Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD      -1
-/SinglePhoton/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD           -1
+/SinglePhoton/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v4/NANOAOD           -1
 /SinglePhoton/Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD           -1
 /SinglePhoton/Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD           -1
 /SinglePhoton/Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD           -1
-/SinglePhoton/Run2016F-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD                -1
+/SinglePhoton/Run2016F-UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD                -1
 /SinglePhoton/Run2016G-UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD                -1
-/SinglePhoton/Run2016H-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD                -1
+/SinglePhoton/Run2016H-UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD                -1
 ###################
 # Displaced SUSY
 ###################

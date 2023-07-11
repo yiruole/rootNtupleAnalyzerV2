@@ -13,11 +13,10 @@
 #### INPUTS HERE ####
 #------------
 # analysis
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateClosureTest_cej_DataAndMC.txt
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2015/QCDFakeRate/cutTable_lq_QCD_FakeRateClosureTest_ccj_DataOnly.txt"
+files="afs/cern.ch/user/e/eipearso/public/leptoquark_analysis/rootNtupleMacrosV2/config2016/QCDFakeRate/cutTable_lq_QCD_FakeRateClosureTest_ccj_DataOnly.txt"
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-SUBDIR=nano/2016/qcdFakeRate/feb24_qcdClosureTest_applyTrigToMC
+SUBDIR=qcdFRCT
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
@@ -29,11 +28,11 @@ FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by
 EXE=main
 CODENAME=analysisClass_lq_QCD_FakeRateClosureTest
 #------------
-INPUTLIST=config/2016_rskQCD_eosuser_comb/inputListAllCurrent.txt
+INPUTLIST=config/myDatasets/2016HEEPpreDataOnly/inputListAllCurrent.txt
 #------------
-XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
+XSECTION=config/xsection_13TeV_2022.txt #specify cross section file
 #------------
-SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj.txt
+SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_calc_2016preVFPDataOnly.yaml
 #------------
 #NCORES=8 #Number of processor cores to be used to run the job
 NCORES=10 #Number of processor cores to be used to run the job

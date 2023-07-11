@@ -20,20 +20,20 @@ YEAR=$1
 
 #### INPUTS HERE ####
 #------------
-ANANAME=calcFR_egmoose_19mar2022
+ANANAME=calcFR_2016pre_June2023
 #------------
-files="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
+files="/afs/cern.ch/user/e/eipearso/leptoquark_analysis/rootNtupleMacrosV2/config2016/QCDFakeRate/cutTable_lq_QCD_FakeRateCalculation.txt"
 #------------
 QUEUE=workday
 #------------
 OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
-#EOSDIR=/eos/cms/store/user/scooper/LQ/nanoV7/2016/qcdFakeRateCalc/$ANANAME
+#EOSDIR=/eos/cms/store/user/eipearso/LQ/nanoV7/2016/qcdFakeRateCalc/$ANANAME
 excludeCombining=""
 
 # output sub-directory (i.e. output will be in OUTDIRPATH/SUBDIR)
 # it is suggested to specify the luminosity in the name of the directory
 #------------
-ilumi2016=35867 #TODO
+ilumi2016=19501601.622000 #TODO
 ilumi2017=41540 #FIXME: this number is just from the Egamma twiki
 ilumi2018=59399
 CODENAME=analysisClass_lq_QCD_FakeRateCalculation
@@ -45,7 +45,9 @@ CODENAME=analysisClass_lq_QCD_FakeRateCalculation
 #INPUTLIST=config/nanoV6_2016_rskQCD_17jul2020_comb/inputListAllCurrent.txt
 #inputlist2016=config/nanoV7_2016_rskQCD_23nov2021_comb/inputListAllCurrent.txt
 #inputlist2016=config/nanoV7_2016_rskQCD_26nov2021_comb/inputListAllCurrent.txt
-inputlist2016=config/nanoV7_2016_rskQCD_looseEGM_18mar2022_comb/inputListAllCurrent.txt
+#inputlist2016=config/nanoV7_2016_rskQCD_looseEGM_18mar2022_comb/inputListAllCurrent.txt
+#inputlist2016=config/myDatasets/inputListAllCurrent.txt
+inputlist2016=config/myDatasets/2016HEEPpreVFP/inputListAllCurrent.txt
 #------------
 if [ "$YEAR" = "2016" ]; then
   echo "Doing 2016!"
@@ -59,16 +61,16 @@ elif [ "$YEAR" = "2018" ]; then
   ILUM=$ilumi2018
   INPUTLIST=$inputlist2018
 fi
-SUBDIR=nanoV7/${YEAR}/qcdFakeRateCalc/$ANANAME
-EOSDIR=/eos/user/s/scooper/LQ/NanoV7/${YEAR}/qcdFakeRateCalc/$ANANAME
-COMMANDFILE=commandsToRunOnMoreCutFiles_fakeRateCalc_${YEAR}_batch_`hostname -s`.txt
-SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_calc_${YEAR}.txt
+SUBDIR=${YEAR}/qcdFakeRateCalc/$ANANAME
+EOSDIR=/eos/user/e/eipearso/LQ/${YEAR}/qcdFakeRateCalc/$ANANAME
+COMMANDFILE=commandsToRunOnMoreCutFiles_fakeRateCalc_${YEAR}PostVFP_batch_`hostname -s`.txt
+SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_calc_${YEAR}PostVFP.yaml
 #------------
 FACTOR=1000 # numbers in final tables (but *not* in plots) will be multiplied by this scale factor (to see well the decimal digits)
 #------------
 EXE=main
 #------------
-XSECTION=config/xsection_13TeV_2015.txt #specify cross section file
+XSECTION=config/xsection_13TeV_2022.txt #specify cross section file
 #------------
 #### END OF INPUTS ####
 

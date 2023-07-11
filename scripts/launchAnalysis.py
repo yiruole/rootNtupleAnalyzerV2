@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+# If you're processing a smaller amount of data (as in the 2F region of the closure test) it's faster to use this, so I updated it. -Emma
 #----------------------------------------------------------------
 # Imports
 #----------------------------------------------------------------
@@ -15,7 +15,7 @@ from multiprocessing import Pool
 #----------------------------------------------------------------
 
 def printAndExecute ( command ): 
-    print command
+    print (command)
     os.system ( command ) 
 
 #----------------------------------------------------------------
@@ -52,7 +52,7 @@ if options.execut:
 #----------------------------------------------------------------
 
 if not os.path.isfile ( options.cut_file ) :
-    print "ERROR.  Cut file does not exist: " + options.cut_file
+    print ("ERROR.  Cut file does not exist: " + options.cut_file)
     sys.exit() 
 
 #----------------------------------------------------------------
@@ -60,7 +60,7 @@ if not os.path.isfile ( options.cut_file ) :
 #----------------------------------------------------------------
 
 if not os.path.isfile ( options.input_list ) : 
-    print "ERROR.  Input list does not exist: " + options.input_list
+    print ("ERROR.  Input list does not exist: " + options.input_list)
     sys.exit() 
 
 #----------------------------------------------------------------
@@ -68,7 +68,7 @@ if not os.path.isfile ( options.input_list ) :
 #----------------------------------------------------------------
 
 if not os.path.isdir ( options.output_dir ) : 
-    print "Making directory: " + options.output_dir
+    print ("Making directory: " + options.output_dir)
     #os.mkdir ( options.output_dir )
     os.makedirs ( options.output_dir ) 
 
@@ -85,23 +85,23 @@ for line in cut_file:
         json_file_path = ""
 
         if found_json:
-            print "ERROR.  Cut file contains multiple JSON files"
-            print "   Cut file is: " + options.cut_file
+            print ("ERROR.  Cut file contains multiple JSON files")
+            print ("   Cut file is: " + options.cut_file)
             sys.exit()
         elif len (line.split() ) != 2 : 
-            print "ERROR.  Cut file contains bad syntax about JSON file."
-            print "   Cut file is: " + options.cut_file
-            print "   Line should read: JSON <path to JSON file>"
-            print "   Line reads      : " + line
+            print ("ERROR.  Cut file contains bad syntax about JSON file.")
+            print ("   Cut file is: " + options.cut_file)
+            print ("   Line should read: JSON <path to JSON file>")
+            print ("   Line reads      : " + line)
             sys.exit()
         elif not os.path.isfile ( line.split()[1] ) :
-            print "ERROR. JSON file in cut file does not exist"
-            print "   Cut file is:  " + options.cut_file
-            print "   JSON path is: " + line.split()[1]
+            print ("ERROR. JSON file in cut file does not exist")
+            print ("   Cut file is:  " + options.cut_file)
+            print ("   JSON path is: " + line.split()[1])
             sys.exit() 
         else : 
             command = "cp " + line.split()[1] + " " + options.output_dir 
-            print command
+            print (command)
             os.system ( command ) 
             found_json = True
 
@@ -143,6 +143,6 @@ pool = Pool ( ncores )
 try:
     pool.map_async( printAndExecute, command_list ).get(99999999)
 except KeyboardInterrupt:
-    print "\n\nCtrl-C detected: Bailing." 
+    print ("\n\nCtrl-C detected: Bailing.") 
     pool.terminate()
     sys.exit(1) 

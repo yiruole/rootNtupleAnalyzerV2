@@ -1,0 +1,247 @@
+DYJetsToLL_0To50:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_50To100:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-50To100_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_100To250:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-100To250_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_250To400:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-250To400_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_400To650:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-400To650_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_650ToInf:
+  pieces:
+  - /DYJetsToLL_LHEFilterPtZ-650ToInf_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_amcatnlo:
+  pieces:
+  - /DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_madgraph:
+  pieces:
+  - /DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+DYJetsToLL_powheg:
+  pieces:
+  - /DYJetsToEE_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ZJet_amcatnlo_ptBinned:
+  pieces:
+  - DYJetsToLL_0To50
+  - DYJetsToLL_50To100
+  - DYJetsToLL_100To250
+  - DYJetsToLL_250To400
+  - DYJetsToLL_400To650
+  - DYJetsToLL_650ToInf
+WWTo4Q_4f:
+  pieces:
+  - /WWTo4Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v3/NANOAODSIM
+WWTo1L1Nu2Q_4f:
+  pieces:
+  - /WWTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WWTo2L2Nu:
+  pieces:
+  - /WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WW_amcatnlo:
+  pieces:
+  - WWTo4Q_4f
+  - WWTo1L1Nu2Q_4f
+ZZTo2Nu2Q2L:
+  pieces:
+  - /ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ZZTo4L:
+  pieces:
+  - /ZZTo4L_TuneCP5_13TeV_powheg_pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ZZTo2Nu2Q_5f:
+  pieces:
+  - /ZZTo2Nu2Q_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ZZTo2L2Nu:
+  pieces:
+  - /ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ZZ_amcatnlo:
+  pieces:
+  - ZZTo2Nu2Q2L
+  - ZZTo2Nu2Q_5f
+ZZ_nlo:
+  pieces:
+  - ZZTo4L
+  - ZZTo2Nu2Q_5f
+  - ZZTo2L2Nu
+WZTo1L1Nu2Q_4f:
+  pieces:
+  - /WZTo1L1Nu2Q_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WZTo1L3Nu_4f:
+  pieces:
+  - /WZTo1L3Nu_4f_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WZTo2Q2L_mllmin4p0:
+  pieces:
+  - /WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+WZTo3LNu:
+  pieces:
+  - /WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WZTo3LNu_mllmin4p0:
+  pieces:
+  - /WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WZ_amcatnlo:
+  pieces:
+  - WZTo1L1Nu2Q_4f
+  - WZTo1L3Nu_4f
+  - WZTo2Q2L_mllmin4p0
+  - WZTo3LNu
+DIBOSON_amcatnlo:
+  pieces:
+  - WW_amcatnlo
+  - ZZ_amcatnlo
+  - WZ_amcatnlo
+DIBOSON_nlo:
+  pieces:
+  - WWTo2L2Nu
+  - ZZ_nlo
+  - WZ_amcatnlo
+TTTo2L2Nu:
+  pieces:
+  - /TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+TTToHadronic:
+  pieces:
+  - /TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+TTToSemiLeptonic:
+  pieces:
+  - /TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+TTbar_powheg:
+  pieces:
+  - TTTo2L2Nu
+  - TTToHadronic
+  - TTToSemiLeptonic
+ST_tW_top_5f:
+  pieces:
+  - /ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ST_tW_antitop_5f:
+  pieces:
+  - /ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ST_t-channel_antitop_5f:
+  pieces:
+  - /ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ST_t-channel_top_5f:
+  pieces:
+  - /ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+ST_s-channel_4f:
+  pieces:
+  - /ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+SingleTop:
+  pieces:
+  - ST_tW_top_5f
+  - ST_tW_antitop_5f
+  - ST_t-channel_antitop_5f
+  - ST_s-channel_4f
+WJetsToLNu_0J:
+  pieces:
+  - /WJetsToLNu_0J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WJetsToLNu_1J:
+  pieces:
+  - /WJetsToLNu_1J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WJetsToLNu_2J:
+  pieces:
+  - /WJetsToLNu_2J_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+WJet_amcatnlo_Inc:
+  pieces:
+  - /WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+WJet_amcatnlo_jetBinned:
+  pieces:
+  - WJetsToLNu_0J
+  - WJetsToLNu_1J
+  - WJetsToLNu_2J
+WWW_4F:
+  pieces:
+  - /WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11_ext1-v1/NANOAODSIM
+WWZ_4F:
+  pieces:
+  - /WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11_ext1-v1/NANOAODSIM
+WZZ:
+  pieces:
+  - /WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11_ext1-v1/NANOAODSIM
+ZZZ:
+  pieces:
+  - /ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11_ext1-v1/NANOAODSIM
+TRIBOSON:
+  pieces:
+  - WWW_4F
+  - WWZ_4F
+  - WZZ
+  - ZZZ
+TTWJetsToLNu:
+  pieces:
+  - /TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+TTWJetsToQQ:
+  pieces:
+  - /TTWJetsToQQ_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+TTW:
+  pieces:
+  - TTWJetsToLNu
+  - TTWJetsToQQ
+TTZ:
+  pieces:
+  - /ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+GJets_100To200:
+  pieces:
+  - /GJets_DR-0p4_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+GJets_200To400:
+  pieces:
+  - /GJets_DR-0p4_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+GJets_400To600:
+  pieces:
+  - /GJets_DR-0p4_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+GJets_600ToInf:
+  pieces:
+  - /GJets_DR-0p4_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM
+PhotonJets_Madgraph:
+  pieces:
+  - GJets_100To200
+  - GJets_200To400
+  - GJets_400To600
+  - GJets_600ToInf
+OTHERBKG_WJetAMCJetBinned_dibosonNLO_triboson:
+  pieces:
+  - WJet_amcatnlo_jetBinned
+  - SingleTop
+  - DIBOSON_nlo
+  - TRIBOSON
+  - TTW
+  - TTZ
+  - PhotonJets_Madgraph
+ALLBKG_powhegTTBar_ZJetPtWJetAMCJetBinned_NLODIBOSON_triboson:
+  pieces:
+  - ZJet_amcatnlo_ptBinned
+  - TTbar_powheg
+  - WJet_amcatnlo_jetBinned
+  - SingleTop
+  - DIBOSON_nlo
+  - TRIBOSON
+  - TTW
+  - TTZ
+  - PhotonJets_Madgraph
+QCDFakes_SinglePhoton_2016B_v1:
+  pieces:
+  - /SinglePhoton/Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_SinglePhoton_2016B_v2:
+  pieces:
+  - /SinglePhoton/Run2016B-ver2_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_SinglePhoton_2016C:
+  pieces:
+  - /SinglePhoton/Run2016C-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_SinglePhoton_2016D:
+  pieces:
+  - /SinglePhoton/Run2016D-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_SinglePhoton_2016E:
+  pieces:
+  - /SinglePhoton/Run2016E-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_SinglePhoton_2016F:
+  pieces:
+  - /SinglePhoton/Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+QCDFakes_DATA:
+  pieces:
+  - QCDFakes_SinglePhoton_2016B_v1
+  - QCDFakes_SinglePhoton_2016B_v2
+  - QCDFakes_SinglePhoton_2016C
+  - QCDFakes_SinglePhoton_2016D
+  - QCDFakes_SinglePhoton_2016E
+  - QCDFakes_SinglePhoton_2016F
