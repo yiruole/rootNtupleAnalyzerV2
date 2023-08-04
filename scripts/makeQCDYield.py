@@ -7,6 +7,10 @@ import math
 import copy
 from pathlib import Path
 from optparse import OptionParser
+import re
+
+from combineCommon import SubtractTables, WriteTable
+
 from ROOT import TFile, gROOT, SetOwnership
 
 
@@ -45,7 +49,7 @@ def GetSampleHistosFromTFile(tfileName, sample):
                 "GetSampleHistosFromTFile({}, {}) -- failed to read any histos for the sampleName from this file!".format(
                     tfile.GetName(), sample))
     else:
-        print("INFO: found {} hists for sample {}".format(len(sampleHistos), sample))
+        print("\tINFO: found {} hists for sample {}".format(len(sampleHistos), sample))
     return sampleHistos
 
 
@@ -92,12 +96,144 @@ def SubtractHistosWithLimit(singleFRHisto, doubleFRHisto, verbose = False):
         doubleBinContent = doubleFRHisto.GetBinContent(globalBin)
         doubleBinErrorSqr = pow(doubleFRHisto.GetBinError(globalBin), 2)
         if abs(doubleBinContent) > limit*abs(singleBinContent):
-            doubleBinContent = limit*singleBinContent
+            # print("INFO: limited bin {} in histo {} to 50% of singleFR bin content = {:.2f}; singleFR orig content={:.2f}; doubleFR orig content={:.2f}".format(
+            #     globalBin, singleFRHisto.GetName(), singleBinContent - limit*abs(singleBinContent), singleBinContent, doubleBinContent))
             #FIXME ERROR? Probably still OK to take the double FR weights into the errors sums as usual.
+            doubleBinContent = limit*abs(singleBinContent)
         binError = math.sqrt(singleBinErrorSqr + doubleBinErrorSqr)
         singleFRHistoNew.SetBinContent(globalBin, singleBinContent - doubleBinContent)
         singleFRHistoNew.SetBinError(globalBin, binError)
     return singleFRHistoNew
+
+
+def ParseDatFile(datFilename, sampleName):
+    data = {}
+    column = []
+    lineCounter = int(0)
+    with open(datFilename) as datFile:
+        # find line that begins with '#id' and check that it belongs to the given sample
+        foundFirstLine = False
+        startIdx = 0
+        prevLine = None
+        for j, line in enumerate(datFile):
+            # ignore comments
+            if re.search("^###", line):
+                prevLine = line
+                continue
+            line = line.strip("\n")
+            if line.strip().startswith("#id"):
+                if not foundFirstLine and sampleName in prevLine.strip():
+                    foundFirstLine = True
+                    print("INFO: found table for sample {} in file {}".format(sampleName, datFilename))
+                elif foundFirstLine:
+                    break
+            # print "---> lineCounter: " , lineCounter
+            # print line
+            if foundFirstLine:
+                if lineCounter == 0:
+                    for i, piece in enumerate(line.split()):
+                        column.append(piece)
+                else:
+                    for i, piece in enumerate(line.split()):
+                        if i == 0:
+                            if len(data) == 0:
+                                startIdx = int(piece)
+                            row = int(piece)-startIdx
+                            data[row] = {}
+                        elif i < 6:
+                            data[row][column[i]] = piece
+                        else:
+                            data[row][column[i]] = float(piece)
+                            # print data[row][ column[i] ]
+
+                lineCounter = lineCounter + 1
+            line = prevLine
+    return data
+
+
+def SubtractTables(inputTable, tableToSubtractOrig, zeroNegatives=False, limitSub=False):
+    limit = 0.5
+    # subtract the tableToSubtract from the inputTable
+    if not inputTable:
+        raise RuntimeError("No inputTable found! cannot subtract from nothing")
+    else:
+        outputTable = copy.deepcopy(inputTable)
+        tableToSubtract = copy.deepcopy(tableToSubtractOrig)
+        for j, line in enumerate(tableToSubtract):
+            # print 'outputTable[int(',j,')][N]=',outputTable[int(j)]['N'],'tableToSubtract[',j,']','[N]=',tableToSubtract[j]['N']
+            if limitSub:
+                # if abs(float(tableToSubtract[j]["N"])) > limit*abs(float(outputTable[int(j)]["N"])):
+                #     tableToSubtract[j]["N"]= limit*float(outputTable[int(j)]["N"])
+                #     print("INFO: limited N to {}%".format(100%limit))
+                if abs(float(tableToSubtract[j]["Npass"])) > limit*abs(float(outputTable[int(j)]["Npass"])):
+                    print("INFO: limiting Npass to {:.2f}; originally {:.2f}, toSub {:.2f}".format(
+                        limit*abs(float(outputTable[int(j)]["Npass"])), float(outputTable[int(j)]["Npass"]), float(tableToSubtract[j]["Npass"])))
+                    tableToSubtract[j]["Npass"] = limit*abs(float(outputTable[int(j)]["Npass"]))
+            # newN = float(outputTable[int(j)]["N"]) - float(tableToSubtract[j]["N"])
+            newNpass = float(outputTable[int(j)]["Npass"]) - float(
+                tableToSubtract[j]["Npass"]
+            )
+            # if newN < 0.0 and zeroNegatives:
+            #     newN = 0.0
+            if newNpass < 0.0 and zeroNegatives:
+                newNpass = 0.0
+            outputTable[int(j)] = {
+                "variableName": tableToSubtract[j]["variableName"],
+                "min1": tableToSubtract[j]["min1"],
+                "max1": tableToSubtract[j]["max1"],
+                "min2": tableToSubtract[j]["min2"],
+                "max2": tableToSubtract[j]["max2"],
+                # "N": newN,
+                # #     #FIXME ERROR? Probably still OK to take the double FR weights into the errors sums as usual.
+                # "errN": math.sqrt(
+                #     pow(float(outputTable[int(j)]["errN"]), 2)
+                #     + pow(float(tableToSubtract[j]["errN"]), 2)
+                # ),
+                "Npass": newNpass,
+                #     #FIXME ERROR? Probably still OK to take the double FR weights into the errors sums as usual.
+                "errNpass": math.sqrt(
+                    pow(float(outputTable[int(j)]["errNpass"]), 2)
+                    + pow(float(tableToSubtract[j]["errNpass"]), 2)
+                ),
+                "EffRel": float(0),
+                "errEffRel": float(0),
+                "EffAbs": float(0),
+                "errEffAbs": float(0),
+            }
+    return outputTable
+
+
+def ScaleTable(inputTableOrig, scaleFactor, errScaleFactor):
+    if not inputTableOrig:
+        raise RuntimeError("No inputTable found! cannot scale nothing")
+    else:
+        inputTable = copy.deepcopy(inputTableOrig)
+        for j, line in enumerate(inputTable):
+            nPassOrig = float(inputTable[int(j)]["Npass"])
+            errNPassOrig = float(inputTable[j]["errNpass"])
+            nPassNew = nPassOrig * scaleFactor
+            if nPassOrig > 0.0:
+                errNpassNew = nPassNew * math.sqrt(
+                    pow(errNPassOrig / nPassOrig, 2)
+                    + pow(errScaleFactor / scaleFactor, 2)
+                )
+            else:
+                errNpassNew = nPassNew * errScaleFactor / scaleFactor
+
+            inputTable[int(j)] = {
+                "variableName": inputTable[j]["variableName"],
+                "min1": inputTable[j]["min1"],
+                "max1": inputTable[j]["max1"],
+                "min2": inputTable[j]["min2"],
+                "max2": inputTable[j]["max2"],
+                "Npass": nPassNew,
+                "errNpass": errNpassNew,
+                "EffRel": float(0),
+                "errEffRel": float(0),
+                "EffAbs": float(0),
+                "errEffAbs": float(0),
+            }
+    return inputTable
 
 
 ####################################################################################################
@@ -166,21 +302,40 @@ print("INFO: Using sample {} for QCD data-driven yields".format(qcdSampleName))
 singleFRPlotsFile = FindFile(options.singleFakeRateEstimateDir, "*_plots.root")
 singleFRTablesFile = FindFile(options.singleFakeRateEstimateDir, "*_tables.dat")
 singleFRQCDHistos = GetSampleHistosFromTFile(singleFRPlotsFile, qcdSampleName)
+singleFRQCDTable = ParseDatFile(singleFRTablesFile, qcdSampleName)
 singleFRDYJHistos = GetSampleHistosFromTFile(singleFRPlotsFile, zjetMCSampleName)
+singleFRDYJTable = ScaleTable(ParseDatFile(singleFRTablesFile, zjetMCSampleName), 1/1000., 0)
 # Try to find the 2FR plots and tables
 doubleFRPlotsFile = FindFile(options.doubleFakeRateEstimateDir, "*_plots.root")
 doubleFRTablesFile = FindFile(options.doubleFakeRateEstimateDir, "*_tables.dat")
 doubleFRQCDHistos = GetSampleHistosFromTFile(doubleFRPlotsFile, qcdSampleName)
-#FIXME TODO TABLES AS WELL
+doubleFRQCDTable = ParseDatFile(doubleFRTablesFile, qcdSampleName)
 
-# now we need to do 1FR - 2FR, where the subtraction is limited to 1FR/2
+# now we need to do 1FR - 2FR, where the subtraction is limited to 1FR/2 in each bin
+print("INFO: Subtracting histograms...", flush=True, end='')
 subbedHistos = DoHistoSubtraction(singleFRQCDHistos, doubleFRQCDHistos, singleFRDYJHistos)
+print("Done.")
+print("INFO: Subtracting tables...", flush=True, end='')
+singleFRQCDTableNoDYJ = SubtractTables(singleFRQCDTable, singleFRDYJTable)
+finalQCDYieldTable = SubtractTables(singleFRQCDTableNoDYJ, doubleFRQCDTable, False, True)
+# subbedTable = DoTableSubtraction(singleFRQCDTable, doubleFRQCDTable, singleFRDYJTable)
+subbedTable = finalQCDYieldTable
+print("Done.")
 
 tfilePath = options.outputDir+"/"+options.fileName
-print("INFO: Writing subtracted plots to {}...".format(tfilePath))
+print("INFO: Writing subtracted plots to {}...".format(tfilePath), flush=True)
 tfile = TFile.Open(tfilePath, "recreate", "", 207)
 tfile.cd()
 for histo in subbedHistos:
     histo.Write()
 tfile.Close()
+print("Done.")
+
+datFilePath = options.outputDir+"/"+options.fileName.replace(".root", ".dat")
+print("INFO: Writing subtracted tables to {}...".format(datFilePath), flush=True)
+WriteTable(singleFRQCDTable, "1FR", open(datFilePath, "w"))
+WriteTable(singleFRDYJTable, "DYJ1FR", open(datFilePath, "a"))
+WriteTable(singleFRQCDTableNoDYJ, "1FR-DYJ1FR", open(datFilePath, "a"))
+WriteTable(doubleFRQCDTable, "2FR", open(datFilePath, "a"))
+WriteTable(subbedTable, qcdSampleName, open(datFilePath, "a"))
 print("Done.")
