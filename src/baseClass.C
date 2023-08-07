@@ -556,6 +556,8 @@ void baseClass::readCutFile()
             exit(-2);
           }
           string modelName = splitByCommas[0];
+          if(!hasPreCut(splitByCommas[1]))
+            throw runtime_error("baseClass::readCutFile: TMVACut was specified in cut file, but no weight file was found among the precuts.");
           string weightFile = getPreCutString1(splitByCommas[1]);
           thisCut.reset(new TMVACut(modelName, weightFile));
           isTMVACut = true;
