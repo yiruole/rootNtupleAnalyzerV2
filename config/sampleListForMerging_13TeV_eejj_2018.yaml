@@ -325,7 +325,7 @@ EGamma_2018:
   - EGamma_2018C
   - EGamma_2018D
   isMC: false
-  isMC: false
+  save: false
 DATA:
   pieces:
   - EGamma_2018_all
