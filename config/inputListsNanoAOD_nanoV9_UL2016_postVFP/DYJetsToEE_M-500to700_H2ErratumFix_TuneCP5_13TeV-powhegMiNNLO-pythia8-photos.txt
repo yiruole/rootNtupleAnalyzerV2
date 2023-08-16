@@ -1,0 +1,1 @@
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv9/DYJetsToEE_M-500to700_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/40000/BF6A85FA-770A-3649-B4AF-D66ECFDEEAAA.root

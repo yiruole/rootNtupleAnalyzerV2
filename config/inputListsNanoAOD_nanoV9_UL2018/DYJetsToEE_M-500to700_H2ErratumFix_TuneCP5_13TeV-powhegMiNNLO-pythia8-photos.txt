@@ -1,0 +1,2 @@
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/DYJetsToEE_M-500to700_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/355272CC-36FF-914F-8823-71D98ABF096D.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/DYJetsToEE_M-500to700_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/30000/B1321FEA-78FA-5F4E-85F6-D0A41581A592.root
