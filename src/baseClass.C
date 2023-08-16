@@ -10,6 +10,7 @@
 #include "TMap.h"
 #include "TObjString.h"
 #include "TGraphAsymmErrors.h"
+#include "TPad.h"
 
 using namespace std;
 
@@ -73,6 +74,9 @@ baseClass::~baseClass()
   h_weightSums_->SetBinError(1,sqrt(sumGenWeightSqrs_));
   checkOverflow(h_weightSums_,sumTopPtWeights_);
   h_weightSums_->SetBinContent(2,sumTopPtWeights_);
+  checkOverflow(h_weightSums_,sumSignOnlyGenWeights_);
+  h_weightSums_->SetBinContent(3,sumSignOnlyGenWeights_);
+  h_weightSums_->SetBinError(3,sqrt(sumSignOnlyGenWeightSqrs_));
   h_weightSums_->Write();
   for(auto& hist : histsToSave_) {
     hist->Write();
@@ -255,11 +259,12 @@ void baseClass::init()
     skim_file_->cd("rootTupleTree");
     skim_tree_ = tree_->CloneTree(0);
     updateBranchList();
-    hCount_ = new TH1D("EventCounter","Event Counter",4,-0.5,3.5);
+    hCount_ = new TH1D("EventCounter","Event Counter",5,-0.5,4.5);
     hCount_->GetXaxis()->SetBinLabel(1,"all events");
     hCount_->GetXaxis()->SetBinLabel(2,"passed");
-    hCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
+    hCount_->GetXaxis()->SetBinLabel(3,"sum of gen weights");
     hCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
+    hCount_->GetXaxis()->SetBinLabel(5,"sum of sign of gen weights");
   }
 
   // Reduced Skim stuff
@@ -270,11 +275,12 @@ void baseClass::init()
     reduced_skim_file_->mkdir("rootTupleTree");
     reduced_skim_file_->cd("rootTupleTree");
     reduced_skim_tree_= new TTree("tree","Reduced Skim");
-    hReducedCount_ = new TH1D("EventCounter","Event Counter",4,-0.5,3.5);
+    hReducedCount_ = new TH1D("EventCounter","Event Counter",5,-0.5,4.5);
     hReducedCount_->GetXaxis()->SetBinLabel(1,"all events");
     hReducedCount_->GetXaxis()->SetBinLabel(2,"passed");
-    hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of amc@NLO weights");
+    hReducedCount_->GetXaxis()->SetBinLabel(3,"sum of gen weights");
     hReducedCount_->GetXaxis()->SetBinLabel(4,"sum of TopPt weights");
+    hReducedCount_->GetXaxis()->SetBinLabel(5,"sum of sign of gen weights");
     for (auto& cutName : orderedCutNames_) {
       auto c = cutName_cut_.find(cutName)->second;
       //cut * c = & (cc->second);
@@ -303,9 +309,10 @@ void baseClass::init()
 
   // setup sum of weights hist
   gDirectory->cd();
-  h_weightSums_ = new TH1D("SumOfWeights","Sum of weights over all events",2,-0.5,1.5);
-  h_weightSums_->GetXaxis()->SetBinLabel(1,"amc@NLOweightSum");
+  h_weightSums_ = new TH1D("SumOfWeights","Sum of weights over all events",3,-0.5,2.5);
+  h_weightSums_->GetXaxis()->SetBinLabel(1,"genWeightSum");
   h_weightSums_->GetXaxis()->SetBinLabel(2,"topPtWeightSum");
+  h_weightSums_->GetXaxis()->SetBinLabel(3,"signOnlyGenWeightSum");
 }
 
 void baseClass::readInputList()
@@ -322,6 +329,8 @@ void baseClass::readInputList()
   sumTopPtWeights_ = 0;
   double tmpSumGenWeights = 0;
   double tmpSumGenWeightSqrs = 0;
+  double tmpSumSignGenWeights = 0;
+  double tmpSumSignGenWeightSqrs = 0;
   double tmpSumTopPtWeights = 0;
   vector<string> rootFileNames;
 
@@ -364,6 +373,11 @@ void baseClass::readInputList()
       tmpSumGenWeightSqrs = getSumGenWeightSqrs(name);
       sumGenWeightSqrs_ += tmpSumGenWeightSqrs;
       STDOUT("gen weight sum (current,total): = "<<tmpSumGenWeights<<"+/-"<<sqrt(tmpSumGenWeightSqrs)<<", "<<sumGenWeights_<<"+/-"<<sqrt(sumGenWeightSqrs_));
+      tmpSumSignGenWeights = getSumSignOnlyGenWeights(name);
+      sumSignOnlyGenWeights_ += tmpSumSignGenWeights;
+      tmpSumSignGenWeightSqrs = getSumSignOnlyGenWeightSqrs(name);
+      sumSignOnlyGenWeightSqrs_ += tmpSumSignGenWeightSqrs;
+      STDOUT("sign only gen weight sum (current,total): = "<<tmpSumSignGenWeights<<"+/-"<<sqrt(tmpSumSignGenWeightSqrs)<<", "<<sumSignOnlyGenWeights_<<"+/-"<<sqrt(sumSignOnlyGenWeightSqrs_));
       tmpSumTopPtWeights = getSumTopPtWeights(name);
       sumTopPtWeights_ += tmpSumTopPtWeights;
       //STDOUT("TopPt weight sum (current,total): = "<<tmpSumTopPtWeights<<", "<<sumTopPtWeights_);
@@ -2056,6 +2070,22 @@ double baseClass::getSumGenWeightSqrs(const std::string& fileName)
   return sumGenWeightSqrs;
 }
 
+double baseClass::getSumSignOnlyGenWeights(const std::string& fileName)
+{
+  double sumGenWeights = getInfoFromHist(fileName, "EventCounter", 5);
+  if(!skimWasMade_)
+    sumGenWeights = getSumOfBranchFromEventsTree(fileName, "TMath::Sign(1, genWeight)");
+  return sumGenWeights;
+}
+
+double baseClass::getSumSignOnlyGenWeightSqrs(const std::string& fileName)
+{
+  double sumGenWeightSqrs = pow(getInfoFromHist(fileName, "EventCounter", 5, true), 2); // need sum(w^2)
+  if(!skimWasMade_)
+      sumGenWeightSqrs = getSumOfBranchFromEventsTree(fileName, "pow(TMath::Sign(1, genWeight), 2)");
+  return sumGenWeightSqrs;
+}
+
 double baseClass::getSumTopPtWeights(const std::string& fileName)
 {
   return getInfoFromHist(fileName, "EventCounter", 4);
@@ -2073,12 +2103,12 @@ double baseClass::getTreeEntries(const std::string& fName)
   return chain->GetEntries();
 }
 
-double baseClass::getSumWeightFromRunsTree(const std::string& fName, const std::string& weightName, int index)
+double baseClass::getSumWeightFromTree(const std::string& fName, const std::string& treeName, const std::string& weightName, int index)
 {
   if(index < 0)
-    return getSumArrayFromRunsTree(fName, weightName, false)[0];
+    return getSumArrayFromTree(fName, treeName, weightName, false)[0];
   else
-    return getSumArrayFromRunsTree(fName, weightName, true)[index];
+    return getSumArrayFromTree(fName, treeName, weightName, true)[index];
 }
 
 template <typename T> std::shared_ptr<T> baseClass::getSavedObjectFromFile(const std::string& fileName, const std::string& histName)
@@ -2100,50 +2130,62 @@ template <typename T> std::shared_ptr<T> baseClass::getSavedObjectFromFile(const
   return std::shared_ptr<T>(hist);
 }
 
-std::vector<double> baseClass::getSumArrayFromRunsTree(const std::string& fName, const std::string& weightName, bool isArrayBranch)
+std::vector<double> baseClass::getSumArrayFromTree(const std::string& fName, const std::string& treeName, const std::string& weightName, bool isArrayBranch)
 {
   std::vector<double> sumWeightArray(1);
 
-  auto chain = std::shared_ptr<TChain>(new TChain("Runs"));
+  auto chain = std::shared_ptr<TChain>(new TChain(treeName.c_str()));
   int retVal = chain->AddFile(fName.c_str(), -1);
   if(!retVal)
   {
-    STDOUT("ERROR: Something went wrong. Could not find TTree 'Runs' in the inputfile '" << fName << "'. Quit here.");
+    STDOUT("ERROR: Something went wrong. Could not find TTree '" << treeName << "' in the inputfile '" << fName << "'. Quit here.");
     exit(-2);
   }
 
   auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
-  if(readerTools->GetTree()->GetBranch(weightName.c_str())) // data may not have the branch we want
-  {
-    for(Long64_t entry = 0; entry < chain->GetEntries(); ++entry)
-    {
-      readerTools->LoadEntry(entry);
-      if(isArrayBranch)
-      {
-        unsigned int arraySize = readerTools->ReadArrayBranch<Double_t>(weightName).GetSize();
-        if(arraySize > 0 && arraySize != sumWeightArray.size())
-        {
-          if(entry == 0)
-            sumWeightArray.resize(arraySize);
-          else
-          {
-            STDOUT("ERROR: array '" << weightName << "' changed size between runs. The indices of the array are inconsistent. Refusing to proceed.");
-            exit(-2);
+  if(readerTools->GetTree()->GetBranch(weightName.c_str())) { // data may not have the branch we want
+      if(weightName == "LHEPdfSumw")
+          chain->Draw("LHEPdfSumw*genEventSumw");
+      else
+          chain->Draw(weightName.c_str());
+      Double_t* sumVals = chain->GetV1();
+      if(isArrayBranch) {
+          readerTools->LoadEntry(0);
+          unsigned int arraySize = readerTools->ReadArrayBranch<Double_t>(weightName).GetSize();
+          if(arraySize > 0 && arraySize != sumWeightArray.size())
+              sumWeightArray.resize(arraySize);
+          for(unsigned int index = 0; index < arraySize; ++index) {
+              sumWeightArray[index] += sumVals[index];
           }
-        }
-        for(unsigned int index = 0; index < arraySize; ++index) {
-          double toAdd = readerTools->ReadArrayBranch<Double_t>(weightName, index);
-          if(weightName == "LHEPdfSumw")
-            toAdd*=readerTools->ReadValueBranch<Double_t>("genEventSumw");
-          sumWeightArray[index]+=toAdd;
-        }
       }
       else
-        sumWeightArray[0]+=readerTools->ReadValueBranch<Double_t>(weightName);
-    }
+          sumWeightArray[0]+=*sumVals;
   }
 
   return sumWeightArray;
+}
+
+double baseClass::getSumOfBranchFromEventsTree(const std::string& fName, const std::string& name)
+{
+    double toReturn = -999;
+    auto chain = std::shared_ptr<TChain>(new TChain("Events"));
+    int retVal = chain->AddFile(fName.c_str(), -1);
+    if(!retVal)
+    {
+        STDOUT("ERROR: Something went wrong. Could not find Events TTree in the inputfile '" << fName << "'. Quit here.");
+        exit(-2);
+    }
+
+    auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
+    Long64_t events = chain->Draw(name.c_str(), name.c_str());
+    auto htemp = (TH1F*)gPad->GetPrimitive("htemp");
+    if(events > 0)
+        return htemp->Integral();
+    else {
+        STDOUT("baseClass::getWeightSumFromEventsTree(): something went wront drawing " << name << " from Events tree in file " << fName << " as requested.");
+        exit(-2);
+    }
+    return toReturn;
 }
 
 void baseClass::saveLHEPdfSumw(const std::string& fileName)
@@ -2543,11 +2585,14 @@ bool baseClass::writeSkimTree()
   checkOverflow(hCount_,NAfterSkim_);
   checkOverflow(hCount_,sumGenWeights_);
   checkOverflow(hCount_,sumTopPtWeights_);
+  checkOverflow(hCount_,sumSignOnlyGenWeights_);
   hCount_->SetBinContent(1,nEntTot);
   hCount_->SetBinContent(2,NAfterSkim_);
   hCount_->SetBinContent(3,sumGenWeights_);
   hCount_->SetBinError(3,sqrt(sumGenWeightSqrs_));
   hCount_->SetBinContent(4,sumTopPtWeights_);
+  hCount_->SetBinContent(5,sumSignOnlyGenWeights_);
+  hCount_->SetBinError(5,sqrt(sumSignOnlyGenWeightSqrs_));
   hCount_->Write();
   for(auto& hist : histsToSave_)
     hist->Write();
@@ -2582,11 +2627,14 @@ bool baseClass::writeReducedSkimTree()
   checkOverflow(hReducedCount_,NAfterReducedSkim_);
   checkOverflow(hReducedCount_,sumGenWeights_);
   checkOverflow(hReducedCount_,sumTopPtWeights_);
+  checkOverflow(hReducedCount_,sumSignOnlyGenWeights_);
   hReducedCount_->SetBinContent(1,nEntTot);
   hReducedCount_->SetBinContent(2,NAfterReducedSkim_);
   hReducedCount_->SetBinContent(3,sumGenWeights_);
   hReducedCount_->SetBinError(3,sqrt(sumGenWeightSqrs_));
   hReducedCount_->SetBinContent(4,sumTopPtWeights_);
+  hReducedCount_->SetBinContent(5,sumSignOnlyGenWeights_);
+  hReducedCount_->SetBinError(5,sqrt(sumSignOnlyGenWeightSqrs_));
   hReducedCount_->Write();
   for(auto& hist : histsToSave_)
     hist->Write();

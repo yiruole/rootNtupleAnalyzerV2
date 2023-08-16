@@ -822,10 +822,15 @@ class baseClass {
     double getGlobalInfoNstart(const std::string& fileName);
     double getSumGenWeights(const std::string& fileName);
     double getSumGenWeightSqrs(const std::string& fileName);
+    double getSumSignOnlyGenWeights(const std::string& fileName);
+    double getSumSignOnlyGenWeightSqrs(const std::string& fileName);
     double getSumTopPtWeights(const std::string& fileName);
     double getTreeEntries(const std::string& fileName);
-    double getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1);
-    std::vector<double> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch);
+    double getSumWeightFromRunsTree(const std::string& fName, const std::string& name, int index = -1) { return getSumWeightFromTree(fName, "Runs", name, index); }
+    double getSumWeightFromTree(const std::string& fName, const std::string& treeName, const std::string& name, int index = -1);
+    std::vector<double> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch) { return getSumArrayFromTree(fName, "Runs", name, isArrayBranch); }
+    std::vector<double> getSumArrayFromTree(const std::string& fName, const std::string& treeName, const std::string& name, bool isArrayBranch);
+    double getSumOfBranchFromEventsTree(const std::string& fName, const std::string& name);
     void saveLHEPdfSumw(const std::string& fileName);
     void saveEventsPassingCuts(const std::string& fileName);
     std::shared_ptr<TProfile> makeNewEventsPassingSkimCutsProfile(const std::shared_ptr<TProfile> prevProfFromFile = 0);
@@ -835,6 +840,8 @@ class baseClass {
     double sumGenWeights_;
     double sumGenWeightSqrs_;
     double sumTopPtWeights_;
+    double sumSignOnlyGenWeights_;
+    double sumSignOnlyGenWeightSqrs_;
 
     template <typename T> void checkOverflow(const TH1*, const T);
 
