@@ -830,7 +830,7 @@ class baseClass {
     double getSumWeightFromTree(const std::string& fName, const std::string& treeName, const std::string& name, int index = -1);
     std::vector<double> getSumArrayFromRunsTree(const std::string& fName, const std::string& name, bool isArrayBranch) { return getSumArrayFromTree(fName, "Runs", name, isArrayBranch); }
     std::vector<double> getSumArrayFromTree(const std::string& fName, const std::string& treeName, const std::string& name, bool isArrayBranch);
-    double getSumOfBranchFromEventsTree(const std::string& fName, const std::string& name);
+    double getSumOfExpressionFromEventsTree(const std::string& fName, const std::string& exp, const std::vector<std::string>& inputBranches);
     void saveLHEPdfSumw(const std::string& fileName);
     void saveEventsPassingCuts(const std::string& fileName);
     std::shared_ptr<TProfile> makeNewEventsPassingSkimCutsProfile(const std::shared_ptr<TProfile> prevProfFromFile = 0);

@@ -2074,7 +2074,7 @@ double baseClass::getSumSignOnlyGenWeights(const std::string& fileName)
 {
   double sumGenWeights = getInfoFromHist(fileName, "EventCounter", 5);
   if(!skimWasMade_)
-    sumGenWeights = getSumOfBranchFromEventsTree(fileName, "TMath::Sign(1, genWeight)");
+    sumGenWeights = getSumOfExpressionFromEventsTree(fileName, "TMath::Sign(1, genWeight)", std::vector<std::string>{"genWeight"});
   return sumGenWeights;
 }
 
@@ -2082,7 +2082,7 @@ double baseClass::getSumSignOnlyGenWeightSqrs(const std::string& fileName)
 {
   double sumGenWeightSqrs = pow(getInfoFromHist(fileName, "EventCounter", 5, true), 2); // need sum(w^2)
   if(!skimWasMade_)
-      sumGenWeightSqrs = getSumOfBranchFromEventsTree(fileName, "pow(TMath::Sign(1, genWeight), 2)");
+      sumGenWeightSqrs = getSumOfExpressionFromEventsTree(fileName, "pow(TMath::Sign(1, genWeight), 2)", std::vector<std::string>{"genWeight"});
   return sumGenWeightSqrs;
 }
 
@@ -2165,9 +2165,9 @@ std::vector<double> baseClass::getSumArrayFromTree(const std::string& fName, con
   return sumWeightArray;
 }
 
-double baseClass::getSumOfBranchFromEventsTree(const std::string& fName, const std::string& name)
+double baseClass::getSumOfExpressionFromEventsTree(const std::string& fName, const std::string& exp, const std::vector<std::string>& inputBranches)
 {
-    double toReturn = -999;
+    double toReturn = 0;
     auto chain = std::shared_ptr<TChain>(new TChain("Events"));
     int retVal = chain->AddFile(fName.c_str(), -1);
     if(!retVal)
@@ -2175,14 +2175,16 @@ double baseClass::getSumOfBranchFromEventsTree(const std::string& fName, const s
         STDOUT("ERROR: Something went wrong. Could not find Events TTree in the inputfile '" << fName << "'. Quit here.");
         exit(-2);
     }
-
     auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
-    Long64_t events = chain->Draw(name.c_str(), name.c_str());
+    for(const auto& branchName : inputBranches)
+        if(!readerTools->GetTree()->GetBranch(branchName.c_str())) // data may not have the branch we want
+            return toReturn;
+    Long64_t events = chain->Draw(exp.c_str(), exp.c_str());
     auto htemp = (TH1F*)gPad->GetPrimitive("htemp");
     if(events > 0)
         return htemp->Integral();
     else {
-        STDOUT("baseClass::getWeightSumFromEventsTree(): something went wront drawing " << name << " from Events tree in file " << fName << " as requested.");
+        STDOUT("baseClass::getWeightSumFromEventsTree(): something went wrong drawing '" << exp << "' from Events tree in file " << fName << " as requested.");
         exit(-2);
     }
     return toReturn;
