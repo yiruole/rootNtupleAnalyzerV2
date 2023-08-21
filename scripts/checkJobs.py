@@ -5,6 +5,7 @@ import glob
 from pathlib import Path
 import subprocess
 import shlex
+import re
 from tabulate import tabulate
 import ROOT as r
 
@@ -38,8 +39,7 @@ def GetDatasets(datasetListFile):
     datasets = []
     with open(datasetListFile, "r") as datasetList:
         for line in datasetList:
-            if line.startswith("#"):
-                continue
+            line = re.sub("#.*", "", line).strip()
             if len(line) < 4:
                 continue
             datasets.append(line)
@@ -101,8 +101,11 @@ def CheckEventsProcessedPerJob(fileNameEventsDict):
         path = Path(srcFile)
         datasetDir = str(path.parent.absolute().parent)+"/"
         datFiles = glob.glob(datasetDir+"output/*_{}.dat".format(index), recursive=True)
-        if len(datFiles) != 1:
+        if len(datFiles) > 1:
             raise RuntimeError("Didn't get exactly 1 dat file matching pattern '{}': {}. There should only be one.".format(datasetDir+"output/*_{}.dat".format(index), datFiles))
+        elif len(datFiles) == 0:
+            print("ERROR: Something happened with the job for src file {}: was not able to find dat file matching pattern '{}'.".format(srcFile, datasetDir+"output/*_{}.dat".format(index)))
+            continue
         datFilename = datFiles[0]
         eventsProcessed = 0
         with open(datFilename, 'r') as datFile:
@@ -143,6 +146,9 @@ harmlessErrorMessages.append("Warning in <TClass::Init>: no dictionary for class
 harmlessErrorMessages.append("No branch name is matching wildcard")
 harmlessErrorMessages.append("Error in <TNetXNGFile::ReadBuffers>: [ERROR] Server responded with an error: [3008] Single readv transfer is too large")
 harmlessErrorMessages.append("INFO:    /etc/singularity/ exists;")
+harmlessErrorMessages.append("security protocol 'ztn' disallowed for non-TLS connections.")
+harmlessErrorMessages.append("tac: write error: Broken pipe")  # no idea what this is about, but apparently harmless
+harmlessErrorMessages.append("Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1")
 
 print("Checking processing of events...")
 print("\t1) Gathering information on expected events per file from DAS...", end = '', flush = True)
@@ -236,7 +242,7 @@ if len(cmdsToRun) > 0:
             numOutputFiles = len(output.split())
             datasetInfoDict[datasets[idx]]["numOutputFiles"] = numOutputFiles
             if numOutputFiles != datasetInfoDict[datasets[idx]]["numExpectedOutputFiles"]:
-                datasetInfoDict[datasets[idx]]["numOutputFiles"] = False
+                datasetInfoDict[datasets[idx]]["OK"] = False
         # print("Ran commands {} for datasets {} and got info {}".format(cmds, datasets, [datasetInfoDict[datasets[datasetIdx]] for datasetIdx in range(0, 4)]))
 print("Done")
 print()
