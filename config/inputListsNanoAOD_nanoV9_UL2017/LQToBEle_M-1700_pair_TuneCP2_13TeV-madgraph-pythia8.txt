@@ -1,6 +1,6 @@
-root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/EB4C7296-12A0-614C-95E4-15D1DAB50DA7.root
-root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/EF3B2EB9-A02A-1045-9FA8-0D898FEEA55E.root
-root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/D5018617-7F64-E74A-A280-E9022EAA1066.root
-root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/6E96CF71-7272-814F-A9EA-4EECF26058AD.root
 root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/2560000/18B15A27-C0B3-DE4F-BDF1-CF19C7985738.root
 root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/2281486B-0F09-E343-BC4D-1C3D9988B957.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/D5018617-7F64-E74A-A280-E9022EAA1066.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/EB4C7296-12A0-614C-95E4-15D1DAB50DA7.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/EF3B2EB9-A02A-1045-9FA8-0D898FEEA55E.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL17NanoAODv9/LQToBEle_M-1700_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/40000/6E96CF71-7272-814F-A9EA-4EECF26058AD.root

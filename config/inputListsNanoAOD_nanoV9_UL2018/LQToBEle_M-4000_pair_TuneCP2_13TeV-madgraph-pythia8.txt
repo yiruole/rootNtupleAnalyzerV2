@@ -1,2 +1,2 @@
-root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-4000_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/30CBD72F-A03F-C348-ACB0-4DCBFDB17761.root
 root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-4000_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/18C387EE-C20B-7A44-9B25-36D247508C01.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL18NanoAODv9/LQToBEle_M-4000_pair_TuneCP2_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/40000/30CBD72F-A03F-C348-ACB0-4DCBFDB17761.root
