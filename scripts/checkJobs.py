@@ -95,6 +95,7 @@ def CheckEventsProcessedPerJob(fileNameEventsDict):
             try:
                 eventsExpected += fileNameEventsDict[fileName]
             except KeyError:
+                print("WARN: could not find key {} in fileNameEventsDict. Getting events expected manually (very slow).".format(fileName))
                 filesToReadFrom.append(rootFile)
         if len(filesToReadFrom) > 0:
             eventsExpected += GetNEventsFromFiles(filesToReadFrom)
@@ -126,9 +127,9 @@ def CheckEventsProcessedPerJob(fileNameEventsDict):
 ####################################################################################################
 #FIXME change to optparser
 if len(sys.argv) < 3:
-    raise RuntimeError("Incorrect number of arguments\n. Usage: {} datasetsFile localDir [outputFileDir].")
+    raise RuntimeError("Incorrect number of arguments\n. Usage: inputList localDir [outputFileDir].")
 
-datasetsFile = sys.argv[1]
+inputListFile = sys.argv[1]
 localDir = sys.argv[2]
 if len(sys.argv) > 3:
     outputDir = sys.argv[3]
@@ -150,11 +151,29 @@ harmlessErrorMessages.append("security protocol 'ztn' disallowed for non-TLS con
 harmlessErrorMessages.append("tac: write error: Broken pipe")  # no idea what this is about, but apparently harmless
 harmlessErrorMessages.append("Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1")
 
-print("Checking processing of events...")
-print("\t1) Gathering information on expected events per file from DAS...", end = '', flush = True)
-fileToEventsDict = GetFileEventsMapFromDAS(datasetsFile)
-print ("Done.", flush = True)
-print("\t2) Checking that all events expected were processed...", end = '', flush = True)
+print("Checking that all events expected were processed...", flush = True)
+fileToEventsDict = {}
+with open(inputListFile, "r") as inputList:
+    for line in inputList:
+        if not len(line.strip()) > 0:
+            continue
+        if line.strip().startswith("#"):
+            continue
+        # dataset = line.strip().split("/")[-1].split(".txt")[0]
+        fileListFile = line.strip()
+        eventsFilename = fileListFile.replace(".txt", "_nevents.txt")
+        eventsFileList = glob.glob(eventsFilename)
+        if len(eventsFileList) != 1:
+            raise RuntimeError("Could not find 1 nevents file '{}' as expected.".format(eventsFilename))
+        with open(fileListFile, "r") as fileList, open(eventsFilename, "r") as eventsFile:
+            for fileLine, eventsLine in zip(fileList, eventsFile):
+                if not len(fileLine.strip()) > 0:
+                    continue
+                if fileLine.strip().startswith("#"):
+                    continue
+                fileURL = fileLine.strip()
+                fileURL = re.sub("root://.*/store", "/store", fileURL)  # need to remove prefix
+                fileToEventsDict[fileURL] = int(eventsLine)
 CheckEventsProcessedPerJob(fileToEventsDict)
 print ("Done.", flush = True)
 
