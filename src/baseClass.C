@@ -11,6 +11,7 @@
 #include "TObjString.h"
 #include "TGraphAsymmErrors.h"
 #include "TPad.h"
+#include "TROOT.h"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   oldKey_                           ( "" ) 
 {
   STDOUT("begins");
+  gROOT->SetBatch();
   //nOptimizerCuts_ = 20; // number of cut points used in optimizer scan over a variable
   nOptimizerCuts_ = 10000; // number of cut points used in optimizer scan over a variable
   inputList_ = inputList;
@@ -38,7 +40,7 @@ baseClass::baseClass(string * inputList, string * cutFile, string * treeName, st
   }
   else
   {
-    STDOUT("baseClass::init(): ERROR: outputFileName_ == NULL ");
+    STDOUT("baseClass(): ERROR: outputFileName_ == NULL ");
     exit(-1);
   }
   cutEfficFile_ = cutEfficFile;
@@ -2144,10 +2146,14 @@ std::vector<double> baseClass::getSumArrayFromTree(const std::string& fName, con
 
   auto readerTools = std::unique_ptr<TTreeReaderTools>(new TTreeReaderTools(chain));
   if(readerTools->GetTree()->GetBranch(weightName.c_str())) { // data may not have the branch we want
+      // suppress info messages
+      int prevLevel = gErrorIgnoreLevel;
+      gErrorIgnoreLevel = kWarning;
       if(weightName == "LHEPdfSumw")
           chain->Draw("LHEPdfSumw*genEventSumw");
       else
           chain->Draw(weightName.c_str());
+      gErrorIgnoreLevel = prevLevel;
       Double_t* sumVals = chain->GetV1();
       if(isArrayBranch) {
           readerTools->LoadEntry(0);
@@ -2179,7 +2185,11 @@ double baseClass::getSumOfExpressionFromEventsTree(const std::string& fName, con
     for(const auto& branchName : inputBranches)
         if(!readerTools->GetTree()->GetBranch(branchName.c_str())) // data may not have the branch we want
             return toReturn;
+    // suppress info messages
+    int prevLevel = gErrorIgnoreLevel;
+    gErrorIgnoreLevel = kWarning;
     Long64_t events = chain->Draw(exp.c_str(), exp.c_str());
+    gErrorIgnoreLevel = prevLevel;
     auto htemp = (TH1F*)gPad->GetPrimitive("htemp");
     if(events > 0)
         return htemp->Integral();
