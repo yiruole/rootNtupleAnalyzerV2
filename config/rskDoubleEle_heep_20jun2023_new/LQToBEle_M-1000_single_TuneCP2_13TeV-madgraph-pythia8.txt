@@ -1,0 +1,3 @@
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8_0_rsk.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8_1_rsk.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8/LQToBEle_M-1000_single_TuneCP2_13TeV-madgraph-pythia8_2_rsk.root

@@ -1,0 +1,231 @@
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 28 - baseClass: begins
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 334 - readInputList: baseClass::readinputList(): inputList_ =  input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 338 - readInputList: baseClass::readInputList: Starting reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 354 - readInputList: baseClass::readInputList: Finished reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 1362000, 1362000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.50985e+07+/-12986.6, 1.50985e+07+/-12986.6
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_1_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 1000, 1363000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 11105.4+/-351.889, 1.51096e+07+/-12991.3
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_2_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 908000, 2271000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.00677e+07+/-10603.5, 2.51772e+07+/-16769.3
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_3_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 2000, 2273000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 22144.1+/-497.646, 2.51994e+07+/-16776.6
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_4_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 824000, 3097000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.13613e+06+/-10101.1, 3.43355e+07+/-19582.9
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_5_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 2000, 3099000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 22144.1+/-497.646, 3.43577e+07+/-19589.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_6_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 702000, 3801000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.7836e+06+/-9323.39, 4.21413e+07+/-21694.7
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_7_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4000, 3805000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 44221.5+/-703.778, 4.21855e+07+/-21706.1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_8_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 702000, 4507000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.7818e+06+/-9323.39, 4.99673e+07+/-23623.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_9_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4000, 4511000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 44310.5+/-703.778, 5.00116e+07+/-23634.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_10_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 648000, 5159000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.18297e+06+/-8957.63, 5.71946e+07+/-25274.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_11_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 6000, 5165000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 66521.4+/-861.948, 5.72611e+07+/-25289.5
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_12_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 640000, 5805000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.0948e+06+/-8902.16, 6.43559e+07+/-26810.6
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_13_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 6000, 5811000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 66410.1+/-861.948, 6.44223e+07+/-26824.5
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_14_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 556000, 6367000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 6.16321e+06+/-8297.41, 7.05855e+07+/-28078.4
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_15_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 20000, 6387000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 221753+/-1573.69, 7.08073e+07+/-28122.5
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_16_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 454000, 6841000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 5.03241e+06+/-7497.79, 7.58397e+07+/-29104.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_17_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 20000, 6861000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 221664+/-1573.69, 7.60613e+07+/-29147.4
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_18_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 440000, 7301000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 4.87765e+06+/-7381.28, 8.0939e+07+/-30067.4
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_19_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 23000, 7324000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 255091+/-1687.6, 8.11941e+07+/-30114.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_20_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 384000, 7708000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 4.25668e+06+/-6895.58, 8.54508e+07+/-30894.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_21_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 26000, 7734000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 288118+/-1794.29, 8.57389e+07+/-30946.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_22_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 316000, 8050000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 3.50293e+06+/-6255.31, 8.92418e+07+/-31572.1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_23_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 27000, 8077000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 299246+/-1828.47, 8.95411e+07+/-31625
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_24_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 297000, 8374000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 3.29235e+06+/-6064.34, 9.28334e+07+/-32201.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_25_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 30000, 8404000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 332562+/-1927.37, 9.3166e+07+/-32258.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_26_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 294000, 8698000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 3.25966e+06+/-6033.64, 9.64256e+07+/-32818.2
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_27_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 34000, 8732000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 376717+/-2051.85, 9.68024e+07+/-32882.3
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_28_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 256000, 8988000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 2.83821e+06+/-5630.22, 9.96406e+07+/-33360.8
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_29_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 60000, 9048000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 665281+/-2725.72, 1.00306e+08+/-33472
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_30_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 208000, 9256000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 2.30622e+06+/-5075.01, 1.02612e+08+/-33854.6
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_31_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 72000, 9328000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 798457+/-2985.88, 1.03411e+08+/-33986
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_32_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 178000, 9506000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.9741e+06+/-4694.78, 1.05385e+08+/-34308.7
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_33_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 76000, 9582000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 842612+/-3067.7, 1.06227e+08+/-34445.6
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_34_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 162000, 9744000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.79577e+06+/-4478.81, 1.08023e+08+/-34735.5
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_35_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 100000, 9844000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.10872e+06+/-3518.89, 1.09132e+08+/-34913.3
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_36_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 150000, 9994000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 1.66357e+06+/-4309.74, 1.10795e+08+/-35178.3
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 389 - readCutFile: Reading cutFile_ = cutTable_lq_eejj_jet2_eta_in_phi_out.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 422 - readCutFile: Getting JSON file: certifiedGolden_11mar2020_2016_2017_2018.json
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 670 - readCutFile: baseClass::readCutFile: Finished reading cutFile: cutTable_lq_eejj_jet2_eta_in_phi_out.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2506 - getSkimPreCutValue: getSkimPreCutValue: (produceSkim): INFO -- found the precut string in the map with value: 1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2501 - getSkimPreCutValue: getSkimPreCutValue: (produceReducedSkim): INFO -- did not find the precut string in the map!
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 731 - readCutFile: INFO: found pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 736 - readCutFile: INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 45 - baseClass: ends
+analysisClass::Loop() begins
+analysisClass::analysisClass(): nentries = 179007
+analysisClass:Loop(): jentry = 0/179007
+analysisClass:Loop(): jentry = 1/179007
+analysisClass:Loop(): jentry = 2/179007
+analysisClass:Loop(): jentry = 3/179007
+analysisClass:Loop(): jentry = 4/179007
+analysisClass:Loop(): jentry = 5/179007
+analysisClass:Loop(): jentry = 6/179007
+analysisClass:Loop(): jentry = 7/179007
+analysisClass:Loop(): jentry = 8/179007
+analysisClass:Loop(): jentry = 9/179007
+analysisClass:Loop(): jentry = 10000/179007
+analysisClass:Loop(): jentry = 20000/179007
+analysisClass:Loop(): jentry = 30000/179007
+analysisClass:Loop(): jentry = 40000/179007
+analysisClass:Loop(): jentry = 50000/179007
+analysisClass:Loop(): jentry = 60000/179007
+analysisClass:Loop(): jentry = 70000/179007
+analysisClass:Loop(): jentry = 80000/179007
+analysisClass:Loop(): jentry = 90000/179007
+analysisClass:Loop(): jentry = 100000/179007
+analysisClass:Loop(): jentry = 110000/179007
+analysisClass:Loop(): jentry = 120000/179007
+analysisClass:Loop(): jentry = 130000/179007
+analysisClass:Loop(): jentry = 140000/179007
+analysisClass:Loop(): jentry = 150000/179007
+analysisClass:Loop(): jentry = 160000/179007
+analysisClass:Loop(): jentry = 170000/179007
+analysisClass::Loop() ends
+‘analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.root’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/condor_cutTable_lq_eejj_jet2_eta_in_phi_out/analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/output/analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.root’
+removed ‘analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.root’
+‘analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.dat’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/condor_cutTable_lq_eejj_jet2_eta_in_phi_out/analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/output/analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.dat’
+removed ‘analysisClass_lq_eejj___WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_0.dat’

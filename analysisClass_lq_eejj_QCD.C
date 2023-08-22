@@ -1,0 +1,1 @@
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/analysisClass_lq_eejj_QCD.C

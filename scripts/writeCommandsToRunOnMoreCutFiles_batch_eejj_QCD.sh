@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Please run this script from the rootNtupleAnalyzerV2 directory by:  
+# Please run this script from the rootNtupleAnalyzerV2 directory by:
 # ./scripts/writeCommandsToRunOnMoreCutFiles.sh
 
 # This scripts creates the whole sets of commands needed to run the analysis on multiple cut files.
-# The commands will be written in a text file commandsToRunOnMoreCutFiles.txt in the current directory, 
+# The commands will be written in a text file commandsToRunOnMoreCutFiles.txt in the current directory,
 # to be used by doing cut&paste to a terminal.
 
 # Cut Files should first be created by a script ../rootNtupleMacrosV2/config/eejj/make_eejj_cutFiles.py
@@ -25,50 +25,22 @@ else
 fi
 
 #### INPUTS HERE ####
+ANANAME=HEM1516study_Jet2_PhiInHEM1516_UL_QCD
 #------------
-#ANANAME=qcdYield_eejj_9aug2021_oldOptFinalSels
-#ANANAME=qcd_eejj_btagMed_8jul2021
-#ANANAME=qcd_eejj_btagLoose_gtetwoBTags_13jul2021
-#ANANAME=qcd_eejj_loosenMee_addMasym_addMET_10aug2021
-#ANANAME=qcd_eejj_finalSelTestPunziAddMsym_3sep2021
-#ANANAME=qcd_eejj_optEGLooseFR_17jan2022
-#ANANAME=qcd_eejj_finalSels_EGLooseFR_19jan2022
-#ANANAME=qcd_eejj_BDTLQ1700parametrized_EGLooseFR_13may2022
-#ANANAME=qcd_eejj_preselOnly_EGLooseFR_6dec2022
-ANANAME=qcd_eejj_EGLooseFR_bdtParamFinalSels_7dec2022
-#------------
-#inputlist2016=config/oldInputLists/nanoV7/2016/nanoV7_2016_rskQCD_16oct2020_comb/inputList_dataOnly.txt
-#inputlist2016=config/nanoV7_2016_rskQCD_22mar2021_comb/inputList_dataOnly.txt
-#inputlist2016=config/nanoV7_2016_rskQCD_26nov2021_comb/inputList_dataOnly.txt
-#inputlist2016=config/nanoV7_2016_pskQCDEEJJ_egLoose_24mar2022_comb/inputList_dataOnly.txt
-#inputlist2017=config/nanoV7_2017_rskQCD_22apr2021/inputList_dataOnly.txt
-#inputlist2018=config/nanoV7_2018_rskQCD_22apr2021/inputList_dataOnly.txt
-inputlist2016pre=config/inputListsPSKQCD_egmloose_UL16preVFP_5dec2022/inputListAllCurrent.txt
-inputlist2016post=config/inputListsPSKQCD_egmloose_UL16postVFP_5dec2022/inputListAllCurrent.txt
+inputlist2018=config/rskQCD_heep_20jun2023/inputListAllCurrent.txt
 #------------
 CODENAME=analysisClass_lq_eejj_QCD
 #------------
-OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
+OUTDIRPATH=/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_PhiInHEM1516_UL_QCD
 # cut files
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Analysis/cutTable_lq_eejj_QCD.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1400_QCD.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT_parametrized_QCD.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj_QCD_MasymTest.txt"
-cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Optimization/cutTable_lq_eejj_QCD_opt.txt"
-#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Optimization/cutTable_lq_eejj_QCD_oneBTag_opt.txt"
-#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Optimization/cutTable_lq_eejj_QCD_twoBTags_opt.txt"
-#
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj_QCD_preselOnly.txt"
-#
-cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1300_QCD.txt
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1200_QCD.txt
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1100_QCD.txt
-"
-# ilumi
+cutFileAna="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_phi_in_QCD.txt"
+cutFileOpt="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_phi_in_QCD.txt"# ilumi
 ilumi2016pre=19501.601622
 ilumi2016post=16812.151722
 ilumi2017=41540 #FIXME: this number is just from the Egamma twiki
-ilumi2018=59399
+#ilumi2018=59399
+#ilumi2018=20760 #AB
+ilumi2018=38630 #CD
 QUEUEOPT=testmatch
 QUEUEANA=workday
 #------------
@@ -106,7 +78,8 @@ else
   queue=$QUEUEANA
 fi
 SUBDIR=ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
-EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
+#EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
+EOSDIR=/eos/user/r/ryi/LQ/NanoV7/${YEAR}/$DIRSTR/$ANANAME
 COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_QCD_${YEAR}_${DIRSTR}_batch_$(hostname -s).txt
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_QCD_dataDriven_${YEAR}.yaml
 #------------
@@ -147,9 +120,9 @@ EOF
 done
 
 
-echo "The set of commands to run on the cut files:" 
+echo "The set of commands to run on the cut files:"
 for file in $files
 do
 echo "  " $file
-done 
+done
 echo "has been written to $COMMANDFILE"

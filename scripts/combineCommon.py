@@ -1446,7 +1446,7 @@ def updateSample(dictFinalHistoAtSample, htemp, h, piece, sample, plotWeight, co
                 if list(htemp.GetXaxis().GetLabels()) != list(dictFinalHistoAtSample[h].GetXaxis().GetLabels()):
                     raise RuntimeError("htemp {} from piece {} to be added has x-axis bin labels {} which are inconsistent with existing hist from sample {}: {}".format(
                         htemp.GetName(), piece, list(htemp.GetXaxis().GetLabels()), sample, list(dictFinalHistoAtSample[h].GetXaxis().GetLabels())))
-                
+
         # Sep. 17 2017: scale first, then add with weight=1 to have "entries" correct
         htemp.Scale(plotWeight)
         #r.gDebug = 3

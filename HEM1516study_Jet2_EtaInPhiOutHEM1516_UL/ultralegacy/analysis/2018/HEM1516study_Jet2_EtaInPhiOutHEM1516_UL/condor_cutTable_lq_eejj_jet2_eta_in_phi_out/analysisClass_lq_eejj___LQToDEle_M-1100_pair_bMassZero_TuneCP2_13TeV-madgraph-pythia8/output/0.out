@@ -1,0 +1,40 @@
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 28 - baseClass: begins
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 334 - readInputList: baseClass::readinputList(): inputList_ =  input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 338 - readInputList: baseClass::readInputList: Starting reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 354 - readInputList: baseClass::readInputList: Finished reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 100000, 100000
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 706.93+/-2.23559, 706.93+/-2.23559
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 389 - readCutFile: Reading cutFile_ = cutTable_lq_eejj_jet2_eta_in_phi_out.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 422 - readCutFile: Getting JSON file: certifiedGolden_11mar2020_2016_2017_2018.json
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 670 - readCutFile: baseClass::readCutFile: Finished reading cutFile: cutTable_lq_eejj_jet2_eta_in_phi_out.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2506 - getSkimPreCutValue: getSkimPreCutValue: (produceSkim): INFO -- found the precut string in the map with value: 1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2501 - getSkimPreCutValue: getSkimPreCutValue: (produceReducedSkim): INFO -- did not find the precut string in the map!
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 731 - readCutFile: INFO: found pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 736 - readCutFile: INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 45 - baseClass: ends
+analysisClass::Loop() begins
+analysisClass::analysisClass(): nentries = 61831
+analysisClass:Loop(): jentry = 0/61831
+analysisClass:Loop(): jentry = 1/61831
+analysisClass:Loop(): jentry = 2/61831
+analysisClass:Loop(): jentry = 3/61831
+analysisClass:Loop(): jentry = 4/61831
+analysisClass:Loop(): jentry = 5/61831
+analysisClass:Loop(): jentry = 6/61831
+analysisClass:Loop(): jentry = 7/61831
+analysisClass:Loop(): jentry = 8/61831
+analysisClass:Loop(): jentry = 9/61831
+analysisClass:Loop(): jentry = 10000/61831
+analysisClass:Loop(): jentry = 20000/61831
+analysisClass:Loop(): jentry = 30000/61831
+analysisClass:Loop(): jentry = 40000/61831
+analysisClass:Loop(): jentry = 50000/61831
+analysisClass:Loop(): jentry = 60000/61831
+analysisClass::Loop() ends
+‘analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.root’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/condor_cutTable_lq_eejj_jet2_eta_in_phi_out/analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/output/analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.root’
+removed ‘analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.root’
+‘analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.dat’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_EtaInPhiOutHEM1516_UL/condor_cutTable_lq_eejj_jet2_eta_in_phi_out/analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/output/analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.dat’
+removed ‘analysisClass_lq_eejj___LQToDEle_M-1100_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0.dat’

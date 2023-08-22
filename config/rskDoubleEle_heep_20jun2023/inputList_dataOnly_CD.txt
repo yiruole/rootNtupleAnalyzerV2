@@ -1,0 +1,2 @@
+config/rskDoubleEle_heep_20jun2023/EGamma_Run2018C-UL2018_MiniAODv2_NanoAODv9-v1.txt
+config/rskDoubleEle_heep_20jun2023/EGamma_Run2018D-UL2018_MiniAODv2_NanoAODv9-v3.txt

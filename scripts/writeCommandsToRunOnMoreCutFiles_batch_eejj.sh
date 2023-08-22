@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Please run this script from the rootNtupleAnalyzerV2 directory by:  
+# Please run this script from the rootNtupleAnalyzerV2 directory by:
 # ./scripts/writeCommandsToRunOnMoreCutFiles.sh
 
 # This scripts creates the whole sets of commands needed to run the analysis on multiple cut files.
-# The commands will be written in a text file commandsToRunOnMoreCutFiles.txt in the current directory, 
+# The commands will be written in a text file commandsToRunOnMoreCutFiles.txt in the current directory,
 # to be used by doing cut&paste to a terminal.
 
 # Cut Files should first be created by a script ../rootNtupleMacrosV2/config/eejj/make_eejj_cutFiles.py
@@ -26,102 +26,23 @@ fi
 
 #### INPUTS HERE ####
 #------------
-#ANANAME=eejj_test_29nov2021_1jobPerDataset
-#ANANAME=eejj_finalSelsPunziAddFlatMasym_3sep2021
-#ANANAME=eejj_loosenMee_addMasym_addMET_10aug2021
-#ANANAME=eejj_masym_9aug2021
-#ANANAME=eejj_btagMed_8jul2021
-#ANANAME=eejj_gteOneBtag_btagMed_9jul2021
-#ANANAME=eejj_gteTwoBtags_btagLoose_9jul2021
-#ANANAME=eejj_gteTwoBtags_btagMed_13jul2021
-#ANANAME=eejj_opt_egLoose_18jan2022
-#ANANAME=eejj_finalSels_egLoose_19jan2022
-#ANANAME=eejj_finalSels_egLoose_4feb2022
-#ANANAME=eejj_optBDTLQ1700_egLoose_19feb2022_10kCutPoints_moreInputs
-#ANANAME=eejj_optBDTLQ1400_heepID_25feb2022
-#ANANAME=eejj_BDTLQ1700parametrized1-2_egLoose_13may2022
-#ANANAME=eejj_optBDTLQ1500_egLoose_21feb2022
-#ANANAME=eejj_optBDTLQ1700Mee200sT400_egLoose_23feb2022
-# ANANAME=eejj_optBDT_LQ1700_Mee200sT400_egLoose_6apr2022
-#ANANAME=eejj_nextTry_3aug2022
-#ANANAME=eejj_looseWithHeepEta_9aug2022
-#ANANAME=eejj_2nov2022_preselOnly_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK_meeBkgSystHist
-ANANAME=eejj_7dec2022_bdtParamFinalSels_eleSFsTrigSFsLead_ele27AndPhoton175_fromPSK
+ANANAME=HEM1516study_Jet2_BothInHEM1516_UL
 #------------
-# inputlist2016=config/nanoV7_2016_pskEEJJ_9nov2020_comb/inputListAllCurrent.txt
-# inputlist2016=config/nanoV7_2016_pskEEJJ_4jan2021_comb/inputListAllCurrent.txt
-# inputlist2016=config/nanoV7_2016_validation_pskEEJJ_15feb2021/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_pskEEJJ_25feb2021_comb/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_pskEEJJ_16mar2021_comb/inputListAllCurrent.txt
-#inputlist2017=config/nanoV7_2017_pskEEJJ_15nov2020_comb/inputListAllCurrent.txt
-#inputlist2018=config/nanoV7_2018_pskEEJJ_15nov2020_comb/inputList_dataOnly.txt
-#
-#inputlist2016=config/nanoV7_2016_pskEEJJ_12apr2021_comb/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_22sep2021/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_pskEEJJ_egLoose_4feb2022/inputListAllCurrent.txt
-#
-inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_1dec2022/inputListAllCurrent.txt
-inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_1dec2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsPSKEEJJ_UL16preVFP_19oct2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsPSKEEJJ_UL16postVFP_19oct2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_6oct2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_6oct2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsTest_RSK_UL16preVFP_SEleL_30sep2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsTest_RSK_UL16postVFP_SEleL_30sep2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_22sep2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_22sep2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_9sep2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_9sep2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_29aug2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_29aug2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_12aug2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_12aug2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsRSK_UL16preVFP_SEleL_11aug2022/inputListAllCurrent.txt  # MET smearing
-#inputlist2016post=config/inputListsRSK_UL16postVFP_SEleL_11aug2022/inputListAllCurrent.txt  # MET smearing
-#inputlist2016pre=config/inputListsPSK_UL16preVFP_eejj_8aug2022/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsPSK_UL16postVFP_eejj_8aug2022/inputListAllCurrent.txt
-#inputlist2016pre=config/inputListsPSK_UL16preVFP_eejj_8aug2022_heep/inputListAllCurrent.txt
-#inputlist2016post=config/inputListsPSK_UL16postVFP_eejj_8aug2022_heep/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_analysisPreselSkims_egLoose_4feb2022/inputListAllCurrent.txt
-#inputlist2016=config/nanoV7_2016_analysisPreselSkims_heep_2sep2021/inputListAllCurrent.txt
-inputlist2017=config/nanoV7_2017_pskEEJJ_12apr2021/inputListAllCurrent.txt
-#inputlist2017=config/nanoV7_2017_pskEEJJ_12apr2021_separate/inputList_LQToBEleOnly.txt
-inputlist2018=config/nanoV7_2018_pskEEJJ_12apr2021/inputListAllCurrent.txt
+inputlist2018=config/rskDoubleEle_heep_20jun2023/inputListAllCurrent_CD.txt
 #------------
 CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_oneBTag
 #------------
-OUTDIRPATH=$LQDATA  # a subdir will be created for each cut file 
+OUTDIRPATH=/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_BothInHEM1516_UL
 # cut files
-cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1300.txt
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1200.txt
-/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1100.txt
-"
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_preselOnly.txt"
-#
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_looserPresel.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj_loosePresel.txt"
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel.txt"
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel_noJetRequirements.txt"
-#cutFileAna2016="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/${YEAR#2016}/cutTable_lq_eejj_loosePresel_noJetRequirements_noPtEE.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR%%p*}/Analysis/cutTable_lq_eejj.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Analysis/cutTable_lq_eejj.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1400.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1500.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1600.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT1700.txt"
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleAnalyzerV2/cutTable_lq_eejj_BDT_parametrized.txt"
-#
-#cutFileAna="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Analysis/cutTable_lq_eejj_MasymTest.txt"
-cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Optimization/cutTable_lq_eejj_BDT_opt.txt"
-#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Optimization/cutTable_lq_eejj_opt.txt"
-#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config${YEAR}/Optimization/cutTable_lq_eejj_oneBTag_opt.txt"
-#cutFileOpt="/afs/cern.ch/user/s/scooper/work/private/LQNanoAODAttempt/Leptoquarks/analyzer/rootNtupleMacrosV2/config2016/Optimization/cutTable_lq_eejj_twoBTags_opt.txt"
-# ilumi
+cutFileAna="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"
+cutFileOpt="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"# ilumi
 ilumi2016pre=19501.601622
 ilumi2016post=16812.151722
 ilumi2017=41540 #FIXME: this number is just from the Egamma twiki
-ilumi2018=59399
+#ilumi2018=59399
+#ilumi2018=20760 #AB
+ilumi2018=38630 #CD
 excludeCombining=""
 #------------
 #QUEUEANA=tomorrow # for systs
@@ -166,7 +87,7 @@ else
 fi
 SUBDIR=ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
 #EOSDIR=/eos/user/s/scooper/LQ/NanoV7/${YEAR}/$DIRSTR/$ANANAME
-EOSDIR=/eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/${DIRSTR}/${YEAR}/$ANANAME
+EOSDIR=/eos/user/r/ryi/LQ/NanoV7/${YEAR}/$DIRSTR/$ANANAME
 COMMANDFILE=commandsToRunOnMoreCutFiles_eejj_${YEAR}_${DIRSTR}_batch_$(hostname -s).txt
 SAMPLELISTFORMERGING=config/sampleListForMerging_13TeV_eejj_${YEAR}.yaml
 #------------
@@ -214,7 +135,7 @@ mkdir -p $OUTDIRPATH/$SUBDIR/output_$suffix \
     -c $CODENAME \
     -d $OUTDIRPATH/$SUBDIR/condor_$suffix \
     -l $(echo "$ILUM*$FACTOR" | bc) \
-    -x $LQANA/versionsOfAnalysis/2016/eejj/${ANANAME}_${YEAR}/xsection_13TeV_2022_Mee_BkgControlRegion_gteTwoBtaggedJets_TTbar_Mee_BkgControlRegion_DYJets.txt \
+    -x $XSECTION \
     -o $OUTDIRPATH/$SUBDIR/output_$suffix \
     -s $SAMPLELISTFORMERGING \
     | tee $OUTDIRPATH/$SUBDIR/output_$suffix/combineTablesAndPlots_${suffix}.log \
@@ -253,9 +174,9 @@ EOF
 done
 
 
-echo "The set of commands to run on the cut files:" 
+echo "The set of commands to run on the cut files:"
 for file in $files
 do
 echo "  " $file
-done 
+done
 echo "has been written to $COMMANDFILE"

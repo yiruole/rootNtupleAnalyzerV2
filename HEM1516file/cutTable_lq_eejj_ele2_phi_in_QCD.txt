@@ -1,0 +1,137 @@
+#############################     Example of file with list of cuts
+#
+#
+#------------------------ Preliminary cut variables and values (cut level -1) here -----------------------------
+# This first list of variable names and values are used to pass configurable values to the user code associated
+# to a variable name.
+# The user can retrieve the values associated to a variable name via a provided function call
+# [e.g. getPreCutValue1("eleFidRegion") and similarly for value2, value3 and value4 ]
+# The idea is that the user can use these values to define the list of objects (electrons, jets, etc.) used in
+# analysis. No cut is automatically evaluated on these variables and the cut level must be equal to -1.
+# Variable names must be unique.
+#
+#VariableName         value1            value2          value3          value4          level
+#------------         ------------      -------------   ------------    -------------   -----
+produceSkim           1                 -               -               -               -1
+#-----------------------------------------------------------------------------------------------------------------------------
+# Preselection cuts
+#-----------------------------------------------------------------------------------------------------------------------------
+eleEta_bar            1.4442           -                -               -               -1
+eleEta_end1           1.566            2.0              -               -               -1
+eleEta_end2           2.000            2.5              -               -               -1
+#-----------------------------------------------------------------------------------------------------------------------------
+# Fake rates
+#-----------------------------------------------------------------------------------------------------------------------------
+QCDFakeRateFilename	   /afs/cern.ch/user/s/scooper/work/public/Leptoquarks/ultralegacy/fakeRate/2016postVFP/fr2DpostVFP.root - - - -1
+QCDCalcType            double   -   -   -   -1
+#
+#TrigCorrForSingleLeptonFinalState false   -   -   -   -1
+#-----------------------------------------------------------------------------------------------------------------------------
+# Analysis year
+#-----------------------------------------------------------------------------------------------------------------------------
+AnalysisYear   2016postVFP  - - - -1
+#------------------------------------------------------------------------------------------------------
+# Electron ID
+#------------------------------------------------------------------------------------------------------
+electronIDType             HEEP  - - - -1
+#-----------------------------------------------------------------------------------------------------------------------------
+# B-tagging
+# See: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation
+#-----------------------------------------------------------------------------------------------------------------------------
+BTagAlgo       DeepJet  - - - -1
+#BTagWP         Loose    - - - -1
+#BTagCutValue   0.0508   - - - -1
+BTagWP         Medium   - - - -1
+BTagCutValue   0.2598   - - - -1
+#
+#-----------------------------------------------------------------------------------------------------------------------------
+#--------------------------------- Cuts (level 0,1,2,3 ... n) below --------------------------------------------
+# The cut variable names, cut boundaries and histogram binnings are provided here by the user.
+# In the event loop of the analysisClass_template.C, the user have to fill each variable with its value using
+# a provided function call [ e.g. fillVariableWithValue("nEleFinal", number_of_electrons) ]
+# The variable names in the user code has to match the names provided here.
+# Variable names must be unique.
+# The cut will be declared "passed" if
+#    ( minValue1 < VariableName <= maxValue1 )
+# in case only the first range (minValue1, maxValue1) is provided,
+# otherwise the cut will be declared "passed" if
+#    ( minValue1 < VariableName <= maxValue1 )  OR  ( minValue2 < VariableName <= maxValue2 )
+# in case even the second range (minValue2, maxValue2) is provided.
+# The level of the cut (0,1,2 ... n) is provided by the user and can be used in the code to easily determine if
+# groups of same-level cuts have passed or failed.
+#
+#VariableName                   minValue1(<) maxValue1(>=)      minValue2(<)    maxValue2(>=)   level   histoNbinsMinMax      OptionalFlag
+#------------                   ------------ -------------      ------------    -------------   -----   ----------------      ------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#                          _           _   _
+# _ __  _ __ ___  ___  ___| | ___  ___| |_(_) ___  _ __
+#| '_ \| '__/ _ \/ __|/ _ \ |/ _ \/ __| __| |/ _ \| '_ \
+#| |_) | | |  __/\__ \  __/ |  __/ (__| |_| | (_) | | | |
+#| .__/|_|  \___||___/\___|_|\___|\___|\__|_|\___/|_| |_|
+#|_|
+#-----------------------------------------------------------------------------------------------------------------------------
+Reweighting			0	     1			-		-		0	2 -0.5 1.5
+PassLHECuts                        0              1              -           -           0           2             -0.5           1.5
+PassJSON                           0              1              -           -           0           2             -0.5           1.5
+PassHLT                            0              1              -           -           0           2             -0.5           1.5
+PassGlobalSuperTightHalo2016Filter 0              1              -           -           0           2             -0.5           1.5
+PassGoodVertices                   0              1              -           -           0           2             -0.5           1.5
+PassHBHENoiseFilter                0              1              -           -           0           2             -0.5           1.5
+PassHBHENoiseIsoFilter             0              1              -           -           0           2             -0.5           1.5
+PassBadEESupercrystalFilter        0              1              -           -           0           2             -0.5           1.5
+PassEcalDeadCellTrigPrim           0              1              -           -           0           2             -0.5           1.5
+PassBadPFMuonFilter                0              1              -           -           0           2             -0.5           1.5
+PassEcalBadCalibV2Filter           0              1              -           -           0           2             -0.5           1.5
+PassNEle                           0              1              -           -           0           2             -0.5           1.5
+PassNMuon                          0              1              -           -           0           2             -0.5           1.5
+nEle_hltMatched                    -inf           +inf           -           -           0           3             -0.5           2.5
+nJet_hltMatched                    -inf           +inf           -           -           0           3             -0.5           2.5
+Ele1_Pt_skim                       40             +inf           -           -           0           200           0              2000
+Ele2_Pt_skim                       40             +inf           -           -           0           200           0              2000
+PassIDRequirements                 0              1              -           -           0           2             -0.5           1.5
+#Ele1_PassHEEPSCEtaCut              0              1              -           -           0           2             -0.5           1.5
+#Ele2_PassHEEPSCEtaCut              0              1              -           -           0           2             -0.5           1.5
+nJet                               -inf           +inf           -           -           0           16            -0.5           15.5
+Jet1_Pt_skim                       35             +inf           -           -           0           200           0              2000
+Jet1_Eta                           -2.4           2.4            -           -           0           100           -5             5
+Jet2_Pt_skim                       35             +inf           -           -           0           200           0              2000
+Jet2_Eta                           -2.4           2.4            -           -           0           100           -5             5
+DR_Ele1Jet1                        -inf           +inf           -           -           0           100           0              10
+DR_Ele1Jet2                        -inf           +inf           -           -           0           100           0              10
+DR_Ele2Jet1                        -inf           +inf           -           -           0           100           0              10
+DR_Ele2Jet2                        -inf           +inf           -           -           0           100           0              10
+DR_Jet1Jet2                        -inf           +inf           -           -           0           100           0              10
+PFMET_Type1_Pt                     -inf           +inf           -           -           0           200           0              20
+PFMET_Type1_Phi                    -inf           +inf           -           -           0           200           0              2000
+Ele1_Phi                           -inf           +inf           -           -           0           60            -3.1416        3.14
+Ele2_Phi                           -inf           +inf           -           -           0           60            -3.1416        3.1416
+Ele1_Eta                           -inf           +inf           -           -           0           100           -5             5
+Ele2_Eta                           -inf           +inf           -           -           0           100           -5             5
+M_e1j1                             -inf           +inf           -           -           0           200           0              2000
+M_e1j2                             -inf           +inf           -           -           0           200           0              2000
+M_e2j1                             -inf           +inf           -           -           0           200           0              2000
+M_e2j2                             -inf           +inf           -           -           0           200           0              2000
+Jet3_Pt                            -inf           +inf           -           -           0           200           0              2000
+Jet3_Eta                           -inf           +inf           -           -           0           100           -5             5
+Jet1_Phi                           -inf           +inf           -           -           0           60            -3.1416        3.1416
+Jet2_Phi                           -inf           +inf           -           -           0           60            -3.1416        3.1416
+Jet3_Phi                           -inf           +inf           -           -           0           60            -3.1416        3.1416
+Masym                              -inf           +inf           -           -           0           200           0              2000
+MejMin                             -inf           +inf           -           -           0           200           0              2000
+MejMax                             -inf           +inf           -           -           0           200           0              2000
+Meejj                              -inf           +inf           -           -           0           200           0              2000
+Pt_e1e2_skim                       50             +inf           -           -           0           200           0              2000
+sT_eejj_skim                       200            +inf           -           -           0           200           0              2000
+M_e1e2_skim                        40             +inf           -           -           0           200           0              2000
+skim_selection                     -inf           +inf           -           -           1           2             -0.5           1.5
+Ele1_Pt                            50             +inf           -           -           1           200           0              2000
+Ele2_Pt                            50             +inf           -           -           1           200           0              2000
+Jet1_Pt                            50             +inf           -           -           1           200           0              2000
+Jet2_Pt                            50             +inf           -           -           1           200           0              2000
+Pt_e1e2                            70             +inf           -           -           1           200           0              2000
+sT_eejj_bkgCR                      300            +inf           -           -           1           200           0              2000
+M_e1e2_bkgCR                       50             +inf           -           -           1           200           0              2000
+preselection                       -inf           +inf           -           -           1           2             -0.5           1.5
+sT_eejj                            400            +inf           -           -           1           200           0              2000
+M_e1e2                             200            +inf           -           -           1           200           0              2000
+trainingSelection                  -inf           +inf           -           -           1           2             -0.5           1.5

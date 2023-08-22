@@ -1,0 +1,19 @@
+QCDFakes_EGamma_2018D:
+  pieces:
+  - /EGamma/Run2018D-UL2018_MiniAODv2_NanoAODv9-v3/NANOAOD
+  isMC: false
+QCDFakes_EGamma_2018C:
+  pieces:
+  - /EGamma/Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD
+  isMC: false
+QCDFakes_EGamma_2018CD:
+  pieces:
+  - QCDFakes_EGamma_2018C
+  - QCDFakes_EGamma_2018D
+  isMC: false
+  save: true
+QCDFakes_DATA:
+  pieces:
+  - QCDFakes_EGamma_2018CD
+  save: true
+  isMC: false

@@ -1,0 +1,1 @@
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_36_rsk.root

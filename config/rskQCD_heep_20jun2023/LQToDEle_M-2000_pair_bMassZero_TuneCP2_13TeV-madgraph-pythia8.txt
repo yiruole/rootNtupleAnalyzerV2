@@ -1,0 +1,1 @@
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskQCD_heep_20jun2023/LQToDEle_M-2000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8/LQToDEle_M-2000_pair_bMassZero_TuneCP2_13TeV-madgraph-pythia8_0_rsk.root

@@ -1,0 +1,1102 @@
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 28 - baseClass: begins
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 334 - readInputList: baseClass::readinputList(): inputList_ =  input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 338 - readInputList: baseClass::readInputList: Starting reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 354 - readInputList: baseClass::readInputList: Finished reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4858623, 4858623
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.25719e+10+/-5.56781e+07, 8.25719e+10+/-5.56781e+07
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_1_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3294253, 8152876
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 5.59841e+10+/-4.58465e+07, 1.38556e+11+/-7.21246e+07
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4883020, 13035896
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.29337e+10+/-5.58177e+07, 2.2149e+11+/-9.12007e+07
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_3_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3351948, 16387844
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 5.69716e+10+/-4.62462e+07, 2.78461e+11+/-1.02256e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_4_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4939916, 21327760
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.40508e+10+/-5.6142e+07, 3.62512e+11+/-1.16654e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_5_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3409901, 24737661
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 5.79013e+10+/-4.66443e+07, 4.20413e+11+/-1.25634e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_6_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4982701, 29720362
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.46668e+10+/-5.63846e+07, 5.0508e+11+/-1.37707e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_7_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3571375, 33291737
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 6.0689e+10+/-4.77359e+07, 5.65769e+11+/-1.45746e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_8_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5240966, 38532703
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.90852e+10+/-5.78274e+07, 6.54854e+11+/-1.56799e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_9_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3935986, 42468689
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 6.69266e+10+/-5.01135e+07, 7.21781e+11+/-1.64612e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_10_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5358164, 47826853
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.11006e+10+/-5.84704e+07, 8.12881e+11+/-1.74688e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_11_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4170966, 51997819
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.09135e+10+/-5.15877e+07, 8.83795e+11+/-1.82146e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_12_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5636403, 57634222
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.573e+10+/-5.99693e+07, 9.79525e+11+/-1.91764e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_13_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4677397, 62311619
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.95663e+10+/-5.46298e+07, 1.05909e+12+/-1.99394e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_14_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5602136, 67913755
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.51899e+10+/-5.97867e+07, 1.15428e+12+/-2.08164e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_15_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4744934, 72658689
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.06521e+10+/-5.50228e+07, 1.23493e+12+/-2.15314e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_16_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5681288, 78339977
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.65763e+10+/-6.02076e+07, 1.33151e+12+/-2.23573e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_17_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5130543, 83470520
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.72338e+10+/-5.72149e+07, 1.41874e+12+/-2.30778e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_18_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5644423, 89114943
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.59391e+10+/-6.00119e+07, 1.51468e+12+/-2.38453e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_19_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5106209, 94221152
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.67365e+10+/-5.70791e+07, 1.60142e+12+/-2.4519e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_20_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5563774, 99784926
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.46295e+10+/-5.95816e+07, 1.69605e+12+/-2.52325e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_21_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5068320, 104853246
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.61608e+10+/-5.68669e+07, 1.78221e+12+/-2.58654e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_22_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5424771, 110278017
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 9.2246e+10+/-5.88327e+07, 1.87446e+12+/-2.6526e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_23_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4897218, 115175235
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.3238e+10+/-5.58988e+07, 1.95769e+12+/-2.71086e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_24_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 5176633, 120351868
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.79897e+10+/-5.74714e+07, 2.04568e+12+/-2.77111e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_25_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4840721, 125192589
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.23378e+10+/-5.55754e+07, 2.12802e+12+/-2.82629e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_26_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4996693, 130189282
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.49207e+10+/-5.64637e+07, 2.21294e+12+/-2.88214e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_27_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4744089, 134933371
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.06657e+10+/-5.50179e+07, 2.29361e+12+/-2.93418e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_28_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4902493, 139835864
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.33311e+10+/-5.59289e+07, 2.37694e+12+/-2.98701e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_29_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4752684, 144588548
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.07657e+10+/-5.50677e+07, 2.4577e+12+/-3.03735e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_30_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4913505, 149502053
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.35472e+10+/-5.59917e+07, 2.54125e+12+/-3.08853e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_31_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4719628, 154221681
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.03279e+10+/-5.48759e+07, 2.62158e+12+/-3.1369e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_32_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4854176, 159075857
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.25174e+10+/-5.56526e+07, 2.7041e+12+/-3.18588e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_33_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4661918, 163737775
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.9242e+10+/-5.45394e+07, 2.78334e+12+/-3.23223e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_34_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4703380, 168441155
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.99499e+10+/-5.47814e+07, 2.86329e+12+/-3.27832e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_35_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4656218, 173097373
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.9134e+10+/-5.4506e+07, 2.94242e+12+/-3.32333e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_36_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4720206, 177817579
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 8.02933e+10+/-5.48793e+07, 3.02272e+12+/-3.36833e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_37_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4656502, 182474081
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.91127e+10+/-5.45077e+07, 3.10183e+12+/-3.41215e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_38_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4681211, 187155292
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.96441e+10+/-5.46521e+07, 3.18147e+12+/-3.45564e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_39_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 4631794, 191787086
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 7.87425e+10+/-5.43629e+07, 3.26021e+12+/-3.49814e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2034 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_40_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 361 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 3723724, 195510810
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 366 - readInputList: gen weight sum (current,total): = 6.32623e+10+/-4.87435e+07, 3.32348e+12+/-3.53194e+08
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2149 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2179 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 389 - readCutFile: Reading cutFile_ = cutTable_lq_eejj_jet2_both_in.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 422 - readCutFile: Getting JSON file: certifiedGolden_11mar2020_2016_2017_2018.json
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 670 - readCutFile: baseClass::readCutFile: Finished reading cutFile: cutTable_lq_eejj_jet2_both_in.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2506 - getSkimPreCutValue: getSkimPreCutValue: (produceSkim): INFO -- found the precut string in the map with value: 1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2501 - getSkimPreCutValue: getSkimPreCutValue: (produceReducedSkim): INFO -- did not find the precut string in the map!
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 731 - readCutFile: INFO: found pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 736 - readCutFile: INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 45 - baseClass: ends
+analysisClass::Loop() begins
+analysisClass::analysisClass(): nentries = 8687497
+analysisClass:Loop(): jentry = 0/8687497
+analysisClass:Loop(): jentry = 1/8687497
+analysisClass:Loop(): jentry = 2/8687497
+analysisClass:Loop(): jentry = 3/8687497
+analysisClass:Loop(): jentry = 4/8687497
+analysisClass:Loop(): jentry = 5/8687497
+analysisClass:Loop(): jentry = 6/8687497
+analysisClass:Loop(): jentry = 7/8687497
+analysisClass:Loop(): jentry = 8/8687497
+analysisClass:Loop(): jentry = 9/8687497
+analysisClass:Loop(): jentry = 10000/8687497
+analysisClass:Loop(): jentry = 20000/8687497
+analysisClass:Loop(): jentry = 30000/8687497
+analysisClass:Loop(): jentry = 40000/8687497
+analysisClass:Loop(): jentry = 50000/8687497
+analysisClass:Loop(): jentry = 60000/8687497
+analysisClass:Loop(): jentry = 70000/8687497
+analysisClass:Loop(): jentry = 80000/8687497
+analysisClass:Loop(): jentry = 90000/8687497
+analysisClass:Loop(): jentry = 100000/8687497
+analysisClass:Loop(): jentry = 110000/8687497
+analysisClass:Loop(): jentry = 120000/8687497
+analysisClass:Loop(): jentry = 130000/8687497
+analysisClass:Loop(): jentry = 140000/8687497
+analysisClass:Loop(): jentry = 150000/8687497
+analysisClass:Loop(): jentry = 160000/8687497
+analysisClass:Loop(): jentry = 170000/8687497
+analysisClass:Loop(): jentry = 180000/8687497
+analysisClass:Loop(): jentry = 190000/8687497
+analysisClass:Loop(): jentry = 200000/8687497
+analysisClass:Loop(): jentry = 210000/8687497
+analysisClass:Loop(): jentry = 220000/8687497
+analysisClass:Loop(): jentry = 230000/8687497
+analysisClass:Loop(): jentry = 240000/8687497
+analysisClass:Loop(): jentry = 250000/8687497
+analysisClass:Loop(): jentry = 260000/8687497
+analysisClass:Loop(): jentry = 270000/8687497
+analysisClass:Loop(): jentry = 280000/8687497
+analysisClass:Loop(): jentry = 290000/8687497
+analysisClass:Loop(): jentry = 300000/8687497
+analysisClass:Loop(): jentry = 310000/8687497
+analysisClass:Loop(): jentry = 320000/8687497
+analysisClass:Loop(): jentry = 330000/8687497
+analysisClass:Loop(): jentry = 340000/8687497
+analysisClass:Loop(): jentry = 350000/8687497
+analysisClass:Loop(): jentry = 360000/8687497
+analysisClass:Loop(): jentry = 370000/8687497
+analysisClass:Loop(): jentry = 380000/8687497
+analysisClass:Loop(): jentry = 390000/8687497
+analysisClass:Loop(): jentry = 400000/8687497
+analysisClass:Loop(): jentry = 410000/8687497
+analysisClass:Loop(): jentry = 420000/8687497
+analysisClass:Loop(): jentry = 430000/8687497
+analysisClass:Loop(): jentry = 440000/8687497
+analysisClass:Loop(): jentry = 450000/8687497
+analysisClass:Loop(): jentry = 460000/8687497
+analysisClass:Loop(): jentry = 470000/8687497
+analysisClass:Loop(): jentry = 480000/8687497
+analysisClass:Loop(): jentry = 490000/8687497
+analysisClass:Loop(): jentry = 500000/8687497
+analysisClass:Loop(): jentry = 510000/8687497
+analysisClass:Loop(): jentry = 520000/8687497
+analysisClass:Loop(): jentry = 530000/8687497
+analysisClass:Loop(): jentry = 540000/8687497
+analysisClass:Loop(): jentry = 550000/8687497
+analysisClass:Loop(): jentry = 560000/8687497
+analysisClass:Loop(): jentry = 570000/8687497
+analysisClass:Loop(): jentry = 580000/8687497
+analysisClass:Loop(): jentry = 590000/8687497
+analysisClass:Loop(): jentry = 600000/8687497
+analysisClass:Loop(): jentry = 610000/8687497
+analysisClass:Loop(): jentry = 620000/8687497
+analysisClass:Loop(): jentry = 630000/8687497
+analysisClass:Loop(): jentry = 640000/8687497
+analysisClass:Loop(): jentry = 650000/8687497
+analysisClass:Loop(): jentry = 660000/8687497
+analysisClass:Loop(): jentry = 670000/8687497
+analysisClass:Loop(): jentry = 680000/8687497
+analysisClass:Loop(): jentry = 690000/8687497
+analysisClass:Loop(): jentry = 700000/8687497
+analysisClass:Loop(): jentry = 710000/8687497
+analysisClass:Loop(): jentry = 720000/8687497
+analysisClass:Loop(): jentry = 730000/8687497
+analysisClass:Loop(): jentry = 740000/8687497
+analysisClass:Loop(): jentry = 750000/8687497
+analysisClass:Loop(): jentry = 760000/8687497
+analysisClass:Loop(): jentry = 770000/8687497
+analysisClass:Loop(): jentry = 780000/8687497
+analysisClass:Loop(): jentry = 790000/8687497
+analysisClass:Loop(): jentry = 800000/8687497
+analysisClass:Loop(): jentry = 810000/8687497
+analysisClass:Loop(): jentry = 820000/8687497
+analysisClass:Loop(): jentry = 830000/8687497
+analysisClass:Loop(): jentry = 840000/8687497
+analysisClass:Loop(): jentry = 850000/8687497
+analysisClass:Loop(): jentry = 860000/8687497
+analysisClass:Loop(): jentry = 870000/8687497
+analysisClass:Loop(): jentry = 880000/8687497
+analysisClass:Loop(): jentry = 890000/8687497
+analysisClass:Loop(): jentry = 900000/8687497
+analysisClass:Loop(): jentry = 910000/8687497
+analysisClass:Loop(): jentry = 920000/8687497
+analysisClass:Loop(): jentry = 930000/8687497
+analysisClass:Loop(): jentry = 940000/8687497
+analysisClass:Loop(): jentry = 950000/8687497
+analysisClass:Loop(): jentry = 960000/8687497
+analysisClass:Loop(): jentry = 970000/8687497
+analysisClass:Loop(): jentry = 980000/8687497
+analysisClass:Loop(): jentry = 990000/8687497
+analysisClass:Loop(): jentry = 1000000/8687497
+analysisClass:Loop(): jentry = 1010000/8687497
+analysisClass:Loop(): jentry = 1020000/8687497
+analysisClass:Loop(): jentry = 1030000/8687497
+analysisClass:Loop(): jentry = 1040000/8687497
+analysisClass:Loop(): jentry = 1050000/8687497
+analysisClass:Loop(): jentry = 1060000/8687497
+analysisClass:Loop(): jentry = 1070000/8687497
+analysisClass:Loop(): jentry = 1080000/8687497
+analysisClass:Loop(): jentry = 1090000/8687497
+analysisClass:Loop(): jentry = 1100000/8687497
+analysisClass:Loop(): jentry = 1110000/8687497
+analysisClass:Loop(): jentry = 1120000/8687497
+analysisClass:Loop(): jentry = 1130000/8687497
+analysisClass:Loop(): jentry = 1140000/8687497
+analysisClass:Loop(): jentry = 1150000/8687497
+analysisClass:Loop(): jentry = 1160000/8687497
+analysisClass:Loop(): jentry = 1170000/8687497
+analysisClass:Loop(): jentry = 1180000/8687497
+analysisClass:Loop(): jentry = 1190000/8687497
+analysisClass:Loop(): jentry = 1200000/8687497
+analysisClass:Loop(): jentry = 1210000/8687497
+analysisClass:Loop(): jentry = 1220000/8687497
+analysisClass:Loop(): jentry = 1230000/8687497
+analysisClass:Loop(): jentry = 1240000/8687497
+analysisClass:Loop(): jentry = 1250000/8687497
+analysisClass:Loop(): jentry = 1260000/8687497
+analysisClass:Loop(): jentry = 1270000/8687497
+analysisClass:Loop(): jentry = 1280000/8687497
+analysisClass:Loop(): jentry = 1290000/8687497
+analysisClass:Loop(): jentry = 1300000/8687497
+analysisClass:Loop(): jentry = 1310000/8687497
+analysisClass:Loop(): jentry = 1320000/8687497
+analysisClass:Loop(): jentry = 1330000/8687497
+analysisClass:Loop(): jentry = 1340000/8687497
+analysisClass:Loop(): jentry = 1350000/8687497
+analysisClass:Loop(): jentry = 1360000/8687497
+analysisClass:Loop(): jentry = 1370000/8687497
+analysisClass:Loop(): jentry = 1380000/8687497
+analysisClass:Loop(): jentry = 1390000/8687497
+analysisClass:Loop(): jentry = 1400000/8687497
+analysisClass:Loop(): jentry = 1410000/8687497
+analysisClass:Loop(): jentry = 1420000/8687497
+analysisClass:Loop(): jentry = 1430000/8687497
+analysisClass:Loop(): jentry = 1440000/8687497
+analysisClass:Loop(): jentry = 1450000/8687497
+analysisClass:Loop(): jentry = 1460000/8687497
+analysisClass:Loop(): jentry = 1470000/8687497
+analysisClass:Loop(): jentry = 1480000/8687497
+analysisClass:Loop(): jentry = 1490000/8687497
+analysisClass:Loop(): jentry = 1500000/8687497
+analysisClass:Loop(): jentry = 1510000/8687497
+analysisClass:Loop(): jentry = 1520000/8687497
+analysisClass:Loop(): jentry = 1530000/8687497
+analysisClass:Loop(): jentry = 1540000/8687497
+analysisClass:Loop(): jentry = 1550000/8687497
+analysisClass:Loop(): jentry = 1560000/8687497
+analysisClass:Loop(): jentry = 1570000/8687497
+analysisClass:Loop(): jentry = 1580000/8687497
+analysisClass:Loop(): jentry = 1590000/8687497
+analysisClass:Loop(): jentry = 1600000/8687497
+analysisClass:Loop(): jentry = 1610000/8687497
+analysisClass:Loop(): jentry = 1620000/8687497
+analysisClass:Loop(): jentry = 1630000/8687497
+analysisClass:Loop(): jentry = 1640000/8687497
+analysisClass:Loop(): jentry = 1650000/8687497
+analysisClass:Loop(): jentry = 1660000/8687497
+analysisClass:Loop(): jentry = 1670000/8687497
+analysisClass:Loop(): jentry = 1680000/8687497
+analysisClass:Loop(): jentry = 1690000/8687497
+analysisClass:Loop(): jentry = 1700000/8687497
+analysisClass:Loop(): jentry = 1710000/8687497
+analysisClass:Loop(): jentry = 1720000/8687497
+analysisClass:Loop(): jentry = 1730000/8687497
+analysisClass:Loop(): jentry = 1740000/8687497
+analysisClass:Loop(): jentry = 1750000/8687497
+analysisClass:Loop(): jentry = 1760000/8687497
+analysisClass:Loop(): jentry = 1770000/8687497
+analysisClass:Loop(): jentry = 1780000/8687497
+analysisClass:Loop(): jentry = 1790000/8687497
+analysisClass:Loop(): jentry = 1800000/8687497
+analysisClass:Loop(): jentry = 1810000/8687497
+analysisClass:Loop(): jentry = 1820000/8687497
+analysisClass:Loop(): jentry = 1830000/8687497
+analysisClass:Loop(): jentry = 1840000/8687497
+analysisClass:Loop(): jentry = 1850000/8687497
+analysisClass:Loop(): jentry = 1860000/8687497
+analysisClass:Loop(): jentry = 1870000/8687497
+analysisClass:Loop(): jentry = 1880000/8687497
+analysisClass:Loop(): jentry = 1890000/8687497
+analysisClass:Loop(): jentry = 1900000/8687497
+analysisClass:Loop(): jentry = 1910000/8687497
+analysisClass:Loop(): jentry = 1920000/8687497
+analysisClass:Loop(): jentry = 1930000/8687497
+analysisClass:Loop(): jentry = 1940000/8687497
+analysisClass:Loop(): jentry = 1950000/8687497
+analysisClass:Loop(): jentry = 1960000/8687497
+analysisClass:Loop(): jentry = 1970000/8687497
+analysisClass:Loop(): jentry = 1980000/8687497
+analysisClass:Loop(): jentry = 1990000/8687497
+analysisClass:Loop(): jentry = 2000000/8687497
+analysisClass:Loop(): jentry = 2010000/8687497
+analysisClass:Loop(): jentry = 2020000/8687497
+analysisClass:Loop(): jentry = 2030000/8687497
+analysisClass:Loop(): jentry = 2040000/8687497
+analysisClass:Loop(): jentry = 2050000/8687497
+analysisClass:Loop(): jentry = 2060000/8687497
+analysisClass:Loop(): jentry = 2070000/8687497
+analysisClass:Loop(): jentry = 2080000/8687497
+analysisClass:Loop(): jentry = 2090000/8687497
+analysisClass:Loop(): jentry = 2100000/8687497
+analysisClass:Loop(): jentry = 2110000/8687497
+analysisClass:Loop(): jentry = 2120000/8687497
+analysisClass:Loop(): jentry = 2130000/8687497
+analysisClass:Loop(): jentry = 2140000/8687497
+analysisClass:Loop(): jentry = 2150000/8687497
+analysisClass:Loop(): jentry = 2160000/8687497
+analysisClass:Loop(): jentry = 2170000/8687497
+analysisClass:Loop(): jentry = 2180000/8687497
+analysisClass:Loop(): jentry = 2190000/8687497
+analysisClass:Loop(): jentry = 2200000/8687497
+analysisClass:Loop(): jentry = 2210000/8687497
+analysisClass:Loop(): jentry = 2220000/8687497
+analysisClass:Loop(): jentry = 2230000/8687497
+analysisClass:Loop(): jentry = 2240000/8687497
+analysisClass:Loop(): jentry = 2250000/8687497
+analysisClass:Loop(): jentry = 2260000/8687497
+analysisClass:Loop(): jentry = 2270000/8687497
+analysisClass:Loop(): jentry = 2280000/8687497
+analysisClass:Loop(): jentry = 2290000/8687497
+analysisClass:Loop(): jentry = 2300000/8687497
+analysisClass:Loop(): jentry = 2310000/8687497
+analysisClass:Loop(): jentry = 2320000/8687497
+analysisClass:Loop(): jentry = 2330000/8687497
+analysisClass:Loop(): jentry = 2340000/8687497
+analysisClass:Loop(): jentry = 2350000/8687497
+analysisClass:Loop(): jentry = 2360000/8687497
+analysisClass:Loop(): jentry = 2370000/8687497
+analysisClass:Loop(): jentry = 2380000/8687497
+analysisClass:Loop(): jentry = 2390000/8687497
+analysisClass:Loop(): jentry = 2400000/8687497
+analysisClass:Loop(): jentry = 2410000/8687497
+analysisClass:Loop(): jentry = 2420000/8687497
+analysisClass:Loop(): jentry = 2430000/8687497
+analysisClass:Loop(): jentry = 2440000/8687497
+analysisClass:Loop(): jentry = 2450000/8687497
+analysisClass:Loop(): jentry = 2460000/8687497
+analysisClass:Loop(): jentry = 2470000/8687497
+analysisClass:Loop(): jentry = 2480000/8687497
+analysisClass:Loop(): jentry = 2490000/8687497
+analysisClass:Loop(): jentry = 2500000/8687497
+analysisClass:Loop(): jentry = 2510000/8687497
+analysisClass:Loop(): jentry = 2520000/8687497
+analysisClass:Loop(): jentry = 2530000/8687497
+analysisClass:Loop(): jentry = 2540000/8687497
+analysisClass:Loop(): jentry = 2550000/8687497
+analysisClass:Loop(): jentry = 2560000/8687497
+analysisClass:Loop(): jentry = 2570000/8687497
+analysisClass:Loop(): jentry = 2580000/8687497
+analysisClass:Loop(): jentry = 2590000/8687497
+analysisClass:Loop(): jentry = 2600000/8687497
+analysisClass:Loop(): jentry = 2610000/8687497
+analysisClass:Loop(): jentry = 2620000/8687497
+analysisClass:Loop(): jentry = 2630000/8687497
+analysisClass:Loop(): jentry = 2640000/8687497
+analysisClass:Loop(): jentry = 2650000/8687497
+analysisClass:Loop(): jentry = 2660000/8687497
+analysisClass:Loop(): jentry = 2670000/8687497
+analysisClass:Loop(): jentry = 2680000/8687497
+analysisClass:Loop(): jentry = 2690000/8687497
+analysisClass:Loop(): jentry = 2700000/8687497
+analysisClass:Loop(): jentry = 2710000/8687497
+analysisClass:Loop(): jentry = 2720000/8687497
+analysisClass:Loop(): jentry = 2730000/8687497
+analysisClass:Loop(): jentry = 2740000/8687497
+analysisClass:Loop(): jentry = 2750000/8687497
+analysisClass:Loop(): jentry = 2760000/8687497
+analysisClass:Loop(): jentry = 2770000/8687497
+analysisClass:Loop(): jentry = 2780000/8687497
+analysisClass:Loop(): jentry = 2790000/8687497
+analysisClass:Loop(): jentry = 2800000/8687497
+analysisClass:Loop(): jentry = 2810000/8687497
+analysisClass:Loop(): jentry = 2820000/8687497
+analysisClass:Loop(): jentry = 2830000/8687497
+analysisClass:Loop(): jentry = 2840000/8687497
+analysisClass:Loop(): jentry = 2850000/8687497
+analysisClass:Loop(): jentry = 2860000/8687497
+analysisClass:Loop(): jentry = 2870000/8687497
+analysisClass:Loop(): jentry = 2880000/8687497
+analysisClass:Loop(): jentry = 2890000/8687497
+analysisClass:Loop(): jentry = 2900000/8687497
+analysisClass:Loop(): jentry = 2910000/8687497
+analysisClass:Loop(): jentry = 2920000/8687497
+analysisClass:Loop(): jentry = 2930000/8687497
+analysisClass:Loop(): jentry = 2940000/8687497
+analysisClass:Loop(): jentry = 2950000/8687497
+analysisClass:Loop(): jentry = 2960000/8687497
+analysisClass:Loop(): jentry = 2970000/8687497
+analysisClass:Loop(): jentry = 2980000/8687497
+analysisClass:Loop(): jentry = 2990000/8687497
+analysisClass:Loop(): jentry = 3000000/8687497
+analysisClass:Loop(): jentry = 3010000/8687497
+analysisClass:Loop(): jentry = 3020000/8687497
+analysisClass:Loop(): jentry = 3030000/8687497
+analysisClass:Loop(): jentry = 3040000/8687497
+analysisClass:Loop(): jentry = 3050000/8687497
+analysisClass:Loop(): jentry = 3060000/8687497
+analysisClass:Loop(): jentry = 3070000/8687497
+analysisClass:Loop(): jentry = 3080000/8687497
+analysisClass:Loop(): jentry = 3090000/8687497
+analysisClass:Loop(): jentry = 3100000/8687497
+analysisClass:Loop(): jentry = 3110000/8687497
+analysisClass:Loop(): jentry = 3120000/8687497
+analysisClass:Loop(): jentry = 3130000/8687497
+analysisClass:Loop(): jentry = 3140000/8687497
+analysisClass:Loop(): jentry = 3150000/8687497
+analysisClass:Loop(): jentry = 3160000/8687497
+analysisClass:Loop(): jentry = 3170000/8687497
+analysisClass:Loop(): jentry = 3180000/8687497
+analysisClass:Loop(): jentry = 3190000/8687497
+analysisClass:Loop(): jentry = 3200000/8687497
+analysisClass:Loop(): jentry = 3210000/8687497
+analysisClass:Loop(): jentry = 3220000/8687497
+analysisClass:Loop(): jentry = 3230000/8687497
+analysisClass:Loop(): jentry = 3240000/8687497
+analysisClass:Loop(): jentry = 3250000/8687497
+analysisClass:Loop(): jentry = 3260000/8687497
+analysisClass:Loop(): jentry = 3270000/8687497
+analysisClass:Loop(): jentry = 3280000/8687497
+analysisClass:Loop(): jentry = 3290000/8687497
+analysisClass:Loop(): jentry = 3300000/8687497
+analysisClass:Loop(): jentry = 3310000/8687497
+analysisClass:Loop(): jentry = 3320000/8687497
+analysisClass:Loop(): jentry = 3330000/8687497
+analysisClass:Loop(): jentry = 3340000/8687497
+analysisClass:Loop(): jentry = 3350000/8687497
+analysisClass:Loop(): jentry = 3360000/8687497
+analysisClass:Loop(): jentry = 3370000/8687497
+analysisClass:Loop(): jentry = 3380000/8687497
+analysisClass:Loop(): jentry = 3390000/8687497
+analysisClass:Loop(): jentry = 3400000/8687497
+analysisClass:Loop(): jentry = 3410000/8687497
+analysisClass:Loop(): jentry = 3420000/8687497
+analysisClass:Loop(): jentry = 3430000/8687497
+analysisClass:Loop(): jentry = 3440000/8687497
+analysisClass:Loop(): jentry = 3450000/8687497
+analysisClass:Loop(): jentry = 3460000/8687497
+analysisClass:Loop(): jentry = 3470000/8687497
+analysisClass:Loop(): jentry = 3480000/8687497
+analysisClass:Loop(): jentry = 3490000/8687497
+analysisClass:Loop(): jentry = 3500000/8687497
+analysisClass:Loop(): jentry = 3510000/8687497
+analysisClass:Loop(): jentry = 3520000/8687497
+analysisClass:Loop(): jentry = 3530000/8687497
+analysisClass:Loop(): jentry = 3540000/8687497
+analysisClass:Loop(): jentry = 3550000/8687497
+analysisClass:Loop(): jentry = 3560000/8687497
+analysisClass:Loop(): jentry = 3570000/8687497
+analysisClass:Loop(): jentry = 3580000/8687497
+analysisClass:Loop(): jentry = 3590000/8687497
+analysisClass:Loop(): jentry = 3600000/8687497
+analysisClass:Loop(): jentry = 3610000/8687497
+analysisClass:Loop(): jentry = 3620000/8687497
+analysisClass:Loop(): jentry = 3630000/8687497
+analysisClass:Loop(): jentry = 3640000/8687497
+analysisClass:Loop(): jentry = 3650000/8687497
+analysisClass:Loop(): jentry = 3660000/8687497
+analysisClass:Loop(): jentry = 3670000/8687497
+analysisClass:Loop(): jentry = 3680000/8687497
+analysisClass:Loop(): jentry = 3690000/8687497
+analysisClass:Loop(): jentry = 3700000/8687497
+analysisClass:Loop(): jentry = 3710000/8687497
+analysisClass:Loop(): jentry = 3720000/8687497
+analysisClass:Loop(): jentry = 3730000/8687497
+analysisClass:Loop(): jentry = 3740000/8687497
+analysisClass:Loop(): jentry = 3750000/8687497
+analysisClass:Loop(): jentry = 3760000/8687497
+analysisClass:Loop(): jentry = 3770000/8687497
+analysisClass:Loop(): jentry = 3780000/8687497
+analysisClass:Loop(): jentry = 3790000/8687497
+analysisClass:Loop(): jentry = 3800000/8687497
+analysisClass:Loop(): jentry = 3810000/8687497
+analysisClass:Loop(): jentry = 3820000/8687497
+analysisClass:Loop(): jentry = 3830000/8687497
+analysisClass:Loop(): jentry = 3840000/8687497
+analysisClass:Loop(): jentry = 3850000/8687497
+analysisClass:Loop(): jentry = 3860000/8687497
+analysisClass:Loop(): jentry = 3870000/8687497
+analysisClass:Loop(): jentry = 3880000/8687497
+analysisClass:Loop(): jentry = 3890000/8687497
+analysisClass:Loop(): jentry = 3900000/8687497
+analysisClass:Loop(): jentry = 3910000/8687497
+analysisClass:Loop(): jentry = 3920000/8687497
+analysisClass:Loop(): jentry = 3930000/8687497
+analysisClass:Loop(): jentry = 3940000/8687497
+analysisClass:Loop(): jentry = 3950000/8687497
+analysisClass:Loop(): jentry = 3960000/8687497
+analysisClass:Loop(): jentry = 3970000/8687497
+analysisClass:Loop(): jentry = 3980000/8687497
+analysisClass:Loop(): jentry = 3990000/8687497
+analysisClass:Loop(): jentry = 4000000/8687497
+analysisClass:Loop(): jentry = 4010000/8687497
+analysisClass:Loop(): jentry = 4020000/8687497
+analysisClass:Loop(): jentry = 4030000/8687497
+analysisClass:Loop(): jentry = 4040000/8687497
+analysisClass:Loop(): jentry = 4050000/8687497
+analysisClass:Loop(): jentry = 4060000/8687497
+analysisClass:Loop(): jentry = 4070000/8687497
+analysisClass:Loop(): jentry = 4080000/8687497
+analysisClass:Loop(): jentry = 4090000/8687497
+analysisClass:Loop(): jentry = 4100000/8687497
+analysisClass:Loop(): jentry = 4110000/8687497
+analysisClass:Loop(): jentry = 4120000/8687497
+analysisClass:Loop(): jentry = 4130000/8687497
+analysisClass:Loop(): jentry = 4140000/8687497
+analysisClass:Loop(): jentry = 4150000/8687497
+analysisClass:Loop(): jentry = 4160000/8687497
+analysisClass:Loop(): jentry = 4170000/8687497
+analysisClass:Loop(): jentry = 4180000/8687497
+analysisClass:Loop(): jentry = 4190000/8687497
+analysisClass:Loop(): jentry = 4200000/8687497
+analysisClass:Loop(): jentry = 4210000/8687497
+analysisClass:Loop(): jentry = 4220000/8687497
+analysisClass:Loop(): jentry = 4230000/8687497
+analysisClass:Loop(): jentry = 4240000/8687497
+analysisClass:Loop(): jentry = 4250000/8687497
+analysisClass:Loop(): jentry = 4260000/8687497
+analysisClass:Loop(): jentry = 4270000/8687497
+analysisClass:Loop(): jentry = 4280000/8687497
+analysisClass:Loop(): jentry = 4290000/8687497
+analysisClass:Loop(): jentry = 4300000/8687497
+analysisClass:Loop(): jentry = 4310000/8687497
+analysisClass:Loop(): jentry = 4320000/8687497
+analysisClass:Loop(): jentry = 4330000/8687497
+analysisClass:Loop(): jentry = 4340000/8687497
+analysisClass:Loop(): jentry = 4350000/8687497
+analysisClass:Loop(): jentry = 4360000/8687497
+analysisClass:Loop(): jentry = 4370000/8687497
+analysisClass:Loop(): jentry = 4380000/8687497
+analysisClass:Loop(): jentry = 4390000/8687497
+analysisClass:Loop(): jentry = 4400000/8687497
+analysisClass:Loop(): jentry = 4410000/8687497
+analysisClass:Loop(): jentry = 4420000/8687497
+analysisClass:Loop(): jentry = 4430000/8687497
+analysisClass:Loop(): jentry = 4440000/8687497
+analysisClass:Loop(): jentry = 4450000/8687497
+analysisClass:Loop(): jentry = 4460000/8687497
+analysisClass:Loop(): jentry = 4470000/8687497
+analysisClass:Loop(): jentry = 4480000/8687497
+analysisClass:Loop(): jentry = 4490000/8687497
+analysisClass:Loop(): jentry = 4500000/8687497
+analysisClass:Loop(): jentry = 4510000/8687497
+analysisClass:Loop(): jentry = 4520000/8687497
+analysisClass:Loop(): jentry = 4530000/8687497
+analysisClass:Loop(): jentry = 4540000/8687497
+analysisClass:Loop(): jentry = 4550000/8687497
+analysisClass:Loop(): jentry = 4560000/8687497
+analysisClass:Loop(): jentry = 4570000/8687497
+analysisClass:Loop(): jentry = 4580000/8687497
+analysisClass:Loop(): jentry = 4590000/8687497
+analysisClass:Loop(): jentry = 4600000/8687497
+analysisClass:Loop(): jentry = 4610000/8687497
+analysisClass:Loop(): jentry = 4620000/8687497
+analysisClass:Loop(): jentry = 4630000/8687497
+analysisClass:Loop(): jentry = 4640000/8687497
+analysisClass:Loop(): jentry = 4650000/8687497
+analysisClass:Loop(): jentry = 4660000/8687497
+analysisClass:Loop(): jentry = 4670000/8687497
+analysisClass:Loop(): jentry = 4680000/8687497
+analysisClass:Loop(): jentry = 4690000/8687497
+analysisClass:Loop(): jentry = 4700000/8687497
+analysisClass:Loop(): jentry = 4710000/8687497
+analysisClass:Loop(): jentry = 4720000/8687497
+analysisClass:Loop(): jentry = 4730000/8687497
+analysisClass:Loop(): jentry = 4740000/8687497
+analysisClass:Loop(): jentry = 4750000/8687497
+analysisClass:Loop(): jentry = 4760000/8687497
+analysisClass:Loop(): jentry = 4770000/8687497
+analysisClass:Loop(): jentry = 4780000/8687497
+analysisClass:Loop(): jentry = 4790000/8687497
+analysisClass:Loop(): jentry = 4800000/8687497
+analysisClass:Loop(): jentry = 4810000/8687497
+analysisClass:Loop(): jentry = 4820000/8687497
+analysisClass:Loop(): jentry = 4830000/8687497
+analysisClass:Loop(): jentry = 4840000/8687497
+analysisClass:Loop(): jentry = 4850000/8687497
+analysisClass:Loop(): jentry = 4860000/8687497
+analysisClass:Loop(): jentry = 4870000/8687497
+analysisClass:Loop(): jentry = 4880000/8687497
+analysisClass:Loop(): jentry = 4890000/8687497
+analysisClass:Loop(): jentry = 4900000/8687497
+analysisClass:Loop(): jentry = 4910000/8687497
+analysisClass:Loop(): jentry = 4920000/8687497
+analysisClass:Loop(): jentry = 4930000/8687497
+analysisClass:Loop(): jentry = 4940000/8687497
+analysisClass:Loop(): jentry = 4950000/8687497
+analysisClass:Loop(): jentry = 4960000/8687497
+analysisClass:Loop(): jentry = 4970000/8687497
+analysisClass:Loop(): jentry = 4980000/8687497
+analysisClass:Loop(): jentry = 4990000/8687497
+analysisClass:Loop(): jentry = 5000000/8687497
+analysisClass:Loop(): jentry = 5010000/8687497
+analysisClass:Loop(): jentry = 5020000/8687497
+analysisClass:Loop(): jentry = 5030000/8687497
+analysisClass:Loop(): jentry = 5040000/8687497
+analysisClass:Loop(): jentry = 5050000/8687497
+analysisClass:Loop(): jentry = 5060000/8687497
+analysisClass:Loop(): jentry = 5070000/8687497
+analysisClass:Loop(): jentry = 5080000/8687497
+analysisClass:Loop(): jentry = 5090000/8687497
+analysisClass:Loop(): jentry = 5100000/8687497
+analysisClass:Loop(): jentry = 5110000/8687497
+analysisClass:Loop(): jentry = 5120000/8687497
+analysisClass:Loop(): jentry = 5130000/8687497
+analysisClass:Loop(): jentry = 5140000/8687497
+analysisClass:Loop(): jentry = 5150000/8687497
+analysisClass:Loop(): jentry = 5160000/8687497
+analysisClass:Loop(): jentry = 5170000/8687497
+analysisClass:Loop(): jentry = 5180000/8687497
+analysisClass:Loop(): jentry = 5190000/8687497
+analysisClass:Loop(): jentry = 5200000/8687497
+analysisClass:Loop(): jentry = 5210000/8687497
+analysisClass:Loop(): jentry = 5220000/8687497
+analysisClass:Loop(): jentry = 5230000/8687497
+analysisClass:Loop(): jentry = 5240000/8687497
+analysisClass:Loop(): jentry = 5250000/8687497
+analysisClass:Loop(): jentry = 5260000/8687497
+analysisClass:Loop(): jentry = 5270000/8687497
+analysisClass:Loop(): jentry = 5280000/8687497
+analysisClass:Loop(): jentry = 5290000/8687497
+analysisClass:Loop(): jentry = 5300000/8687497
+analysisClass:Loop(): jentry = 5310000/8687497
+analysisClass:Loop(): jentry = 5320000/8687497
+analysisClass:Loop(): jentry = 5330000/8687497
+analysisClass:Loop(): jentry = 5340000/8687497
+analysisClass:Loop(): jentry = 5350000/8687497
+analysisClass:Loop(): jentry = 5360000/8687497
+analysisClass:Loop(): jentry = 5370000/8687497
+analysisClass:Loop(): jentry = 5380000/8687497
+analysisClass:Loop(): jentry = 5390000/8687497
+analysisClass:Loop(): jentry = 5400000/8687497
+analysisClass:Loop(): jentry = 5410000/8687497
+analysisClass:Loop(): jentry = 5420000/8687497
+analysisClass:Loop(): jentry = 5430000/8687497
+analysisClass:Loop(): jentry = 5440000/8687497
+analysisClass:Loop(): jentry = 5450000/8687497
+analysisClass:Loop(): jentry = 5460000/8687497
+analysisClass:Loop(): jentry = 5470000/8687497
+analysisClass:Loop(): jentry = 5480000/8687497
+analysisClass:Loop(): jentry = 5490000/8687497
+analysisClass:Loop(): jentry = 5500000/8687497
+analysisClass:Loop(): jentry = 5510000/8687497
+analysisClass:Loop(): jentry = 5520000/8687497
+analysisClass:Loop(): jentry = 5530000/8687497
+analysisClass:Loop(): jentry = 5540000/8687497
+analysisClass:Loop(): jentry = 5550000/8687497
+analysisClass:Loop(): jentry = 5560000/8687497
+analysisClass:Loop(): jentry = 5570000/8687497
+analysisClass:Loop(): jentry = 5580000/8687497
+analysisClass:Loop(): jentry = 5590000/8687497
+analysisClass:Loop(): jentry = 5600000/8687497
+analysisClass:Loop(): jentry = 5610000/8687497
+analysisClass:Loop(): jentry = 5620000/8687497
+analysisClass:Loop(): jentry = 5630000/8687497
+analysisClass:Loop(): jentry = 5640000/8687497
+analysisClass:Loop(): jentry = 5650000/8687497
+analysisClass:Loop(): jentry = 5660000/8687497
+analysisClass:Loop(): jentry = 5670000/8687497
+analysisClass:Loop(): jentry = 5680000/8687497
+analysisClass:Loop(): jentry = 5690000/8687497
+analysisClass:Loop(): jentry = 5700000/8687497
+analysisClass:Loop(): jentry = 5710000/8687497
+analysisClass:Loop(): jentry = 5720000/8687497
+analysisClass:Loop(): jentry = 5730000/8687497
+analysisClass:Loop(): jentry = 5740000/8687497
+analysisClass:Loop(): jentry = 5750000/8687497
+analysisClass:Loop(): jentry = 5760000/8687497
+analysisClass:Loop(): jentry = 5770000/8687497
+analysisClass:Loop(): jentry = 5780000/8687497
+analysisClass:Loop(): jentry = 5790000/8687497
+analysisClass:Loop(): jentry = 5800000/8687497
+analysisClass:Loop(): jentry = 5810000/8687497
+analysisClass:Loop(): jentry = 5820000/8687497
+analysisClass:Loop(): jentry = 5830000/8687497
+analysisClass:Loop(): jentry = 5840000/8687497
+analysisClass:Loop(): jentry = 5850000/8687497
+analysisClass:Loop(): jentry = 5860000/8687497
+analysisClass:Loop(): jentry = 5870000/8687497
+analysisClass:Loop(): jentry = 5880000/8687497
+analysisClass:Loop(): jentry = 5890000/8687497
+analysisClass:Loop(): jentry = 5900000/8687497
+analysisClass:Loop(): jentry = 5910000/8687497
+analysisClass:Loop(): jentry = 5920000/8687497
+analysisClass:Loop(): jentry = 5930000/8687497
+analysisClass:Loop(): jentry = 5940000/8687497
+analysisClass:Loop(): jentry = 5950000/8687497
+analysisClass:Loop(): jentry = 5960000/8687497
+analysisClass:Loop(): jentry = 5970000/8687497
+analysisClass:Loop(): jentry = 5980000/8687497
+analysisClass:Loop(): jentry = 5990000/8687497
+analysisClass:Loop(): jentry = 6000000/8687497
+analysisClass:Loop(): jentry = 6010000/8687497
+analysisClass:Loop(): jentry = 6020000/8687497
+analysisClass:Loop(): jentry = 6030000/8687497
+analysisClass:Loop(): jentry = 6040000/8687497
+analysisClass:Loop(): jentry = 6050000/8687497
+analysisClass:Loop(): jentry = 6060000/8687497
+analysisClass:Loop(): jentry = 6070000/8687497
+analysisClass:Loop(): jentry = 6080000/8687497
+analysisClass:Loop(): jentry = 6090000/8687497
+analysisClass:Loop(): jentry = 6100000/8687497
+analysisClass:Loop(): jentry = 6110000/8687497
+analysisClass:Loop(): jentry = 6120000/8687497
+analysisClass:Loop(): jentry = 6130000/8687497
+analysisClass:Loop(): jentry = 6140000/8687497
+analysisClass:Loop(): jentry = 6150000/8687497
+analysisClass:Loop(): jentry = 6160000/8687497
+analysisClass:Loop(): jentry = 6170000/8687497
+analysisClass:Loop(): jentry = 6180000/8687497
+analysisClass:Loop(): jentry = 6190000/8687497
+analysisClass:Loop(): jentry = 6200000/8687497
+analysisClass:Loop(): jentry = 6210000/8687497
+analysisClass:Loop(): jentry = 6220000/8687497
+analysisClass:Loop(): jentry = 6230000/8687497
+analysisClass:Loop(): jentry = 6240000/8687497
+analysisClass:Loop(): jentry = 6250000/8687497
+analysisClass:Loop(): jentry = 6260000/8687497
+analysisClass:Loop(): jentry = 6270000/8687497
+analysisClass:Loop(): jentry = 6280000/8687497
+analysisClass:Loop(): jentry = 6290000/8687497
+analysisClass:Loop(): jentry = 6300000/8687497
+analysisClass:Loop(): jentry = 6310000/8687497
+analysisClass:Loop(): jentry = 6320000/8687497
+analysisClass:Loop(): jentry = 6330000/8687497
+analysisClass:Loop(): jentry = 6340000/8687497
+analysisClass:Loop(): jentry = 6350000/8687497
+analysisClass:Loop(): jentry = 6360000/8687497
+analysisClass:Loop(): jentry = 6370000/8687497
+analysisClass:Loop(): jentry = 6380000/8687497
+analysisClass:Loop(): jentry = 6390000/8687497
+analysisClass:Loop(): jentry = 6400000/8687497
+analysisClass:Loop(): jentry = 6410000/8687497
+analysisClass:Loop(): jentry = 6420000/8687497
+analysisClass:Loop(): jentry = 6430000/8687497
+analysisClass:Loop(): jentry = 6440000/8687497
+analysisClass:Loop(): jentry = 6450000/8687497
+analysisClass:Loop(): jentry = 6460000/8687497
+analysisClass:Loop(): jentry = 6470000/8687497
+analysisClass:Loop(): jentry = 6480000/8687497
+analysisClass:Loop(): jentry = 6490000/8687497
+analysisClass:Loop(): jentry = 6500000/8687497
+analysisClass:Loop(): jentry = 6510000/8687497
+analysisClass:Loop(): jentry = 6520000/8687497
+analysisClass:Loop(): jentry = 6530000/8687497
+analysisClass:Loop(): jentry = 6540000/8687497
+analysisClass:Loop(): jentry = 6550000/8687497
+analysisClass:Loop(): jentry = 6560000/8687497
+analysisClass:Loop(): jentry = 6570000/8687497
+analysisClass:Loop(): jentry = 6580000/8687497
+analysisClass:Loop(): jentry = 6590000/8687497
+analysisClass:Loop(): jentry = 6600000/8687497
+analysisClass:Loop(): jentry = 6610000/8687497
+analysisClass:Loop(): jentry = 6620000/8687497
+analysisClass:Loop(): jentry = 6630000/8687497
+analysisClass:Loop(): jentry = 6640000/8687497
+analysisClass:Loop(): jentry = 6650000/8687497
+analysisClass:Loop(): jentry = 6660000/8687497
+analysisClass:Loop(): jentry = 6670000/8687497
+analysisClass:Loop(): jentry = 6680000/8687497
+analysisClass:Loop(): jentry = 6690000/8687497
+analysisClass:Loop(): jentry = 6700000/8687497
+analysisClass:Loop(): jentry = 6710000/8687497
+analysisClass:Loop(): jentry = 6720000/8687497
+analysisClass:Loop(): jentry = 6730000/8687497
+analysisClass:Loop(): jentry = 6740000/8687497
+analysisClass:Loop(): jentry = 6750000/8687497
+analysisClass:Loop(): jentry = 6760000/8687497
+analysisClass:Loop(): jentry = 6770000/8687497
+analysisClass:Loop(): jentry = 6780000/8687497
+analysisClass:Loop(): jentry = 6790000/8687497
+analysisClass:Loop(): jentry = 6800000/8687497
+analysisClass:Loop(): jentry = 6810000/8687497
+analysisClass:Loop(): jentry = 6820000/8687497
+analysisClass:Loop(): jentry = 6830000/8687497
+analysisClass:Loop(): jentry = 6840000/8687497
+analysisClass:Loop(): jentry = 6850000/8687497
+analysisClass:Loop(): jentry = 6860000/8687497
+analysisClass:Loop(): jentry = 6870000/8687497
+analysisClass:Loop(): jentry = 6880000/8687497
+analysisClass:Loop(): jentry = 6890000/8687497
+analysisClass:Loop(): jentry = 6900000/8687497
+analysisClass:Loop(): jentry = 6910000/8687497
+analysisClass:Loop(): jentry = 6920000/8687497
+analysisClass:Loop(): jentry = 6930000/8687497
+analysisClass:Loop(): jentry = 6940000/8687497
+analysisClass:Loop(): jentry = 6950000/8687497
+analysisClass:Loop(): jentry = 6960000/8687497
+analysisClass:Loop(): jentry = 6970000/8687497
+analysisClass:Loop(): jentry = 6980000/8687497
+analysisClass:Loop(): jentry = 6990000/8687497
+analysisClass:Loop(): jentry = 7000000/8687497
+analysisClass:Loop(): jentry = 7010000/8687497
+analysisClass:Loop(): jentry = 7020000/8687497
+analysisClass:Loop(): jentry = 7030000/8687497
+analysisClass:Loop(): jentry = 7040000/8687497
+analysisClass:Loop(): jentry = 7050000/8687497
+analysisClass:Loop(): jentry = 7060000/8687497
+analysisClass:Loop(): jentry = 7070000/8687497
+analysisClass:Loop(): jentry = 7080000/8687497
+analysisClass:Loop(): jentry = 7090000/8687497
+analysisClass:Loop(): jentry = 7100000/8687497
+analysisClass:Loop(): jentry = 7110000/8687497
+analysisClass:Loop(): jentry = 7120000/8687497
+analysisClass:Loop(): jentry = 7130000/8687497
+analysisClass:Loop(): jentry = 7140000/8687497
+analysisClass:Loop(): jentry = 7150000/8687497
+analysisClass:Loop(): jentry = 7160000/8687497
+analysisClass:Loop(): jentry = 7170000/8687497
+analysisClass:Loop(): jentry = 7180000/8687497
+analysisClass:Loop(): jentry = 7190000/8687497
+analysisClass:Loop(): jentry = 7200000/8687497
+analysisClass:Loop(): jentry = 7210000/8687497
+analysisClass:Loop(): jentry = 7220000/8687497
+analysisClass:Loop(): jentry = 7230000/8687497
+analysisClass:Loop(): jentry = 7240000/8687497
+analysisClass:Loop(): jentry = 7250000/8687497
+analysisClass:Loop(): jentry = 7260000/8687497
+analysisClass:Loop(): jentry = 7270000/8687497
+analysisClass:Loop(): jentry = 7280000/8687497
+analysisClass:Loop(): jentry = 7290000/8687497
+analysisClass:Loop(): jentry = 7300000/8687497
+analysisClass:Loop(): jentry = 7310000/8687497
+analysisClass:Loop(): jentry = 7320000/8687497
+analysisClass:Loop(): jentry = 7330000/8687497
+analysisClass:Loop(): jentry = 7340000/8687497
+analysisClass:Loop(): jentry = 7350000/8687497
+analysisClass:Loop(): jentry = 7360000/8687497
+analysisClass:Loop(): jentry = 7370000/8687497
+analysisClass:Loop(): jentry = 7380000/8687497
+analysisClass:Loop(): jentry = 7390000/8687497
+analysisClass:Loop(): jentry = 7400000/8687497
+analysisClass:Loop(): jentry = 7410000/8687497
+analysisClass:Loop(): jentry = 7420000/8687497
+analysisClass:Loop(): jentry = 7430000/8687497
+analysisClass:Loop(): jentry = 7440000/8687497
+analysisClass:Loop(): jentry = 7450000/8687497
+analysisClass:Loop(): jentry = 7460000/8687497
+analysisClass:Loop(): jentry = 7470000/8687497
+analysisClass:Loop(): jentry = 7480000/8687497
+analysisClass:Loop(): jentry = 7490000/8687497
+analysisClass:Loop(): jentry = 7500000/8687497
+analysisClass:Loop(): jentry = 7510000/8687497
+analysisClass:Loop(): jentry = 7520000/8687497
+analysisClass:Loop(): jentry = 7530000/8687497
+analysisClass:Loop(): jentry = 7540000/8687497
+analysisClass:Loop(): jentry = 7550000/8687497
+analysisClass:Loop(): jentry = 7560000/8687497
+analysisClass:Loop(): jentry = 7570000/8687497
+analysisClass:Loop(): jentry = 7580000/8687497
+analysisClass:Loop(): jentry = 7590000/8687497
+analysisClass:Loop(): jentry = 7600000/8687497
+analysisClass:Loop(): jentry = 7610000/8687497
+analysisClass:Loop(): jentry = 7620000/8687497
+analysisClass:Loop(): jentry = 7630000/8687497
+analysisClass:Loop(): jentry = 7640000/8687497
+analysisClass:Loop(): jentry = 7650000/8687497
+analysisClass:Loop(): jentry = 7660000/8687497
+analysisClass:Loop(): jentry = 7670000/8687497
+analysisClass:Loop(): jentry = 7680000/8687497
+analysisClass:Loop(): jentry = 7690000/8687497
+analysisClass:Loop(): jentry = 7700000/8687497
+analysisClass:Loop(): jentry = 7710000/8687497
+analysisClass:Loop(): jentry = 7720000/8687497
+analysisClass:Loop(): jentry = 7730000/8687497
+analysisClass:Loop(): jentry = 7740000/8687497
+analysisClass:Loop(): jentry = 7750000/8687497
+analysisClass:Loop(): jentry = 7760000/8687497
+analysisClass:Loop(): jentry = 7770000/8687497
+analysisClass:Loop(): jentry = 7780000/8687497
+analysisClass:Loop(): jentry = 7790000/8687497
+analysisClass:Loop(): jentry = 7800000/8687497
+analysisClass:Loop(): jentry = 7810000/8687497
+analysisClass:Loop(): jentry = 7820000/8687497
+analysisClass:Loop(): jentry = 7830000/8687497
+analysisClass:Loop(): jentry = 7840000/8687497
+analysisClass:Loop(): jentry = 7850000/8687497
+analysisClass:Loop(): jentry = 7860000/8687497
+analysisClass:Loop(): jentry = 7870000/8687497
+analysisClass:Loop(): jentry = 7880000/8687497
+analysisClass:Loop(): jentry = 7890000/8687497
+analysisClass:Loop(): jentry = 7900000/8687497
+analysisClass:Loop(): jentry = 7910000/8687497
+analysisClass:Loop(): jentry = 7920000/8687497
+analysisClass:Loop(): jentry = 7930000/8687497
+analysisClass:Loop(): jentry = 7940000/8687497
+analysisClass:Loop(): jentry = 7950000/8687497
+analysisClass:Loop(): jentry = 7960000/8687497
+analysisClass:Loop(): jentry = 7970000/8687497
+analysisClass:Loop(): jentry = 7980000/8687497
+analysisClass:Loop(): jentry = 7990000/8687497
+analysisClass:Loop(): jentry = 8000000/8687497
+analysisClass:Loop(): jentry = 8010000/8687497
+analysisClass:Loop(): jentry = 8020000/8687497
+analysisClass:Loop(): jentry = 8030000/8687497
+analysisClass:Loop(): jentry = 8040000/8687497
+analysisClass:Loop(): jentry = 8050000/8687497
+analysisClass:Loop(): jentry = 8060000/8687497
+analysisClass:Loop(): jentry = 8070000/8687497
+analysisClass:Loop(): jentry = 8080000/8687497
+analysisClass:Loop(): jentry = 8090000/8687497
+analysisClass:Loop(): jentry = 8100000/8687497
+analysisClass:Loop(): jentry = 8110000/8687497
+analysisClass:Loop(): jentry = 8120000/8687497
+analysisClass:Loop(): jentry = 8130000/8687497
+analysisClass:Loop(): jentry = 8140000/8687497
+analysisClass:Loop(): jentry = 8150000/8687497
+analysisClass:Loop(): jentry = 8160000/8687497
+analysisClass:Loop(): jentry = 8170000/8687497
+analysisClass:Loop(): jentry = 8180000/8687497
+analysisClass:Loop(): jentry = 8190000/8687497
+analysisClass:Loop(): jentry = 8200000/8687497
+analysisClass:Loop(): jentry = 8210000/8687497
+analysisClass:Loop(): jentry = 8220000/8687497
+analysisClass:Loop(): jentry = 8230000/8687497
+analysisClass:Loop(): jentry = 8240000/8687497
+analysisClass:Loop(): jentry = 8250000/8687497
+analysisClass:Loop(): jentry = 8260000/8687497
+analysisClass:Loop(): jentry = 8270000/8687497
+analysisClass:Loop(): jentry = 8280000/8687497
+analysisClass:Loop(): jentry = 8290000/8687497
+analysisClass:Loop(): jentry = 8300000/8687497
+analysisClass:Loop(): jentry = 8310000/8687497
+analysisClass:Loop(): jentry = 8320000/8687497
+analysisClass:Loop(): jentry = 8330000/8687497
+analysisClass:Loop(): jentry = 8340000/8687497
+analysisClass:Loop(): jentry = 8350000/8687497
+analysisClass:Loop(): jentry = 8360000/8687497
+analysisClass:Loop(): jentry = 8370000/8687497
+analysisClass:Loop(): jentry = 8380000/8687497
+analysisClass:Loop(): jentry = 8390000/8687497
+analysisClass:Loop(): jentry = 8400000/8687497
+analysisClass:Loop(): jentry = 8410000/8687497
+analysisClass:Loop(): jentry = 8420000/8687497
+analysisClass:Loop(): jentry = 8430000/8687497
+analysisClass:Loop(): jentry = 8440000/8687497
+analysisClass:Loop(): jentry = 8450000/8687497
+analysisClass:Loop(): jentry = 8460000/8687497
+analysisClass:Loop(): jentry = 8470000/8687497
+analysisClass:Loop(): jentry = 8480000/8687497
+analysisClass:Loop(): jentry = 8490000/8687497
+analysisClass:Loop(): jentry = 8500000/8687497
+analysisClass:Loop(): jentry = 8510000/8687497
+analysisClass:Loop(): jentry = 8520000/8687497
+analysisClass:Loop(): jentry = 8530000/8687497
+analysisClass:Loop(): jentry = 8540000/8687497
+analysisClass:Loop(): jentry = 8550000/8687497
+analysisClass:Loop(): jentry = 8560000/8687497
+analysisClass:Loop(): jentry = 8570000/8687497
+analysisClass:Loop(): jentry = 8580000/8687497
+analysisClass:Loop(): jentry = 8590000/8687497
+analysisClass:Loop(): jentry = 8600000/8687497
+analysisClass:Loop(): jentry = 8610000/8687497
+analysisClass:Loop(): jentry = 8620000/8687497
+analysisClass:Loop(): jentry = 8630000/8687497
+analysisClass:Loop(): jentry = 8640000/8687497
+analysisClass:Loop(): jentry = 8650000/8687497
+analysisClass:Loop(): jentry = 8660000/8687497
+analysisClass:Loop(): jentry = 8670000/8687497
+analysisClass:Loop(): jentry = 8680000/8687497
+analysisClass::Loop() ends
+‘analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.root’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_BothInHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_BothInHEM1516_UL/condor_cutTable_lq_eejj_jet2_both_in/analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/output/analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.root’
+removed ‘analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.root’
+‘analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.dat’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_BothInHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Jet2_BothInHEM1516_UL/condor_cutTable_lq_eejj_jet2_both_in/analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/output/analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.dat’
+removed ‘analysisClass_lq_eejj___DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_0.dat’
