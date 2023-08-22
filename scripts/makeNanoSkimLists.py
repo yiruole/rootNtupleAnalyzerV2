@@ -8,36 +8,37 @@ import collections
 from optparse import OptionParser
 
 
-def GetFileList(dataset):
-    query="\"file dataset={} | grep file.name, file.size\"".format(dataset)
+def GetFileNamesAndNEvents(dataset):
+    query="\"file dataset={} | grep file.name, file.nevents\"".format(dataset)
     fullCommand = "dasgoclient --query="+query
     fullCommand += " --limit=0"
     rawOut = subprocess.run(shlex.split(fullCommand), check=True, stdout=subprocess.PIPE).stdout
     out = rawOut.decode(sys.stdout.encoding).split("\n")
-    fileNameToSizeDict = dict()
+    fileNameToEventsDict = dict()
     for line in out:
         if len(line) <= 0:
             continue
         lineSplit = line.split()
-        fileNameToSizeDict[lineSplit[0]] = lineSplit[1]
-    if len(fileNameToSizeDict) <= 0:
+        fileNameToEventsDict[lineSplit[0]] = lineSplit[1]
+    if len(fileNameToEventsDict) <= 0:
         raise RuntimeError("Did not find any files for the dataset '{}' by running the command '{}'.  Please correct or remove this dataset from the inputlist file.".format(dataset, fullCommand))
-    sortedFileNameToSizes = sorted(fileNameToSizeDict.items(), key=lambda kv: int(kv[1]))
-    sortedFileNameToSizesDict = collections.OrderedDict(sortedFileNameToSizes)
-    # look at the sorted dict
-    # i = 0
-    # for key in sortedFileNameToSizesDict.keys():
-    #     print(key, sortedFileNameToSizesDict[key])
-    #     i += 1
-    #     if i > 5:
-    #         break
-    de = collections.deque(sortedFileNameToSizesDict.keys())
-    fileList = list()
-    while de:
-        fileList.append(de.pop())  # largest
-        if de:
-          fileList.append(de.popleft())
-    return fileList
+    # sortedFileNameToSizes = sorted(fileNameToSizeDict.items(), key=lambda kv: int(kv[1]))
+    # sortedFileNameToSizesDict = collections.OrderedDict(sortedFileNameToSizes)
+    # # look at the sorted dict
+    # # i = 0
+    # # for key in sortedFileNameToSizesDict.keys():
+    # #     print(key, sortedFileNameToSizesDict[key])
+    # #     i += 1
+    # #     if i > 5:
+    # #         break
+    # de = collections.deque(sortedFileNameToSizesDict.keys())
+    # fileList = list()
+    # while de:
+    #     fileList.append(de.pop())  # largest
+    #     if de:
+    #       fileList.append(de.popleft())
+    # return fileList
+    return fileNameToEventsDict
 
 
 def ReadDatasetList(datasetFile):
@@ -52,7 +53,7 @@ def ReadDatasetList(datasetFile):
     return datasetList
 
 
-def GetFileNameFromDataset(dataset):
+def GetTxtFileNameFromDataset(dataset):
     datasetParts = dataset.split("/")
     fileName = datasetParts[1]
     if "APV" in dataset:
@@ -112,11 +113,14 @@ sys.stdout.flush()
 with open(outputFileName, "w") as mainInputList:
     for dataset in datasetList:
         # dataset="/DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM"
-        fileList = GetFileList(dataset)
-        fileName = outputDir+GetFileNameFromDataset(dataset)
+        fileNamesToNEventsDict = GetFileNamesAndNEvents(dataset)
+        fileName = outputDir+GetTxtFileNameFromDataset(dataset)
         with open(fileName, "w") as outFile:
-            for fName in fileList:
-                outFile.write(prefix+fName+"\n")
+            nEventsFilename = fileName.replace(".txt", "_nevents.txt")
+            with open(nEventsFilename, "w") as eventsFile:
+                for fName, nEvents in fileNamesToNEventsDict.items():
+                    outFile.write(prefix+fName+"\n")
+                    eventsFile.write(nEvents+"\n")
         mainInputList.write(fileName + "\n")
         print("\b.", end=" ")
         sys.stdout.flush()
