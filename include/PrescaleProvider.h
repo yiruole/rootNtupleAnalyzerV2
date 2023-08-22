@@ -52,246 +52,246 @@ namespace psprov{
 }
 
 class PrescaleTbl {
-public:
-  struct Entry {
-    std::string name;
-    std::vector<unsigned int> prescales;
-    bool operator<(const Entry& rhs)const{return name<rhs.name;}
-    bool operator<(const std::string& rhs)const{return name<rhs;}
-    friend bool operator<(const std::string& lhs,const Entry& rhs){return lhs<rhs.name;}
-  };
+  public:
+    struct Entry {
+      std::string name;
+      std::vector<unsigned int> prescales;
+      bool operator<(const Entry& rhs)const{return name<rhs.name;}
+      bool operator<(const std::string& rhs)const{return name<rhs;}
+      friend bool operator<(const std::string& lhs,const Entry& rhs){return lhs<rhs.name;}
+    };
 
-private:
-  std::vector<Entry> tblData_;
-  std::string menuName_;
+  private:
+    std::vector<Entry> tblData_;
+    std::string menuName_;
 
-public:
-  PrescaleTbl(){}
-  ~PrescaleTbl(){}
-  
-  void fill(const std::string& keyName,const boost::property_tree::ptree& psTree, bool isL1Table, bool verbose = false){
-    for(const auto& psTbl : psTree){
-      //const auto& psTbl = psTree.get_child(keyName);
-      if(psTbl.first==keyName){
-	fill(psTbl.second, isL1Table, verbose);
-	break;
+  public:
+    PrescaleTbl(){}
+    ~PrescaleTbl(){}
+
+    void fill(const std::string& keyName,const boost::property_tree::ptree& psTree, bool isL1Table, bool verbose = false){
+      for(const auto& psTbl : psTree){
+        //const auto& psTbl = psTree.get_child(keyName);
+        if(psTbl.first==keyName){
+          fill(psTbl.second, isL1Table, verbose);
+          break;
+        }
       }
     }
-  }
-  void fill(const boost::property_tree::ptree& psTbl, bool isL1Table, bool verbose = false){
-    for(const auto& pathEntry : psTbl){ 
-      std::vector<std::string> pathData;
-      for(const auto& entry : pathEntry.second){
-	const auto& val = entry.second.get_value<std::string>();
-	pathData.push_back(val);
-      }
-      if(pathData[0]=="n") continue;
+    void fill(const boost::property_tree::ptree& psTbl, bool isL1Table, bool verbose = false){
+      for(const auto& pathEntry : psTbl){ 
+        std::vector<std::string> pathData;
+        for(const auto& entry : pathEntry.second){
+          const auto& val = entry.second.get_value<std::string>();
+          pathData.push_back(val);
+        }
+        if(pathData[0]=="n") continue;
 
-      //trigger number (meaningless) is entry 0
-      //trigger name is entry 1
-      //prescales are entries 2 to second to last
-      //L1 seeds are last entry
-      Entry tblEntry;
-      tblEntry.name = psprov::rmTrigVersionFromName(pathData[1]);
-      bool print = false;
-      if(verbose && tblEntry.name.find("SingleEG34") != std::string::npos) {
-        std::cout << "SingleEG34 prescales: ";
+        //trigger number (meaningless) is entry 0
+        //trigger name is entry 1
+        //prescales are entries 2 to second to last
+        //L1 seeds are last entry
+        Entry tblEntry;
+        tblEntry.name = psprov::rmTrigVersionFromName(pathData[1]);
+        bool print = false;
+        if(verbose && tblEntry.name.find("SingleEG34") != std::string::npos) {
+          std::cout << "SingleEG34 prescales: ";
           print = true;
-      }
-      if(verbose && tblEntry.name.find("HLT_Photon120") != std::string::npos) {
-        std::cout << "HLT_Photon120 prescales: ";
+        }
+        if(verbose && tblEntry.name.find("HLT_Photon120") != std::string::npos) {
+          std::cout << "HLT_Photon120 prescales: ";
           print = true;
-      }
-      size_t stopCondition = pathData.size();
-      if(!isL1Table)
-        stopCondition--;
-      for(size_t indx=2;indx<stopCondition;indx++){
-	tblEntry.prescales.push_back(std::stoi(pathData[indx]));
-  if(print)
-    std::cout << tblEntry.prescales.back();
-      }
-      if(print) {
-        std::cout << std::endl;
-        std::cout << "path data looks like: ";
-        for(const auto& item : pathData)
-          std::cout << item << ", ";
-        std::cout << std::endl;
-      }
-      tblData_.emplace_back(std::move(tblEntry));
-    } 
-    std::sort(tblData_.begin(),tblData_.end());
-    //if(verbose) {
-    //  std::stringstream ss;
-    //  boost::property_tree::json_parser::write_json(ss, psTbl);
-    //  std::cout << "PrescaleTbl::fill() - psTbl looks like" << ss.str() << std::endl;
-    //}
-  }
-  
-  int prescale(const std::string& path,const int psColumn)const{
-    if(psColumn<0) return -1;
-    const size_t psColUnsigned = static_cast<size_t>(psColumn);
-    auto res = std::equal_range(tblData_.begin(),tblData_.end(),path);
-    if(res.first==res.second) return -1;//path not found
-    else{
-      if(distance(res.first,res.second)!=1){
-	std::cout <<"PrescaleTbl::prescale error "<<path<<" has multiple entries, this should not be possible"<<std::endl;
-      }
-	//std::cout <<"PrescaleTbl::prescale "<<path<<" has "<<res.first->prescales.size()<<" prescale columns:"<<std::endl;
-  //for(std::vector<unsigned int>::const_iterator idx = res.first->prescales.begin(); idx != res.first->prescales.end(); idx++)
-  //  std::cout << *idx << ", ";
-  //for(const auto& ps : res.first->prescales)
-  //  std::cout << ps << ", ";
-  //std::cout << std::endl;
-      if(psColUnsigned<res.first->prescales.size()){
-	return res.first->prescales[psColUnsigned];
-      }else {
-        std::cout <<"PrescaleTbl::prescale error "<<path<<" has "<<res.first->prescales.size()<<" prescale columns while we asked for column [int] = " << psColumn<<std::endl;
-        return -2;
-      }
-    } 
-  }
+        }
+        size_t stopCondition = pathData.size();
+        if(!isL1Table)
+          stopCondition--;
+        for(size_t indx=2;indx<stopCondition;indx++){
+          tblEntry.prescales.push_back(std::stoi(pathData[indx]));
+          if(print)
+            std::cout << tblEntry.prescales.back();
+        }
+        if(print) {
+          std::cout << std::endl;
+          std::cout << "path data looks like: ";
+          for(const auto& item : pathData)
+            std::cout << item << ", ";
+          std::cout << std::endl;
+        }
+        tblData_.emplace_back(std::move(tblEntry));
+      } 
+      std::sort(tblData_.begin(),tblData_.end());
+      //if(verbose) {
+      //  std::stringstream ss;
+      //  boost::property_tree::json_parser::write_json(ss, psTbl);
+      //  std::cout << "PrescaleTbl::fill() - psTbl looks like" << ss.str() << std::endl;
+      //}
+    }
+
+    int prescale(const std::string& path,const int psColumn)const{
+      if(psColumn<0) return -1;
+      const size_t psColUnsigned = static_cast<size_t>(psColumn);
+      auto res = std::equal_range(tblData_.begin(),tblData_.end(),path);
+      if(res.first==res.second) return -1;//path not found
+      else{
+        if(distance(res.first,res.second)!=1){
+          std::cout <<"PrescaleTbl::prescale error "<<path<<" has multiple entries, this should not be possible"<<std::endl;
+        }
+        //std::cout <<"PrescaleTbl::prescale "<<path<<" has "<<res.first->prescales.size()<<" prescale columns:"<<std::endl;
+        //for(std::vector<unsigned int>::const_iterator idx = res.first->prescales.begin(); idx != res.first->prescales.end(); idx++)
+        //  std::cout << *idx << ", ";
+        //for(const auto& ps : res.first->prescales)
+        //  std::cout << ps << ", ";
+        //std::cout << std::endl;
+        if(psColUnsigned<res.first->prescales.size()){
+          return res.first->prescales[psColUnsigned];
+        }else {
+          std::cout <<"PrescaleTbl::prescale error "<<path<<" has "<<res.first->prescales.size()<<" prescale columns while we asked for column [int] = " << psColumn<<std::endl;
+          return -2;
+        }
+      } 
+    }
 };
 
 
 
 
 class RunInfo{
-private:
-  struct PSColData {
-    int psCol;
-    unsigned int minLumiSec;
-    unsigned int maxLumiSec;
-    
-    PSColData(int iPSCol,unsigned int iMinLumiSec,unsigned int iMaxLumiSec):
-      psCol(iPSCol),minLumiSec(iMinLumiSec),maxLumiSec(iMaxLumiSec){}
-    bool isInRange(unsigned int lumiSec)const{
-      return lumiSec>=minLumiSec && lumiSec<=maxLumiSec;
-    }
-    
-  };
+  private:
+    struct PSColData {
+      int psCol;
+      unsigned int minLumiSec;
+      unsigned int maxLumiSec;
 
-  int runnr_;
-  std::string l1Menu_;
-  std::string hltMenu_;
-  std::string triggerMode_;
-  std::string cmsswVersion_;
-  std::vector<PSColData> psColData_;
- 
-  PrescaleTbl l1PSTbl_;
-  PrescaleTbl hltPSTbl_;
-
-
-public:
-  explicit RunInfo(int runnr):runnr_(runnr){}
-  bool operator<(const RunInfo& rhs)const{return runnr_<rhs.runnr_;}
-  bool operator<(const int rhs)const{return runnr_<rhs;}
-  friend bool operator<(const int lhs,const RunInfo& rhs){return lhs<rhs.runnr_;}
-
-  int psColumn(unsigned int lumiSec)const{
-    for(const auto& entry : psColData_){
-      if(entry.isInRange(lumiSec)) return entry.psCol;
-    }
-    //okay we didnt find it,there is some WBM limitations sometimes 
-    //the last and first limis are not taken into account
-    //so we take our best guess
-    //the guess is very good for the last lumis, probably okay for first lumis
-    unsigned int minLumi=std::numeric_limits<int>::max();
-    unsigned int maxLumi=0;
-    for(const auto& entry : psColData_){
-      minLumi = std::min(minLumi,entry.minLumiSec);
-      maxLumi = std::max(maxLumi,entry.maxLumiSec);
-    }
-    if(lumiSec==maxLumi+1) return psColumn(maxLumi);
-    if(lumiSec>0 && lumiSec<minLumi) return psColumn(minLumi);
-
-    return -1; //didnt find it, return invalid column
-  }
-  int l1PrescaleFromLumiSec(const std::string& path,unsigned int lumiSec)const{
-    return l1PrescaleFromPSColumn(path,psColumn(lumiSec));
-  }
-  int l1PrescaleFromPSColumn(const std::string& path,int psColumn)const{
-    return l1PSTbl_.prescale(path,psColumn);
-  }
-  int hltPrescaleFromLumiSec(const std::string& path,unsigned int lumiSec)const{
-    return hltPrescaleFromPSColumn(path,psColumn(lumiSec));
-  }
-  int hltPrescaleFromPSColumn(const std::string& path,int psColumn)const{
-    return hltPSTbl_.prescale(path,psColumn);
-  }
-  void fill(const boost::property_tree::ptree& runInfoTree,
-	    const boost::property_tree::ptree& l1PSTree,
-	    const boost::property_tree::ptree& hltPSTree){
-    
-    const auto& runData = runInfoTree.get_child(std::to_string(runnr_));
-    l1Menu_ = runData.get<std::string>("l1_menu");
-    hltMenu_ = runData.get<std::string>("hlt_menu");    
-    triggerMode_ = runData.get<std::string>("trig_mode");
-    cmsswVersion_ = runData.get<std::string>("cmssw_version");
-    
-    const auto& psColData = runData.get_child("ps_cols");
-    for(auto& entry : psColData){
-      int colNr = std::stoi(entry.first);
-      for(auto& lumiPair : entry.second){
-	unsigned int minLumiSec = lumiPair.second.begin()->second.get_value<int>();
-	unsigned int maxLumiSec = (++lumiPair.second.begin())->second.get_value<int>();
-	//	std::cout <<"run "<<runnr_<<" colnr "<<colNr<<" min lumi "<<minLumiSec<<" max Lumi "<<maxLumiSec<<std::endl;
-	psColData_.push_back(PSColData(colNr,minLumiSec,maxLumiSec));
+      PSColData(int iPSCol,unsigned int iMinLumiSec,unsigned int iMaxLumiSec):
+        psCol(iPSCol),minLumiSec(iMinLumiSec),maxLumiSec(iMaxLumiSec){}
+      bool isInRange(unsigned int lumiSec)const{
+        return lumiSec>=minLumiSec && lumiSec<=maxLumiSec;
       }
+
+    };
+
+    int runnr_;
+    std::string l1Menu_;
+    std::string hltMenu_;
+    std::string triggerMode_;
+    std::string cmsswVersion_;
+    std::vector<PSColData> psColData_;
+
+    PrescaleTbl l1PSTbl_;
+    PrescaleTbl hltPSTbl_;
+
+
+  public:
+    explicit RunInfo(int runnr):runnr_(runnr){}
+    bool operator<(const RunInfo& rhs)const{return runnr_<rhs.runnr_;}
+    bool operator<(const int rhs)const{return runnr_<rhs;}
+    friend bool operator<(const int lhs,const RunInfo& rhs){return lhs<rhs.runnr_;}
+
+    int psColumn(unsigned int lumiSec)const{
+      for(const auto& entry : psColData_){
+        if(entry.isInRange(lumiSec)) return entry.psCol;
+      }
+      //okay we didnt find it,there is some WBM limitations sometimes 
+      //the last and first limis are not taken into account
+      //so we take our best guess
+      //the guess is very good for the last lumis, probably okay for first lumis
+      unsigned int minLumi=std::numeric_limits<int>::max();
+      unsigned int maxLumi=0;
+      for(const auto& entry : psColData_){
+        minLumi = std::min(minLumi,entry.minLumiSec);
+        maxLumi = std::max(maxLumi,entry.maxLumiSec);
+      }
+      if(lumiSec==maxLumi+1) return psColumn(maxLumi);
+      if(lumiSec>0 && lumiSec<minLumi) return psColumn(minLumi);
+
+      return -1; //didnt find it, return invalid column
     }
-    bool verbose = false;
-    //If(triggerMode_ == "l1_hlt_collisions2016/v448")
-    //  verbose = true;
-    //If(verbose)
-    //  std::cout << "RunInfo::fill() - filling prescale tables for run=" << runnr_ << " and triggerMode=" << triggerMode_ << std::endl;
-    l1PSTbl_.fill(triggerMode_,l1PSTree, true, verbose);
-    hltPSTbl_.fill(hltMenu_,hltPSTree,false, verbose);
-  }
-  std::string l1Menu() const { return l1Menu_; }
-  std::string hltMenu() const { return hltMenu_; }
-  std::string triggerMode() const { return triggerMode_; }
+    int l1PrescaleFromLumiSec(const std::string& path,unsigned int lumiSec)const{
+      return l1PrescaleFromPSColumn(path,psColumn(lumiSec));
+    }
+    int l1PrescaleFromPSColumn(const std::string& path,int psColumn)const{
+      return l1PSTbl_.prescale(path,psColumn);
+    }
+    int hltPrescaleFromLumiSec(const std::string& path,unsigned int lumiSec)const{
+      return hltPrescaleFromPSColumn(path,psColumn(lumiSec));
+    }
+    int hltPrescaleFromPSColumn(const std::string& path,int psColumn)const{
+      return hltPSTbl_.prescale(path,psColumn);
+    }
+    void fill(const boost::property_tree::ptree& runInfoTree,
+        const boost::property_tree::ptree& l1PSTree,
+        const boost::property_tree::ptree& hltPSTree){
+
+      const auto& runData = runInfoTree.get_child(std::to_string(runnr_));
+      l1Menu_ = runData.get<std::string>("l1_menu");
+      hltMenu_ = runData.get<std::string>("hlt_menu");    
+      triggerMode_ = runData.get<std::string>("trig_mode");
+      cmsswVersion_ = runData.get<std::string>("cmssw_version");
+
+      const auto& psColData = runData.get_child("ps_cols");
+      for(auto& entry : psColData){
+        int colNr = std::stoi(entry.first);
+        for(auto& lumiPair : entry.second){
+          unsigned int minLumiSec = lumiPair.second.begin()->second.get_value<int>();
+          unsigned int maxLumiSec = (++lumiPair.second.begin())->second.get_value<int>();
+          //	std::cout <<"run "<<runnr_<<" colnr "<<colNr<<" min lumi "<<minLumiSec<<" max Lumi "<<maxLumiSec<<std::endl;
+          psColData_.push_back(PSColData(colNr,minLumiSec,maxLumiSec));
+        }
+      }
+      bool verbose = false;
+      //If(triggerMode_ == "l1_hlt_collisions2016/v448")
+      //  verbose = true;
+      //If(verbose)
+      //  std::cout << "RunInfo::fill() - filling prescale tables for run=" << runnr_ << " and triggerMode=" << triggerMode_ << std::endl;
+      l1PSTbl_.fill(triggerMode_,l1PSTree, true, verbose);
+      hltPSTbl_.fill(hltMenu_,hltPSTree,false, verbose);
+    }
+    std::string l1Menu() const { return l1Menu_; }
+    std::string hltMenu() const { return hltMenu_; }
+    std::string triggerMode() const { return triggerMode_; }
 };
 
 
 class PrescaleProvider {
-private:
-  std::vector<RunInfo> runInfo_;
-public:  
-  PrescaleProvider(const std::string& jsonBaseName){
-    boost::property_tree::ptree runInfoTree,l1PSTree,hltPSTree;
-    boost::property_tree::read_json(jsonBaseName+"_runInfo.json",runInfoTree);
-    boost::property_tree::read_json(jsonBaseName+"_l1prescales.json",l1PSTree);
-    boost::property_tree::read_json(jsonBaseName+"_hltprescales.json",hltPSTree);
-    for(auto& entry : runInfoTree){
-      //std::cout <<"entry "<<entry.first<<" : "<<entry.second.get<std::string>("hlt_menu")<<std::endl; 
-      if(entry.second.get<std::string>("hlt_menu").find("/cdaq/physics")==0){
-	runInfo_.emplace_back(RunInfo(std::stoi(entry.first)));
+  private:
+    std::vector<RunInfo> runInfo_;
+  public:  
+    PrescaleProvider(const std::string& jsonBaseName){
+      boost::property_tree::ptree runInfoTree,l1PSTree,hltPSTree;
+      boost::property_tree::read_json(jsonBaseName+"_runInfo.json",runInfoTree);
+      boost::property_tree::read_json(jsonBaseName+"_l1prescales.json",l1PSTree);
+      boost::property_tree::read_json(jsonBaseName+"_hltprescales.json",hltPSTree);
+      for(auto& entry : runInfoTree){
+        //std::cout <<"entry "<<entry.first<<" : "<<entry.second.get<std::string>("hlt_menu")<<std::endl; 
+        if(entry.second.get<std::string>("hlt_menu").find("/cdaq/physics")==0){
+          runInfo_.emplace_back(RunInfo(std::stoi(entry.first)));
+        }
+      }
+      for(auto& info : runInfo_) info.fill(runInfoTree,l1PSTree,hltPSTree);
+    }
+
+    const RunInfo* getRunInfo(int runnr)const{
+      auto res = std::equal_range(runInfo_.begin(),runInfo_.end(),runnr);
+      if(res.first==res.second){
+        std::cout <<"PrescaleProvider::prescale : warning run "<<runnr<<" not found "<<std::endl;
+        return nullptr; 
+      }else{
+        if(std::distance(res.first,res.second)>1) std::cout <<"PrescaleProvider::prescale : warning run "<<runnr<<" has multiple entries, this should not be possible "<<std::endl;
+        return &(*res.first);
       }
     }
-    for(auto& info : runInfo_) info.fill(runInfoTree,l1PSTree,hltPSTree);
-  }
-  
-  const RunInfo* getRunInfo(int runnr)const{
-    auto res = std::equal_range(runInfo_.begin(),runInfo_.end(),runnr);
-    if(res.first==res.second){
-      std::cout <<"PrescaleProvider::prescale : warning run "<<runnr<<" not found "<<std::endl;
-      return nullptr; 
-    }else{
-      if(std::distance(res.first,res.second)>1) std::cout <<"PrescaleProvider::prescale : warning run "<<runnr<<" has multiple entries, this should not be possible "<<std::endl;
-      return &(*res.first);
-    }
-  }
 
-  int l1Prescale(const std::string& l1Seed,int runnr,int lumiSec)const{
-    auto runInfo = getRunInfo(runnr);
-    if(runInfo) return runInfo->l1PrescaleFromLumiSec(psprov::rmTrigVersionFromName(l1Seed),lumiSec);
-    else return -1;
-  }
-  int hltPrescale(const std::string& hltPath,int runnr,int lumiSec)const{
-    auto runInfo = getRunInfo(runnr);
-    if(runInfo) return runInfo->hltPrescaleFromLumiSec(psprov::rmTrigVersionFromName(hltPath),lumiSec);
-    else return -1;
-  }
-    
+    int l1Prescale(const std::string& l1Seed,int runnr,int lumiSec)const{
+      auto runInfo = getRunInfo(runnr);
+      if(runInfo) return runInfo->l1PrescaleFromLumiSec(psprov::rmTrigVersionFromName(l1Seed),lumiSec);
+      else return -1;
+    }
+    int hltPrescale(const std::string& hltPath,int runnr,int lumiSec)const{
+      auto runInfo = getRunInfo(runnr);
+      if(runInfo) return runInfo->hltPrescaleFromLumiSec(psprov::rmTrigVersionFromName(hltPath),lumiSec);
+      else return -1;
+    }
+
 };
 
 #endif

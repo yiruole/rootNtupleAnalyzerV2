@@ -57,6 +57,7 @@ enum ID {
   GEN_QUARK_HARD_SCATTER   = 59,
   GEN_QUARK_HARD_PROCESS   = 60,
 
+  LHE_ELECTRON             = 70,
   // HLT
   // Taken from: https://github.com/cms-sw/cmssw/blob/CMSSW_7_5_X/DataFormats/HLTReco/interface/TriggerTypeDefs.h
   TRIGGER_PHOTON           = 81,

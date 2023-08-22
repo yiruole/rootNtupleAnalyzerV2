@@ -5,7 +5,9 @@ import glob
 from pathlib import Path
 import subprocess
 import shlex
+import re
 from tabulate import tabulate
+import ROOT as r
 
 
 def appendSlash(dirName):
@@ -14,12 +16,123 @@ def appendSlash(dirName):
     return dirName
 
 
-if len(sys.argv) < 2:
-    raise RuntimeError("Incorrect number of arguments\n. Usage: {} localDir [outputFileDir].")
+def GetNEventsFromRootFile(rootFileURL, treeName = "Events"):
+    r.gErrorIgnoreLevel = r.kWarning
+    tfile = r.TFile.Open(rootFileURL)
+    nevents = tfile.Get(treeName).GetEntries()
+    tfile.Close()
+    r.gErrorIgnoreLevel = r.kPrint
+    return nevents
 
-localDir = sys.argv[1]
-if len(sys.argv) > 2:
-    outputDir = sys.argv[2]
+
+def GetNEventsFromFiles(fileList, treeName = "Events"):
+    r.gErrorIgnoreLevel = r.kWarning+1
+    tchain = r.TChain(treeName)
+    for rootFileURL in fileList:
+        tchain.Add(rootFileURL)
+    nevents = tchain.GetEntries()
+    r.gErrorIgnoreLevel = r.kPrint
+    return nevents
+
+
+def GetDatasets(datasetListFile):
+    datasets = []
+    with open(datasetListFile, "r") as datasetList:
+        for line in datasetList:
+            line = re.sub("#.*", "", line).strip()
+            if len(line) < 4:
+                continue
+            datasets.append(line)
+    return datasets
+
+
+def GetFileEventsMapFromDAS(datasetList):
+    fileNameToNEventsDict = {}
+    datasets = GetDatasets(datasetsFile)
+    cmdsToRun = []
+    for dataset in datasets:
+        dataset = dataset.strip("\n")
+        query = "file dataset={} | grep file.name, file.nevents".format(dataset)
+        cmd = 'dasgoclient --query="{}" --limit=-1'.format(query)
+        cmdsToRun.append(cmd)
+    # use 6 processes in parallel
+    procsToUse = 6
+    for i in range(0, len(cmdsToRun), procsToUse):
+         cmds = cmdsToRun[i:i+procsToUse]
+         procs = [subprocess.Popen(shlex.split(i), stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in cmds]
+         for idx, p in enumerate(procs):
+             res = p.communicate()
+             if p.returncode != 0:
+                  raise RuntimeError("DAS command failed with stderr =", res[1])
+             output = res[0].decode()
+             split = output.split()
+             it = iter(split)
+             for element in it:
+                 fileName = element
+                 nEvents = next(it)
+                 fileNameToNEventsDict[fileName] = int(nEvents)
+    return fileNameToNEventsDict
+
+
+def CheckEventsProcessedPerJob(fileNameEventsDict):
+    fileList = glob.glob(localDir+"**/submit_*.sh", recursive=True)
+    if len(fileList) < 0:
+        raise RuntimeError("Could not find any submit files in localDir {}".format(localDir))
+    for srcFile in fileList:
+        index = srcFile.split("_")[-1].split(".")[0]
+        filesProcessed = []
+        with open(srcFile, 'r') as thisFile:
+            for line in thisFile:
+                if "haddnano.py" in line:
+                    filesProcessed =  line.split()[2:]
+                    break
+        if len(filesProcessed) < 1:
+            raise RuntimeError("Did not find any input files processed when parsing file {}. Cannot check for correct number of events processed.".format(srcFile))
+        eventsExpected = 0
+        filesToReadFrom = []
+        for rootFile in filesProcessed:
+            fileName = "/"+rootFile.split("//")[-1]
+            try:
+                eventsExpected += fileNameEventsDict[fileName]
+            except KeyError:
+                print("WARN: could not find key {} in fileNameEventsDict. Getting events expected manually (very slow).".format(fileName))
+                filesToReadFrom.append(rootFile)
+        if len(filesToReadFrom) > 0:
+            eventsExpected += GetNEventsFromFiles(filesToReadFrom)
+        path = Path(srcFile)
+        datasetDir = str(path.parent.absolute().parent)+"/"
+        datFiles = glob.glob(datasetDir+"output/*_{}.dat".format(index), recursive=True)
+        if len(datFiles) > 1:
+            raise RuntimeError("Didn't get exactly 1 dat file matching pattern '{}': {}. There should only be one.".format(datasetDir+"output/*_{}.dat".format(index), datFiles))
+        elif len(datFiles) == 0:
+            print("ERROR: Something happened with the job for src file {}: was not able to find dat file matching pattern '{}'.".format(srcFile, datasetDir+"output/*_{}.dat".format(index)))
+            continue
+        datFilename = datFiles[0]
+        eventsProcessed = 0
+        with open(datFilename, 'r') as datFile:
+            for line in datFile:
+                splitLine = line.split()
+                if splitLine[1] == "nocut":
+                    eventsProcessed = int(splitLine[7])
+                    eventsProcessedPass = int(splitLine[8])
+                    assert(eventsProcessed == eventsProcessedPass)
+                    assert(eventsProcessed > 0)
+                    break
+        if eventsExpected != eventsProcessed:
+            print("ERROR: Something happened with the job for src file {}: expected {} events but processed {}".format(srcFile, eventsExpected, eventsProcessed))
+
+
+####################################################################################################
+# Run
+####################################################################################################
+#FIXME change to optparser
+if len(sys.argv) < 3:
+    raise RuntimeError("Incorrect number of arguments\n. Usage: inputList localDir [outputFileDir].")
+
+inputListFile = sys.argv[1]
+localDir = sys.argv[2]
+if len(sys.argv) > 3:
+    outputDir = sys.argv[3]
 else:
     outputDir = localDir
 
@@ -32,6 +145,37 @@ harmlessErrorMessages.append("Unable to set SINGULARITY")
 harmlessErrorMessages.append("WARNING: Environment variable")
 harmlessErrorMessages.append("Warning in <TClass::Init>: no dictionary for class")
 harmlessErrorMessages.append("No branch name is matching wildcard")
+harmlessErrorMessages.append("Error in <TNetXNGFile::ReadBuffers>: [ERROR] Server responded with an error: [3008] Single readv transfer is too large")
+harmlessErrorMessages.append("INFO:    /etc/singularity/ exists;")
+harmlessErrorMessages.append("security protocol 'ztn' disallowed for non-TLS connections.")
+harmlessErrorMessages.append("tac: write error: Broken pipe")  # no idea what this is about, but apparently harmless
+harmlessErrorMessages.append("Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1")
+
+print("Checking that all events expected were processed...", flush = True)
+fileToEventsDict = {}
+with open(inputListFile, "r") as inputList:
+    for line in inputList:
+        if not len(line.strip()) > 0:
+            continue
+        if line.strip().startswith("#"):
+            continue
+        # dataset = line.strip().split("/")[-1].split(".txt")[0]
+        fileListFile = line.strip()
+        eventsFilename = fileListFile.replace(".txt", "_nevents.txt")
+        eventsFileList = glob.glob(eventsFilename)
+        if len(eventsFileList) != 1:
+            raise RuntimeError("Could not find 1 nevents file '{}' as expected.".format(eventsFilename))
+        with open(fileListFile, "r") as fileList, open(eventsFilename, "r") as eventsFile:
+            for fileLine, eventsLine in zip(fileList, eventsFile):
+                if not len(fileLine.strip()) > 0:
+                    continue
+                if fileLine.strip().startswith("#"):
+                    continue
+                fileURL = fileLine.strip()
+                fileURL = re.sub("root://.*/store", "/store", fileURL)  # need to remove prefix
+                fileToEventsDict[fileURL] = int(eventsLine)
+CheckEventsProcessedPerJob(fileToEventsDict)
+print ("Done.", flush = True)
 
 print("Grepping error files...")
 fileList = glob.glob(localDir+"**/*.err", recursive=True)
@@ -47,7 +191,7 @@ for errFile in fileList:
                 continue
             elif "mkdir" in line and "File exists" in line:
                 continue
-            else:
+            elif len(line.strip("\n")) > 0:
                 errorOutputThisFile.append(line.strip("\n"))
     if len(errorOutputThisFile) > 0:
         filesAndErrorOutput[errFile] = errorOutputThisFile
@@ -117,7 +261,7 @@ if len(cmdsToRun) > 0:
             numOutputFiles = len(output.split())
             datasetInfoDict[datasets[idx]]["numOutputFiles"] = numOutputFiles
             if numOutputFiles != datasetInfoDict[datasets[idx]]["numExpectedOutputFiles"]:
-                datasetInfoDict[datasets[idx]]["numOutputFiles"] = False
+                datasetInfoDict[datasets[idx]]["OK"] = False
         # print("Ran commands {} for datasets {} and got info {}".format(cmds, datasets, [datasetInfoDict[datasets[datasetIdx]] for datasetIdx in range(0, 4)]))
 print("Done")
 print()

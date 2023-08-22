@@ -131,6 +131,8 @@ if(REDUCED_SKIM)
     src/GenJetIDs.C
     src/GenParticle.C
     src/GenParticleIDs.C
+    src/LHEParticle.C
+    src/LHEParticleIDs.C
     src/HLTriggerObject.C
     src/HLTriggerObjectCollectionHelper.C
     src/LooseElectron.C
