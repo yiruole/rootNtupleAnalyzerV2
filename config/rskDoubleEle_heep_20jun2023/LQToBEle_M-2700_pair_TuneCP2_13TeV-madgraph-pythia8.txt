@@ -1,1 +1,1 @@
-root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/LQToBEle_M-2700_pair_TuneCP2_13TeV-madgraph-pythia8/LQToBEle_M-2700_pair_TuneCP2_13TeV-madgraph-pythia8_0_rsk.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_18aug23/LQToBEle_M-2700_pair_TuneCP2_13TeV-madgraph-pythia8/LQToBEle_M-2700_pair_TuneCP2_13TeV-madgraph-pythia8_0_rsk.root

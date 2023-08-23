@@ -26,30 +26,34 @@ fi
 
 #### INPUTS HERE ####
 #------------
-ANANAME=HEM1516study_Jet2_BothInHEM1516_UL
+#ANANAME=HEM1516study_Jet2_BothInHEM1516_UL
+ANANAME=HEM1516study_nocut_AB
 #------------
-inputlist2018=config/rskDoubleEle_heep_20jun2023/inputListAllCurrent_CD.txt
+inputlist2018=config/rskDoubleEle_heep_20jun2023/inputListAllCurrent_AB.txt
 #------------
 CODENAME=analysisClass_lq_eejj
 #CODENAME=analysisClass_lq_eejj_oneBTag
 #------------
-OUTDIRPATH=/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_BothInHEM1516_UL
+#OUTDIRPATH=/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Jet2_BothInHEM1516_UL
+OUTDIRPATH=/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_nocut_AB
 # cut files
-cutFileAna="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"
-cutFileOpt="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"# ilumi
+#cutFileAna="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"
+#cutFileOpt="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_jet2_both_in.txt"# ilumi
+cutFileAna="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_nocut.txt"
+cutFileOpt="/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516file/cutTable_lq_eejj_nocut.txt"# ilumi
 ilumi2016pre=19501.601622
 ilumi2016post=16812.151722
 ilumi2017=41540 #FIXME: this number is just from the Egamma twiki
 #ilumi2018=59399
-#ilumi2018=20760 #AB
-ilumi2018=38630 #CD
+ilumi2018=20760 #AB
+#ilumi2018=38630 #CD
 excludeCombining=""
 #------------
 #QUEUEANA=tomorrow # for systs
 QUEUEOPT=testmatch
 #QUEUEANA=longlunch  # one job failed using longlunch
-QUEUEANA=workday
-#QUEUEANA=microcentury # sufficient for no systs
+#QUEUEANA=workday
+QUEUEANA=microcentury # sufficient for no systs
 #------------
 if [ "$YEAR" = "2016preVFP" ]; then
   echo "Doing 2016preVFP!"

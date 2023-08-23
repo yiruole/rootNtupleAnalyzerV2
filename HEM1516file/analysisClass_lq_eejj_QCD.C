@@ -85,17 +85,40 @@ void analysisClass::Loop()
 
   // prescales
   //Run2PhotonTriggerPrescales run2PhotonTriggerPrescales;
-	PrescaleProvider psProv("/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/ul-analysis-inputs/prescales/2016/triggerData2016");
+    PrescaleProvider psProv("/afs/cern.ch/user/s/scooper/work/public/Leptoquarks/ul-analysis-inputs/prescales/2018/hltData2018");
 
   //--------------------------------------------------------------------------
   // Analysis year
   //--------------------------------------------------------------------------
-  string analysisYear = getPreCutString1("AnalysisYear");
-  int analysisYearInt = -1;
-  if(analysisYear.find("2016") != string::npos)
-      analysisYearInt = 2016;
-  else
-    analysisYearInt = stoi(analysisYear);
+//  string analysisYear = getPreCutString1("AnalysisYear");
+//  int analysisYearInt = -1;
+//  if(analysisYear.find("2016") != string::npos)
+//      analysisYearInt = 2016;
+//  else
+//    cout << "Value of analysisYear before conversion: " << analysisYear << endl;
+//    analysisYearInt = stoi(analysisYear);
+
+//debug
+//  string analysisYear = getPreCutString1("AnalysisYear");
+//  int analysisYearInt = -1;
+//  if (!analysisYear.empty()) {
+//      if (analysisYear.find("2016") != string::npos)
+//          analysisYearInt = 2016;
+//      else if (analysisYear.find("2018") != string::npos)
+//          analysisYearInt = 2018;
+//      else {
+//          cout << "Value of analysisYear before conversion: " << analysisYear << endl;
+//          cout << "Invalid value for AnalysisYear: " << analysisYear << endl;
+//      }
+//  } else {
+//      cout << "AnalysisYear value is empty." << endl;
+//  }
+//
+//set default analysis year to 2018
+  int analysisYearInt = 2018;
+
+
+
 
   //--------------------------------------------------------------------------
   // electron ID
@@ -115,15 +138,17 @@ void analysisClass::Loop()
     regionVec = {"2Jet_TrkIsoHEEP7vsHLTPt_PAS"};
   else
     regionVec = {
-      "Bar_pre319077_2Jet",
-      "End1_pre319077_2Jet",
-      "End2_pre319077_2Jet",
-      "Bar_noHEM_post319077_2Jet",
-      "End1_noHEM_post319077_2Jet",
-      "End2_noHEM_post319077_2Jet",
-      "Bar_HEMonly_post319077_2Jet",
-      "End1_HEMonly_post319077_2Jet",
-      "End2_HEMonly_post319077_2Jet"};
+      "2Jet_TrkIsoHEEP7vsHLTPt_PAS"//,
+  //    "Bar_pre319077_2Jet",
+  //    "End1_pre319077_2Jet",
+  //    "End2_pre319077_2Jet",
+  //    "Bar_noHEM_post319077_2Jet",
+  //    "End1_noHEM_post319077_2Jet",
+  //    "End2_noHEM_post319077_2Jet",
+  //    "Bar_HEMonly_post319077_2Jet",
+  //    "End1_HEMonly_post319077_2Jet",
+  //    "End2_HEMonly_post319077_2Jet"
+        };
   QCDFakeRate qcdFR(qcdFileName, "fr2D_", regionVec, true); // look up from hist
 
   std::string qcdCalcType  = getPreCutString1("QCDCalcType");
@@ -153,23 +178,23 @@ void analysisClass::Loop()
   // Create hists
   //--------------------------------------------------------------------------
 
-  CreateUserTH1D( "EventCount"            ,    1    , 0      , 1	 );
+  CreateUserTH1D( "EventCount"            ,    1    , 0      , 1     );
 
-  CreateUserTH1D( "FakeRateEffective"     ,    50   , 0      , 1	 );
-  CreateUserTH1D( "FakeRateEffective_PassNEle"     ,    50   , 0      , 1	 );
-  CreateUserTH1D( "MinPrescale"           ,    1000 , 0      , 1000	 );
+  CreateUserTH1D( "FakeRateEffective"     ,    50   , 0      , 1     );
+  CreateUserTH1D( "FakeRateEffective_PassNEle"     ,    50   , 0      , 1     );
+  CreateUserTH1D( "MinPrescale"           ,    1000 , 0      , 1000     );
 
-  CreateUserTH1D( "M_j1j3_PAS"            ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_j2j3_PAS"            ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_e1j3_PAS"            ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_e2j3_PAS"            ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_eejjj_PAS"           ,    500 , 0       , 5000	 );
+  CreateUserTH1D( "M_j1j3_PAS"            ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_j2j3_PAS"            ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_e1j3_PAS"            ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_e2j3_PAS"            ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_eejjj_PAS"           ,    500 , 0       , 5000     );
 
-  CreateUserTH1D( "M_j1j3_PASandMee100"   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_j2j3_PASandMee100"   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_e1j3_PASandMee100"   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_e2j3_PASandMee100"   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "M_eejjj_PASandMee100"  ,    500 , 0       , 5000	 );
+  CreateUserTH1D( "M_j1j3_PASandMee100"   ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_j2j3_PASandMee100"   ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_e1j3_PASandMee100"   ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_e2j3_PASandMee100"   ,    200 , 0       , 2000     );
+  CreateUserTH1D( "M_eejjj_PASandMee100"  ,    500 , 0       , 5000     );
 
 
   CreateUserTH1D( "sTfrac_Jet1_PAS"       ,   100  ,  0.0    , 1.0      );
@@ -188,61 +213,61 @@ void analysisClass::Loop()
   CreateUserTH1D( "nMuon_PAS"             ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nJet_PAS"              ,    10  , -0.5    , 9.5      );
   CreateUserTH1D( "nJet_PASandMee100"        ,    10  , -0.5    , 9.5      );
-  CreateUserTH1D( "Pt1stEle_PAS"	   , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Pt1stEle_PASandMee100" , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Eta1stEle_PAS"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "SCEta1stEle_PAS"	   , 	100 , -5      , 5	 );
+  CreateUserTH1D( "Pt1stEle_PAS"       ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Pt1stEle_PASandMee100" ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Eta1stEle_PAS"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "SCEta1stEle_PAS"       ,     100 , -5      , 5     );
   CreateUserTH1D( "DeltaEtaEleTrk1stEle_Presel", 400, -0.5,   0.5 );
-  CreateUserTH1D( "Phi1stEle_PAS"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt2ndEle_PAS"	   , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Pt2ndEle_PASandMee100" , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Eta2ndEle_PAS"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "SCEta2ndEle_PAS"	   , 	100 , -5      , 5	 );
+  CreateUserTH1D( "Phi1stEle_PAS"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt2ndEle_PAS"       ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Pt2ndEle_PASandMee100" ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Eta2ndEle_PAS"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "SCEta2ndEle_PAS"       ,     100 , -5      , 5     );
   CreateUserTH1D( "DeltaEtaEleTrk2ndEle_Presel", 400, -0.5,   0.5 );
-  CreateUserTH1D( "Phi2ndEle_PAS"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Charge1stEle_PAS"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "Charge2ndEle_PAS"	   , 	2   , -1.0001 , 1.0001	 );
+  CreateUserTH1D( "Phi2ndEle_PAS"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Charge1stEle_PAS"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "Charge2ndEle_PAS"       ,     2   , -1.0001 , 1.0001     );
   CreateUserTH1D( "EleChargeSum_PAS"         ,    3   , -2.5    , 2.5  );
   CreateUserTH1D( "EleChargeSum_PASandMee100",    3   , -2.5    , 2.5  );
-  CreateUserTH1D( "MET_PAS"               ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "METPhi_PAS"		   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt1stJet_PAS"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt2ndJet_PAS"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt1stJet_PASandMee100" ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt2ndJet_PASandMee100" ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Eta1stJet_PAS"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Eta2ndJet_PAS"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stJet_PAS"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Phi2ndJet_PAS"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "sTlep_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTjet_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTlep_PASandMee100"    ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTjet_PASandMee100"    ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PAS"                ,    300   , 0       , 3000	 );
-  CreateUserTH1D( "sT_zjj_PAS"            ,    300   , 0       , 3000	  );
-  CreateUserTH1D( "sT_zjj_PASandMee100"   ,    300   , 0       , 3000	  );
-  CreateUserTH1D( "sT_PASandMee100"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee110"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee120"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee130"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee140"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee150"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee160"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee170"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee180"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee190"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_PASandMee200"       ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mjj_PAS"		   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mjj_PASandMee100"	   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_PAS"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_PASandST445"       ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "MTenu_PAS"             ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "Me1j1_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j1_PASandMee100"    ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j2_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j1_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j2_PAS"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j_selected_PAS"     ,    200 , 0       , 2000	 );
+  CreateUserTH1D( "MET_PAS"               ,    200 , 0       , 1000     );
+  CreateUserTH1D( "METPhi_PAS"           ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt1stJet_PAS"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt2ndJet_PAS"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt1stJet_PASandMee100" ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt2ndJet_PASandMee100" ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Eta1stJet_PAS"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Eta2ndJet_PAS"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stJet_PAS"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Phi2ndJet_PAS"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "sTlep_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTjet_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTlep_PASandMee100"    ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTjet_PASandMee100"    ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PAS"                ,    300   , 0       , 3000     );
+  CreateUserTH1D( "sT_zjj_PAS"            ,    300   , 0       , 3000      );
+  CreateUserTH1D( "sT_zjj_PASandMee100"   ,    300   , 0       , 3000      );
+  CreateUserTH1D( "sT_PASandMee100"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee110"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee120"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee130"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee140"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee150"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee160"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee170"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee180"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee190"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_PASandMee200"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mjj_PAS"           ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mjj_PASandMee100"       ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mee_PAS"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_PASandST445"       ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "MTenu_PAS"             ,    200 , 0       , 1000     );
+  CreateUserTH1D( "Me1j1_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j1_PASandMee100"    ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j2_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j1_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j2_PAS"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j_selected_PAS"     ,    200 , 0       , 2000     );
   CreateUserTH1D( "Me2j_selected_PAS"     ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_min_PAS"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_max_PAS"  ,    200 , 0       , 2000     );
@@ -254,12 +279,12 @@ void analysisClass::Loop()
   CreateUserTH1D( "Meej_PAS"              ,    400 , 0       , 4000     );
   CreateUserTH1D( "Meejj_PAS"             ,    400 , 0       , 4000     );
   // muon kinematics
-  CreateUserTH1D( "Pt1stMuon_PAS"	   , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Eta1stMuon_PAS"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stMuon_PAS"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt2ndMuon_PAS"	   , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Eta2ndMuon_PAS"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi2ndMuon_PAS"	   , 	60  , -3.1416 , +3.1416	 );
+  CreateUserTH1D( "Pt1stMuon_PAS"       ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Eta1stMuon_PAS"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stMuon_PAS"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt2ndMuon_PAS"       ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Eta2ndMuon_PAS"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi2ndMuon_PAS"       ,     60  , -3.1416 , +3.1416     );
 
 
   CreateUserTH1D( "Ptj1j2j3_PAS"                    ,    400 , 0       , 4000     );
@@ -287,16 +312,16 @@ void analysisClass::Loop()
   CreateUserTH1D( "Ptee_PASandMee100"     ,    200 , 0       , 2000     );
 
 
-  CreateUserTH1D( "nVertex_PAS"                     ,    101   , -0.5   , 100.5	 ) ;
-  CreateUserTH1D( "nVertex_PASandMee100"            ,    101   , -0.5   , 100.5	 ) ;
+  CreateUserTH1D( "nVertex_PAS"                     ,    101   , -0.5   , 100.5     ) ;
+  CreateUserTH1D( "nVertex_PASandMee100"            ,    101   , -0.5   , 100.5     ) ;
 
-  CreateUserTH1D( "DR_Ele1Jet1_PAS"	   , 	getHistoNBins("DR_Ele1Jet1"), getHistoMin("DR_Ele1Jet1"), getHistoMax("DR_Ele1Jet1")     ) ;
-  CreateUserTH1D( "DR_Ele1Jet2_PAS"	   , 	getHistoNBins("DR_Ele1Jet2"), getHistoMin("DR_Ele1Jet2"), getHistoMax("DR_Ele1Jet2")     ) ;
-  CreateUserTH1D( "DR_Ele2Jet1_PAS"	   , 	getHistoNBins("DR_Ele2Jet1"), getHistoMin("DR_Ele2Jet1"), getHistoMax("DR_Ele2Jet1")     ) ;
-  CreateUserTH1D( "DR_Ele2Jet2_PAS"	   , 	getHistoNBins("DR_Ele2Jet2"), getHistoMin("DR_Ele2Jet2"), getHistoMax("DR_Ele2Jet2")     ) ;
-  CreateUserTH1D( "DR_Jet1Jet2_PAS"	   , 	getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
-  CreateUserTH1D( "DR_Ele1Ele2_PAS"	   , 	getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
-  CreateUserTH1D( "minDR_EleJet_PAS"	   , 	getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
+  CreateUserTH1D( "DR_Ele1Jet1_PAS"       ,     getHistoNBins("DR_Ele1Jet1"), getHistoMin("DR_Ele1Jet1"), getHistoMax("DR_Ele1Jet1")     ) ;
+  CreateUserTH1D( "DR_Ele1Jet2_PAS"       ,     getHistoNBins("DR_Ele1Jet2"), getHistoMin("DR_Ele1Jet2"), getHistoMax("DR_Ele1Jet2")     ) ;
+  CreateUserTH1D( "DR_Ele2Jet1_PAS"       ,     getHistoNBins("DR_Ele2Jet1"), getHistoMin("DR_Ele2Jet1"), getHistoMax("DR_Ele2Jet1")     ) ;
+  CreateUserTH1D( "DR_Ele2Jet2_PAS"       ,     getHistoNBins("DR_Ele2Jet2"), getHistoMin("DR_Ele2Jet2"), getHistoMax("DR_Ele2Jet2")     ) ;
+  CreateUserTH1D( "DR_Jet1Jet2_PAS"       ,     getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
+  CreateUserTH1D( "DR_Ele1Ele2_PAS"       ,     getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
+  CreateUserTH1D( "minDR_EleJet_PAS"       ,     getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
   CreateUserTH1D( "minDR_ZJet_PAS"        ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
 
   CreateUserTH1D( "DR_ZJet1_PAS"        ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
@@ -315,21 +340,21 @@ void analysisClass::Loop()
   CreateUserTH1D( "Mee_70_110_Preselection", 200, 60, 120 );
   CreateUserTH1D( "Mee_70_110_ST600_Preselection", 200, 60, 120 );
 
-  CreateUserTH1D( "Mee_EBEB_PAS"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EBEE_PAS"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EEEE_PAS"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EB_PAS" 		   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_End2End2_PAS" 		   ,    60 , 60       , 120	 );
+  CreateUserTH1D( "Mee_EBEB_PAS"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EBEE_PAS"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EEEE_PAS"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EB_PAS"            ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_End2End2_PAS"            ,    60 , 60       , 120     );
 
-  CreateUserTH1D( "Mee_EBEB_80_100_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EBEE_80_100_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EEEE_80_100_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EB_80_100_PAS" 	     	   ,    60 , 60       , 120	 );
+  CreateUserTH1D( "Mee_EBEB_80_100_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EBEE_80_100_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EEEE_80_100_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EB_80_100_PAS"                 ,    60 , 60       , 120     );
 
-  CreateUserTH1D( "Mee_EBEB_70_110_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EBEE_70_110_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EEEE_70_110_PAS"	   ,    60 , 60       , 120	 );
-  CreateUserTH1D( "Mee_EB_70_110_PAS" 	     	   ,    60 , 60       , 120	 );
+  CreateUserTH1D( "Mee_EBEB_70_110_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EBEE_70_110_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EEEE_70_110_PAS"       ,    60 , 60       , 120     );
+  CreateUserTH1D( "Mee_EB_70_110_PAS"                 ,    60 , 60       , 120     );
 
   CreateUserTH1D( "PileupWeight"   , 100, -10, 10 );
   CreateUserTH1D( "GeneratorWeight", 100, -2.0 , 2.0 );
@@ -361,11 +386,11 @@ void analysisClass::Loop()
   CreateUserTH1D("Full5x5SigmaIEtaIEta_Endcap_1stEle_PASandMee100" , 200,  0.0,    0.1  ); CreateUserTH1D("Full5x5SigmaIEtaIEta_Endcap_2ndEle_PASandMee100" , 200,  0.0,    0.1  );
 
   if(do_roi_plots) {
-    CreateUserTH1D( "M_j1j3_ROI"            ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "M_j2j3_ROI"            ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "M_e1j3_ROI"            ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "M_e2j3_ROI"            ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "M_eejjj_ROI"           ,    500 , 0       , 5000	 );
+    CreateUserTH1D( "M_j1j3_ROI"            ,    200 , 0       , 2000     );
+    CreateUserTH1D( "M_j2j3_ROI"            ,    200 , 0       , 2000     );
+    CreateUserTH1D( "M_e1j3_ROI"            ,    200 , 0       , 2000     );
+    CreateUserTH1D( "M_e2j3_ROI"            ,    200 , 0       , 2000     );
+    CreateUserTH1D( "M_eejjj_ROI"           ,    500 , 0       , 5000     );
     CreateUserTH1D( "sTfrac_Jet1_ROI"       ,   100  ,  0.0    , 1.0      );
     CreateUserTH1D( "sTfrac_Jet2_ROI"       ,   100  ,  0.0    , 1.0      );
     CreateUserTH1D( "sTfrac_Ele1_ROI"       ,   100  ,  0.0    , 1.0      );
@@ -373,32 +398,32 @@ void analysisClass::Loop()
     CreateUserTH1D( "sTfrac_Jet_ROI"        ,   100  ,  0.0    , 1.0      );
     CreateUserTH1D( "sTfrac_Ele_ROI"        ,   100  ,  0.0    , 1.0      );
     CreateUserTH1D( "nJet_ROI"              ,    10  , -0.5    , 9.5      );
-    CreateUserTH1D( "Pt1stEle_ROI"	   , 	100 , 0       , 1000     );
-    CreateUserTH1D( "Pt2ndEle_ROI"	   , 	300 , 0       , 3000     );
+    CreateUserTH1D( "Pt1stEle_ROI"       ,     100 , 0       , 1000     );
+    CreateUserTH1D( "Pt2ndEle_ROI"       ,     300 , 0       , 3000     );
     CreateUserTH1D( "EleChargeSum_ROI"         ,    3   , -2.5    , 2.5  );
-    CreateUserTH1D( "MET_ROI"               ,    200 , 0       , 1000	 );
-    CreateUserTH1D( "Pt1stJet_ROI"          ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "Pt2ndJet_ROI"          ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "sTlep_ROI"             ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "sTjet_ROI"             ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "sT_zjj_ROI"                      ,    200   , 0       , 2000	  );
-    CreateUserTH1D( "sT_ROI"                ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "Mjj_ROI"		   ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "Mee_ROI"		   ,    200 , 0       , 2000	 );
-    CreateUserTH1D( "Me1j1_ROI"             ,    200 , 0       , 2000	 );
+    CreateUserTH1D( "MET_ROI"               ,    200 , 0       , 1000     );
+    CreateUserTH1D( "Pt1stJet_ROI"          ,    200 , 0       , 2000     );
+    CreateUserTH1D( "Pt2ndJet_ROI"          ,    200 , 0       , 2000     );
+    CreateUserTH1D( "sTlep_ROI"             ,    200 , 0       , 2000     );
+    CreateUserTH1D( "sTjet_ROI"             ,    200 , 0       , 2000     );
+    CreateUserTH1D( "sT_zjj_ROI"                      ,    200   , 0       , 2000      );
+    CreateUserTH1D( "sT_ROI"                ,    200 , 0       , 2000     );
+    CreateUserTH1D( "Mjj_ROI"           ,    200 , 0       , 2000     );
+    CreateUserTH1D( "Mee_ROI"           ,    200 , 0       , 2000     );
+    CreateUserTH1D( "Me1j1_ROI"             ,    200 , 0       , 2000     );
     CreateUserTH1D( "Mej_selected_avg_ROI"  ,    200 , 0       , 2000     );
     CreateUserTH1D( "Meejj_ROI"             ,    400 , 0       , 4000     );
     CreateUserTH1D( "Mejj_ROI"              ,    400 , 0       , 4000     );
     CreateUserTH1D( "Meej_ROI"              ,    400 , 0       , 4000     );
-    CreateUserTH1D( "Eta1stJet_ROI"                   ,    100   , -5      , 5	  );
-    CreateUserTH1D( "Eta2ndJet_ROI"                   ,    100   , -5      , 5	  );
-    CreateUserTH1D( "Eta1stEle_ROI"	             , 	100    , -5      , 5	  );
-    CreateUserTH1D( "Eta2ndEle_ROI"	             , 	100    , -5      , 5	  );
+    CreateUserTH1D( "Eta1stJet_ROI"                   ,    100   , -5      , 5      );
+    CreateUserTH1D( "Eta2ndJet_ROI"                   ,    100   , -5      , 5      );
+    CreateUserTH1D( "Eta1stEle_ROI"                 ,     100    , -5      , 5      );
+    CreateUserTH1D( "Eta2ndEle_ROI"                 ,     100    , -5      , 5      );
 
-    CreateUserTH1D( "Phi1stJet_ROI"	             , 	 60    , -3.1416 , +3.1416  );
-    CreateUserTH1D( "Phi2ndJet_ROI"	             , 	 60    , -3.1416 , +3.1416  );
-    CreateUserTH1D( "Phi1stEle_ROI"	             , 	 60    , -3.1416 , +3.1416  );
-    CreateUserTH1D( "Phi2ndEle_ROI"	             , 	 60    , -3.1416 , +3.1416  );
+    CreateUserTH1D( "Phi1stJet_ROI"                 ,      60    , -3.1416 , +3.1416  );
+    CreateUserTH1D( "Phi2ndJet_ROI"                 ,      60    , -3.1416 , +3.1416  );
+    CreateUserTH1D( "Phi1stEle_ROI"                 ,      60    , -3.1416 , +3.1416  );
+    CreateUserTH1D( "Phi2ndEle_ROI"                 ,      60    , -3.1416 , +3.1416  );
     CreateUserTH1D( "Ptj1j2j3_ROI"                    ,    200 , 0       , 2000     );
     CreateUserTH1D( "Ptj1j2_ROI"                      ,    200 , 0       , 2000     );
     CreateUserTH1D( "Ptj2j3_ROI"                      ,    200 , 0       , 2000     );
@@ -406,7 +431,7 @@ void analysisClass::Loop()
     CreateUserTH1D( "Ptee_Minus_Ptj1j2_ROI"           ,    200 , -500    , 500      );
     CreateUserTH1D( "Ptee_Minus_Ptj1j2j3_ROI"         ,    200 , -500    , 500      );
     CreateUserTH1D( "Ptee_ROI"              ,    200 , 0       , 2000     );
-    CreateUserTH1D( "nVertex_ROI"                     ,    101   , -0.5   , 100.5	 ) ;
+    CreateUserTH1D( "nVertex_ROI"                     ,    101   , -0.5   , 100.5     ) ;
     CreateUserTH1D( "minDR_ZJet_ROI"        ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
     CreateUserTH1D( "DR_ZJet1_ROI"        ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
     CreateUserTH2D( "MeeVsST_ROI"                 ,     200, 0, 2000, 200, 0, 2000) ;
@@ -428,69 +453,69 @@ void analysisClass::Loop()
   }
 
   // for scale factor dependence studies
-  CreateUserTH1D( "Mee_NJetEq2_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq3_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq4_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq5_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq6_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq7_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetGeq3_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetGeq4_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT300To500_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT500To750_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT750To1250_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT1250ToInf_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin100To200_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin200To300_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin300To400_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin400To500_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin500To650_PAS"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin650ToInf_PAS"		             ,    200   , 0       , 2000	  );
+  CreateUserTH1D( "Mee_NJetEq2_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq3_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq4_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq5_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq6_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq7_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetGeq3_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetGeq4_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT300To500_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT500To750_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT750To1250_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT1250ToInf_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin100To200_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin200To300_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin300To400_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin400To500_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin500To650_PAS"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin650ToInf_PAS"                     ,    200   , 0       , 2000      );
    // with zero B-tags
-   CreateUserTH1D( "Mee_PAS_noBtaggedJets"		       ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEB_PAS_noBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEE_PAS_noBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EEEE_PAS_noBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_sT300To500_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT500To750_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT750To1250_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT1250ToInf_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin100To200_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin200To300_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin300To400_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin400To500_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin500To650_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_noBtaggedJets"		             ,    200   , 0       , 2000	  );
+   CreateUserTH1D( "Mee_PAS_noBtaggedJets"               ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEB_PAS_noBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEE_PAS_noBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EEEE_PAS_noBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_sT300To500_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT500To750_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT750To1250_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT1250ToInf_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin100To200_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin200To300_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin300To400_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin400To500_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin500To650_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_noBtaggedJets"                     ,    200   , 0       , 2000      );
   CreateUserTH1D( "nElectron_noBtaggedJets"         ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nMuon_noBtaggedJets"             ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nJet_noBtaggedJets"              ,    10  , -0.5    , 9.5      );
-  CreateUserTH1D( "Pt1stEle_noBtaggedJets"	   , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Eta1stEle_noBtaggedJets"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stEle_noBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt2ndEle_noBtaggedJets"	   , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Eta2ndEle_noBtaggedJets"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi2ndEle_noBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Charge1stEle_noBtaggedJets"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "Charge2ndEle_noBtaggedJets"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "MET_noBtaggedJets"               ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "METPhi_noBtaggedJets"		   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt1stJet_noBtaggedJets"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt2ndJet_noBtaggedJets"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Eta1stJet_noBtaggedJets"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Eta2ndJet_noBtaggedJets"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stJet_noBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Phi2ndJet_noBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "sTlep_noBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTjet_noBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_noBtaggedJets"                ,    300   , 0       , 3000	 );
-  CreateUserTH1D( "sT_zjj_noBtaggedJets"            ,    300   , 0       , 3000	  );
-  CreateUserTH1D( "Mjj_noBtaggedJets"		   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_noBtaggedJets"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "MTenu_noBtaggedJets"             ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "Me1j1_noBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j2_noBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j1_noBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j2_noBtaggedJets"             ,    200 , 0       , 2000	 );
+  CreateUserTH1D( "Pt1stEle_noBtaggedJets"       ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Eta1stEle_noBtaggedJets"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stEle_noBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt2ndEle_noBtaggedJets"       ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Eta2ndEle_noBtaggedJets"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi2ndEle_noBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Charge1stEle_noBtaggedJets"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "Charge2ndEle_noBtaggedJets"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "MET_noBtaggedJets"               ,    200 , 0       , 1000     );
+  CreateUserTH1D( "METPhi_noBtaggedJets"           ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt1stJet_noBtaggedJets"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt2ndJet_noBtaggedJets"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Eta1stJet_noBtaggedJets"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Eta2ndJet_noBtaggedJets"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stJet_noBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Phi2ndJet_noBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "sTlep_noBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTjet_noBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_noBtaggedJets"                ,    300   , 0       , 3000     );
+  CreateUserTH1D( "sT_zjj_noBtaggedJets"            ,    300   , 0       , 3000      );
+  CreateUserTH1D( "Mjj_noBtaggedJets"           ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mee_noBtaggedJets"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "MTenu_noBtaggedJets"             ,    200 , 0       , 1000     );
+  CreateUserTH1D( "Me1j1_noBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j2_noBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j1_noBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j2_noBtaggedJets"             ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_min_noBtaggedJets"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_max_noBtaggedJets"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_minmax_noBtaggedJets"        ,    200 , 0       , 2000     );
@@ -499,50 +524,50 @@ void analysisClass::Loop()
   CreateUserTH1D( "Meej_noBtaggedJets"              ,    400 , 0       , 4000     );
   CreateUserTH1D( "Meejj_noBtaggedJets"             ,    400 , 0       , 4000     );
    // with >= 1 B-tags
-   CreateUserTH1D( "Mee_PAS_gteOneBtaggedJet"		       ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEB_PAS_gteOneBtaggedJet"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEE_PAS_gteOneBtaggedJet"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EEEE_PAS_gteOneBtaggedJet"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_sT300To500_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT500To750_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT750To1250_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT1250ToInf_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin100To200_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin200To300_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin300To400_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin400To500_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin500To650_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_gteOneBtaggedJet"		             ,    200   , 0       , 2000	  );
+   CreateUserTH1D( "Mee_PAS_gteOneBtaggedJet"               ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEB_PAS_gteOneBtaggedJet"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEE_PAS_gteOneBtaggedJet"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EEEE_PAS_gteOneBtaggedJet"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_sT300To500_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT500To750_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT750To1250_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT1250ToInf_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin100To200_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin200To300_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin300To400_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin400To500_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin500To650_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_gteOneBtaggedJet"                     ,    200   , 0       , 2000      );
   CreateUserTH1D( "nElectron_gteOneBtaggedJet"         ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nMuon_gteOneBtaggedJet"             ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nJet_gteOneBtaggedJet"              ,    10  , -0.5    , 9.5      );
-  CreateUserTH1D( "Pt1stEle_gteOneBtaggedJet"	   , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Eta1stEle_gteOneBtaggedJet"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stEle_gteOneBtaggedJet"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt2ndEle_gteOneBtaggedJet"	   , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Eta2ndEle_gteOneBtaggedJet"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi2ndEle_gteOneBtaggedJet"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Charge1stEle_gteOneBtaggedJet"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "Charge2ndEle_gteOneBtaggedJet"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "MET_gteOneBtaggedJet"               ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "METPhi_gteOneBtaggedJet"		   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt1stJet_gteOneBtaggedJet"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt2ndJet_gteOneBtaggedJet"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Eta1stJet_gteOneBtaggedJet"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Eta2ndJet_gteOneBtaggedJet"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stJet_gteOneBtaggedJet"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Phi2ndJet_gteOneBtaggedJet"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "sTlep_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTjet_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_gteOneBtaggedJet"                ,    300   , 0       , 3000	 );
-  CreateUserTH1D( "sT_zjj_gteOneBtaggedJet"            ,    300   , 0       , 3000	  );
-  CreateUserTH1D( "Mjj_gteOneBtaggedJet"		   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_gteOneBtaggedJet"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "MTenu_gteOneBtaggedJet"             ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "Me1j1_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j2_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j1_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j2_gteOneBtaggedJet"             ,    200 , 0       , 2000	 );
+  CreateUserTH1D( "Pt1stEle_gteOneBtaggedJet"       ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Eta1stEle_gteOneBtaggedJet"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stEle_gteOneBtaggedJet"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt2ndEle_gteOneBtaggedJet"       ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Eta2ndEle_gteOneBtaggedJet"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi2ndEle_gteOneBtaggedJet"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Charge1stEle_gteOneBtaggedJet"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "Charge2ndEle_gteOneBtaggedJet"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "MET_gteOneBtaggedJet"               ,    200 , 0       , 1000     );
+  CreateUserTH1D( "METPhi_gteOneBtaggedJet"           ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt1stJet_gteOneBtaggedJet"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt2ndJet_gteOneBtaggedJet"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Eta1stJet_gteOneBtaggedJet"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Eta2ndJet_gteOneBtaggedJet"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stJet_gteOneBtaggedJet"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Phi2ndJet_gteOneBtaggedJet"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "sTlep_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTjet_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_gteOneBtaggedJet"                ,    300   , 0       , 3000     );
+  CreateUserTH1D( "sT_zjj_gteOneBtaggedJet"            ,    300   , 0       , 3000      );
+  CreateUserTH1D( "Mjj_gteOneBtaggedJet"           ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mee_gteOneBtaggedJet"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "MTenu_gteOneBtaggedJet"             ,    200 , 0       , 1000     );
+  CreateUserTH1D( "Me1j1_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j2_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j1_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j2_gteOneBtaggedJet"             ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_min_gteOneBtaggedJet"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_max_gteOneBtaggedJet"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_minmax_gteOneBtaggedJet"        ,    200 , 0       , 2000     );
@@ -551,50 +576,50 @@ void analysisClass::Loop()
   CreateUserTH1D( "Meej_gteOneBtaggedJet"              ,    400 , 0       , 4000     );
   CreateUserTH1D( "Meejj_gteOneBtaggedJet"             ,    400 , 0       , 4000     );
    // with >= 2 B-tags
-   CreateUserTH1D( "Mee_PAS_gteTwoBtaggedJets"		       ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEB_PAS_gteTwoBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EBEE_PAS_gteTwoBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_EEEE_PAS_gteTwoBtaggedJets"		   ,    2000 , 0       , 2000	 );
-   CreateUserTH1D( "Mee_sT300To500_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT500To750_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT750To1250_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_sT1250ToInf_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin100To200_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin200To300_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin300To400_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin400To500_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin500To650_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
-   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_gteTwoBtaggedJets"		             ,    200   , 0       , 2000	  );
+   CreateUserTH1D( "Mee_PAS_gteTwoBtaggedJets"               ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEB_PAS_gteTwoBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EBEE_PAS_gteTwoBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_EEEE_PAS_gteTwoBtaggedJets"           ,    2000 , 0       , 2000     );
+   CreateUserTH1D( "Mee_sT300To500_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT500To750_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT750To1250_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_sT1250ToInf_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin100To200_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin200To300_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin300To400_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin400To500_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin500To650_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
+   CreateUserTH1D( "Mee_MejMin650ToInf_PAS_gteTwoBtaggedJets"                     ,    200   , 0       , 2000      );
   CreateUserTH1D( "nElectron_gteTwoBtaggedJets"         ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nMuon_gteTwoBtaggedJets"             ,    5   , -0.5    , 4.5      );
   CreateUserTH1D( "nJet_gteTwoBtaggedJets"              ,    10  , -0.5    , 9.5      );
-  CreateUserTH1D( "Pt1stEle_gteTwoBtaggedJets"	   , 	100 , 0       , 1000     );
-  CreateUserTH1D( "Eta1stEle_gteTwoBtaggedJets"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stEle_gteTwoBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt2ndEle_gteTwoBtaggedJets"	   , 	300 , 0       , 3000     );
-  CreateUserTH1D( "Eta2ndEle_gteTwoBtaggedJets"	   , 	100 , -5      , 5	 );
-  CreateUserTH1D( "Phi2ndEle_gteTwoBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Charge1stEle_gteTwoBtaggedJets"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "Charge2ndEle_gteTwoBtaggedJets"	   , 	2   , -1.0001 , 1.0001	 );
-  CreateUserTH1D( "MET_gteTwoBtaggedJets"               ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "METPhi_gteTwoBtaggedJets"		   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Pt1stJet_gteTwoBtaggedJets"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Pt2ndJet_gteTwoBtaggedJets"          ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Eta1stJet_gteTwoBtaggedJets"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Eta2ndJet_gteTwoBtaggedJets"         ,    100 , -5      , 5	 );
-  CreateUserTH1D( "Phi1stJet_gteTwoBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "Phi2ndJet_gteTwoBtaggedJets"	   , 	60  , -3.1416 , +3.1416	 );
-  CreateUserTH1D( "sTlep_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sTjet_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "sT_gteTwoBtaggedJets"                ,    300   , 0       , 3000	 );
-  CreateUserTH1D( "sT_zjj_gteTwoBtaggedJets"            ,    300   , 0       , 3000	  );
-  CreateUserTH1D( "Mjj_gteTwoBtaggedJets"		   ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_gteTwoBtaggedJets"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "MTenu_gteTwoBtaggedJets"             ,    200 , 0       , 1000	 );
-  CreateUserTH1D( "Me1j1_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me1j2_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j1_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
-  CreateUserTH1D( "Me2j2_gteTwoBtaggedJets"             ,    200 , 0       , 2000	 );
+  CreateUserTH1D( "Pt1stEle_gteTwoBtaggedJets"       ,     100 , 0       , 1000     );
+  CreateUserTH1D( "Eta1stEle_gteTwoBtaggedJets"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stEle_gteTwoBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt2ndEle_gteTwoBtaggedJets"       ,     300 , 0       , 3000     );
+  CreateUserTH1D( "Eta2ndEle_gteTwoBtaggedJets"       ,     100 , -5      , 5     );
+  CreateUserTH1D( "Phi2ndEle_gteTwoBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Charge1stEle_gteTwoBtaggedJets"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "Charge2ndEle_gteTwoBtaggedJets"       ,     2   , -1.0001 , 1.0001     );
+  CreateUserTH1D( "MET_gteTwoBtaggedJets"               ,    200 , 0       , 1000     );
+  CreateUserTH1D( "METPhi_gteTwoBtaggedJets"           ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Pt1stJet_gteTwoBtaggedJets"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Pt2ndJet_gteTwoBtaggedJets"          ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Eta1stJet_gteTwoBtaggedJets"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Eta2ndJet_gteTwoBtaggedJets"         ,    100 , -5      , 5     );
+  CreateUserTH1D( "Phi1stJet_gteTwoBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "Phi2ndJet_gteTwoBtaggedJets"       ,     60  , -3.1416 , +3.1416     );
+  CreateUserTH1D( "sTlep_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sTjet_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "sT_gteTwoBtaggedJets"                ,    300   , 0       , 3000     );
+  CreateUserTH1D( "sT_zjj_gteTwoBtaggedJets"            ,    300   , 0       , 3000      );
+  CreateUserTH1D( "Mjj_gteTwoBtaggedJets"           ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Mee_gteTwoBtaggedJets"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "MTenu_gteTwoBtaggedJets"             ,    200 , 0       , 1000     );
+  CreateUserTH1D( "Me1j1_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me1j2_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j1_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
+  CreateUserTH1D( "Me2j2_gteTwoBtaggedJets"             ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_min_gteTwoBtaggedJets"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_selected_max_gteTwoBtaggedJets"  ,    200 , 0       , 2000     );
   CreateUserTH1D( "Mej_minmax_gteTwoBtaggedJets"        ,    200 , 0       , 2000     );
@@ -604,32 +629,32 @@ void analysisClass::Loop()
   CreateUserTH1D( "Meejj_gteTwoBtaggedJets"             ,    400 , 0       , 4000     );
 
   // bkg control region plots
-  CreateUserTH1D( "Mee_BkgControlRegion"		            ,    2000   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_BkgControlRegion_gteOneBtaggedJet"		       ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_BkgControlRegion_gteTwoBtaggedJets"		       ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EB_BkgControlRegion"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EBEB_BkgControlRegion"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EBEE_BkgControlRegion"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_EEEE_BkgControlRegion"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_End2End2_BkgControlRegion"		   ,    2000 , 0       , 2000	 );
-  CreateUserTH1D( "Mee_NJetEq2_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq3_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq4_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq5_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq6_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetEq7_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetGeq3_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_NJetGeq4_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT300To500_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT500To750_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT750To1250_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_sT1250ToInf_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin100To200_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin200To300_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin300To400_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin400To500_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin500To650_BkgControlRegion"		             ,    200   , 0       , 2000	  );
-  CreateUserTH1D( "Mee_MejMin650ToInf_BkgControlRegion"		             ,    200   , 0       , 2000	  );
+  CreateUserTH1D( "Mee_BkgControlRegion"                    ,    2000   , 0       , 2000      );
+  CreateUserTH1D( "Mee_BkgControlRegion_gteOneBtaggedJet"               ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_BkgControlRegion_gteTwoBtaggedJets"               ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EB_BkgControlRegion"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EBEB_BkgControlRegion"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EBEE_BkgControlRegion"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_EEEE_BkgControlRegion"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_End2End2_BkgControlRegion"           ,    2000 , 0       , 2000     );
+  CreateUserTH1D( "Mee_NJetEq2_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq3_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq4_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq5_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq6_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetEq7_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetGeq3_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_NJetGeq4_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT300To500_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT500To750_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT750To1250_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_sT1250ToInf_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin100To200_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin200To300_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin300To400_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin400To500_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin500To650_BkgControlRegion"                     ,    200   , 0       , 2000      );
+  CreateUserTH1D( "Mee_MejMin650ToInf_BkgControlRegion"                     ,    200   , 0       , 2000      );
 
   // 3D opt cut space
   CreateUserTH3D( "OptimizationCutSpace", 200, 0, 2000, 200, 0, 2000, 200, 0, 2000);
@@ -709,10 +734,10 @@ void analysisClass::Loop()
     sprintf(plot_name, "sTfrac_Jet_LQ%d"          , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1.0      );
     sprintf(plot_name, "sTfrac_Ele_LQ%d"          , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1.0      );
     sprintf(plot_name, "nJet_LQ%d"                , lq_mass ); CreateUserTH1D( plot_name ,     10 , -0.5    , 9.5      );
-    sprintf(plot_name, "Pt1stEle_LQ%d"	           , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
+    sprintf(plot_name, "Pt1stEle_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
     sprintf(plot_name, "Eta1stEle_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,    100 , -5.0    , 5.0      );
     sprintf(plot_name, "Phi1stEle_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,     60 , -3.1416 , +3.1416  );
-    sprintf(plot_name, "Pt2ndEle_LQ%d"	           , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
+    sprintf(plot_name, "Pt2ndEle_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
     sprintf(plot_name, "Eta2ndEle_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,    100 , -5.0    , 5.0      );
     sprintf(plot_name, "Phi2ndEle_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,     60 , -3.1416 , 3.1416   );
     sprintf(plot_name, "MET_LQ%d"                 , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 1000     );
@@ -725,7 +750,7 @@ void analysisClass::Loop()
     sprintf(plot_name, "sTlep_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 2000     );
     sprintf(plot_name, "sTjet_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 2000     );
     sprintf(plot_name, "sT_zjj_LQ%d"              , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 2000     );
-    sprintf(plot_name, "Mjj_LQ%d"		   , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 2000     );
+    sprintf(plot_name, "Mjj_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,    200 ,  0.0    , 2000     );
     sprintf(plot_name, "Meejj_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    400 ,  0.0    , 4000     );
     sprintf(plot_name, "Mejj_LQ%d"                , lq_mass ); CreateUserTH1D( plot_name ,    400 ,  0.0    , 4000     );
     sprintf(plot_name, "Meej_LQ%d"                , lq_mass ); CreateUserTH1D( plot_name ,    400 ,  0.0    , 4000     );
@@ -751,10 +776,10 @@ void analysisClass::Loop()
     sprintf(plot_name, "DR_ZJet1_LQ%d"            , lq_mass ); CreateUserTH1D( plot_name ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
     sprintf(plot_name, "DR_ZJet2_LQ%d"            , lq_mass ); CreateUserTH1D( plot_name ,    getHistoNBins("DR_Jet1Jet2"), getHistoMin("DR_Jet1Jet2"), getHistoMax("DR_Jet1Jet2")     ) ;
     // muon kinematics
-    sprintf(plot_name, "Pt1stMuon_LQ%d"	           , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
+    sprintf(plot_name, "Pt1stMuon_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
     sprintf(plot_name, "Eta1stMuon_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,    100 , -5.0    , 5.0      );
     sprintf(plot_name, "Phi1stMuon_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,     60 , -3.1416 , +3.1416  );
-    sprintf(plot_name, "Pt2ndMuon_LQ%d"	           , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
+    sprintf(plot_name, "Pt2ndMuon_LQ%d"               , lq_mass ); CreateUserTH1D( plot_name ,    100 ,  0.0    , 1000     );
     sprintf(plot_name, "Eta2ndMuon_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,    100 , -5.0    , 5.0      );
     sprintf(plot_name, "Phi2ndMuon_LQ%d"           , lq_mass ); CreateUserTH1D( plot_name ,     60 , -3.1416 , 3.1416   );
 
@@ -953,7 +978,9 @@ void analysisClass::Loop()
           "; hlt menu=" << psProv.getRunInfo(run)->hltMenu() << "; trig mode=" << psProv.getRunInfo(run)->triggerMode() << std::endl;
       //assert(l1Prescale > 0);
       //assert(hltPrescale > 0);
+      std::cout << "DEBUG: l1Prescale = " << l1Prescale << ", hltPrescale = " << hltPrescale << std::endl;
       min_prescale = l1Prescale * hltPrescale;
+      std::cout << "DEBUG: min_prescale = " << min_prescale << std::endl;
       //if(hltPhotonPt < 100)
       //  std::cout << "INFO: found prescale " << min_prescale << " for trigger name " << triggerName << " with hltPhotonPt = " << hltPhotonPt << ", for year: " << analysisYear << std::endl;
       if(min_prescale <= 0)
@@ -1145,7 +1172,7 @@ void analysisClass::Loop()
     //}
     //FIXME: add error on fake rate as well
     // double eFakeRateEffective = fakeRateEffective * sqrt (  ( eFakeRate1 / fakeRate1 ) * ( eFakeRate1 / fakeRate1 ) +
-    //					     ( eFakeRate2 / fakeRate2 ) * ( eFakeRate2 / fakeRate2 ) );
+    //                         ( eFakeRate2 / fakeRate2 ) * ( eFakeRate2 / fakeRate2 ) );
     double eFakeRateEffective = 0.0;
 
     weight = fakeRateEffective * min_prescale;
@@ -1246,6 +1273,10 @@ void analysisClass::Loop()
 
     // reweighting
     fillVariableWithValue ( "Reweighting", 1, fakeRateEffective * min_prescale ) ;
+//    std::cout << "fakeRateEffective: " << fakeRateEffective << std::endl;
+//    std::cout << "min_prescale: " << min_prescale << std::endl;
+//    std::cout << "Reweighting: " << fakeRateEffective * min_prescale << std::endl;
+
 
     // LHE cuts
     bool passLHECuts = true;
@@ -1294,9 +1325,9 @@ void analysisClass::Loop()
     fillVariableWithValue("PassBadPFMuonFilter"                , readerTools_->ReadValueBranch<Bool_t>("PassBadPFMuonFilter")                    , fakeRateEffective * min_prescale);
     // EcalBadCalibV2 for 2017, 2018
     if(analysisYearInt > 2016)
-      fillVariableWithValue("PassEcalBadCalibV2Filter"         , readerTools_->ReadValueBranch<Bool_t>("PassEcalBadCalibV2Filter")               , fakeRateEffective * min_prescale);
+      fillVariableWithValue("PassEcalBadCalibFilter"         , readerTools_->ReadValueBranch<Bool_t>("PassEcalBadCalibFilter")               , fakeRateEffective * min_prescale);
     else
-      fillVariableWithValue("PassEcalBadCalibV2Filter"         , 1                                                                                , fakeRateEffective * min_prescale);
+      fillVariableWithValue("PassEcalBadCalibFilter"         , 1                                                                                , fakeRateEffective * min_prescale);
 
     // Electrons
     int PassNEle = 0;
@@ -1655,7 +1686,7 @@ void analysisClass::Loop()
     // Did we at least pass the noise filtes?
     //--------------------------------------------------------------------------
 
-    bool passed_minimum = ( passedAllPreviousCuts("PassEcalBadCalibV2Filter") && passedCut ("PassEcalBadCalibV2Filter"));
+    bool passed_minimum = ( passedAllPreviousCuts("PassEcalBadCalibFilter") && passedCut ("PassEcalBadCalibFilter"));
 
     //--------------------------------------------------------------------------
     // Did we make it to the background control region?
@@ -1718,7 +1749,7 @@ void analysisClass::Loop()
     // Fill background control region plots
     //--------------------------------------------------------------------------
     if(bkgControlRegion) {
-      FillUserTH1D("Mee_BkgControlRegion"	                ,    M_e1e2,    fakeRateEffective * min_prescale , "M_e1e2_bkgCR");
+      FillUserTH1D("Mee_BkgControlRegion"                    ,    M_e1e2,    fakeRateEffective * min_prescale , "M_e1e2_bkgCR");
       if(nBJet_ptCut>=1)
         FillUserTH1D( "Mee_BkgControlRegion_gteOneBtaggedJet"      , M_e1e2,  fakeRateEffective * min_prescale * weightAtLeastOneBJet, "M_e1e2_bkgCR" ) ;
       if(nBJet_ptCut>=2)
@@ -1865,36 +1896,36 @@ void analysisClass::Loop()
       FillUserTH1D( "Ptee_Minus_Ptj1j2_PAS", Pt_e1e2 - Pt_j1j2              , min_prescale * fakeRateEffective ) ;
 
       FillUserTH1D("minDR_EleJet_PAS"     , min_DR_EleJet                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Ele1Ele2_PAS"	   , DR_Ele1Ele2                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Ele1Ele2_PAS"       , DR_Ele1Ele2                        , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("EleChargeSum_PAS"     , Ele1_Charge + Ele2_Charge, min_prescale * fakeRateEffective ) ;
 
       FillUserTH1D("nElectron_PAS"        , nEle_ptCut                    , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("nMuon_PAS"            , nMuon_ptCut                        , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("nJet_PAS"             , nJet_ptCut                 , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Pt1stEle_PAS"	   , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Eta1stEle_PAS"	   , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("SCEta1stEle_PAS"	   , Ele1_SCEta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi1stEle_PAS"	   , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Pt2ndEle_PAS"	   , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Eta2ndEle_PAS"	   , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("SCEta2ndEle_PAS"	   , Ele2_SCEta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi2ndEle_PAS"	   , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Charge1stEle_PAS"	   , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Charge2ndEle_PAS"	   , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Pt1stEle_PAS"       , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Eta1stEle_PAS"       , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("SCEta1stEle_PAS"       , Ele1_SCEta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi1stEle_PAS"       , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Pt2ndEle_PAS"       , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Eta2ndEle_PAS"       , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("SCEta2ndEle_PAS"       , Ele2_SCEta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi2ndEle_PAS"       , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Charge1stEle_PAS"       , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Charge2ndEle_PAS"       , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("MET_PAS"              , PFMET_Type1_Pt                  , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("METPhi_PAS"	   , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("METPhi_PAS"       , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Pt1stJet_PAS"         , Jet1_Pt                    , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Pt2ndJet_PAS"         , Jet2_Pt                    , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Eta1stJet_PAS"        , Jet1_Eta                   , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Eta2ndJet_PAS"        , Jet2_Eta                   , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi1stJet_PAS"	   , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi2ndJet_PAS"	   , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi1stJet_PAS"       , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi2ndJet_PAS"       , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("sTlep_PAS"            , Ele1_Pt + Ele2_Pt        , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("sTjet_PAS"            , Jet1_Pt + Jet2_Pt  , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("sT_PAS"               , sT_eejj                            , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("sT_zjj_PAS"           , sT_zjj                             , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Mjj_PAS"		   , M_j1j2                             , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Mee_PAS"		   , M_e1e2                             , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Mjj_PAS"           , M_j1j2                             , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Mee_PAS"           , M_e1e2                             , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("MTenu_PAS"            , MT_Ele1MET                         , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Me1j1_PAS"            , M_e1j1                             , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Me1j2_PAS"            , M_e1j2                             , min_prescale * fakeRateEffective ) ;
@@ -1902,11 +1933,11 @@ void analysisClass::Loop()
       FillUserTH1D("Me2j2_PAS"            , M_e2j2                             , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Ptee_PAS"             , Pt_e1e2                            , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("nVertex_PAS"          , nVertex                            , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Ele1Jet1_PAS"	   , DR_Ele1Jet1                        , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Ele1Jet2_PAS"	   , DR_Ele1Jet2                        , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Ele2Jet1_PAS"	   , DR_Ele2Jet1                        , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Ele2Jet2_PAS"	   , DR_Ele2Jet2                        , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("DR_Jet1Jet2_PAS"	   , DR_Jet1Jet2                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Ele1Jet1_PAS"       , DR_Ele1Jet1                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Ele1Jet2_PAS"       , DR_Ele1Jet2                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Ele2Jet1_PAS"       , DR_Ele2Jet1                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Ele2Jet2_PAS"       , DR_Ele2Jet2                        , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("DR_Jet1Jet2_PAS"       , DR_Jet1Jet2                        , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Meejj_PAS"            , M_eejj                             , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Meej_PAS"             , M_eej                              , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Mejj_PAS"             , M_ejj                              , min_prescale * fakeRateEffective ) ;
@@ -1920,12 +1951,12 @@ void analysisClass::Loop()
       FillUserTH1D("Mej_minmax_PAS"       , M_ej_max                           , min_prescale * fakeRateEffective ) ;
       FillUserTH1D("Mej_asym_PAS"         , M_ej_asym                        , min_prescale * fakeRateEffective );
       // muon kinematics
-      FillUserTH1D("Pt1stMuon_PAS"	   , Muon1_Pt                       , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Eta1stMuon_PAS"	   , Muon1_Eta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi1stMuon_PAS"	   , Muon1_Phi                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Pt2ndMuon_PAS"	   , Muon2_Pt                       , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Eta2ndMuon_PAS"	   , Muon2_Eta                      , min_prescale * fakeRateEffective ) ;
-      FillUserTH1D("Phi2ndMuon_PAS"	   , Muon2_Phi                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Pt1stMuon_PAS"       , Muon1_Pt                       , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Eta1stMuon_PAS"       , Muon1_Eta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi1stMuon_PAS"       , Muon1_Phi                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Pt2ndMuon_PAS"       , Muon2_Pt                       , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Eta2ndMuon_PAS"       , Muon2_Eta                      , min_prescale * fakeRateEffective ) ;
+      FillUserTH1D("Phi2ndMuon_PAS"       , Muon2_Phi                      , min_prescale * fakeRateEffective ) ;
 
       FillUserTH2D("MeeVsST_PAS" , M_e1e2, sT_eejj, min_prescale * fakeRateEffective ) ;
       // scale factor dependence histos
@@ -1975,28 +2006,28 @@ void analysisClass::Loop()
         FillUserTH1D("nElectron_noBtaggedJets"        , nEle_ptCut                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nMuon_noBtaggedJets"            , nMuon_ptCut                        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nJet_noBtaggedJets"             , nJet_ptCut                 , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt1stEle_noBtaggedJets"	   , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta1stEle_noBtaggedJets"	   , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stEle_noBtaggedJets"	   , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt2ndEle_noBtaggedJets"	   , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta2ndEle_noBtaggedJets"	   , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndEle_noBtaggedJets"	   , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge1stEle_noBtaggedJets"	   , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge2ndEle_noBtaggedJets"	   , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt1stEle_noBtaggedJets"       , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta1stEle_noBtaggedJets"       , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stEle_noBtaggedJets"       , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt2ndEle_noBtaggedJets"       , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta2ndEle_noBtaggedJets"       , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndEle_noBtaggedJets"       , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge1stEle_noBtaggedJets"       , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge2ndEle_noBtaggedJets"       , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MET_noBtaggedJets"              , PFMET_Type1_Pt                  , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("METPhi_noBtaggedJets"	   , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("METPhi_noBtaggedJets"       , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt1stJet_noBtaggedJets"         , Jet1_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt2ndJet_noBtaggedJets"         , Jet2_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta1stJet_noBtaggedJets"        , Jet1_Eta                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta2ndJet_noBtaggedJets"        , Jet2_Eta                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stJet_noBtaggedJets"	   , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndJet_noBtaggedJets"	   , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stJet_noBtaggedJets"       , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndJet_noBtaggedJets"       , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTlep_noBtaggedJets"            , Ele1_Pt + Ele2_Pt        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTjet_noBtaggedJets"            , Jet1_Pt + Jet2_Pt  , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_noBtaggedJets"               , sT_eejj                            , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_zjj_noBtaggedJets"           , sT_zjj                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mjj_noBtaggedJets"		   , M_j1j2                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mee_noBtaggedJets"		   , M_e1e2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mjj_noBtaggedJets"           , M_j1j2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mee_noBtaggedJets"           , M_e1e2                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MTenu_noBtaggedJets"            , MT_Ele1MET                         , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j1_noBtaggedJets"            , M_e1j1                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j2_noBtaggedJets"            , M_e1j2                             , min_prescale * fakeRateEffective ) ;
@@ -2012,9 +2043,9 @@ void analysisClass::Loop()
         FillUserTH1D("Meejj_noBtaggedJets"            , M_eejj                             , min_prescale * fakeRateEffective ) ;
 
         FillUserTH1D( "Mee_PAS_noBtaggedJets"      , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets ) ;
-        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_noBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
-        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_noBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
-        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_noBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
+        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_noBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
+        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_noBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
+        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_noBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightZeroBJets );
 
         if (sT_eejj >= 300 && sT_eejj < 500)
           FillUserTH1D("Mee_sT300To500_PAS_noBtaggedJets", M_e1e2      , min_prescale * fakeRateEffective * weightZeroBJets );
@@ -2042,28 +2073,28 @@ void analysisClass::Loop()
         FillUserTH1D("nElectron_gteOneBtaggedJet"        , nEle_ptCut                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nMuon_gteOneBtaggedJet"            , nMuon_ptCut                        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nJet_gteOneBtaggedJet"             , nJet_ptCut                 , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt1stEle_gteOneBtaggedJet"	   , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta1stEle_gteOneBtaggedJet"	   , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stEle_gteOneBtaggedJet"	   , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt2ndEle_gteOneBtaggedJet"	   , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta2ndEle_gteOneBtaggedJet"	   , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndEle_gteOneBtaggedJet"	   , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge1stEle_gteOneBtaggedJet"	   , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge2ndEle_gteOneBtaggedJet"	   , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt1stEle_gteOneBtaggedJet"       , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta1stEle_gteOneBtaggedJet"       , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stEle_gteOneBtaggedJet"       , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt2ndEle_gteOneBtaggedJet"       , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta2ndEle_gteOneBtaggedJet"       , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndEle_gteOneBtaggedJet"       , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge1stEle_gteOneBtaggedJet"       , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge2ndEle_gteOneBtaggedJet"       , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MET_gteOneBtaggedJet"              , PFMET_Type1_Pt                  , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("METPhi_gteOneBtaggedJet"	   , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("METPhi_gteOneBtaggedJet"       , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt1stJet_gteOneBtaggedJet"         , Jet1_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt2ndJet_gteOneBtaggedJet"         , Jet2_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta1stJet_gteOneBtaggedJet"        , Jet1_Eta                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta2ndJet_gteOneBtaggedJet"        , Jet2_Eta                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stJet_gteOneBtaggedJet"	   , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndJet_gteOneBtaggedJet"	   , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stJet_gteOneBtaggedJet"       , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndJet_gteOneBtaggedJet"       , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTlep_gteOneBtaggedJet"            , Ele1_Pt + Ele2_Pt        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTjet_gteOneBtaggedJet"            , Jet1_Pt + Jet2_Pt  , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_gteOneBtaggedJet"               , sT_eejj                            , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_zjj_gteOneBtaggedJet"           , sT_zjj                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mjj_gteOneBtaggedJet"		   , M_j1j2                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mee_gteOneBtaggedJet"		   , M_e1e2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mjj_gteOneBtaggedJet"           , M_j1j2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mee_gteOneBtaggedJet"           , M_e1e2                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MTenu_gteOneBtaggedJet"            , MT_Ele1MET                         , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j1_gteOneBtaggedJet"            , M_e1j1                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j2_gteOneBtaggedJet"            , M_e1j2                             , min_prescale * fakeRateEffective ) ;
@@ -2079,9 +2110,9 @@ void analysisClass::Loop()
         FillUserTH1D("Meejj_gteOneBtaggedJet"            , M_eejj                             , min_prescale * fakeRateEffective ) ;
 
         FillUserTH1D( "Mee_PAS_gteOneBtaggedJet"      , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet ) ;
-        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_gteOneBtaggedJet"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
-        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_gteOneBtaggedJet"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
-        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_gteOneBtaggedJet"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
+        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_gteOneBtaggedJet"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
+        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_gteOneBtaggedJet"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
+        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_gteOneBtaggedJet"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastOneBJet );
 
         if (sT_eejj >= 300 && sT_eejj < 500)
           FillUserTH1D("Mee_sT300To500_PAS_gteOneBtaggedJet", M_e1e2      , min_prescale * fakeRateEffective * weightAtLeastOneBJet );
@@ -2109,28 +2140,28 @@ void analysisClass::Loop()
         FillUserTH1D("nElectron_gteTwoBtaggedJets"        , nEle_ptCut                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nMuon_gteTwoBtaggedJets"            , nMuon_ptCut                        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("nJet_gteTwoBtaggedJets"             , nJet_ptCut                 , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt1stEle_gteTwoBtaggedJets"	   , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta1stEle_gteTwoBtaggedJets"	   , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stEle_gteTwoBtaggedJets"	   , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Pt2ndEle_gteTwoBtaggedJets"	   , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Eta2ndEle_gteTwoBtaggedJets"	   , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndEle_gteTwoBtaggedJets"	   , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge1stEle_gteTwoBtaggedJets"	   , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Charge2ndEle_gteTwoBtaggedJets"	   , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt1stEle_gteTwoBtaggedJets"       , Ele1_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta1stEle_gteTwoBtaggedJets"       , Ele1_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stEle_gteTwoBtaggedJets"       , Ele1_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Pt2ndEle_gteTwoBtaggedJets"       , Ele2_Pt                       , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Eta2ndEle_gteTwoBtaggedJets"       , Ele2_Eta                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndEle_gteTwoBtaggedJets"       , Ele2_Phi                      , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge1stEle_gteTwoBtaggedJets"       , Ele1_Charge                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Charge2ndEle_gteTwoBtaggedJets"       , Ele2_Charge                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MET_gteTwoBtaggedJets"              , PFMET_Type1_Pt                  , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("METPhi_gteTwoBtaggedJets"	   , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("METPhi_gteTwoBtaggedJets"       , PFMET_Type1_Phi                 , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt1stJet_gteTwoBtaggedJets"         , Jet1_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Pt2ndJet_gteTwoBtaggedJets"         , Jet2_Pt                    , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta1stJet_gteTwoBtaggedJets"        , Jet1_Eta                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Eta2ndJet_gteTwoBtaggedJets"        , Jet2_Eta                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi1stJet_gteTwoBtaggedJets"	   , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Phi2ndJet_gteTwoBtaggedJets"	   , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi1stJet_gteTwoBtaggedJets"       , Jet1_Phi                   , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Phi2ndJet_gteTwoBtaggedJets"       , Jet2_Phi                   , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTlep_gteTwoBtaggedJets"            , Ele1_Pt + Ele2_Pt        , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sTjet_gteTwoBtaggedJets"            , Jet1_Pt + Jet2_Pt  , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_gteTwoBtaggedJets"               , sT_eejj                            , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("sT_zjj_gteTwoBtaggedJets"           , sT_zjj                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mjj_gteTwoBtaggedJets"		   , M_j1j2                             , min_prescale * fakeRateEffective ) ;
-        FillUserTH1D("Mee_gteTwoBtaggedJets"		   , M_e1e2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mjj_gteTwoBtaggedJets"           , M_j1j2                             , min_prescale * fakeRateEffective ) ;
+        FillUserTH1D("Mee_gteTwoBtaggedJets"           , M_e1e2                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("MTenu_gteTwoBtaggedJets"            , MT_Ele1MET                         , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j1_gteTwoBtaggedJets"            , M_e1j1                             , min_prescale * fakeRateEffective ) ;
         FillUserTH1D("Me1j2_gteTwoBtaggedJets"            , M_e1j2                             , min_prescale * fakeRateEffective ) ;
@@ -2146,9 +2177,9 @@ void analysisClass::Loop()
         FillUserTH1D("Meejj_gteTwoBtaggedJets"            , M_eejj                             , min_prescale * fakeRateEffective ) ;
 
         FillUserTH1D( "Mee_PAS_gteTwoBtaggedJets"      , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets ) ;
-        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_gteTwoBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
-        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_gteTwoBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
-        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_gteTwoBtaggedJets"		   , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
+        if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_PAS_gteTwoBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
+        else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_PAS_gteTwoBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
+        else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_PAS_gteTwoBtaggedJets"           , M_e1e2,  min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
 
         if (sT_eejj >= 300 && sT_eejj < 500)
           FillUserTH1D("Mee_sT300To500_PAS_gteTwoBtaggedJets", M_e1e2      , min_prescale * fakeRateEffective * weightAtLeastTwoBJets );
@@ -2332,7 +2363,7 @@ void analysisClass::Loop()
 
       if ( M_e1e2 > 70.0 && M_e1e2 < 110.0 ){
         FillUserTH1D("Mee_70_110_Preselection", M_e1e2, min_prescale * fakeRateEffective ) ;
-        if ( sT_eejj > 600 ) 	 FillUserTH1D("Mee_70_110_ST600_Preselection", M_e1e2, min_prescale * fakeRateEffective ) ;
+        if ( sT_eejj > 600 )      FillUserTH1D("Mee_70_110_ST600_Preselection", M_e1e2, min_prescale * fakeRateEffective ) ;
         if      ( isEBEB ) FillUserTH1D( "Mee_EBEB_70_110_PAS", M_e1e2, min_prescale * fakeRateEffective  );
         else if ( isEBEE ) FillUserTH1D( "Mee_EBEE_70_110_PAS", M_e1e2, min_prescale * fakeRateEffective  );
         else if ( isEEEE ) FillUserTH1D( "Mee_EEEE_70_110_PAS", M_e1e2, min_prescale * fakeRateEffective  );
@@ -2398,14 +2429,14 @@ void analysisClass::Loop()
         FillUserTH1D("Ptee_ROI"            , Pt_e1e2                                        , min_prescale * fakeRateEffective );
         FillUserTH1D("Eta1stJet_ROI"       , Jet1_Eta                               , min_prescale * fakeRateEffective );
         FillUserTH1D("Eta2ndJet_ROI"       , Jet2_Eta                               , min_prescale * fakeRateEffective );
-        FillUserTH1D("Eta1stEle_ROI"	    , Ele1_SCEta                                  , min_prescale * fakeRateEffective );
-        FillUserTH1D("Eta2ndEle_ROI"	    , Ele2_SCEta                                  , min_prescale * fakeRateEffective );
+        FillUserTH1D("Eta1stEle_ROI"        , Ele1_SCEta                                  , min_prescale * fakeRateEffective );
+        FillUserTH1D("Eta2ndEle_ROI"        , Ele2_SCEta                                  , min_prescale * fakeRateEffective );
         FillUserTH1D("Phi1stJet_ROI"       , Jet1_Phi                               , min_prescale * fakeRateEffective );
         FillUserTH1D("Phi2ndJet_ROI"       , Jet2_Phi                               , min_prescale * fakeRateEffective );
-        FillUserTH1D("Phi1stEle_ROI"	    , Ele1_Phi                                  , min_prescale * fakeRateEffective );
-        FillUserTH1D("Phi2ndEle_ROI"	    , Ele2_Phi                                  , min_prescale * fakeRateEffective );
+        FillUserTH1D("Phi1stEle_ROI"        , Ele1_Phi                                  , min_prescale * fakeRateEffective );
+        FillUserTH1D("Phi2ndEle_ROI"        , Ele2_Phi                                  , min_prescale * fakeRateEffective );
         FillUserTH2D("MeeVsST_ROI"         , M_e1e2                                , sT_eejj, min_prescale * fakeRateEffective );
-        FillUserTH1D("Mee_ROI"		    , M_e1e2                                         , min_prescale * fakeRateEffective );
+        FillUserTH1D("Mee_ROI"            , M_e1e2                                         , min_prescale * fakeRateEffective );
         FillUserTH1D("sT_zjj_ROI"          , sT_zjj                                         , min_prescale * fakeRateEffective );
         FillUserTH1D("nVertex_ROI"         , nVertex                                        , min_prescale * fakeRateEffective );
         FillUserTH1D("EleChargeSum_ROI"    , Ele1_Charge + Ele2_Charge            , min_prescale * fakeRateEffective );

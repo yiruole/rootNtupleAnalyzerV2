@@ -1,0 +1,53 @@
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 30 - baseClass: begins
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 345 - readInputList: baseClass::readinputList(): inputList_ =  input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 349 - readInputList: baseClass::readInputList: Starting reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 365 - readInputList: baseClass::readInputList: Finished reading list: input_0.list
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2052 - getGlobalInfoNstart: root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_18aug23/DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0_rsk.root
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 372 - readInputList: Initial number of events (current file,runningTotal): NBeforeSkim, NBeforeSkim_ = 298566, 298566
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 377 - readInputList: gen weight sum (current,total): = 267.255+/-25.1692, 267.255+/-25.1692
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 382 - readInputList: sign only gen weight sum (current,total): = 259910+/-546.412, 259910+/-546.412
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2205 - saveLHEPdfSumw: saveLHEPdfSumw
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2235 - saveEventsPassingCuts: saveEventsPassingCuts
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 405 - readCutFile: Reading cutFile_ = cutTable_lq_eejj_ele1_both_in.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 438 - readCutFile: Getting JSON file: certifiedGolden_11mar2020_2016_2017_2018.json
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 688 - readCutFile: baseClass::readCutFile: Finished reading cutFile: cutTable_lq_eejj_ele1_both_in.txt
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2562 - getSkimPreCutValue: getSkimPreCutValue: (produceSkim): INFO -- found the precut string in the map with value: 1
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 2557 - getSkimPreCutValue: getSkimPreCutValue: (produceReducedSkim): INFO -- did not find the precut string in the map!
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 749 - readCutFile: INFO: found pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 754 - readCutFile: INFO: doing skim -- updating pre-existing EventsPassingSkimCuts profile.
+/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/src/baseClass.C - Line 48 - baseClass: ends
+analysisClass::Loop() begins
+analysisClass::analysisClass(): nentries = 187938
+analysisClass:Loop(): jentry = 0/187938
+analysisClass:Loop(): jentry = 1/187938
+analysisClass:Loop(): jentry = 2/187938
+analysisClass:Loop(): jentry = 3/187938
+analysisClass:Loop(): jentry = 4/187938
+analysisClass:Loop(): jentry = 5/187938
+analysisClass:Loop(): jentry = 6/187938
+analysisClass:Loop(): jentry = 7/187938
+analysisClass:Loop(): jentry = 8/187938
+analysisClass:Loop(): jentry = 9/187938
+analysisClass:Loop(): jentry = 10000/187938
+analysisClass:Loop(): jentry = 20000/187938
+analysisClass:Loop(): jentry = 30000/187938
+analysisClass:Loop(): jentry = 40000/187938
+analysisClass:Loop(): jentry = 50000/187938
+analysisClass:Loop(): jentry = 60000/187938
+analysisClass:Loop(): jentry = 70000/187938
+analysisClass:Loop(): jentry = 80000/187938
+analysisClass:Loop(): jentry = 90000/187938
+analysisClass:Loop(): jentry = 100000/187938
+analysisClass:Loop(): jentry = 110000/187938
+analysisClass:Loop(): jentry = 120000/187938
+analysisClass:Loop(): jentry = 130000/187938
+analysisClass:Loop(): jentry = 140000/187938
+analysisClass:Loop(): jentry = 150000/187938
+analysisClass:Loop(): jentry = 160000/187938
+analysisClass:Loop(): jentry = 170000/187938
+analysisClass:Loop(): jentry = 180000/187938
+analysisClass::Loop() ends
+‘analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.root’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Ele1_BothInHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Ele1_BothInHEM1516_UL/condor_cutTable_lq_eejj_ele1_both_in/analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/output/analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.root’
+removed ‘analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.root’
+‘analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.dat’ -> ‘/afs/cern.ch/user/r/ryi/HEM1516/Leptoquarks/analyzer/rootNtupleAnalyzerV2/HEM1516study_Ele1_BothInHEM1516_UL/ultralegacy/analysis/2018/HEM1516study_Ele1_BothInHEM1516_UL/condor_cutTable_lq_eejj_ele1_both_in/analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/output/analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.dat’
+removed ‘analysisClass_lq_eejj___DYJetsToEE_M-1500to2000_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos_0.dat’

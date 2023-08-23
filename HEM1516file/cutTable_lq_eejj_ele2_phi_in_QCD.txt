@@ -1,3 +1,4 @@
+JSON /afs/cern.ch/user/s/scooper/work/public/Leptoquarks/certifiedGoodDataJson/certifiedGolden_11mar2020_2016_2017_2018.json
 #############################     Example of file with list of cuts
 #
 #

@@ -1,1 +1,3 @@
-root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_20jun2023/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8_36_rsk.root
+root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_18aug23/EGamma_Run2018C-UL2018_MiniAODv2_NanoAODv9-v1/EGamma_Run2018C-UL2018_MiniAODv2_NanoAODv9-v1_0_rsk.root
+#root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_18aug23/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8_3_rsk.root
+#root://eoscms.cern.ch//eos/cms/store/group/phys_exotica/leptonsPlusJets/LQ/scooper/ultralegacy/skims/2018/rskDoubleEle_heep_18aug23/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/ZZTo4L_TuneCP5_13TeV_powheg_pythia8_36_rsk.root
